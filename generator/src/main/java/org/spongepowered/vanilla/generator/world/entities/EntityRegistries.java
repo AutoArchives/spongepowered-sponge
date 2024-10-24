@@ -34,6 +34,7 @@ import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Panda;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Rabbit;
+import net.minecraft.world.entity.animal.Salmon;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Markings;
@@ -168,6 +169,13 @@ public class EntityRegistries {
                 "item.inventory.equipment",
                 "EquipmentTypes",
                 EquipmentSlot.class,
+                "getSerializedName",
+                "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                "data.type",
+                "SalmonSizes",
+                Salmon.Variant.class,
                 "getSerializedName",
                 "sponge"
             )

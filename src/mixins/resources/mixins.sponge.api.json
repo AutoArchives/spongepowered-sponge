@@ -168,6 +168,7 @@
     "minecraft.world.entity.animal.Rabbit_VariantMixin_API",
     "minecraft.world.entity.animal.RabbitMixin_API",
     "minecraft.world.entity.animal.SalmonMixin_API",
+    "minecraft.world.entity.animal.SalmonVariantMixin_API",
     "minecraft.world.entity.animal.SheepMixin_API",
     "minecraft.world.entity.animal.ShoulderRidingEntityMixin_API",
     "minecraft.world.entity.animal.SnowGolemMixin_API",
