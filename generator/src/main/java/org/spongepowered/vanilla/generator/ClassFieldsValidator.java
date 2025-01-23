@@ -27,7 +27,7 @@ package org.spongepowered.vanilla.generator;
 import static com.github.javaparser.ast.Modifier.createModifierList;
 
 import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.Modifier.Keyword;
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -37,9 +37,6 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.description.JavadocDescription;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.tinylog.Logger;
 
@@ -47,45 +44,42 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
+import java.util.function.Function;
 
-// Generates a constants file based on registry entries
-public class RegistryEntriesValidator<V> implements Generator {
+public class ClassFieldsValidator<V> implements Generator {
 
     private final String relativePackageName;
     private final String targetClassSimpleName;
-    private final ResourceKey<? extends Registry<V>> registry;
-    private final Predicate<V> filter;
-    private final Set<ResourceLocation> extraEntries;
+    private final Class<?> clazz;
+    private final Function<String, ResourceLocation> mapping;
 
-    public RegistryEntriesValidator(
+    public ClassFieldsValidator(
         final String targetRelativePackage,
         final String targetClassSimpleName,
-        final ResourceKey<? extends Registry<V>> registry
+        final Class<?> clazz
     ) {
-        this(targetRelativePackage, targetClassSimpleName, registry, $ -> true, Set.of());
+        this(targetRelativePackage, targetClassSimpleName, clazz, name -> ResourceLocation.tryBuild("sponge", name.toLowerCase(Locale.ROOT)));
     }
 
-    public RegistryEntriesValidator(
+    public ClassFieldsValidator(
         final String targetRelativePackage,
         final String targetClassSimpleName,
-        final ResourceKey<? extends Registry<V>> registry,
-        final Predicate<V> filter,
-        final Set<ResourceLocation> extraEntries
+        final Class<?> clazz,
+        final Function<String, ResourceLocation> mapping
     ) {
         this.relativePackageName = targetRelativePackage;
         this.targetClassSimpleName = targetClassSimpleName;
-        this.registry = registry;
-        this.filter = filter;
-        this.extraEntries = Set.copyOf(extraEntries);
+        this.clazz = clazz;
+        this.mapping = mapping;
     }
 
     @Override
     public String name() {
-        return "elements of registry " + this.registry.location();
+        return "elements of class " + this.clazz.getName();
     }
 
     @Override
@@ -96,20 +90,26 @@ public class RegistryEntriesValidator<V> implements Generator {
         final var primaryTypeDeclaration = compilationUnit.getPrimaryType()
             .orElseThrow(() -> new IllegalStateException("Could not find primary type for registry type " + this.targetClassSimpleName));
 
-        Registry<V> registry = ctx.registries().lookup(this.registry).orElse(null);
-        if (registry == null) {
-            registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.location())
-                .orElseThrow(() -> new IllegalArgumentException("Unknown registry " + this.registry));
-        }
-
         primaryTypeDeclaration.setJavadocComment(new Javadoc(JavadocDescription.parseText(Generator.GENERATED_FILE_JAVADOCS)));
+
+        final List<ResourceLocation> map = new ArrayList<>();
+        for (final var field : this.clazz.getDeclaredFields()) {
+            if (!java.lang.reflect.Modifier.isPublic(field.getModifiers())
+                || !java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                continue;
+
+            }
+            final var name = field.getName();
+            final var key = this.mapping.apply(name);
+            map.add(key);
+        }
 
         // Find index of first field member
         // Take out all field members from the members list
         final var members = primaryTypeDeclaration.getMembers();
         final var fields = new HashMap<ResourceLocation, FieldDeclaration>();
         int lastNonFieldIndex = -1;
-        for (final var it = members.listIterator(); it.hasNext();) {
+        for (final var it = members.listIterator(); it.hasNext(); ) {
             final var node = it.next();
             if (lastNonFieldIndex == -1 && node instanceof FieldDeclaration) {
                 lastNonFieldIndex = it.nextIndex() - 1;
@@ -124,14 +124,9 @@ public class RegistryEntriesValidator<V> implements Generator {
 
         // Now, iterate the registry, discovering which fields were added and removed
         final var added = new HashSet<ResourceLocation>();
-        final var processedFields = new ArrayList<FieldDeclaration>(registry.keySet().size());
-        final Set<ResourceLocation> allKeys = new HashSet<>(registry.keySet());
-        allKeys.addAll(this.extraEntries);
+        final var processedFields = new ArrayList<FieldDeclaration>(map.size());
+        final Set<ResourceLocation> allKeys = new HashSet<>(map);
         for (final ResourceLocation key : allKeys) {
-            if (!this.filter.test(registry.getValue(key))) {
-                continue;
-            }
-
             final FieldDeclaration existing = fields.remove(key);
             if (existing != null) {
                 processedFields.add(existing);
@@ -166,7 +161,7 @@ public class RegistryEntriesValidator<V> implements Generator {
 
         final Expression argument = ((MethodCallExpr) initializer).getArgument(0);
         if (!(argument instanceof final MethodCallExpr keyInitializer)
-                || keyInitializer.getArguments().size() < 1) {
+            || keyInitializer.getArguments().size() < 1) {
             return ResourceLocation.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
@@ -187,7 +182,7 @@ public class RegistryEntriesValidator<V> implements Generator {
         final FieldDeclaration fieldDeclaration = new FieldDeclaration();
         final VariableDeclarator variable = new VariableDeclarator(StaticJavaParser.parseType("DefaultedRegistryReference<FixMe>"), Types.keyToFieldName(element.getPath()));
         fieldDeclaration.getVariables().add(variable);
-        fieldDeclaration.setModifiers(createModifierList(Keyword.PUBLIC, Keyword.STATIC, Keyword.FINAL));
+        fieldDeclaration.setModifiers(createModifierList(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL));
         variable.setInitializer(new MethodCallExpr(new NameExpr(ownType), factoryMethod, new NodeList<>(RegistryEntriesValidator.resourceKey(element))));
         return fieldDeclaration;
     }
@@ -196,9 +191,12 @@ public class RegistryEntriesValidator<V> implements Generator {
         Objects.requireNonNull(location, "location");
         final var resourceKey = new NameExpr("ResourceKey");
         return switch (location.getNamespace()) {
-            case "minecraft" -> new MethodCallExpr(resourceKey, "minecraft", new NodeList<>(new StringLiteralExpr(location.getPath())));
-            case "brigadier" -> new MethodCallExpr(resourceKey, "brigadier", new NodeList<>(new StringLiteralExpr(location.getPath())));
-            case "sponge" -> new MethodCallExpr(resourceKey, "sponge", new NodeList<>(new StringLiteralExpr(location.getPath())));
+            case "minecraft" ->
+                new MethodCallExpr(resourceKey, "minecraft", new NodeList<>(new StringLiteralExpr(location.getPath())));
+            case "brigadier" ->
+                new MethodCallExpr(resourceKey, "brigadier", new NodeList<>(new StringLiteralExpr(location.getPath())));
+            case "sponge" ->
+                new MethodCallExpr(resourceKey, "sponge", new NodeList<>(new StringLiteralExpr(location.getPath())));
             default -> new MethodCallExpr(
                 resourceKey, "of", new NodeList<>(new StringLiteralExpr(location.getNamespace()), new StringLiteralExpr(location.getPath())));
         };
