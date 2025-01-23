@@ -163,6 +163,7 @@
     "minecraft.world.entity.animal.Parrot_VariantMixin_API",
     "minecraft.world.entity.animal.ParrotMixin_API",
     "minecraft.world.entity.animal.PigMixin_API",
+    "minecraft.world.entity.animal.PigVariantMixin_API",
     "minecraft.world.entity.animal.PolarBearMixin_API",
     "minecraft.world.entity.animal.PufferfishMixin_API",
     "minecraft.world.entity.animal.Rabbit_VariantMixin_API",

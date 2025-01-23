@@ -25,7 +25,6 @@
 package org.spongepowered.common.adventure;
 
 import com.mojang.brigadier.Message;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
@@ -60,7 +59,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
-import net.kyori.adventure.util.Codec;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.arguments.selector.SelectorPattern;
@@ -71,8 +69,6 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.HoverEvent.Action;
@@ -110,7 +106,6 @@ import org.spongepowered.common.bridge.adventure.StyleBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.launch.Launch;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -131,21 +126,6 @@ import java.util.function.Consumer;
 public final class SpongeAdventure {
 
     public static final AttributeKey<Locale> CHANNEL_LOCALE = AttributeKey.newInstance("sponge:locale");
-    public static final Codec<CompoundTag, String, IOException, IOException> NBT_CODEC = new Codec<CompoundTag, String, IOException, IOException>() {
-        @Override
-        public @NonNull CompoundTag decode(final @NonNull String encoded) throws IOException {
-            try {
-                return TagParser.parseTag(encoded);
-            } catch (final CommandSyntaxException e) {
-                throw new IOException(e);
-            }
-        }
-
-        @Override
-        public @NonNull String encode(final @NonNull CompoundTag decoded) {
-            return decoded.toString();
-        }
-    };
 
     public static final PrimitiveCodec<Component> STRING_CODEC = new PrimitiveCodec<Component>() {
         @Override

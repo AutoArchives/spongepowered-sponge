@@ -313,7 +313,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_I
      */
     @Inject(method = "actuallyHurt", at = @At("RETURN"))
     protected void attackImpl$afterActuallyHurt(final ServerLevel level, final DamageSource $$0, final float $$1, final CallbackInfo ci) {
-        this.attackImpl$handlePostDamage();
+        this.attackImpl$handlePostDamage(level);
         this.attackImpl$actuallyHurt = null;
         this.attackImpl$actuallyHurtResult = null;
     }

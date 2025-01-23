@@ -165,6 +165,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         return SpongeBlockSnapshot.BuilderImpl.pooled().from(this).position(location.blockPosition()).world(location.worldKey()).build();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean restore(final boolean force, final BlockChangeFlag flag) {
         // TODO - rewrite with the PhaseTracker being the hook or use SpongeImplHooks to do the restore.

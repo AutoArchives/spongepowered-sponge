@@ -31,6 +31,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.LodestoneTracker;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -51,7 +52,7 @@ final class CompassItemData {
             .asMutable(ItemStack.class)
                 .create(Keys.LODESTONE)
                     .get(stack -> {
-                        final LodestoneTracker component = stack.get(DataComponents.LODESTONE_TRACKER);
+                        final @Nullable LodestoneTracker component = stack.get(DataComponents.LODESTONE_TRACKER);
                         if (component == null) {
                             return null;
                         }

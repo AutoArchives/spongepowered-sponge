@@ -39,7 +39,7 @@ public abstract class SmithingTransformRecipeMixin_API implements SmithingRecipe
     // @formatter:off
     @Shadow @Final Optional<net.minecraft.world.item.crafting.Ingredient> addition;
     @Shadow @Final Optional<net.minecraft.world.item.crafting.Ingredient> template;
-    @Shadow @Final Optional<net.minecraft.world.item.crafting.Ingredient> base;
+    @Shadow @Final net.minecraft.world.item.crafting.Ingredient base;
     // @formatter:on
 
     @Override
@@ -49,7 +49,7 @@ public abstract class SmithingTransformRecipeMixin_API implements SmithingRecipe
 
     @Override
     public Optional<Ingredient> baseIngredient() {
-        return this.base.map(Ingredient.class::cast);
+        return Optional.of((Ingredient) (Object) this.base);
     }
 
     @Override

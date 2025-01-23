@@ -29,7 +29,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.serializer.gson.LegacyHoverEventSerializer;
+import net.kyori.adventure.text.serializer.json.LegacyHoverEventSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.util.Codec;
 import net.minecraft.nbt.CompoundTag;
@@ -43,7 +43,7 @@ import java.util.UUID;
 @SuppressWarnings({"PatternValidation","deprecation"})
 public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSerializer {
     public static final NbtLegacyHoverEventSerializer INSTANCE = new NbtLegacyHoverEventSerializer();
-    private static final Codec<CompoundTag, String, CommandSyntaxException, RuntimeException> SNBT_CODEC = Codec.of(TagParser::parseTag, Tag::toString);
+    private static final Codec<CompoundTag, String, CommandSyntaxException, RuntimeException> SNBT_CODEC = Codec.codec(TagParser::parseCompoundFully, Tag::toString);
 
     static final String ITEM_TYPE = "id";
     static final String ITEM_COUNT = "Count";
@@ -62,7 +62,7 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
         try {
             final CompoundTag contents = NbtLegacyHoverEventSerializer.SNBT_CODEC.decode(rawContent);
             final CompoundTag tag = contents.getCompound(NbtLegacyHoverEventSerializer.ITEM_TAG);
-            return HoverEvent.ShowItem.of(
+            return HoverEvent.ShowItem.showItem(
                 Key.key(contents.getString(NbtLegacyHoverEventSerializer.ITEM_TYPE)),
                 contents.contains(NbtLegacyHoverEventSerializer.ITEM_COUNT) ? contents.getByte(NbtLegacyHoverEventSerializer.ITEM_COUNT) : 1,
                 tag.isEmpty() ? null : BinaryTagHolder.encode(tag, NbtLegacyHoverEventSerializer.SNBT_CODEC)
@@ -77,7 +77,7 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
         final String raw = PlainTextComponentSerializer.plainText().serialize(input);
         try {
             final CompoundTag contents = NbtLegacyHoverEventSerializer.SNBT_CODEC.decode(raw);
-            return HoverEvent.ShowEntity.of(
+            return HoverEvent.ShowEntity.showEntity(
                 Key.key(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_TYPE)),
                 UUID.fromString(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_ID)),
                 componentCodec.decode(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_NAME))

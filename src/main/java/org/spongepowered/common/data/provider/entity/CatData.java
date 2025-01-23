@@ -67,9 +67,7 @@ public final class CatData {
                         .get(Cat::isLying)
                         .set(Cat::setLying)
                     .create(Keys.IS_PURRING)
-                        .get(h -> {
-                            throw new MissingImplementationException("CatData", "IS_PURRING::getter");
-                        })
+                        .get(h -> h.isLying() || ((CatAccessor) h).invoker$isRelaxStateOne())
                         .set((h, v) -> {
                             throw new MissingImplementationException("CatData", "IS_PURRING::setter");
                         })

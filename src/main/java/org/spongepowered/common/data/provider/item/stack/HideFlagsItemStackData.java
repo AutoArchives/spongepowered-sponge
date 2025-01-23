@@ -24,22 +24,14 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.util.Unit;
-import net.minecraft.world.item.AdventureModePredicate;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
-import net.minecraft.world.item.component.Unbreakable;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.item.component.TooltipDisplay;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.item.AdventureModePredicateAccessor;
-import org.spongepowered.common.accessor.world.item.enchantment.ItemEnchantmentsAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Map;
+
 
 public final class HideFlagsItemStackData {
 
@@ -48,62 +40,48 @@ public final class HideFlagsItemStackData {
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(ItemStack.class)
-                    .create(Keys.HIDE_ATTRIBUTES)
-                        .get(h -> h.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).showInTooltip())
-                        .set((h, v) -> h.update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, p -> new ItemAttributeModifiers(p.modifiers(), !v)))
-                    .create(Keys.HIDE_CAN_DESTROY)
-                        .get(h -> h.has(DataComponents.CAN_BREAK) && !h.get(DataComponents.CAN_BREAK).showInTooltip())
-                        .set((h, v) -> h.set(DataComponents.CAN_BREAK, HideFlagsItemStackData.newAdventureModePredicate(h, !v)))
-                    .create(Keys.HIDE_CAN_PLACE)
-                        .get(h -> {
-                            final var predicate = h.get(DataComponents.CAN_BREAK);
-                            if (predicate == null) {
-                                return false;
-                            }
-                            return !predicate.showInTooltip();
-                        })
-                        .set((h, v) -> h.set(DataComponents.CAN_PLACE_ON, HideFlagsItemStackData.newAdventureModePredicate(h, !v)))
-                    .create(Keys.HIDE_ENCHANTMENTS)
-                        .get(h -> ((ItemEnchantmentsAccessor)h.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)).accessor$showInTooltip())
-                        .set((h, v) -> h.set(DataComponents.ENCHANTMENTS, HideFlagsItemStackData.newItemEnchantments(h, !v)))
-                    .create(Keys.HIDE_STORED_ENCHANTMENTS)
-                        .get(h -> ((ItemEnchantmentsAccessor)h.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY)).accessor$showInTooltip())
-                        .set((h, v) -> h.set(DataComponents.STORED_ENCHANTMENTS, HideFlagsItemStackData.newItemEnchantments(h, !v)))
-                    .create(Keys.HIDE_MISCELLANEOUS)
-                        .get(h -> h.get(DataComponents.HIDE_ADDITIONAL_TOOLTIP) != Unit.INSTANCE)
-                        .set((h, v) -> h.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, v ? Unit.INSTANCE : null))
-                    .create(Keys.HIDE_UNBREAKABLE)
-                        .get(h -> h.has(DataComponents.UNBREAKABLE) && !h.get(DataComponents.UNBREAKABLE).showInTooltip())
-                        .set((h, v) -> {
-                            if (h.has(DataComponents.UNBREAKABLE)) {
-                                h.set(DataComponents.UNBREAKABLE, new Unbreakable(v));
-                            } // else TODO not supported?
-                        })
+        final var keyToComponentMapping = Map.of(
+            Keys.HIDE_ATTRIBUTES, DataComponents.ATTRIBUTE_MODIFIERS,
+            Keys.HIDE_ENCHANTMENTS, DataComponents.ENCHANTMENTS,
+            Keys.HIDE_CAN_DESTROY, DataComponents.CAN_BREAK,
+            Keys.HIDE_CAN_PLACE, DataComponents.CAN_PLACE_ON,
+            Keys.HIDE_STORED_ENCHANTMENTS, DataComponents.STORED_ENCHANTMENTS,
+            Keys.HIDE_UNBREAKABLE, DataComponents.UNBREAKABLE,
+            Keys.HIDE_MISCELLANEOUS, DataComponents.CUSTOM_DATA
+        );
+
+        final var mutableItem = registrator
+                .asMutable(ItemStack.class);
+        for (final var entry : keyToComponentMapping.entrySet()) {
+            mutableItem
+                    .create(entry.getKey())
+                        .get(h -> h.has(DataComponents.TOOLTIP_DISPLAY) && !h.getOrDefault(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT).shows(entry.getValue()))
+                        .set((h, v) -> h.update(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT, p -> p.withHidden(entry.getValue(), v)));
+        }
+        mutableItem
                     .create(Keys.HIDE_TOOLTIP)
-                        .get(h -> h.get(DataComponents.HIDE_ADDITIONAL_TOOLTIP) != Unit.INSTANCE)
-                        .set((h, v) -> h.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, v ? Unit.INSTANCE : null))
+                        .get(h -> h.getOrDefault(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT).hideTooltip())
+                        .set((h, v) -> h.update(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT, p -> new TooltipDisplay(v, p.hiddenComponents())))
         ;
 
 
         // TODO missing show_in_tooltip (DYED_COLOR, more?)
     }
     // @formatter:on
-
-    @NotNull
-    private static AdventureModePredicate newAdventureModePredicate(final ItemStack h, final boolean showInTooltip) {
-        if (h.has(DataComponents.CAN_BREAK)) {
-            final List<BlockPredicate> $$0 = ((AdventureModePredicateAccessor) h.get(DataComponents.CAN_BREAK)).accessor$predicates();
-            return new AdventureModePredicate($$0, showInTooltip);
-        }
-        return new AdventureModePredicate(Collections.emptyList(), showInTooltip);
-    }
-
-    @NotNull
-    private static ItemEnchantments newItemEnchantments(final ItemStack h, final boolean showInTooltip) {
-        final ItemEnchantmentsAccessor enchantments = (ItemEnchantmentsAccessor) h.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);;
-        return ItemEnchantmentsAccessor.invoker$new(enchantments.accessor$enchantments(), showInTooltip);
-    }
+//
+//    @NotNull
+//    private static AdventureModePredicate newAdventureModePredicate(final ItemStack h, final boolean showInTooltip) {
+//        if (h.has(DataComponents.CAN_BREAK)) {
+//            final List<BlockPredicate> $$0 = ((AdventureModePredicateAccessor) h.get(DataComponents.CAN_BREAK)).accessor$predicates();
+//            return new AdventureModePredicate($$0, showInTooltip);
+//        }
+//        return new AdventureModePredicate(Collections.emptyList(), showInTooltip);
+//    }
+//
+//    @NotNull
+//    private static ItemEnchantments newItemEnchantments(final ItemStack h, final boolean showInTooltip) {
+//        final ItemEnchantmentsAccessor enchantments = (ItemEnchantmentsAccessor) h.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);;
+//        return ItemEnchantmentsAccessor.invoker$new(enchantments.accessor$enchantments(), showInTooltip);
+//    }
 
 }

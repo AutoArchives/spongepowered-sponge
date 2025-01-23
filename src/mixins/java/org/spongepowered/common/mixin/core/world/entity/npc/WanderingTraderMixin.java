@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.npc;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.util.Constants;
 
 @Mixin(WanderingTraderSpawner.class)
@@ -40,9 +41,11 @@ public abstract class WanderingTraderMixin {
     // @formatter:on
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
-    private void impl$checkInfiniteTickDelay(final CallbackInfoReturnable<Integer> cir) {
+    private void impl$checkInfiniteTickDelay(
+        final ServerLevel $$0, final boolean $$1, final boolean $$2, final CallbackInfo cir
+    ) {
         if (this.tickDelay == Constants.TickConversions.INFINITE_TICKS) {
-            cir.setReturnValue(0);
+            cir.cancel();
         }
     }
 }

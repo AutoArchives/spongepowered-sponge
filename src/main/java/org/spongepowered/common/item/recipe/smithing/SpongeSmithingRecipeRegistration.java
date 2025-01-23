@@ -70,14 +70,14 @@ public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration<S
     public Recipe recipe() {
         this.ensureCached();
         if (SpongeRecipeRegistration.isVanillaSerializer(this.spongeResult, this.resultFunction, null, List.of(this.template, this.base, this.addition))) {
-            return (SmithingRecipe) new SmithingTransformRecipe(Optional.of(this.template), Optional.of(this.base), Optional.of(this.addition), new TransmuteResult(
+            return (SmithingRecipe) new SmithingTransformRecipe(Optional.of(this.template), this.base, Optional.of(this.addition), new TransmuteResult(
                 this.spongeResult.getItemHolder(),
                 this.spongeResult.getCount(),
                 this.spongeResult.getComponentsPatch()
             ));
 
         }
-        return (SmithingRecipe) new SpongeSmithingRecipe(Optional.ofNullable(this.template), Optional.ofNullable(this.base), Optional.ofNullable(this.addition),
+        return (SmithingRecipe) new SpongeSmithingRecipe(Optional.ofNullable(this.template), this.base, Optional.ofNullable(this.addition),
             this.spongeResult, this.resultFunction == null ? null : this.key.toString());
     }
 

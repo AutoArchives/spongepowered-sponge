@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
-import net.minecraft.world.entity.animal.FrogVariant;
+import net.minecraft.world.entity.animal.frog.FrogVariant;
 import org.spongepowered.api.data.type.FrogType;
 import org.spongepowered.asm.mixin.Mixin;
 

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.entity.animal.FrogVariant;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.animal.frog.Frog;
+import net.minecraft.world.entity.animal.frog.FrogVariant;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.FrogType;
 import org.spongepowered.common.accessor.entity.animal.frog.FrogAccessor;
@@ -43,7 +43,12 @@ public final class FrogData {
                 .asMutable(Frog.class)
                     .create(Keys.FROG_TYPE)
                         .get(h -> (FrogType) (Object) h.getVariant().value())
-                        .set((h, v) -> ((FrogAccessor) h).invoker$setVariant(BuiltInRegistries.FROG_VARIANT.wrapAsHolder((FrogVariant) (Object) v)));
+                        .set((h, v) -> {
+                            final var holder = h.level().registryAccess().lookup(Registries.FROG_VARIANT)
+                                .orElseThrow()
+                                .wrapAsHolder(((FrogVariant) (Object) v));
+                            ((FrogAccessor) h).invoker$setVariant(holder);
+                        });
     }
     // @formatter:on
 }

@@ -45,7 +45,6 @@ import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
-import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.component.UseCooldown;
 import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
@@ -354,7 +353,7 @@ public final class ItemStackData {
 
     private static void setIsUnbrekable(final ItemStack stack, final Boolean value) {
         if (value) {
-            stack.set(DataComponents.UNBREAKABLE, new Unbreakable(true));
+            stack.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
         } else {
             stack.remove(DataComponents.UNBREAKABLE);
         }

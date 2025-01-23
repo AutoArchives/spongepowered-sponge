@@ -33,6 +33,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.AdventureModePredicate;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.item.AdventureModePredicateAccessor;
@@ -53,14 +54,14 @@ public final class BlockTypeItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.BREAKABLE_BLOCK_TYPES)
                         .get(h -> BlockTypeItemStackData.get(h, DataComponents.CAN_BREAK))
-                        .set((h, v) -> BlockTypeItemStackData.set(h, DataComponents.CAN_BREAK, v))
+                        .setAnd((h, v) -> BlockTypeItemStackData.set(h, DataComponents.CAN_BREAK, v))
                     .create(Keys.PLACEABLE_BLOCK_TYPES)
                         .get(h -> BlockTypeItemStackData.get(h, DataComponents.CAN_PLACE_ON))
-                        .set((h, v) -> BlockTypeItemStackData.set(h, DataComponents.CAN_PLACE_ON, v));
+                        .setAnd((h, v) -> BlockTypeItemStackData.set(h, DataComponents.CAN_PLACE_ON, v));
     }
     // @formatter:on
 
-    private static Set<BlockType> get(final ItemStack stack, final DataComponentType<AdventureModePredicate> component) {
+    private static @Nullable Set<BlockType> get(final ItemStack stack, final DataComponentType<AdventureModePredicate> component) {
         // TODO change API type to predicates
         final AdventureModePredicate predicate = stack.get(component);
         if (predicate != null) {
@@ -81,7 +82,7 @@ public final class BlockTypeItemStackData {
         final AdventureModePredicate prev = stack.get(component);
         final var holderGetter = BuiltInRegistries.BLOCK;
         final BlockPredicate blockPredicate = BlockPredicate.Builder.block().of(holderGetter, value.stream().map(Block.class::cast).toList()).build();
-        final AdventureModePredicate predicate = new AdventureModePredicate(List.of(blockPredicate), prev == null || prev.showInTooltip());
+        final AdventureModePredicate predicate = new AdventureModePredicate(List.of(blockPredicate));
         stack.set(component, predicate);
         return true;
     }

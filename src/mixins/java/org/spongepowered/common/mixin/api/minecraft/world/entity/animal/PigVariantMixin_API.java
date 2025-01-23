@@ -22,16 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.entity.animal.frog;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
-import net.minecraft.core.Holder;
-import net.minecraft.world.entity.animal.frog.Frog;
-import net.minecraft.world.entity.animal.frog.FrogVariant;
+import net.minecraft.world.entity.animal.PigVariant;
+import org.spongepowered.api.data.type.PigType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(Frog.class)
-public interface FrogAccessor {
+@Mixin(PigVariant.class)
+public class PigVariantMixin_API implements PigType {
 
-    @Invoker("setVariant") void invoker$setVariant(Holder<FrogVariant> variant);
 }

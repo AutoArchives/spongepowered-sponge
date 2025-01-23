@@ -201,7 +201,8 @@ public class ProjectileTest implements LoadableModule {
             this.projectileTypes.add(EntityTypes.WITHER_SKULL.get());
             this.projectileTypes.add(EntityTypes.EYE_OF_ENDER.get());
             //             this.projectileTypes.add(EntityTypes.FISHING_BOBBER.get());
-            this.projectileTypes.add(EntityTypes.POTION.get());
+            this.projectileTypes.add(EntityTypes.SPLASH_POTION.get());
+            this.projectileTypes.add(EntityTypes.LINGERING_POTION.get());
             this.projectileTypes.add(EntityTypes.LLAMA_SPIT.get());
             this.projectileTypes.add(EntityTypes.DRAGON_FIREBALL.get());
             this.projectileTypes.add(EntityTypes.SHULKER_BULLET.get());

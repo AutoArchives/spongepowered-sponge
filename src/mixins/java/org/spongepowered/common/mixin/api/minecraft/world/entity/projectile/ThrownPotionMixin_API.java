@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.AbstractThrownPotion;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.Potion;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
 
-@Mixin(ThrownPotion.class)
+@Mixin(AbstractThrownPotion.class)
 public abstract class ThrownPotionMixin_API extends ThrowableItemProjectileMixin_API implements Potion {
 
     @Override

@@ -50,8 +50,6 @@ import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.data.type.ArtTypes;
-import org.spongepowered.api.data.type.CatType;
-import org.spongepowered.api.data.type.CatTypes;
 import org.spongepowered.api.data.type.ComparatorMode;
 import org.spongepowered.api.data.type.ComparatorModes;
 import org.spongepowered.api.data.type.DyeColor;
@@ -64,8 +62,6 @@ import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.LlamaTypes;
-import org.spongepowered.api.data.type.ParrotType;
-import org.spongepowered.api.data.type.ParrotTypes;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.StructureMode;
@@ -843,20 +839,6 @@ public final class Constants {
             public static final int DEFAULT_FUSE_DURATION = 80;
         }
 
-        public static final class Cat {
-
-            public static final Supplier<CatType> DEFAULT_TYPE = CatTypes.WHITE;
-        }
-
-        public static final class Panda {
-
-            public static final int UNHAPPY_TIME = 32;
-        }
-
-        public static final class Parrot {
-
-            public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED_BLUE;
-        }
 
         public static final class Player {
 

@@ -40,7 +40,7 @@ public abstract class SmithingTransformRecipeMixin implements SmithingRecipeBrid
 
     // @formatter=off
     @Shadow @Final Optional<Ingredient> template;
-    @Shadow @Final Optional<Ingredient> base;
+    @Shadow @Final Ingredient base;
     @Shadow @Final Optional<Ingredient> addition;
     @Shadow @Final TransmuteResult result;
     // @formatter=on
@@ -51,7 +51,7 @@ public abstract class SmithingTransformRecipeMixin implements SmithingRecipeBrid
     }
 
     @Override
-    public Optional<Ingredient> bridge$base() {
+    public Ingredient bridge$base() {
         return this.base;
     }
 

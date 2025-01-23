@@ -31,7 +31,7 @@ import java.util.Optional;
 public interface SmithingRecipeBridge extends RecipeResultBridge {
 
     Optional<Ingredient> bridge$template();
-    Optional<Ingredient> bridge$base();
+    Ingredient bridge$base();
     Optional<Ingredient> bridge$addition();
 
 }

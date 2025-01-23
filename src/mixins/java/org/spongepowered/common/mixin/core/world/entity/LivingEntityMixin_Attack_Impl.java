@@ -31,12 +31,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlocksAttacks;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
@@ -59,8 +61,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
     //@formatter:off
     @Shadow protected abstract void shadow$playHurtSound(DamageSource param0);
     @Shadow protected abstract void shadow$hurtHelmet(final DamageSource $$0, final float $$1);
-    @Shadow protected abstract void shadow$hurtCurrentlyUsedShield(final float $$0);
-    @Shadow protected abstract void shadow$blockUsingShield(final LivingEntity $$0);
+    @Shadow protected abstract void shadow$blockUsingItem(ServerLevel $$0, LivingEntity $$1);private float attackImpl$baseDamage;
     @Shadow protected abstract void shadow$hurtArmor(DamageSource source, float damage);
     @Shadow protected abstract float shadow$getKnockback(final Entity $$0, final DamageSource $$1);
     @Shadow public abstract float shadow$getAbsorptionAmount();
@@ -68,7 +69,6 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
     @Shadow public abstract void setAbsorptionAmount(final float $$0);
     @Shadow protected int attackStrengthTicker;
     @Shadow protected float lastHurt;
-    private float attackImpl$baseDamage;
     // @formatter:on
 
     private float attackImpl$lastHurt;
@@ -112,17 +112,22 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
      * Prevents shield usage before event
      * Captures the blocked damage as a function
      */
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtCurrentlyUsedShield(F)V"))
-    private void attackImpl$preventEarlyBlock1(final LivingEntity instance, final float damageToShield) {
+    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"))
+    private void attackImpl$preventEarlyBlock1(
+        final BlocksAttacks instance, final net.minecraft.world.level.Level level,
+        final ItemStack stack, final LivingEntity target, final InteractionHand hand, final float damage) {
         // this.hurtCurrentlyUsedShield(damageToShield);
-        this.attackImpl$hurt.functions().add(DamageEventUtil.createShieldFunction(instance));
+        // $$6.hurtBlockingItem(this.level(), this.getUseItem(), this, this.getUsedItemHand(), $$5);
+        this.attackImpl$hurt.functions().add(DamageEventUtil.createShieldFunction(target));
     }
 
     /**
      * Prevents shield usage before event
      */
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;blockUsingShield(Lnet/minecraft/world/entity/LivingEntity;)V"))
-    private void attackImpl$preventEarlyBlock2(final LivingEntity instance, final LivingEntity livingDamageSource) {
+    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;blockUsingItem(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;)V"))
+    private void attackImpl$preventEarlyBlock2(final LivingEntity instance, final ServerLevel level, final LivingEntity shooter) {
+        // TODO - 25w04a
+        // this.blockUsingItem($$0, $$8);
         // this.blockUsingShield(livingDamageSource);
     }
 
@@ -339,7 +344,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
 
     /**
      * Replay prevented
-     * {@link #shadow$hurtCurrentlyUsedShield} and {@link #shadow$blockUsingShield}
+     * {@link #shadow$hurtCurrentlyUsedShield} and {@link #shadow$blockUsingItem}
      * {@link #shadow$hurtHelmet}
      * {@link #shadow$hurtArmor}
      * {@link ServerPlayer#awardStat} for {@link Stats#DAMAGE_RESISTED} and {@link Stats#DAMAGE_DEALT}
@@ -347,15 +352,16 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
      * <p>
      * And capture inventory changes if needed
      */
-    protected void attackImpl$handlePostDamage() {
+    protected void attackImpl$handlePostDamage(ServerLevel level) {
         final var result = this.attackImpl$actuallyHurtResult;
         if (result != null && !this.attackImpl$actuallyHurtCancelled) {
             final var damageSource = result.source();
             result.damageToShield().ifPresent(dmg -> {
-                this.shadow$hurtCurrentlyUsedShield(dmg);
+                // TODO - figure out how to grab the blocksdamage component
+//                this.shadow$hurtCurrentlyUsedShield(dmg);
                 if (!damageSource.is(DamageTypeTags.IS_PROJECTILE)) {
                     if (damageSource.getDirectEntity() instanceof LivingEntity livingSource) {
-                        this.shadow$blockUsingShield(livingSource);
+                        this.shadow$blockUsingItem(level, livingSource);
                     }
                 }
             });
@@ -388,7 +394,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
      */
     @Inject(method = "actuallyHurt", at = @At("RETURN"))
     protected void attackImpl$cleanupActuallyHurt(final ServerLevel level, final DamageSource $$0, final float $$1, final CallbackInfo ci) {
-        this.attackImpl$handlePostDamage();
+        this.attackImpl$handlePostDamage(level);
         this.attackImpl$actuallyHurt = null;
         this.attackImpl$actuallyHurtResult = null;
         this.lastHurt = this.attackImpl$lastHurt;

@@ -43,7 +43,7 @@ public final class DyeableItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.COLOR)
                         .get(h -> h.has(DataComponents.DYED_COLOR) ? Color.ofRgb(h.get(DataComponents.DYED_COLOR).rgb()) : null)
-                        .set((h, v) -> h.update(DataComponents.DYED_COLOR, new DyedItemColor(0, true), prev -> new DyedItemColor(v.rgb(), prev.showInTooltip())))
+                        .set((h, v) -> h.update(DataComponents.DYED_COLOR, new DyedItemColor(0), prev -> new DyedItemColor(v.rgb())))
                         .delete(h -> h.set(DataComponents.DYED_COLOR, null))
                         .supports(h -> h.is(ItemTags.DYEABLE));
     }

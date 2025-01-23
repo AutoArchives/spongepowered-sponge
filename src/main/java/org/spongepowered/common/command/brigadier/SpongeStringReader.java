@@ -28,6 +28,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -192,7 +193,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     public String parseNBTString() throws ArgumentParseException {
         final int startCursor = this.getCursor();
         try {
-            new TagParser(this).readStruct();
+            TagParser.parseAsArgument(NbtOps.INSTANCE, this);
         } catch (final CommandSyntaxException ex) {
             this.setCursor(startCursor);
             throw new ArgumentParseException(
@@ -208,7 +209,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     @Override
     public DataContainer parseDataContainer() throws ArgumentParseException {
         try {
-            return NBTTranslator.INSTANCE.translate(new TagParser(this).readStruct());
+            return NBTTranslator.INSTANCE.translate(TagParser.parseCompoundAsArgument(this));
         } catch (final CommandSyntaxException e) {
             throw this.createException(SpongeAdventure.asAdventure(e.getRawMessage()));
         }

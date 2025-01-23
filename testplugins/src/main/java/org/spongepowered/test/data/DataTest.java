@@ -980,7 +980,7 @@ public final class DataTest  {
 //        this.checkOfferData(itemFrame, Keys.ITEM_STACK_SNAPSHOT, stoneStack.asImmutable());
         // TODO JukeBox
         // TODO Lectern
-        final Entity potionEntity = world.createEntity(EntityTypes.POTION.get(), position);
+        final Entity potionEntity = world.createEntity(EntityTypes.SPLASH_POTION.get(), position);
         this.checkOfferData(potionEntity, Keys.ITEM_STACK_SNAPSHOT, splashPotion.asImmutable()); // TODO unset original value causes logging error
 
         // TODO Keys.KNOCKBACK_STRENGTH

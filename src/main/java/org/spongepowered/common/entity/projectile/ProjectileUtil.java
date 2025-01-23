@@ -38,7 +38,8 @@ import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.ThrownLingeringPotion;
+import net.minecraft.world.entity.projectile.ThrownSplashPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
@@ -303,12 +304,22 @@ public final class ProjectileUtil {
                 return super.createProjectile(source, loc);
             }
         });
-        ProjectileUtil.registerProjectileLogic(EntityTypes.POTION, new SimpleItemLaunchLogic<Potion>(EntityTypes.POTION, Items.SPLASH_POTION) {
+        ProjectileUtil.registerProjectileLogic(EntityTypes.SPLASH_POTION, new SimpleItemLaunchLogic<Potion>(EntityTypes.SPLASH_POTION, Items.SPLASH_POTION) {
 
             @Override
             protected Optional<Potion> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ThrownPotion potion = new ThrownPotion(source.level(), source, new ItemStack(this.item));
+                final ThrownSplashPotion potion = new ThrownSplashPotion(source.level(), source, new ItemStack(this.item));
                 potion.setItem(new ItemStack(Items.SPLASH_POTION, 1));
+                potion.shoot(source.getXRot(), source.getYRot(), -20.0F, 0.5F, 0);
+                return ProjectileUtil.doLaunch(loc.world(), (Potion) potion);
+            }
+        });
+        ProjectileUtil.registerProjectileLogic(EntityTypes.LINGERING_POTION, new SimpleItemLaunchLogic<Potion>(EntityTypes.SPLASH_POTION, Items.SPLASH_POTION) {
+
+            @Override
+            protected Optional<Potion> createProjectile(final LivingEntity source, final ServerLocation loc) {
+                final ThrownLingeringPotion potion = new ThrownLingeringPotion(source.level(), source, new ItemStack(this.item));
+                potion.setItem(new ItemStack(Items.LINGERING_POTION, 1));
                 potion.shoot(source.getXRot(), source.getYRot(), -20.0F, 0.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Potion) potion);
             }

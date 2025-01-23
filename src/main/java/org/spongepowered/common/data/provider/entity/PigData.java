@@ -54,7 +54,7 @@ public final class PigData {
                             }
                         })
                     .create(Keys.PIG_TYPE)
-                        .get(p -> (PigType) p.getVariant().value())
+                        .get(p -> (PigType) (Object) p.getVariant().value())
                         .setAnd((h, v) -> h.level().registryAccess().lookup(Registries.PIG_VARIANT)
                             .map(r -> {
                                 var newPigType = r.wrapAsHolder((PigVariant) (Object) v);

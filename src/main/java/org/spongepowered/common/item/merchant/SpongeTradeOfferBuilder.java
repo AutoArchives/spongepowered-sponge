@@ -25,7 +25,7 @@
 package org.spongepowered.common.item.merchant;
 
 
-import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.DataComponentExactPredicate;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -146,7 +146,7 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @NotNull
     private static ItemCost itemCostOf(final net.minecraft.world.item.ItemStack stack) {
-        return new ItemCost(stack.getItemHolder(), stack.getCount(), DataComponentPredicate.allOf(stack.getComponents()), stack);
+        return new ItemCost(stack.getItemHolder(), stack.getCount(), DataComponentExactPredicate.allOf(stack.getComponents()), stack);
     }
 
     @Override

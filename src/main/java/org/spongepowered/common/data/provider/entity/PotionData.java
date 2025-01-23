@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.AbstractThrownPotion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import org.apache.commons.lang3.stream.Streams;
 import org.spongepowered.api.data.Keys;
@@ -41,7 +41,7 @@ public final class PotionData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ThrownPotion.class)
+                .asMutable(AbstractThrownPotion.class)
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> Streams.of(h.getItem().getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getAllEffects()).map(PotionEffect.class::cast).toList())
                         .set((h, v) -> {

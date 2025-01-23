@@ -55,7 +55,7 @@ public final class SNBTDataFormat implements StringDataFormat {
     @Override
     public DataContainer read(final String input) throws InvalidDataException, IOException {
         try {
-            return NBTTranslator.INSTANCE.translate(TagParser.parseTag(input));
+            return NBTTranslator.INSTANCE.translate(TagParser.parseCompoundFully(input));
         } catch (final CommandSyntaxException e) {
             throw new InvalidDataException(e);
         }
@@ -65,7 +65,7 @@ public final class SNBTDataFormat implements StringDataFormat {
     public DataContainer readFrom(final Reader input) throws InvalidDataException {
         try {
             return NBTTranslator.INSTANCE.translate(
-                    TagParser.parseTag(SNBTDataFormat.createBufferedReader(input).lines().collect(Collectors.joining("\n"))));
+                    TagParser.parseCompoundFully(SNBTDataFormat.createBufferedReader(input).lines().collect(Collectors.joining("\n"))));
         } catch (final CommandSyntaxException e) {
             throw new InvalidDataException(e);
         }
@@ -74,7 +74,7 @@ public final class SNBTDataFormat implements StringDataFormat {
     @Override
     public DataContainer readFrom(final InputStream input) throws InvalidDataFormatException {
         try {
-            return NBTTranslator.INSTANCE.translate(TagParser.parseTag(
+            return NBTTranslator.INSTANCE.translate(TagParser.parseCompoundFully(
                     new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"))));
         } catch (final CommandSyntaxException e) {
             throw new InvalidDataException(e);

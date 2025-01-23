@@ -116,7 +116,9 @@ public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder
                 ItemStackUtil.fromSnapshotToNative(di.icon()),
                 SpongeAdventure.asVanilla(di.title()),
                 SpongeAdventure.asVanilla(di.description()),
-                Optional.ofNullable(this.backgroundPath),
+// TODO - Define how we want to expose ClientResource that is a combo of resource location and asset location
+//                Optional.ofNullable(this.backgroundPath),
+                Optional.empty(),
                 (net.minecraft.advancements.AdvancementType) (Object) di.type(),
                 di.doesShowToast(),
                 di.doesAnnounceToChat(),

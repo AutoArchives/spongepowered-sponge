@@ -36,11 +36,10 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(ItemEnchantments.class)
 public interface ItemEnchantmentsAccessor {
 
-    @Accessor("showInTooltip") boolean accessor$showInTooltip();
 
     @Accessor("enchantments") Object2IntOpenHashMap<Holder<Enchantment>> accessor$enchantments();
 
-    @Invoker("<init>") static ItemEnchantments invoker$new(Object2IntOpenHashMap<Holder<Enchantment>> $$0, boolean $$1) {
+    @Invoker("<init>") static ItemEnchantments invoker$new(Object2IntOpenHashMap<Holder<Enchantment>> $$0) {
         throw new UntransformedInvokerError();
     }
 
