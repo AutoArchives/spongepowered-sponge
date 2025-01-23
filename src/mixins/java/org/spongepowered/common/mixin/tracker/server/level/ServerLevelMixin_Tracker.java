@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.server.level;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -47,7 +49,6 @@ import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -75,6 +76,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.TrackableBridge;
@@ -137,26 +139,20 @@ import java.util.function.Consumer;
 public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implements TrackedWorldBridge {
 
 
-    @Redirect(
-        // This normally would target this.entityTickList.forEach((var2x) ->
-        // but we don't have lambda syntax support yet.
-        method = "lambda$tick$2",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerLevel;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V")
+    @WrapOperation(
+            // This normally would target this.entityTickList.forEach((var2x) ->
+            // but we don't have lambda syntax support yet.
+            method = "lambda$tick$2",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/level/ServerLevel;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V")
     )
-    private void tracker$wrapNormalEntityTick(final ServerLevel level, final Consumer<Entity> entityUpdateConsumer,
-                                              final Entity entity
+    private void tracker$wrapNormalEntityTick(
+        final ServerLevel level, final Consumer<Entity> entityUpdateConsumer,
+        final Entity entity, final Operation<Void> tick
     ) {
-        final PhaseContext<@NonNull ?> currentState = PhaseTracker.getWorldInstance((ServerLevel) (Object) this).getPhaseContext();
-        TrackingUtil.tickEntity(entityUpdateConsumer, entity);
+        TrackingUtil.tickEntity(entity, () -> tick.call(level, entityUpdateConsumer, entity));
     }
-
-    @Override
-    protected void tracker$wrapBlockEntityTick(final TickingBlockEntity blockEntity) {
-        TrackingUtil.tickTileEntity(this, blockEntity);
-    }
-
 
     /**
      * For PhaseTracking, we need to wrap around the
@@ -170,18 +166,23 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      * @param randomIn   The world random
      * @author gabizou - January 11th, 2020 - Minecraft 1.14.3
      */
-    @Redirect(method = "tickBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;)V",
+    @WrapOperation(method = "tickBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;)V",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/state/BlockState;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"))
-    private void tracker$wrapBlockTick(final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn, final RandomSource randomIn) {
-        TrackingUtil.updateTickBlock(this, blockState, posIn, randomIn);
+    private void tracker$wrapBlockTick(
+        final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn,
+        final RandomSource randomIn, Operation<Void> tick) {
+        TrackingUtil.updateTickBlock(this, blockState, posIn, () -> tick.call(blockState, worldIn, posIn, randomIn));
     }
 
-    @Redirect(method = "tickFluid(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/material/Fluid;)V",
+    @WrapOperation(method = "tickFluid(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/material/Fluid;)V",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
-    private void tracker$wrapFluidTick(final FluidState fluidState, final ServerLevel level, final BlockPos pos, final BlockState blockState) {
-        TrackingUtil.updateTickFluid(this, fluidState, pos, blockState);
+    private void tracker$wrapFluidTick(
+        final FluidState fluidState, final ServerLevel level, final BlockPos pos, final BlockState blockState,
+        final Operation<Void> tick
+    ) {
+        TrackingUtil.updateTickFluid(this, fluidState, pos, blockState, () -> tick.call(fluidState, level, pos, blockState));
     }
 
     /**
@@ -192,20 +193,24 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      *
      * @author gabizou - January 11th, 2020 - Minecraft 1.14.3
      */
-    @Redirect(method = "tickChunk(Lnet/minecraft/world/level/chunk/LevelChunk;I)V",
+    @WrapOperation(method = "tickChunk(Lnet/minecraft/world/level/chunk/LevelChunk;I)V",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/state/BlockState;randomTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"))
-    private void tracker$wrapBlockRandomTick(final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn, final RandomSource randomIn) {
-        TrackingUtil.randomTickBlock(this, blockState, posIn, this.random);
+    private void tracker$wrapBlockRandomTick(
+        final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn,
+        final RandomSource randomIn, final Operation<Void> tick) {
+        TrackingUtil.randomTickBlock(this, blockState, posIn, this.random, () -> tick.call(blockState, worldIn, posIn, randomIn));
     }
 
-    @Redirect(method = "tickChunk(Lnet/minecraft/world/level/chunk/LevelChunk;I)V",
+    @WrapOperation(method = "tickChunk(Lnet/minecraft/world/level/chunk/LevelChunk;I)V",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/material/FluidState;randomTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"
         )
     )
-    private void tracker$wrapFluidRandomTick(final FluidState fluidState, final ServerLevel worldIn, final BlockPos pos, final RandomSource random) {
-        TrackingUtil.randomTickFluid(this, fluidState, pos, this.random);
+    private void tracker$wrapFluidRandomTick(
+        final FluidState fluidState, final ServerLevel worldIn, final BlockPos pos,
+        final RandomSource random, final Operation<Void> tick) {
+        TrackingUtil.randomTickFluid(this, fluidState, pos, this.random, () -> tick.call(fluidState, worldIn, pos, random));
     }
 
     @Inject(
@@ -237,13 +242,16 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         context.close();
     }
 
-    @Redirect(method = "doBlockEvent(Lnet/minecraft/world/level/BlockEventData;)Z",
+    @WrapOperation(method = "doBlockEvent(Lnet/minecraft/world/level/BlockEventData;)Z",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;triggerEvent(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;II)Z"))
-    private boolean tracker$wrapBlockStateEventReceived(final BlockState recievingState, final net.minecraft.world.level.Level thisWorld, final BlockPos targetPos, final int eventId, final int flag, final BlockEventData data) {
-        return TrackingUtil.fireMinecraftBlockEvent((ServerLevel) (Object) this, data, recievingState);
+    private boolean tracker$wrapBlockStateEventReceived(
+        final BlockState recievingState, final Level thisWorld, final BlockPos targetPos,
+        final int eventId, final int flag, final Operation<Boolean> blockEvent, final BlockEventData data) {
+        return TrackingUtil.fireMinecraftBlockEvent((ServerLevel) (Object) this, data,
+            () -> blockEvent.call(recievingState, thisWorld, targetPos, eventId, flag));
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "blockEvent(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;II)V",
         at = @At(
             value = "INVOKE",
@@ -251,16 +259,16 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             remap = false
         )
     )
-    private boolean tracker$associatePhaseContextDataWithBlockEvent(
-        final ObjectLinkedOpenHashSet<BlockEventData> list, final Object data,
+    private <K> boolean tracker$associatePhaseContextDataWithBlockEvent(
+        ObjectLinkedOpenHashSet<K> list, K curr, Operation<Boolean> original,
         final BlockPos pos, final Block blockIn, final int eventID, final int eventParam
     ) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getWorldInstance((ServerLevel) (Object) this).getPhaseContext();
-        final BlockEventData blockEventData = (BlockEventData) data;
+        final BlockEventData blockEventData = (BlockEventData) curr;
         final TrackableBlockEventDataBridge blockEvent = (TrackableBlockEventDataBridge) (Object) blockEventData;
         // Short circuit phase states who do not track during block events
         if (currentContext.ignoresBlockEvent()) {
-            return list.add(blockEventData);
+            return original.call(list, curr);
         }
 
         final BlockState state = this.shadow$getBlockState(pos);
@@ -271,7 +279,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             }
             if (blockEvent.bridge$getTileEntity() == null) {
                 final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
-                    .world((org.spongepowered.api.world.server.ServerWorld) this)
+                    .world((ServerWorld) this)
                     .position(pos.getX(), pos.getY(), pos.getZ())
                     .state((org.spongepowered.api.block.BlockState) state)
                     .build();
@@ -282,7 +290,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         // Short circuit any additional handling. We've associated enough with the BlockEvent to
         // allow tracking to take place for other/future phases
         if (!((TrackableBridge) blockIn).bridge$allowsBlockEventCreation()) {
-            return list.add((BlockEventData) data);
+            return original.call(list, curr);
         }
         // In pursuant with our block updates management, we chose to
         // effectively allow the block event get added to the list, but
@@ -305,7 +313,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         }
         currentContext.getTransactor().logBlockEvent(state, this, pos, blockEvent);
 
-        return list.add(blockEventData);
+        return original.call(list, curr);
     }
 
     @Redirect(method = "explode", at = @At(value = "NEW",
@@ -369,7 +377,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 mcExplosion = (ServerExplosion) event.explosion();
                 apiExplosion = event.explosion();
             } catch (final ClassCastException e) {
-                new org.spongepowered.asm.util.PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
+                new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
                     .add("An explosion that was expected to be used for this implementation does not originate from this implementation.")
                     .trace();
                 mcExplosion = (ServerExplosion) detonateEvent.explosionBuilder().build();

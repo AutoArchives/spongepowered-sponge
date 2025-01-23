@@ -59,6 +59,8 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LightLayer;
@@ -114,6 +116,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class VanillaRegistryLoader {
     private final SpongeRegistryHolder holder;
@@ -144,17 +147,19 @@ public final class VanillaRegistryLoader {
             map.put(EnderDragonPhase.HOVERING, "hover");
         }, phase -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ((EnderDragonPhaseAccessor) phase).accessor$name()));
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
-//        final var materials = new HashMap<ArmorMaterial, String>();
-//        materials.put(ArmorMaterials.LEATHER, ArmorMaterials.LEATHER.modelId().toString());
-//        materials.put(ArmorMaterials.CHAIN, ArmorMaterials.CHAIN.modelId().toString());
-//        materials.put(ArmorMaterials.IRON, ArmorMaterials.IRON.modelId().toString());
-//        materials.put(ArmorMaterials.GOLD, ArmorMaterials.GOLD.modelId().toString());
-//        materials.put(ArmorMaterials.DIAMOND, ArmorMaterials.DIAMOND.modelId().toString());
-//        materials.put(ArmorMaterials.TURTLE_SCUTE, ResourceKey.minecraft("turtle").toString());
-//        materials.put(ArmorMaterials.NETHERITE, ArmorMaterials.NETHERITE.modelId().toString());
-//        materials.put(ArmorMaterials.ARMADILLO_SCUTE, ArmorMaterials.ARMADILLO_SCUTE.modelId().toString());
-//
-//        this.naming(RegistryTypes.ARMOR_MATERIAL, materials.keySet().toArray(new ArmorMaterial[]{}), materials);
+        final var materials = new HashMap<ArmorMaterial, String>();
+        Stream.of(
+            ArmorMaterials.LEATHER,
+            ArmorMaterials.CHAINMAIL,
+            ArmorMaterials.IRON,
+            ArmorMaterials.GOLD,
+            ArmorMaterials.DIAMOND,
+            ArmorMaterials.TURTLE_SCUTE,
+            ArmorMaterials.NETHERITE,
+            ArmorMaterials.ARMADILLO_SCUTE
+        ).forEach(am -> materials.put(am, am.assetId().location().toString()));
+
+        this.naming(RegistryTypes.ARMOR_MATERIAL, materials.keySet().toArray(new ArmorMaterial[]{}), materials);
         this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
         this.holder.createRegistry(RegistryTypes.ITEM_TIER, VanillaRegistryLoader.itemTier());
     }

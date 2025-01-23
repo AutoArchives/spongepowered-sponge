@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
 // Generates a constants file based on registry entries
-class RegistryEntriesGenerator<V> implements Generator {
+public class RegistryEntriesGenerator<V> implements Generator {
 
     private final String relativePackageName;
     private final String targetClassSimpleName;
@@ -56,7 +56,7 @@ class RegistryEntriesGenerator<V> implements Generator {
     private final RegistryScope scopeOverride;
     private final TypeName registryValueType;
 
-    RegistryEntriesGenerator(
+    public RegistryEntriesGenerator(
         final String targetRelativePackage,
         final String targetClassSimpleName,
         final String registryTypeName,
@@ -77,7 +77,7 @@ class RegistryEntriesGenerator<V> implements Generator {
         this(targetRelativePackage, targetClassSimpleName, registryTypeName, valueType, registry, filter, null);
     }
 
-    RegistryEntriesGenerator(
+    public RegistryEntriesGenerator(
         final String targetRelativePackage,
         final String targetClassSimpleName,
         final String registryTypeName,
