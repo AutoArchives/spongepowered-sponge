@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -239,8 +240,9 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
     }
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"))
-    public void attackImpl$startActuallyHurt(final ServerLevel level, final DamageSource damageSource,
-                                             final float originalDamage, final CallbackInfo ci) {
+    protected void attackImpl$startActuallyHurt(
+        final ServerLevel level, final DamageSource damageSource,
+        final float originalDamage, final CallbackInfo ci) {
         // TODO check for direct call?
         this.attackImpl$actuallyHurt = new DamageEventUtil.ActuallyHurt((LivingEntity) (Object) this, new ArrayList<>(), damageSource, originalDamage);
     }
@@ -251,7 +253,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
      */
     @Redirect(method = "getDamageAfterArmorAbsorb",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtArmor(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
-    public void attackImpl$onDamageAfterArmorAbsorb(final LivingEntity instance, final DamageSource $$0, final float $$1) {
+    protected void attackImpl$onDamageAfterArmorAbsorb(final LivingEntity instance, final DamageSource $$0, final float $$1) {
         if (this.attackImpl$actuallyHurt != null) {
             // prevents this.hurtArmor($$0, $$1);
             // $$1 = CombatRules.getDamageAfterAbsorb(this, $$1, $$0, (float)this.getArmorValue(), (float)this.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
@@ -265,7 +267,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
      */
     @Inject(method = "getDamageAfterMagicAbsorb",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getEffect(Lnet/minecraft/core/Holder;)Lnet/minecraft/world/effect/MobEffectInstance;"))
-    public void attackImpl$onDamageAfterMagicAbsorb(final DamageSource $$0, final float $$1, final CallbackInfoReturnable<Float> cir) {
+    protected void attackImpl$onDamageAfterMagicAbsorb(final DamageSource $$0, final float $$1, final CallbackInfoReturnable<Float> cir) {
         if (this.attackImpl$actuallyHurt != null) {
             var func = DamageEventUtil.createResistanceModifier(this.attackImpl$actuallyHurt.entity());
             this.attackImpl$actuallyHurt.functions().add(func);
@@ -276,14 +278,14 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
     /**
      * Captures the damage protection as a function
      */
-    @Redirect(method = "getDamageAfterMagicAbsorb",
+    @WrapOperation(method = "getDamageAfterMagicAbsorb",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatRules;getDamageAfterMagicAbsorb(FF)F"))
-    public float attackImpl$onDetDamageProtection(final float damage, final float protection) {
+    protected float attackImpl$onDetDamageProtection(float damage, float protection, Operation<Float> original) {
         if (this.attackImpl$actuallyHurt != null) {
             var func = DamageEventUtil.createEnchantmentModifiers(this.attackImpl$actuallyHurt.entity(), protection);
             this.attackImpl$actuallyHurt.functions().add(func);
         }
-        return CombatRules.getDamageAfterMagicAbsorb(damage, protection);
+        return original.call(damage, protection);
     }
 
     /**
@@ -292,7 +294,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
      * Then calls the DamageEntityEvent
      */
     @Inject(method = "setAbsorptionAmount", cancellable = true, at = @At("HEAD"))
-    public void attackImpl$onSetAbsorptionAmount(final float newAmount, final CallbackInfo ci) {
+    protected void attackImpl$onSetAbsorptionAmount(final float newAmount, final CallbackInfo ci) {
         if (this.attackImpl$actuallyHurt != null) {
             ci.cancel(); // Always cancel this
             var oldAmount = this.shadow$getAbsorptionAmount();
@@ -328,7 +330,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
     @ModifyVariable(method = "actuallyHurt", ordinal = 0,
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setAbsorptionAmount(F)V",
             ordinal = 0, shift = At.Shift.AFTER), argsOnly = true)
-    public float attackImpl$setFinalDamage(final float value) {
+    protected float attackImpl$setFinalDamage(final float value) {
         if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
             return 0;
         }
@@ -385,7 +387,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
      * also reverts {@link #attackImpl$beforeActuallyHurt}
      */
     @Inject(method = "actuallyHurt", at = @At("RETURN"))
-    public void attackImpl$cleanupActuallyHurt(final ServerLevel level, final DamageSource $$0, final float $$1, final CallbackInfo ci) {
+    protected void attackImpl$cleanupActuallyHurt(final ServerLevel level, final DamageSource $$0, final float $$1, final CallbackInfo ci) {
         this.attackImpl$handlePostDamage();
         this.attackImpl$actuallyHurt = null;
         this.attackImpl$actuallyHurtResult = null;

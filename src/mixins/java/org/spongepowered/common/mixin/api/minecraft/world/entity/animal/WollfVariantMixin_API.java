@@ -22,40 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.launch.bridge.event;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.event.Event;
+import net.minecraft.world.entity.animal.WolfVariant;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface NeoEventBridge_Neo<E extends Event> {
-
-    /**
-     * Syncs the Sponge event to this Forge event
-     *
-     * <p>Note that a Sponge event might service multiple Forge events, so any
-     * syncing should be limited to the remit of this event only (i.e., if the
-     * event fires for multiple positions, the sync should only consider the
-     * positions this event is concerned with)</p>
-     *
-     * @param event The Sponge event
-     */
-    void bridge$syncFrom(E event);
-
-    /**
-     * Syncs the Forge event to this Sponge event
-     *
-     * <p>Note that a Sponge event might service multiple Forge events, so any
-     * syncing should be limited to the remit of this event only (that is, this
-     * should only affect the Sponge event as far as the remit of this event goes,
-     * most likely not cancelling events but invalidating transactions.)</p>
-     *
-     * @param event The Sponge event
-     */
-    void bridge$syncTo(E event);
-
-    /**
-     * Creates a Sponge event from this Forge event
-     */
-    @Nullable E bridge$createSpongeEvent();
-
+@Mixin(WolfVariant.class)
+public class WollfVariantMixin_API implements org.spongepowered.api.data.type.WolfVariant {
 }

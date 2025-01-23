@@ -83,6 +83,7 @@
     "server.level.ServerPlayer_ContainerListenerMixin",
     "server.level.ServerPlayerGameModeMixin",
     "server.level.ServerPlayerMixin",
+    "server.level.ServerPlayerMixin_Attack_impl",
     "server.level.ServerPlayerMixin_HealthScale",
     "server.level.TicketMixin",
     "server.level.TicketStorageMixin",

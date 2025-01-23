@@ -70,6 +70,8 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CHISELED_BOOKSHELF_SLOT_5_OCCUPIED, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_5_OCCUPIED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CONDITIONAL, BlockStateProperties.CONDITIONAL);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CRACKED, BlockStateProperties.CRACKED);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CRAFTING, BlockStateProperties.CRAFTING);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CREAKING_HEART_STATE, BlockStateProperties.CREAKING_HEART_STATE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DELAY, BlockStateProperties.DELAY);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DISARMED, BlockStateProperties.DISARMED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DISTANCE, BlockStateProperties.DISTANCE);
@@ -112,12 +114,14 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.LOCKED, BlockStateProperties.LOCKED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.MODE_COMPARATOR, BlockStateProperties.MODE_COMPARATOR);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.MOISTURE, BlockStateProperties.MOISTURE);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.NATURAL, BlockStateProperties.NATURAL);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.NORTH, BlockStateProperties.NORTH);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.NORTH_REDSTONE, BlockStateProperties.NORTH_REDSTONE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.NORTH_WALL, BlockStateProperties.NORTH_WALL);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.NOTE, BlockStateProperties.NOTE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.NOTEBLOCK_INSTRUMENT, BlockStateProperties.NOTEBLOCK_INSTRUMENT);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.OCCUPIED, BlockStateProperties.OCCUPIED);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.OMINOUS, BlockStateProperties.OMINOUS);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.OPEN, BlockStateProperties.OPEN);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.ORIENTATION, BlockStateProperties.ORIENTATION);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.PERSISTENT, BlockStateProperties.PERSISTENT);
@@ -130,6 +134,7 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.RESPAWN_ANCHOR_CHARGES, BlockStateProperties.RESPAWN_ANCHOR_CHARGES);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.ROTATION_16, BlockStateProperties.ROTATION_16);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SCULK_SENSOR_PHASE, BlockStateProperties.SCULK_SENSOR_PHASE);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SEGMENT_AMOUNT, BlockStateProperties.SEGMENT_AMOUNT);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SHORT, BlockStateProperties.SHORT);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SHRIEKING, BlockStateProperties.SHRIEKING);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SIGNAL_FIRE, BlockStateProperties.SIGNAL_FIRE);
@@ -142,10 +147,14 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.STAGE, BlockStateProperties.STAGE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.STAIRS_SHAPE, BlockStateProperties.STAIRS_SHAPE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.STRUCTUREBLOCK_MODE, BlockStateProperties.STRUCTUREBLOCK_MODE);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.TEST_BLOCK_MODE, BlockStateProperties.TEST_BLOCK_MODE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.TILT, BlockStateProperties.TILT);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.TIP, BlockStateProperties.TIP);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.TRIAL_SPAWNER_STATE, BlockStateProperties.TRIAL_SPAWNER_STATE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.TRIGGERED, BlockStateProperties.TRIGGERED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.UNSTABLE, BlockStateProperties.UNSTABLE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.UP, BlockStateProperties.UP);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.VAULT_STATE, BlockStateProperties.VAULT_STATE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.VERTICAL_DIRECTION, BlockStateProperties.VERTICAL_DIRECTION);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.WATERLOGGED, BlockStateProperties.WATERLOGGED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.WEST, BlockStateProperties.WEST);
