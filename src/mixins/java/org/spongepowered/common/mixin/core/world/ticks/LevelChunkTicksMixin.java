@@ -24,22 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.world.ticks;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import com.google.common.collect.Iterators;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.LevelTicks;
-import net.minecraft.world.ticks.SavedTick;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.ticks.LevelChunkTicksBridge;
+import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.util.function.Function;
+import java.util.Iterator;
 
 @Mixin(LevelChunkTicks.class)
 public abstract class LevelChunkTicksMixin<T> implements LevelChunkTicksBridge<T> {
@@ -54,26 +55,14 @@ public abstract class LevelChunkTicksMixin<T> implements LevelChunkTicksBridge<T
     @SuppressWarnings("unchecked")
     @Inject(method = "scheduleUnchecked", at = @At("HEAD"))
     private void impl$onScheduleUnchecked(final ScheduledTick<T> $$0, final CallbackInfo ci) {
-        ((TickNextTickDataBridge<T>) (Object) $$0).bridge$createdByList(this.impl$tickList);
+        final ServerLevel level = ((LevelTicksBridge<?>) this.impl$tickList).bridge$level();
+        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate(level, $$0);
+        ((TickNextTickDataBridge<T>) (Object) $$0).bridge$createdByList(level, (LevelChunkTicks) (Object) this);
     }
 
-    @SuppressWarnings("unchecked")
-    @Redirect(method = "save(JLjava/util/function/Function;)Lnet/minecraft/nbt/ListTag;",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ticks/SavedTick;saveTick(Lnet/minecraft/world/ticks/ScheduledTick;Ljava/util/function/Function;J)Lnet/minecraft/nbt/CompoundTag;"))
-    private CompoundTag impl$onSaveSkipCancelled(final ScheduledTick<T> $$0, final Function<T, String> $$1, final long $$2) {
-        final ScheduledUpdate.State state = ((TickNextTickDataBridge<T>) (Object) $$0).bridge$internalState();
-        if (state != ScheduledUpdate.State.CANCELLED) {
-            return SavedTick.saveTick($$0, $$1, $$2);
-        }
-        return null;
-    }
-
-    @Redirect(method = "save(JLjava/util/function/Function;)Lnet/minecraft/nbt/ListTag;",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/ListTag;add(Ljava/lang/Object;)Z", ordinal = 1))
-    private boolean impl$onSaveSkipCancelled2(final ListTag instance, final Object o) {
-        if (o != null) {
-            return instance.add((CompoundTag) o);
-        }
-        return false;
+    @ModifyExpressionValue(method = "save(JLjava/util/function/Function;)Lnet/minecraft/nbt/ListTag;",
+        at = @At(value = "INVOKE", target = "Ljava/util/Queue;iterator()Ljava/util/Iterator;"))
+    private Iterator<ScheduledTick<T>> impl$onSaveSkipCancelled(final Iterator<ScheduledTick<T>> original) {
+        return Iterators.filter(original, t -> ((TickNextTickDataBridge<T>) (Object) t).bridge$internalState() != ScheduledUpdate.State.CANCELLED);
     }
 }

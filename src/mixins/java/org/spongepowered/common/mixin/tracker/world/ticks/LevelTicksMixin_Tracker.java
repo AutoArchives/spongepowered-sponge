@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.tracker.world.ticks;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.LevelTicks;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.asm.mixin.Final;
@@ -33,7 +32,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.bridge.world.ticks.ScheduledTickBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -47,17 +45,6 @@ public abstract class LevelTicksMixin_Tracker {
     // @formatter:off
     @Shadow @Final private List<ScheduledTick<?>> alreadyRunThisTick;
     // @formatter:on
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Redirect(method = "schedule(Lnet/minecraft/world/ticks/ScheduledTick;)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/ticks/LevelChunkTicks;schedule(Lnet/minecraft/world/ticks/ScheduledTick;)V")
-    )
-    private void tracker$associatePhaseContextWithTickEntry(final LevelChunkTicks instance, final ScheduledTick<?> scheduledTick) {
-        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate(((LevelTicksBridge<?>) this).bridge$level(), scheduledTick);
-        instance.schedule(scheduledTick);
-    }
 
     @Redirect(method = "runCollectedTicks",
         at = @At(value = "INVOKE",
