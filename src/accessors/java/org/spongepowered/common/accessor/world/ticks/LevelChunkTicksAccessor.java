@@ -22,26 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.ticks;
+package org.spongepowered.common.accessor.world.ticks;
 
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ticks.LevelChunkTicks;
-import org.spongepowered.api.scheduler.ScheduledUpdate;
-import org.spongepowered.api.world.server.ServerLocation;
+import net.minecraft.world.ticks.ScheduledTick;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.time.Duration;
+import java.util.Set;
 
-public interface TickNextTickDataBridge<T> {
+@Mixin(LevelChunkTicks.class)
+public interface LevelChunkTicksAccessor {
 
-    void bridge$createdByList(ServerLevel level, LevelChunkTicks<T> levelChunkTicks);
-
-    ServerLocation bridge$getLocation();
-
-    ScheduledUpdate.State bridge$internalState();
-
-    boolean bridge$cancelForcibly();
-
-    Duration bridge$getScheduledDelayWhenCreated();
-
-    void bridge$setState(ScheduledUpdate.State finished);
+    @Accessor("ticksPerPosition") Set<ScheduledTick<?>> accessor$ticksPerPosition();
 }

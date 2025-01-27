@@ -81,9 +81,9 @@ import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.network.ServerCommonPacketListenerImplBridge;
+import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.entity.player.SpongeUserView;
-import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.player.PlayerMixin_API;
 import org.spongepowered.common.profile.SpongeGameProfile;
@@ -118,8 +118,6 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Nullable
     private Vec3 enteredLavaOnVehiclePosition;
     private volatile Pointers api$pointers;
-
-    private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
 
     @Override
     public ServerWorld world() {
@@ -196,7 +194,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public TabList tabList() {
-        return this.api$tabList;
+        return ((ServerGamePacketListenerImplBridge) this.connection).bridge$tabList();
     }
 
     @Override
@@ -399,17 +397,17 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public void sendPlayerListHeader(final Component header) {
-        this.api$tabList.setHeader(Objects.requireNonNull(header, "header"));
+        this.tabList().setHeader(Objects.requireNonNull(header, "header"));
     }
 
     @Override
     public void sendPlayerListFooter(final Component footer) {
-        this.api$tabList.setFooter(Objects.requireNonNull(footer, "footer"));
+        this.tabList().setFooter(Objects.requireNonNull(footer, "footer"));
     }
 
     @Override
     public void sendPlayerListHeaderAndFooter(final Component header, final Component footer) {
-        this.api$tabList.setHeaderAndFooter(Objects.requireNonNull(header, "header"), Objects.requireNonNull(footer, "footer"));
+        this.tabList().setHeaderAndFooter(Objects.requireNonNull(header, "header"), Objects.requireNonNull(footer, "footer"));
     }
 
     @Override

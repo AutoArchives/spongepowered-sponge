@@ -139,14 +139,16 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
 
+    private final SpongeTabList impl$tabList = new SpongeTabList((ServerGamePacketListenerImpl) (Object) this);
+
     private int impl$ignorePackets;
 
     @Override
     public @Nullable Packet<?> impl$modifyClientBoundPacket(final Packet<?> packet) {
         if (packet instanceof final ClientboundPlayerInfoUpdatePacket infoPacket) {
-            return ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(infoPacket);
+            return this.impl$tabList.updateEntriesOnSend(infoPacket);
         } else if (packet instanceof final ClientboundPlayerInfoRemovePacket removePacket) {
-            return ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(removePacket);
+            return this.impl$tabList.updateEntriesOnSend(removePacket);
         }
         return super.impl$modifyClientBoundPacket(packet);
     }
@@ -560,5 +562,10 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
             ci.cancel();
         }
+    }
+
+    @Override
+    public SpongeTabList bridge$tabList() {
+        return this.impl$tabList;
     }
 }

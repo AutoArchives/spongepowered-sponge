@@ -24,26 +24,26 @@
  */
 package org.spongepowered.common.mixin.core.world.ticks;
 
+import com.google.common.collect.Iterators;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.LevelTicks;
-import net.minecraft.world.ticks.SavedTick;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.ticks.LevelChunkTicksBridge;
+import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.util.List;
+import java.util.Iterator;
 
 @Mixin(LevelChunkTicks.class)
 public abstract class LevelChunkTicksMixin<T> implements LevelChunkTicksBridge<T> {
-
-    @Shadow public abstract List<SavedTick<T>> shadow$pack(long $$0);
 
     private LevelTicks<T> impl$tickList;
 
@@ -55,17 +55,14 @@ public abstract class LevelChunkTicksMixin<T> implements LevelChunkTicksBridge<T
     @SuppressWarnings("unchecked")
     @Inject(method = "scheduleUnchecked", at = @At("HEAD"))
     private void impl$onScheduleUnchecked(final ScheduledTick<T> $$0, final CallbackInfo ci) {
-        ((TickNextTickDataBridge<T>) (Object) $$0).bridge$createdByList(this.impl$tickList);
+        final ServerLevel level = ((LevelTicksBridge<?>) this.impl$tickList).bridge$level();
+        PhaseTracker.getWorldInstance(level).getPhaseContext().associateScheduledTickUpdate(level, $$0);
+        ((TickNextTickDataBridge<T>) (Object) $$0).bridge$createdByList(level, (LevelChunkTicks) (Object) this);
     }
 
-    @Redirect(method = "save(JLjava/util/function/Function;)Lnet/minecraft/nbt/ListTag;",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ticks/LevelChunkTicks;pack(J)Ljava/util/List;"))
-    private List<SavedTick<T>> impl$onSaveSkipCancelled(final LevelChunkTicks<?> ticks, final long $$0) {
-        final List<SavedTick<T>> list = this.shadow$pack($$0);
-        return list.stream().filter(tick -> {
-            final ScheduledUpdate.State state = ((TickNextTickDataBridge<T>) (Object) $$0).bridge$internalState();
-            return state != ScheduledUpdate.State.CANCELLED;
-        }).toList();
+    @ModifyExpressionValue(method = "pack(J)Ljava/util/List;",
+        at = @At(value = "INVOKE", target = "Ljava/util/Queue;iterator()Ljava/util/Iterator;"))
+    private Iterator<ScheduledTick<T>> impl$onSaveSkipCancelled(final Iterator<ScheduledTick<T>> original) {
+        return Iterators.filter(original, t -> ((TickNextTickDataBridge<T>) (Object) t).bridge$internalState() != ScheduledUpdate.State.CANCELLED);
     }
-
 }
