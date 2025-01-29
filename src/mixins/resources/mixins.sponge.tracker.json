@@ -47,8 +47,7 @@
         "world.level.chunk.storage.SerializableChunkDataMixin_Tracker",
         "world.level.dimension.end.EndDragonFightMixin_Tracker",
         "world.level.redstone.NeighborUpdaterMixin_Tracker",
-        "world.ticks.LevelTicksMixin_Tracker",
-        "world.ticks.ScheduledTickMixin_Tracker"
+        "world.ticks.LevelTicksMixin_Tracker"
     ],
     "injectors": {
         "maxShiftBy": 3
