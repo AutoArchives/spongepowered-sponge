@@ -284,6 +284,7 @@
     "world.scores.ScoreboardMixin",
     "world.ticks.LevelChunkTicksMixin",
     "world.ticks.LevelTicksMixin",
+    "world.ticks.SavedTickMixin",
     "world.ticks.ScheduledTickMixin"
   ],
   "client": [

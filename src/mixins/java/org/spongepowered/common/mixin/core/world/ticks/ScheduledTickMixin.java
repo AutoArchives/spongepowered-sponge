@@ -27,10 +27,12 @@ package org.spongepowered.common.mixin.core.world.ticks;
 
 import net.kyori.adventure.util.Ticks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -38,13 +40,16 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.ticks.LevelChunkTicksAccessor;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
+import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.util.Preconditions;
 
 import java.time.Duration;
 
 @Mixin(ScheduledTick.class)
-public abstract class ScheduledTickMixin<T> implements TickNextTickDataBridge<T> {
+public abstract class ScheduledTickMixin<T> implements TickNextTickDataBridge<T>, SpongeMutableDataHolder, DataCompoundHolder, CreatorTrackedBridge {
 
     @Shadow @Final private BlockPos pos;
     @Shadow @Final private long triggerTick;
@@ -53,6 +58,8 @@ public abstract class ScheduledTickMixin<T> implements TickNextTickDataBridge<T>
     @MonotonicNonNull private LevelChunkTicks<T> impl$parentLevelChunkTicks;
     private long impl$scheduledTime;
     private ScheduledUpdate.State impl$state = ScheduledUpdate.State.WAITING;
+
+    private @Nullable CompoundTag impl$compound;
 
     @Override
     public void bridge$createdByList(final ServerLevel level, final LevelChunkTicks<T> levelChunkTicks) {
@@ -99,5 +106,13 @@ public abstract class ScheduledTickMixin<T> implements TickNextTickDataBridge<T>
         return Ticks.duration(this.triggerTick - this.impl$scheduledTime);
     }
 
+    @Override
+    public CompoundTag data$getCompound() {
+        return this.impl$compound;
+    }
 
+    @Override
+    public void data$setCompound(final CompoundTag nbt) {
+        this.impl$compound = nbt;
+    }
 }
