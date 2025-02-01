@@ -29,10 +29,8 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raider;
-import net.minecraft.world.level.Level;
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.api.raid.RaidWave;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,15 +51,9 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
     @Shadow @Final private ServerBossEvent raidEvent;
     @Shadow private Raid.RaidStatus status;
 
-    @Shadow public abstract Level shadow$getLevel();
     @Shadow public abstract float shadow$getHealthOfLivingRaiders();
     @Shadow public abstract int shadow$getGroupsSpawned();
     //@formatter:on
-
-    @Override
-    public ServerWorld world() {
-        return (ServerWorld) this.shadow$getLevel();
-    }
 
     @Override
     public BossBar bossBar() {

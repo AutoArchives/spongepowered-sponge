@@ -211,6 +211,7 @@
     "world.level.levelgen.flat.FlatLevelGeneratorSettingsAccessor",
     "world.level.levelgen.structure.pools.StructureTemplatePoolAccessor",
     "world.level.portal.TeleportTransitionAccessor",
+    "world.level.saveddata.maps.MapIndexAccessor",
     "world.level.saveddata.maps.MapItemSavedDataAccessor",
     "world.level.storage.LevelStorageSource_LevelStorageAccessAccessor",
     "world.level.storage.PlayerDataStorageAccessor",

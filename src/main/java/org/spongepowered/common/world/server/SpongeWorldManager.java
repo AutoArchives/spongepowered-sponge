@@ -1035,7 +1035,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     private void updateForcedChunks(final ServerLevel world, final ServerChunkCache serverChunkProvider) {
-        final @Nullable TicketStorage forcedChunksSaveData = world.getDataStorage().get(TicketStorage.factory(), "chunks");
+        final @Nullable TicketStorage forcedChunksSaveData = world.getDataStorage().get(TicketStorage.TYPE);
         if (forcedChunksSaveData != null) {
             final LongIterator longIterator = forcedChunksSaveData.getForceLoadedChunks().iterator();
 

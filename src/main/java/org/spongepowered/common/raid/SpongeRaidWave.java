@@ -25,6 +25,7 @@
 package org.spongepowered.common.raid;
 
 
+import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.api.entity.living.monster.raider.Raider;
 import org.spongepowered.api.raid.Raid;
 import org.spongepowered.api.raid.RaidWave;
@@ -56,11 +57,7 @@ public final class SpongeRaidWave implements RaidWave {
          * If the wave is not a final wave, the bonus waves occur after the final wave.
          * If our wave was before the final wave, the amount of normal raids (which is set by the difficulty) would be greater than our wave's id.
          */
-        if (this.isFinal() || this.waveId < ((RaidAccessor) this.raid).accessor$numGroups()) {
-            return false;
-        }
-
-        return true;
+        return !this.isFinal() && this.waveId >= ((RaidAccessor) this.raid).accessor$numGroups();
     }
 
     @Override
@@ -78,14 +75,18 @@ public final class SpongeRaidWave implements RaidWave {
     @Override
     public boolean addRaider(Raider raider, boolean addToRaidHealth) {
         Objects.requireNonNull(raider, "Raider cannot be null.");
-        return this.raid.addWaveMob(this.waveId, (net.minecraft.world.entity.raid.Raider) raider, addToRaidHealth);
+        // We only support adding raiders to server worlds
+        if (raider.world() instanceof ServerLevel sl) {
+            return this.raid.addWaveMob(sl, this.waveId, (net.minecraft.world.entity.raid.Raider) raider, addToRaidHealth);
+        }
+        return false;
     }
 
     @Override
     public boolean removeRaider(Raider raider) {
         Objects.requireNonNull(raider, "Raider cannot be null.");
-        if (raider.raidWave().isPresent() && this.equals(raider.raidWave().get().get())) {
-            this.raid.removeFromRaid((net.minecraft.world.entity.raid.Raider) raider, true);
+        if (raider.raidWave().isPresent() && this.equals(raider.raidWave().get().get()) && raider.world() instanceof ServerLevel sl) {
+            this.raid.removeFromRaid(sl, (net.minecraft.world.entity.raid.Raider) raider, true);
             return true;
         }
 
@@ -94,11 +95,10 @@ public final class SpongeRaidWave implements RaidWave {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof SpongeRaidWave) {
-            SpongeRaidWave other = (SpongeRaidWave) obj;
+        if (obj instanceof SpongeRaidWave other) {
             // Minecraft Tracks it's raids via an ID which is handled by the RaidManager.
             // Each world has it's own raid manager so we have to verify that the world the raids are in is also equal.
-            if (this.waveId == other.waveId && this.raid.getLevel() == other.raid.getLevel() && this.raid.getId() == other.raid.getId()) {
+            if (this.waveId == other.waveId && this.raid == other.raid && this.raid.getCenter() == other.raid.getCenter()) {
                 return true;
             }
         }

@@ -22,30 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level;
+package org.spongepowered.common.mixin.core.world.level.storage;
 
-import net.minecraft.core.HolderLookup;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.DataUtil;
 
-@Mixin(SavedData.class)
-public abstract class SavedDataMixin {
+@Mixin(DimensionDataStorage.class)
+public abstract class DimensionDataSotrageMixin {
 
-    @Inject(method = "save(Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/nbt/CompoundTag;",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/saveddata/SavedData;save(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/nbt/CompoundTag;"),
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    public void impl$writeAdditionalMapNBT(HolderLookup.Provider registry, final CallbackInfoReturnable<CompoundTag> cir, CompoundTag compound) {
-        if (this instanceof DataCompoundHolder) {
-            if (DataUtil.syncDataToTag(this)) {
-                compound.merge(((DataCompoundHolder) this).data$getCompound());
+    @WrapOperation(method = "encodeUnchecked",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/nbt/CompoundTag;put(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;"
+        )
+    )
+    public <T extends SavedData> Tag impl$writeAdditionalMapNBT(
+        final CompoundTag instance, final String key, final Tag encoded,
+        final Operation<Tag> original, final SavedDataType<T> type,
+        final SavedData data, final RegistryOps<Tag> registry
+    ) {
+        if (data instanceof DataCompoundHolder dch) {
+            if (DataUtil.syncDataToTag(dch)) {
+                instance.merge(dch.data$getCompound());
             }
         }
+        return original.call(instance, key, encoded);
     }
 }

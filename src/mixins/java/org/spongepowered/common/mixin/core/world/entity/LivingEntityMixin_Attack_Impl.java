@@ -112,7 +112,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
      * Prevents shield usage before event
      * Captures the blocked damage as a function
      */
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"))
+    @Redirect(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"))
     private void attackImpl$preventEarlyBlock1(
         final BlocksAttacks instance, final net.minecraft.world.level.Level level,
         final ItemStack stack, final LivingEntity target, final InteractionHand hand, final float damage) {
@@ -124,7 +124,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
     /**
      * Prevents shield usage before event
      */
-    @Redirect(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;blockUsingItem(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;)V"))
+    @Redirect(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;blockUsingItem(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;)V"))
     private void attackImpl$preventEarlyBlock2(final LivingEntity instance, final ServerLevel level, final LivingEntity shooter) {
         // TODO - 25w04a
         // this.blockUsingItem($$0, $$8);

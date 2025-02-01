@@ -27,7 +27,6 @@ package org.spongepowered.common.accessor.world.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -76,8 +75,6 @@ public interface LivingEntityAccessor {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("dead") boolean accessor$dead();
-
     @Accessor("lastHurt") float accessor$lastHurt();
 
     @Accessor("lastHurt") void accessor$lastHurt(final float lastHurt);
@@ -90,7 +87,5 @@ public interface LivingEntityAccessor {
     @Invoker("setLivingEntityFlag") void invoker$setLivingEntityFlag(int $$0, boolean $$1);
 
     @Accessor("useItem") void accessor$useItem(final ItemStack useItem);
-
-    @Invoker("isDamageSourceBlocked") boolean invoker$isDamageSourceBlocked(final DamageSource source);
 
 }

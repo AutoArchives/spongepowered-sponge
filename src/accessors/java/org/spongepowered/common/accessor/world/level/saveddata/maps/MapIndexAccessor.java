@@ -22,34 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.storage;
+package org.spongepowered.common.accessor.world.level.saveddata.maps;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.saveddata.maps.MapIndex;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.data.DataUtil;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+@Mixin(MapIndex.class)
+public interface MapIndexAccessor {
 
-@Mixin(DimensionDataStorage.class)
-public abstract class DimensionDataStorageMixin {
+    @Accessor("lastMapId") int accessor$getLastIndexID();
 
-    @WrapOperation(method = "readSavedData", at = @At(value = "INVOKE", target = "Ljava/util/Optional;orElse(Ljava/lang/Object;)Ljava/lang/Object;"))
-    public <T> T readSpongeMapData(
-        final Optional<T> instance, final T other, final Operation<T> original,
-        final @Local CompoundTag rootTag
-    ) {
-        final var result = original.call(instance, other);
-        if (result instanceof DataCompoundHolder dch) {
-            dch.data$setCompound(rootTag);
-            DataUtil.syncTagToData(dch);
-            dch.data$setCompound(null);
-        }
-        return null;
-    }
 }

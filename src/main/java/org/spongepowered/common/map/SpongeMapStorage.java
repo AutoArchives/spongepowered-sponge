@@ -34,11 +34,10 @@ import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
+import org.spongepowered.common.accessor.world.level.saveddata.maps.MapIndexAccessor;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,8 +63,7 @@ public final class SpongeMapStorage implements MapStorage {
         final Set<MapInfo> mapInfos = new HashSet<>();
         final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
 
-        final int highestId = ((MapIdTrackerBridge) defaultWorld.getDataStorage()
-                .computeIfAbsent(MapIndex.factory(), Constants.Map.MAP_INDEX_DATA_NAME)).bridge$getHighestMapId().orElse(-1);
+        final int highestId = ((MapIndexAccessor) defaultWorld.getDataStorage().computeIfAbsent(MapIndex.TYPE)).accessor$getLastIndexID();
         for (int i = 0; i <= highestId; i++) {
             final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(new MapId(i));
             if (mapInfo == null) {
