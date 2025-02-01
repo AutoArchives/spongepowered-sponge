@@ -55,6 +55,7 @@ import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.cause.entity.SpongeSpawnTypes;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.Constants;
@@ -568,6 +569,10 @@ public final class PhaseTracker implements CauseStackManager {
 
     @Override
     public StackFrame pushCauseFrame() {
+        return this.pushCauseFrame0(false);
+    }
+
+    public StackFrame pushCauseFrame0(final boolean skipImplicitPhaseCreation) {
         this.enforceMainThread();
         // Ensure duplicate causes will be correctly sized.
         final int size = this.cause.size();
@@ -596,6 +601,9 @@ public final class PhaseTracker implements CauseStackManager {
             // were created.
             frame.stackDebug = new Exception();
         }
+        if (!skipImplicitPhaseCreation && this.getPhaseContext().requiresImplicitPhase()) {
+            frame.implicitContext = PluginPhase.State.PLUGIN.createPhaseContext(this).buildAndSwitch();
+        }
         return frame;
     }
 
@@ -603,7 +611,25 @@ public final class PhaseTracker implements CauseStackManager {
     public void popCauseFrame(final StackFrame oldFrame) {
         Objects.requireNonNull(oldFrame, "oldFrame");
         this.enforceMainThread();
-        final @Nullable SpongeCauseStackFrame frame = this.frames.peek();
+        @Nullable SpongeCauseStackFrame frame = this.frames.peek();
+        if (frame != oldFrame) {
+            // If implicit context is present, we need to
+            // first close it as it might have pushed new frames.
+            // This is an implementation detail so the caller has
+            // no knowledge of this context, so it can't close it
+            // by itself and instead closes the outer frame.
+            if (((SpongeCauseStackFrame) oldFrame).implicitContext != null) {
+                ((SpongeCauseStackFrame) oldFrame).implicitContext.close();
+                ((SpongeCauseStackFrame) oldFrame).implicitContext = null;
+                frame = this.frames.peek();
+            }
+        } else if (frame.implicitContext != null) {
+            // See above, no frames to close here.
+            // Fast path to avoid casting.
+            frame.implicitContext.close();
+            frame.implicitContext = null;
+        }
+
         if (frame != oldFrame) {
             // If the given frame is not the top frame then some form of
             // corruption of the stack has occurred and we do our best to correct
@@ -763,7 +789,7 @@ public final class PhaseTracker implements CauseStackManager {
         // except for this method call-point.
         for (final Iterator<PhaseContext<@NonNull ?>> iterator = this.phaseContextProviders.descendingIterator(); iterator.hasNext(); ) {
             final PhaseContext<@NonNull ?> context = iterator.next();
-            final StackFrame frame = this.pushCauseFrame(); // these should auto close
+            final StackFrame frame = this.pushCauseFrame0(true); // these should auto close
             context.getFrameModifier().accept(frame); // The frame will be auto closed by the phase context
         }
         // Clear the list since everything is now loaded.
