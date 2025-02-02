@@ -89,9 +89,6 @@ import org.spongepowered.common.mixin.api.minecraft.world.entity.player.PlayerMi
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.NetworkUtil;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
@@ -195,16 +192,6 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Override
     public TabList tabList() {
         return ((ServerGamePacketListenerImplBridge) this.connection).bridge$tabList();
-    }
-
-    @Override
-    public boolean hasPlayedBefore() {
-        return this.get(Keys.FIRST_DATE_JOINED).map(instant -> {
-            final Instant toTheMinute = instant.truncatedTo(ChronoUnit.MINUTES);
-            final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
-            final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
-            return timeSinceFirstJoined.getSeconds() > 0;
-        }).orElse(false);
     }
 
     @Override

@@ -257,7 +257,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         if (compound.isEmpty()) {
             final Instant now = Instant.now();
             ((ServerPlayer) playerIn).offer(Keys.FIRST_DATE_JOINED, now);
-            ((ServerPlayer) playerIn).offer(Keys.LAST_DATE_PLAYED, now);
+            ((ServerPlayer) playerIn).offer(Keys.LAST_DATE_JOINED, now);
         }
         return compound;
     }
@@ -462,6 +462,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private void impl$RemovePlayerReferenceFromScoreboard(final net.minecraft.server.level.ServerPlayer player, final CallbackInfo ci) {
         ((ServerScoreboardBridge) ((ServerPlayer) player).scoreboard()).bridge$removePlayer(player, false);
         SpongeAdventure.forEachBossBar(bar -> bar.removePlayer(player));
+        ((ServerPlayer) player).offer(Keys.LAST_DATE_PLAYED, Instant.now());
     }
 
     @Redirect(method = "addWorldborderListener",
@@ -487,7 +488,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().readLegacyPlayerData((ServerPlayer) entity, compound, null);
         }
 
-        ((ServerPlayer) entity).offer(Keys.LAST_DATE_PLAYED, Instant.now());
+        ((ServerPlayer) entity).offer(Keys.LAST_DATE_JOINED, Instant.now());
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
