@@ -22,11 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.ticks;
+package org.spongepowered.common.accessor.world.ticks;
 
-public interface ScheduledTickBridge {
+import net.minecraft.world.ticks.LevelChunkTicks;
+import net.minecraft.world.ticks.ScheduledTick;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    boolean bridge$isPartOfWorldGeneration();
+import java.util.Set;
 
-    void bridge$setIsPartOfWorldGeneration(boolean isLoading);
+@Mixin(LevelChunkTicks.class)
+public interface LevelChunkTicksAccessor {
+
+    @Accessor("ticksPerPosition") Set<ScheduledTick<?>> accessor$ticksPerPosition();
 }

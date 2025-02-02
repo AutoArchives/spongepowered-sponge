@@ -104,9 +104,11 @@ import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.network.channel.SpongeChannelPayload;
 import org.spongepowered.common.profile.SpongeGameProfile;
@@ -139,14 +141,16 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
 
+    private final SpongeTabList impl$tabList = new SpongeTabList((ServerGamePacketListenerImpl) (Object) this);
+
     private int impl$ignorePackets;
 
     @Override
     public @Nullable Packet<?> impl$modifyClientBoundPacket(final Packet<?> packet) {
         if (packet instanceof final ClientboundPlayerInfoUpdatePacket infoPacket) {
-            return ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(infoPacket);
+            return this.impl$tabList.updateEntriesOnSend(infoPacket);
         } else if (packet instanceof final ClientboundPlayerInfoRemovePacket removePacket) {
-            return ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(removePacket);
+            return this.impl$tabList.updateEntriesOnSend(removePacket);
         }
         return super.impl$modifyClientBoundPacket(packet);
     }
@@ -440,9 +444,17 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
                     return; // prevents Mismatch in destroy block pos warning
                 }
             }
-            playerInteractionManager.handleBlockBreakAction(pos, act, dir, maxBuildHeight, sequence);
-            if (act == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
-                this.impl$ignorePackets++;
+            final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.player.serverLevel());
+            try (final CauseStackManager.StackFrame frame = tracker.pushCauseFrame();
+                 final PhaseContext<?> context = PlayerPhase.State.PLAYER_INTERACT.createPhaseContext(tracker)
+                    .creator(this.player.getUUID())
+                    .notifier(this.player.getUUID())) {
+                context.buildAndSwitch();
+                frame.pushCause(event);
+                playerInteractionManager.handleBlockBreakAction(pos, act, dir, maxBuildHeight, sequence);
+                if (act == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
+                    this.impl$ignorePackets++;
+                }
             }
         }
     }
@@ -560,5 +572,10 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
             ci.cancel();
         }
+    }
+
+    @Override
+    public SpongeTabList bridge$tabList() {
+        return this.impl$tabList;
     }
 }

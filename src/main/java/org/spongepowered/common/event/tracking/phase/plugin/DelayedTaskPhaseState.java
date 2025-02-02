@@ -70,6 +70,7 @@ class DelayedTaskPhaseState extends PluginPhaseState<DelayedTaskPhaseState.Conte
 
         public Context(final IPhaseState<Context> phaseState, final PhaseTracker tracker) {
             super(phaseState, tracker);
+            this.requiresImplicitPhase(false);
         }
 
         public Context container(final PluginContainer container) {
