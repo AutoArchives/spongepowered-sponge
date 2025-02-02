@@ -47,6 +47,7 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
 
     CommandPhaseContext(final IPhaseState<CommandPhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);
+        this.requiresImplicitPhase(true);
     }
 
     @Override

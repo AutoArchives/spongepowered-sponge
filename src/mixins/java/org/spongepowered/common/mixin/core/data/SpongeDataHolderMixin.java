@@ -32,6 +32,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.ticks.SavedTick;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.api.data.DataHolder;
@@ -58,7 +59,8 @@ import org.spongepowered.common.entity.player.SpongeUserData;
         MapItemSavedData.class,
         LevelChunk.class,
         ScheduledTick.class,
-        SavedTick.class})
+        SavedTick.class,
+        PrimaryLevelData.class})
 public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
 
     private DataManipulator.Mutable impl$manipulator;

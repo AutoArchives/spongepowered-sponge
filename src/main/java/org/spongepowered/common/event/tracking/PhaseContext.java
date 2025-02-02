@@ -82,6 +82,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
     private boolean allowsEntityEvents = true;
     private boolean allowsBulkBlockCaptures = true; // Defaults to allow block captures
     private boolean allowsBulkEntityCaptures = true;
+    private boolean requiresImplicitPhase = false;
     @Nullable Deque<CauseStackManager.StackFrame> usedFrame;
 
     private @Nullable Object source;
@@ -375,6 +376,15 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
 
     public Optional<ServerLocation> containerLocation() {
         return Optional.empty();
+    }
+
+    public final boolean requiresImplicitPhase() {
+        return this.requiresImplicitPhase;
+    }
+
+    protected P requiresImplicitPhase(final boolean requiresImplicitPhase) {
+        this.requiresImplicitPhase = requiresImplicitPhase;
+        return (P) this;
     }
 
     protected boolean isRunaway(final PhaseContext<?> phaseContext) {
