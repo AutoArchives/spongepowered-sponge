@@ -68,7 +68,7 @@ public abstract class EntityTravelToDimensionEventMixin_Neo implements NeoEventB
     public ChangeEntityWorldEvent.@Nullable Pre bridge$createSpongeEvent() {
         final Entity entity = ((EntityEvent) (Object) this).getEntity();
         final ServerLevel toWorld = SpongeCommon.server().getLevel(this.dimension);
-        return SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getCauseStackManager().currentCause(),
+        return SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getInstance().currentCause(),
                 (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) entity.getCommandSenderWorld(),
                 (org.spongepowered.api.world.server.ServerWorld) toWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld);
     }

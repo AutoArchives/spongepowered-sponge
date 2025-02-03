@@ -235,24 +235,24 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void callStartingEngineEvent(final Engine engine) {
-        this.game.eventManager().post(SpongeEventFactory.createStartingEngineEvent(PhaseTracker.getCauseStackManager().currentCause(),
+        this.game.eventManager().post(SpongeEventFactory.createStartingEngineEvent(PhaseTracker.getInstance().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
 
     @Override
     public void callStartedEngineEvent(final Engine engine) {
-        this.game.eventManager().post(SpongeEventFactory.createStartedEngineEvent(PhaseTracker.getCauseStackManager().currentCause(),
+        this.game.eventManager().post(SpongeEventFactory.createStartedEngineEvent(PhaseTracker.getInstance().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
 
     @Override
     public void callLoadedGameEvent() {
-        this.game.eventManager().post(SpongeEventFactory.createLoadedGameEvent(PhaseTracker.getCauseStackManager().currentCause(), this.game));
+        this.game.eventManager().post(SpongeEventFactory.createLoadedGameEvent(PhaseTracker.getInstance().currentCause(), this.game));
     }
 
     @Override
     public void callStoppingEngineEvent(final Engine engine) {
-        this.game.eventManager().post(SpongeEventFactory.createStoppingEngineEvent(PhaseTracker.getCauseStackManager().currentCause(),
+        this.game.eventManager().post(SpongeEventFactory.createStoppingEngineEvent(PhaseTracker.getInstance().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
         if (engine instanceof SpongeServer) {
             final @Nullable SpongeGameProfileManager profileManager = ((SpongeServer) engine).gameProfileManagerIfPresent();
@@ -265,7 +265,7 @@ public final class SpongeLifecycle implements Lifecycle {
     @Override
     public void callStoppedGameEvent() {
         // Call an event for plugins to shut down any thread pools
-        this.game.eventManager().post(SpongeEventFactory.createStoppedGameEvent(PhaseTracker.getCauseStackManager().currentCause(), this.game));
+        this.game.eventManager().post(SpongeEventFactory.createStoppedGameEvent(PhaseTracker.getInstance().currentCause(), this.game));
 
         // Then shut down our own thread pool
         ((AsyncScheduler) this.game.asyncScheduler()).close();

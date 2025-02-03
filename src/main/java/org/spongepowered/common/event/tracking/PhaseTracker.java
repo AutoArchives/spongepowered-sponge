@@ -119,10 +119,6 @@ public final class PhaseTracker implements CauseStackManager {
         });
     }
 
-    public static CauseStackManager getCauseStackManager() {
-        return PhaseTracker.getInstance();
-    }
-
     public static Block validateBlockForNeighborNotification(final ServerLevel worldServer, final BlockPos pos, @Nullable Block blockIn,
         final BlockPos otherPos, final LevelChunk chunk) {
         if (blockIn == null) {

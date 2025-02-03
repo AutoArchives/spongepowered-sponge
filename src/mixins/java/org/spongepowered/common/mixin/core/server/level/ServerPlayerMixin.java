@@ -252,7 +252,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     public boolean bridge$kick(final Component message) {
         final Component messageToSend;
         if (ShouldFire.KICK_PLAYER_EVENT) {
-            final KickPlayerEvent kickEvent = SpongeEventFactory.createKickPlayerEvent(PhaseTracker.getCauseStackManager().currentCause(),
+            final KickPlayerEvent kickEvent = SpongeEventFactory.createKickPlayerEvent(PhaseTracker.getInstance().currentCause(),
                 message,
                 message,
                 (ServerPlayer) this
@@ -412,8 +412,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
      */
     @Overwrite
     public void teleportTo(final ServerLevel world, final double x, final double y, final double z, final float yaw, final float pitch) {
-        final boolean hasMovementContext = PhaseTracker.getCauseStackManager().currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        final boolean hasMovementContext = PhaseTracker.getInstance().currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             if (!hasMovementContext) {
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
             }
@@ -499,7 +499,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         // Sponge Start TODO cause/context like in impl$fireDimensionTransitionEvents
         Sponge.eventManager().post(
             SpongeEventFactory.createChangeEntityWorldEventPost(
-                PhaseTracker.getCauseStackManager().currentCause(),
+                PhaseTracker.getInstance().currentCause(),
                 (org.spongepowered.api.entity.Entity) this,
                 (ServerWorld) oldLevel,
                 (ServerWorld) newLevel,
@@ -524,7 +524,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 .player();
             final boolean hasMovementContext = PhaseTracker.SERVER.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
             try (final TeleportContext context = contextToSwitchTo.buildAndSwitch();
-                 final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                 final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(thisPlayer);
                 if (!hasMovementContext) {
                     // TODO we should be able to detect normal plugin code though
@@ -767,7 +767,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final int viewDistance = info.viewDistance();
 
         // Post before the player values are updated
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             final ChatVisibility visibility = (ChatVisibility) (Object) info.chatVisibility();
             final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(
                 frame.currentCause(),
@@ -855,7 +855,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 case NOT_POSSIBLE_NOW:
                 case OBSTRUCTED:
                 case NOT_SAFE:
-                    final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+                    final Cause currentCause = PhaseTracker.getInstance().currentCause();
                     final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
                     if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) this))) {
                         final Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
@@ -891,7 +891,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         final ChangeDataHolderEvent.ValueChange
             event =
-            SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getCauseStackManager().currentCause(), transaction, (DataHolder.Mutable) this);
+            SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getInstance().currentCause(), transaction, (DataHolder.Mutable) this);
 
         Sponge.eventManager().post(event);
 
@@ -953,7 +953,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             playerRespawnDestination = player.server.overworld();
         }
 
-        final RespawnPlayerEvent.SelectWorld event = SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().currentCause(),
+        final RespawnPlayerEvent.SelectWorld event = SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getInstance().currentCause(),
             (ServerWorld) playerRespawnDestination, (ServerWorld) player.serverLevel(), (ServerWorld) playerRespawnDestination, (ServerPlayer) player);
         SpongeCommon.post(event);
 

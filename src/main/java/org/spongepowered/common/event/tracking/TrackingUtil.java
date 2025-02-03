@@ -172,7 +172,7 @@ public final class TrackingUtil {
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(block, pos, BlockChangeFlags.NONE);
-            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().currentCause(), snapshot);
+            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getInstance().currentCause(), snapshot);
             SpongeCommon.post(event);
             if (event.isCancelled()) {
                 return;
@@ -206,7 +206,7 @@ public final class TrackingUtil {
         final net.minecraft.world.level.block.state.BlockState blockState = fluidState.createLegacyBlock();
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(blockState, pos, BlockChangeFlags.NONE);
-            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().currentCause(), snapshot);
+            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getInstance().currentCause(), snapshot);
             SpongeCommon.post(event);
             if (event.isCancelled()) {
                 return;
@@ -245,7 +245,7 @@ public final class TrackingUtil {
             final BlockSnapshot currentTickBlock = mixinWorld.bridge$createSnapshot(state, pos, BlockChangeFlags.NONE);
             final TickBlockEvent
                 event =
-                SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getCauseStackManager().currentCause(), currentTickBlock);
+                SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getInstance().currentCause(), currentTickBlock);
             SpongeCommon.post(event);
             if (event.isCancelled()) {
                 return;
@@ -284,7 +284,7 @@ public final class TrackingUtil {
             final BlockSnapshot currentTickBlock = mixinWorld.bridge$createSnapshot(state.createLegacyBlock(), pos, BlockChangeFlags.NONE);
             final TickBlockEvent
                 event =
-                SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getCauseStackManager().currentCause(), currentTickBlock);
+                SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getInstance().currentCause(), currentTickBlock);
             SpongeCommon.post(event);
             if (event.isCancelled()) {
                 return;

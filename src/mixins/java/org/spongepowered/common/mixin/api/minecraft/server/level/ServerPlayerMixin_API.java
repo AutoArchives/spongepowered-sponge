@@ -262,7 +262,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             return currentBorder; // do not fire an event since nothing would have changed
         }
         final ChangeWorldBorderEvent.Player event =
-            SpongeEventFactory.createChangeWorldBorderEventPlayer(PhaseTracker.getCauseStackManager().currentCause(),
+            SpongeEventFactory.createChangeWorldBorderEventPlayer(PhaseTracker.getInstance().currentCause(),
                 Optional.ofNullable(border), Optional.ofNullable(border), this, Optional.ofNullable(border));
         if (SpongeCommon.post(event)) {
             return currentBorder;
