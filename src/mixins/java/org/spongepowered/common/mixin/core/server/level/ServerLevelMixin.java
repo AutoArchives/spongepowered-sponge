@@ -358,7 +358,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
         this.impl$isManualSave = false;
 
-        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+        final Cause currentCause = PhaseTracker.getInstance().currentCause();
 
         if (Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPre(currentCause, ((ServerWorld) this)))) {
             return; // cancelled save
@@ -418,7 +418,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final boolean isRaining = this.shadow$isRaining();
         if (this.oRainLevel != this.rainLevel || this.oThunderLevel != this.thunderLevel || $$0 != isRaining) {
             Weather newWeather = ((ServerWorld) this).properties().weather();
-            final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+            final Cause currentCause = PhaseTracker.getInstance().currentCause();
             final Transaction<Weather> weatherTransaction = new Transaction<>(this.impl$prevWeather, newWeather);
             final ChangeWeatherEvent event = SpongeEventFactory.createChangeWeatherEvent(currentCause, ((ServerWorld) this), weatherTransaction);
             if (Sponge.eventManager().post(event)) {
@@ -457,7 +457,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private boolean impl$onBeforeThunder(final ServerLevel serverLevel, final BlockPos param0) {
         final boolean rainingAt = serverLevel.isRainingAt(param0);
         if (rainingAt) {
-            final LightningEvent.Pre strike = SpongeEventFactory.createLightningEventPre(Sponge.server().causeStackManager().currentCause());
+            final LightningEvent.Pre strike = SpongeEventFactory.createLightningEventPre(PhaseTracker.getInstance().currentCause());
             if (Sponge.eventManager().post(strike)) {
                 return false;
             }
@@ -496,7 +496,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Inject(method = "levelEvent", at = @At("HEAD"), cancellable = true)
     private void impl$throwBroadcastEvent(final Player player, final int eventID, final BlockPos pos, final int dataID, CallbackInfo ci) {
         if(eventID == Constants.WorldEvents.PLAY_RECORD_EVENT && ShouldFire.PLAY_SOUND_EVENT_FROM_JUKEBOX) {
-            try (final CauseStackManager.StackFrame frame = Sponge.server().causeStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 final BlockEntity tileEntity = this.shadow$getBlockEntity(pos);
                 if(tileEntity instanceof JukeboxBlockEntity) {
                     final JukeboxBlockEntity jukebox = (JukeboxBlockEntity) tileEntity;

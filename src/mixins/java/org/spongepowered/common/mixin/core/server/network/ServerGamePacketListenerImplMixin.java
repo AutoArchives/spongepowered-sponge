@@ -233,7 +233,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         // common checks and throws are done here.
         final @Nullable Vector3d toPosition;
         if (fireMoveEvent) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
                 toPosition = SpongeCommonEventFactory.callMoveEvent(
                         player,
@@ -409,7 +409,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             final HandType handType = (HandType) (Object) hand;
             final ItemStack heldItem = this.player.getItemInHand(hand);
 
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
                 frame.addContext(EventContextKeys.USED_HAND, handType);
                 final AnimateHandEvent event =
@@ -470,12 +470,12 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         }
         final ServerPlayer spongePlayer = (ServerPlayer) this.player;
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this.player);
             final Component message = SpongeAdventure.asAdventure($$0);
             final Audience audience = Sponge.server().broadcastAudience();
             final ServerSideConnectionEvent.Leave event = SpongeEventFactory.createServerSideConnectionEventLeave(
-                    PhaseTracker.getCauseStackManager().currentCause(), audience, Optional.of(audience), message, message,
+                    PhaseTracker.getInstance().currentCause(), audience, Optional.of(audience), message, message,
                     spongePlayer.connection(), spongePlayer, SpongeGameProfile.of(this.player.getGameProfile()), false);
             SpongeCommon.post(event);
             if (!event.isMessageCancelled()) {
@@ -510,10 +510,10 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             newLines.add(Component.text(StringUtil.filterText(line.filtered())));
         }
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this.player);
             final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES, newLines);
-            final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().currentCause(),
+            final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getInstance().currentCause(),
                     originalLines, newLinesValue,
                     (Sign) sign,
                     isFrontText);
@@ -549,7 +549,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Redirect(method = "lambda$handleChatCommand$7", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performUnsignedChatCommand(Ljava/lang/String;)V"))
     public void impl$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final String $$0) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this.player);
             frame.addContext(EventContextKeys.COMMAND, $$0);
             this.shadow$performUnsignedChatCommand($$0);
@@ -558,7 +558,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Redirect(method = "lambda$handleSignedChatCommand$8", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performSignedChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandSignedPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
     public void impl$onPerformSignedChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandSignedPacket $$0, final LastSeenMessages $$1) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this.player);
             frame.addContext(EventContextKeys.COMMAND, $$0.command());
             this.shadow$performSignedChatCommand($$0, $$1);

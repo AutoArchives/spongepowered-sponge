@@ -135,6 +135,20 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                 final ItemStack copiedStack = stackIn.copy();
                 if (useBlock != Tristate.FALSE && !flag1) { // Sponge check useBlock
                     final InteractionResult result = blockstate.useItemOn(playerIn.getItemInHand(handIn), worldIn, playerIn, handIn, blockRaytraceResultIn);
+                    // Sponge start - log change in hand
+                    final TransactionalCaptureSupplier transactor = context.getTransactor();
+                    if (!transactor.isEmpty()) { //TODO: API 14 composite event
+                        try (final EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
+                            transactor.logPlayerInventoryChange(this.player, PlayerInventoryTransaction.EventCreator.STANDARD);
+                            this.player.inventoryMenu.broadcastChanges();
+                        }
+                    } else {
+                        transactor.logPlayerInventoryChange(this.player, PlayerInventoryTransaction.EventCreator.STANDARD);
+                        try (final EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
+                            this.player.inventoryMenu.broadcastChanges();
+                        }
+                    }
+                    // Sponge end
 
                     if (result.consumesAction()) {
                         CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(playerIn, blockpos, copiedStack);
@@ -176,9 +190,14 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                         result = stackIn.useOn(itemusecontext);
                         // Sponge start - log change in hand
                         final TransactionalCaptureSupplier transactor = context.getTransactor();
-                        if (!transactor.isEmpty()) { //TODO: Add effect to attach the transaction to be the child of the parents
+                        if (!transactor.isEmpty()) { //TODO: API 14 composite event
                             try (final EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
                                 transactor.logPlayerInventoryChange(this.player, PlayerInventoryTransaction.EventCreator.STANDARD);
+                                this.player.inventoryMenu.broadcastChanges();
+                            }
+                        } else {
+                            transactor.logPlayerInventoryChange(this.player, PlayerInventoryTransaction.EventCreator.STANDARD);
+                            try (final EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
                                 this.player.inventoryMenu.broadcastChanges();
                             }
                         }

@@ -100,7 +100,7 @@ public abstract class SynchedEntityDataMixin {
                 final DataTransactionResult transaction = optional.get();
                 final ChangeDataHolderEvent.ValueChange
                     event =
-                    SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getCauseStackManager().currentCause(), transaction,
+                    SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getInstance().currentCause(), transaction,
                         (DataHolder.Mutable) this.entity);
                 Sponge.eventManager().post(event);
                 eventHolder.set(event);

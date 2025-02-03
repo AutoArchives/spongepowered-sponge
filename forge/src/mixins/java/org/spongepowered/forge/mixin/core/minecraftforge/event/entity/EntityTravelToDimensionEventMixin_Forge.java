@@ -67,7 +67,7 @@ public abstract class EntityTravelToDimensionEventMixin_Forge extends EntityEven
     public ChangeEntityWorldEvent.@Nullable Pre bridge$createSpongeEvent() {
         final Entity entity = this.getEntity();
         final ServerLevel toWorld = SpongeCommon.server().getLevel(this.dimension);
-        return SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getCauseStackManager().currentCause(),
+        return SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getInstance().currentCause(),
                 (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) entity.getCommandSenderWorld(),
                 (org.spongepowered.api.world.server.ServerWorld) toWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld);
     }

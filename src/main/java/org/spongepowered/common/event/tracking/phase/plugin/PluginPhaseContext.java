@@ -42,7 +42,6 @@ public class PluginPhaseContext<P extends PluginPhaseContext<P>> extends PhaseCo
 
     protected PluginPhaseContext(final IPhaseState<P> phaseState, final PhaseTracker tracker) {
         super(phaseState, tracker);
-        this.requiresImplicitPhase(true);
     }
 
     @Override

@@ -597,7 +597,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      * <ul>
      *     <li>This world instance is managed and verified by Sponge</li>
      *     <li>This world must {@link LevelBridge#bridge$isFake()} return {@code false}</li>
-     *     <li>The {@link PhaseTracker#SERVER}'s {@link PhaseTracker#getSidedThread()} must be {@code ==} {@link Thread#currentThread()}</li
+     *     <li>The {@link PhaseTracker#getWorldInstance}'s {@link PhaseTracker#onSidedThread()} ()} must be {@code true}</li
      *     <li>The current {@link IPhaseState} must be allowing to record transactions with an applicable {@link org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier}</li>
      * </ul>
      * After which, we may be able to appropriately associate the {@link net.minecraft.world.level.block.entity.BlockEntity}

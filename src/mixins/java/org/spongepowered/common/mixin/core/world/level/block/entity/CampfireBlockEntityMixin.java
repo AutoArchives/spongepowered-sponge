@@ -85,7 +85,7 @@ public abstract class CampfireBlockEntityMixin {
         mixinSelf.impl$currentIndex = i;
         final boolean isEmpty = itemStack.isEmpty();
         if (!isEmpty) {
-            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+            final Cause cause = PhaseTracker.getInstance().currentCause();
             final ItemStackSnapshot stack = ItemStackUtil.snapshotOf(mixinSelf.items.get(i));
             final RecipeHolder<?> recipe = mixinSelf.impl$cookingRecipe[i];
             final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (Campfire) self, stack, Optional.empty(),
@@ -104,7 +104,7 @@ public abstract class CampfireBlockEntityMixin {
         final CampfireBlockEntity self, final RecipeManager.CachedCheck<SingleRecipeInput, CampfireCookingRecipe> check,
         final CallbackInfo ci, final boolean hasChanged, final int i,
         final ItemStack itemStack, final SingleRecipeInput recipeInput, final ItemStack itemStack1) {
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        final Cause cause = PhaseTracker.getInstance().currentCause();
         final CampfireBlockEntityMixin mixinSelf = (CampfireBlockEntityMixin) (Object) self;
         final SlotTransaction transaction = new SlotTransaction(((Campfire) self).inventory().slot(i).get(), ItemStackUtil.snapshotOf(itemStack1), ItemStackSnapshot.empty());
         final RecipeHolder<?> recipe = mixinSelf.impl$cookingRecipe[i];

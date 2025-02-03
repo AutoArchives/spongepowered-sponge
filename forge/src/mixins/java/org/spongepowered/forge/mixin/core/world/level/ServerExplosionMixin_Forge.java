@@ -86,7 +86,7 @@ public abstract class ServerExplosionMixin_Forge {
             final var apiWorld = (ServerWorld) this.level;
             final var apiEntities = entities.stream().map(org.spongepowered.api.entity.Entity.class::cast).toList();
             final var apiBlockPositions = this.impl$affectedBlocks.stream().map(bp -> ServerLocation.of(apiWorld, VecHelper.toVector3i(bp))).toList();
-            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+            final Cause cause = PhaseTracker.getInstance().currentCause();
             final ExplosionEvent.Detonate event = SpongeEventFactory.createExplosionEventDetonate(cause, apiBlockPositions, apiEntities, (Explosion) this, apiWorld);
             if (SpongeCommon.post(event)) {
                 this.impl$affectedBlocks.clear(); // no blocks affected

@@ -520,7 +520,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final ServerWorld originalWorld = originalPlayer.world();
         final ServerWorld destinationWorld = recreatedPlayer.world();
 
-        final RespawnPlayerEvent.Recreate event = SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().currentCause(),
+        final RespawnPlayerEvent.Recreate event = SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getInstance().currentCause(),
                 destinationPosition, originalWorld, originalPosition, destinationWorld,
                 (ServerWorld) dimensionTransition.newLevel(),
                 destinationPosition, originalPlayer, recreatedPlayer, this.impl$isRespawnWithPosition, !keepAllPlayerData);
@@ -530,7 +530,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         newPlayer.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
 
         if (ShouldFire.ROTATE_ENTITY_EVENT) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(event);
 
                 final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(
@@ -554,7 +554,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final ServerPlayer recreatedPlayer = (ServerPlayer) cir.getReturnValue();
         final ServerWorld originalWorld = (ServerWorld) player.serverLevel();
 
-        final RespawnPlayerEvent.Post event = SpongeEventFactory.createRespawnPlayerEventPost(PhaseTracker.getCauseStackManager().currentCause(),
+        final RespawnPlayerEvent.Post event = SpongeEventFactory.createRespawnPlayerEventPost(PhaseTracker.getInstance().currentCause(),
                 recreatedPlayer.world(), originalWorld, (ServerWorld) dimensionTransition.newLevel(), recreatedPlayer);
         SpongeCommon.post(event);
     }
@@ -594,7 +594,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         final Audience originalAudience = (Audience) this.server;
         final Component originalMessage = SpongeAdventure.asAdventure($$0);
-        final SystemMessageEvent event = SpongeEventFactory.createSystemMessageEvent(Sponge.server().causeStackManager().currentCause(),
+        final SystemMessageEvent event = SpongeEventFactory.createSystemMessageEvent(PhaseTracker.getInstance().currentCause(),
                     originalAudience, Optional.of(originalAudience), originalMessage, originalMessage);
         if (SpongeCommon.post(event)) {
             ci.cancel();

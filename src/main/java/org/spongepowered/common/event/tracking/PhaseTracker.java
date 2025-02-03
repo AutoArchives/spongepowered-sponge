@@ -158,10 +158,6 @@ public final class PhaseTracker implements CauseStackManager {
         return PhaseTracker.SERVER;
     }
 
-    public static CauseStackManager getCauseStackManager() {
-        return PhaseTracker.getInstance();
-    }
-
     public static Block validateBlockForNeighborNotification(final ServerLevel worldServer, final BlockPos pos, @Nullable Block blockIn,
         final BlockPos otherPos, final LevelChunk chunk) {
         if (blockIn == null) {
@@ -262,7 +258,7 @@ public final class PhaseTracker implements CauseStackManager {
      */
     private final Deque<PhaseContext<?>> phaseContextProviders = new ArrayDeque<>();
     final PhaseStack stack = new PhaseStack();
-
+    private final SpongeCauseStackManager api = new SpongeCauseStackManager();
 
     PhaseTracker() {
         for (int i = 0; i < PhaseTracker.INITIAL_POOL_SIZE; i++) {
@@ -611,7 +607,7 @@ public final class PhaseTracker implements CauseStackManager {
         return this.pushCauseFrame0(false);
     }
 
-    public StackFrame pushCauseFrame0(final boolean skipImplicitPhaseCreation) {
+    private StackFrame pushCauseFrame0(final boolean requiresImplicitPhase) {
         this.enforceMainThread();
         // Ensure duplicate causes will be correctly sized.
         final int size = this.cause.size();
@@ -640,7 +636,7 @@ public final class PhaseTracker implements CauseStackManager {
             // were created.
             frame.stackDebug = new Exception();
         }
-        if (!skipImplicitPhaseCreation && this.getPhaseContext().requiresImplicitPhase()) {
+        if (requiresImplicitPhase) {
             frame.implicitContext = PluginPhase.State.PLUGIN.createPhaseContext(this).buildAndSwitch();
         }
         return frame;
@@ -828,7 +824,7 @@ public final class PhaseTracker implements CauseStackManager {
         // except for this method call-point.
         for (final Iterator<PhaseContext<@NonNull ?>> iterator = this.phaseContextProviders.descendingIterator(); iterator.hasNext(); ) {
             final PhaseContext<@NonNull ?> context = iterator.next();
-            final StackFrame frame = this.pushCauseFrame0(true); // these should auto close
+            final StackFrame frame = this.pushCauseFrame(); // these should auto close
             context.getFrameModifier().accept(frame); // The frame will be auto closed by the phase context
         }
         // Clear the list since everything is now loaded.
@@ -866,5 +862,70 @@ public final class PhaseTracker implements CauseStackManager {
             this.pendingProviders.compareAndSet(true, false);
         }
 
+    }
+
+    public CauseStackManager apiAccess() {
+        return this.api;
+    }
+
+    /**
+     * We insert implicit phases for plugin created frames.
+     */
+    private final class SpongeCauseStackManager implements CauseStackManager {
+
+        @Override
+        public Cause currentCause() {
+            return PhaseTracker.this.currentCause();
+        }
+
+        @Override
+        public EventContext currentContext() {
+            return PhaseTracker.this.currentContext();
+        }
+
+        @Override
+        public CauseStackManager pushCause(final Object obj) {
+            return PhaseTracker.this.pushCause(obj);
+        }
+
+        @Override
+        public Object popCause() {
+            return PhaseTracker.this.popCause();
+        }
+
+        @Override
+        public void popCauses(final int n) {
+            PhaseTracker.this.popCauses(n);
+        }
+
+        @Override
+        public Object peekCause() {
+            return PhaseTracker.this.peekCause();
+        }
+
+        @Override
+        public StackFrame pushCauseFrame() {
+            return PhaseTracker.this.pushCauseFrame0(true);
+        }
+
+        @Override
+        public void popCauseFrame(final StackFrame handle) {
+            PhaseTracker.this.popCauseFrame(handle);
+        }
+
+        @Override
+        public <T> CauseStackManager addContext(final EventContextKey<T> key, final T value) {
+            return PhaseTracker.this.addContext(key, value);
+        }
+
+        @Override
+        public <T> Optional<T> context(final EventContextKey<T> key) {
+            return PhaseTracker.this.context(key);
+        }
+
+        @Override
+        public <T> Optional<T> removeContext(final EventContextKey<T> key) {
+            return PhaseTracker.this.removeContext(key);
+        }
     }
 }
