@@ -366,7 +366,7 @@ public abstract class SpongeEventManager implements EventManager {
     protected final boolean post(final Event event, final List<RegisteredListener<?>> handlers) {
         for (final RegisteredListener handler : handlers) {
             try (
-                    final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
+                    final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame();
                     final @Nullable PhaseContext<@NonNull ?> context = SpongeEventManager.createListenerContext(handler.getPlugin())
             ) {
                 frame.pushCause(handler.getPlugin());

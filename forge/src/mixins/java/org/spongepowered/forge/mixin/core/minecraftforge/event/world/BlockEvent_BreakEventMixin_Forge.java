@@ -86,7 +86,7 @@ public abstract class BlockEvent_BreakEventMixin_Forge extends BlockEventMixin_F
                             .build(),
                     Operations.BREAK.get()
             );
-            return SpongeEventFactory.createChangeBlockEventAll(PhaseTracker.getCauseStackManager().currentCause(),
+            return SpongeEventFactory.createChangeBlockEventAll(PhaseTracker.getInstance().currentCause(),
                     Collections.singletonList(transaction), serverWorld);
         }
         return null;

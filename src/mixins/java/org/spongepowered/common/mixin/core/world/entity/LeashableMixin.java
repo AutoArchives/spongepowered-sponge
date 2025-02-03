@@ -46,7 +46,7 @@ public interface LeashableMixin {
     @Inject(method = "setLeashedTo(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity;Z)V", at = @At("HEAD"), cancellable = true)
     private static <E extends net.minecraft.world.entity.Entity & Leashable> void impl$onSetLeashedTo(final E $$0, final net.minecraft.world.entity.Entity $$1, final boolean $$2, final CallbackInfo ci) {
         if (!$$0.level().isClientSide) {
-            final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+            final Cause currentCause = PhaseTracker.getInstance().currentCause();
             if (Sponge.eventManager().post(SpongeEventFactory.createLeashEntityEvent(currentCause, (Entity) $$0))) {
                 ci.cancel();
             }
@@ -66,7 +66,7 @@ public interface LeashableMixin {
 
         final net.minecraft.world.entity.Entity holder = leashData.leashHolder;
 
-        final CauseStackManager csm = PhaseTracker.getCauseStackManager();
+        final CauseStackManager csm = PhaseTracker.getInstance();
         csm.pushCause(Objects.requireNonNullElse(holder, entity));
         final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(csm.currentCause(), (Entity) entity);
         SpongeCommon.post(event);

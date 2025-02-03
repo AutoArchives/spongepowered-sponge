@@ -85,7 +85,7 @@ public abstract class ServerPlayerMixin_Tracker extends PlayerMixin_Tracker {
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
 
             item = SpongeCommonEventFactory.throwDropItemAndConstructEvent(
                 (ServerPlayer) (Object) this, posX1, posY1, posZ1, snapshot, original, frame);

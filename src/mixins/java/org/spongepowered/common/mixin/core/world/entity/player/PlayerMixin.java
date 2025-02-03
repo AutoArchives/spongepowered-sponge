@@ -180,7 +180,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     private boolean impl$postSleepingEvent(final net.minecraft.world.entity.player.Player self) {
         if (self.isSleeping()) {
             if (!((LevelBridge) this.shadow$level()).bridge$isFake()) {
-                final CauseStackManager csm = PhaseTracker.getCauseStackManager();
+                final CauseStackManager csm = PhaseTracker.getInstance();
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.shadow$getSleepingPos().get();
                 final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
@@ -278,7 +278,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
             // Note that this can potentially cause phase contexts to auto populate frames
             // we shouldn't rely so much on them, but sometimes the extra information is provided
             // through this method.
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 // Go ahead and add the item stack in use, just in the event the current phase contexts don't provide
                 // that information.
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
