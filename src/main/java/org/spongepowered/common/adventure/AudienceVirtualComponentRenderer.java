@@ -22,29 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.chat;
+package org.spongepowered.common.adventure;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.util.locale.Locales;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.common.adventure.NativeComponentRenderer;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.VirtualComponentRenderer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Locale;
+import java.util.function.Function;
 
-@Mixin(ComponentSerialization.class)
-public abstract class ComponentSerializationMixin {
+public final class AudienceVirtualComponentRenderer implements VirtualComponentRenderer<Audience> {
 
-    @ModifyVariable(method = "lambda$createCodec$6", at = @At(value = "HEAD"), argsOnly = true)
-    private static Component impl$localizeComponent(final Component input) {
-        final Locale locale = SpongeAdventure.ENCODING_LOCALE.get();
-        final ServerPlayer player = SpongeAdventure.ENCODING_PLAYER.get();
-        return NativeComponentRenderer.apply(input, locale == null ? Locales.DEFAULT : locale, player);
+    private final Function<Audience, ComponentLike> apply;
+
+    AudienceVirtualComponentRenderer(final Function<Audience, ComponentLike> apply) {
+        this.apply = apply;
     }
 
-    //TODO: Do this for ItemStacks too
+    @Override
+    public @NonNull ComponentLike apply(final @NonNull Audience context) {
+        return this.apply.apply(context);
+    }
 }

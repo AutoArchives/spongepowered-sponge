@@ -22,29 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.chat;
+package org.spongepowered.common.adventure;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.util.locale.Locales;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.common.adventure.NativeComponentRenderer;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import net.kyori.adventure.audience.Audience;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Locale;
 
-@Mixin(ComponentSerialization.class)
-public abstract class ComponentSerializationMixin {
+public final class SpongeRendererContext {
 
-    @ModifyVariable(method = "lambda$createCodec$6", at = @At(value = "HEAD"), argsOnly = true)
-    private static Component impl$localizeComponent(final Component input) {
-        final Locale locale = SpongeAdventure.ENCODING_LOCALE.get();
-        final ServerPlayer player = SpongeAdventure.ENCODING_PLAYER.get();
-        return NativeComponentRenderer.apply(input, locale == null ? Locales.DEFAULT : locale, player);
+    private final Locale locale;
+    private final @Nullable Audience audience;
+
+    private boolean containsVirtualComponents;
+
+    public SpongeRendererContext(final Locale locale, final @Nullable Audience audience) {
+        this.locale = locale;
+        this.audience = audience;
     }
 
-    //TODO: Do this for ItemStacks too
+    public Locale locale() {
+        return this.locale;
+    }
+
+    public @Nullable Audience audience() {
+        return this.audience;
+    }
+
+    public boolean containsVirtualComponents() {
+        return this.containsVirtualComponents;
+    }
+
+    public void markContainsVirtualComponents() {
+        this.containsVirtualComponents = true;
+    }
 }
