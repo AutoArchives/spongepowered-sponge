@@ -53,6 +53,7 @@
     "server.rcon.thread.RconClientAccessor",
     "sounds.SoundEventAccessor",
     "stats.StatsCounterAccessor",
+    "tags.TagEntryAccessor",
     "util.datafix.schemas.V100Accessor",
     "util.thread.ProcessorMailboxAccessor",
     "world.CompoundContainerAccessor",
