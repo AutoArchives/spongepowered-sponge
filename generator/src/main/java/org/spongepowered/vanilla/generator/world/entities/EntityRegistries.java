@@ -238,6 +238,15 @@ public class EntityRegistries {
                 Registries.COW_VARIANT,
                 $ -> true,
                 RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
+                "data.type",
+                "ChickenVariants",
+                "CHICKEN_VARIANT",
+                context.relativeClass("data.type", "ChickenVariant"),
+                Registries.CHICKEN_VARIANT,
+                $-> true,
+                RegistryScope.SERVER
             )
         );
     }
