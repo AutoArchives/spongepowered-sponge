@@ -22,28 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancements;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
-import net.minecraft.advancements.AdvancementNode;
-import net.minecraft.advancements.TreeNodePosition;
-import org.spongepowered.api.advancement.AdvancementTree;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.advancement.AdvancementTreeEvent;
+import org.spongepowered.api.entity.living.animal.cow.Cow;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
-@Mixin(TreeNodePosition.class)
-public abstract class TreeNodePositionMixin {
+@Mixin(net.minecraft.world.entity.animal.AbstractCow.class)
+public abstract class AbstractCowMixin_API extends AnimalMixin_API implements Cow {
 
-    @Inject(method = "run", at = @At("RETURN"))
-    private static void impl$onLayout(AdvancementNode node, CallbackInfo ci) {
-        final Cause cause = PhaseTracker.getInstance().currentCause();
-        final AdvancementTreeEvent.GenerateLayout event = SpongeEventFactory.createAdvancementTreeEventGenerateLayout(cause, (AdvancementTree) node);
-        SpongeCommon.post(event);
-    }
 }

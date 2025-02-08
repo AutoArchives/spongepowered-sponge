@@ -148,7 +148,7 @@
     "minecraft.world.entity.animal.CatVariantMixin_API",
     "minecraft.world.entity.animal.ChickenMixin_API",
     "minecraft.world.entity.animal.CodMixin_API",
-    "minecraft.world.entity.animal.CowMixin_API",
+    "minecraft.world.entity.animal.AbstractCowMixin_API",
     "minecraft.world.entity.animal.DolphinMixin_API",
     "minecraft.world.entity.animal.FlyingAnimalMixin_API",
     "minecraft.world.entity.animal.Fox_VariantMixin_API",

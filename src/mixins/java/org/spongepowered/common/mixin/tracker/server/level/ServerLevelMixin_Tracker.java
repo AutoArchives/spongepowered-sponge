@@ -646,7 +646,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             return null;
         }
         final var instance = PhaseTracker.getWorldInstance(this);
-        if (instance.getSidedThread() != PhaseTracker.getServerInstanceExplicitly().getSidedThread() && instance != PhaseTracker.getServerInstanceExplicitly()) {
+        if (!instance.onSidedThread()) {
             throw new UnsupportedOperationException("Cannot perform a tracked Block Change on a ServerWorld while not on the main thread!");
         }
         return instance;
@@ -689,7 +689,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      * <ul>
      *     <li>This world instance is managed and verified by Sponge</li>
      *     <li>This world must {@link LevelBridge#bridge$isFake()} return {@code false}</li>
-     *     <li>The {@link PhaseTracker#getServerInstanceExplicitly}'s {@link PhaseTracker#getSidedThread()} must be {@code ==} {@link Thread#currentThread()}</li
+     *     <li>The {@link PhaseTracker#getWorldInstance}'s {@link PhaseTracker#onSidedThread()} ()} must be {@code true}</li
      *     <li>The current {@link IPhaseState} must be allowing to record transactions with an applicable {@link org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier}</li>
      * </ul>
      * After which, we may be able to appropriately associate the {@link net.minecraft.world.level.block.entity.BlockEntity}

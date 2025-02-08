@@ -114,6 +114,8 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
         try (final CauseStackManager.StackFrame frame = phaseTracker.pushCauseFrame();
              final PhaseContext<?> context = PlayerPhase.State.PLAYER_INTERACT.createPhaseContext(phaseTracker)
+                 .creator(playerIn.getUUID())
+                 .notifier(playerIn.getUUID())
                  .containerLocation(ServerLocation.of((ServerWorld) worldIn, VecHelper.toVector3i(blockpos)))) {
             context.buildAndSwitch();
             frame.pushCause(event);

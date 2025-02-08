@@ -22,11 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.ticks;
+package org.spongepowered.common.adventure;
 
-public interface ScheduledTickBridge {
+import net.kyori.adventure.audience.Audience;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-    boolean bridge$isPartOfWorldGeneration();
+import java.util.Locale;
 
-    void bridge$setIsPartOfWorldGeneration(boolean isLoading);
+public final class SpongeRendererContext {
+
+    private final Locale locale;
+    private final @Nullable Audience audience;
+
+    private boolean containsVirtualComponents;
+
+    public SpongeRendererContext(final Locale locale, final @Nullable Audience audience) {
+        this.locale = locale;
+        this.audience = audience;
+    }
+
+    public Locale locale() {
+        return this.locale;
+    }
+
+    public @Nullable Audience audience() {
+        return this.audience;
+    }
+
+    public boolean containsVirtualComponents() {
+        return this.containsVirtualComponents;
+    }
+
+    public void markContainsVirtualComponents() {
+        this.containsVirtualComponents = true;
+    }
 }

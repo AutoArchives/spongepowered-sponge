@@ -22,24 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.world.ticks;
+package org.spongepowered.common.accessor.world.ticks;
 
+import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.ticks.ScheduledTickBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ScheduledTick.class)
-public abstract class ScheduledTickMixin_Tracker implements ScheduledTickBridge {
+import java.util.Set;
 
-    private boolean tracker$isWorldGen = false;
+@Mixin(LevelChunkTicks.class)
+public interface LevelChunkTicksAccessor {
 
-    @Override
-    public boolean bridge$isPartOfWorldGeneration() {
-        return this.tracker$isWorldGen;
-    }
-
-    @Override
-    public void bridge$setIsPartOfWorldGeneration(final boolean isLoading) {
-        this.tracker$isWorldGen = isLoading;
-    }
+    @Accessor("ticksPerPosition") Set<ScheduledTick<?>> accessor$ticksPerPosition();
 }

@@ -88,7 +88,7 @@ public abstract class BlockEvent_BreakEventMixin_Neo extends BlockEventMixin_Neo
                             .build(),
                     Operations.BREAK.get()
             );
-            return SpongeEventFactory.createChangeBlockEventAll(PhaseTracker.getCauseStackManager().currentCause(),
+            return SpongeEventFactory.createChangeBlockEventAll(PhaseTracker.getInstance().currentCause(),
                     Collections.singletonList(transaction), serverWorld);
         }
         return null;

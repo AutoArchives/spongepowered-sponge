@@ -70,6 +70,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
@@ -87,6 +88,7 @@ import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -197,7 +199,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Inject(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveAllChunks(ZZZ)Z"))
     private void impl$callUnloadWorldEvents(final CallbackInfo ci) {
         for(final ServerLevel level : this.shadow$getAllLevels()) {
-            final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) level);
+            final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getInstance().currentCause(), (ServerWorld) level);
             SpongeCommon.post(unloadWorldEvent);
         }
     }
@@ -225,7 +227,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      */
     @Inject(method = "sendSystemMessage", at = @At("HEAD"), cancellable = true)
     private void impl$useTranslatingLogger(final Component input, final CallbackInfo ci) {
-        MinecraftServerMixin.LOGGER.info(input.getString());
+        MinecraftServerMixin.LOGGER.info(NativeComponentRenderer.apply(input, Locale.getDefault(), Sponge.game().systemSubject()).getString());
         ci.cancel();
     }
 

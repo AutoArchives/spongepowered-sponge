@@ -94,7 +94,7 @@ public final class SpongeMapStorage implements MapStorage {
 
     @Override
     public Optional<MapInfo> createNewMapInfo() {
-        return SpongeCommonEventFactory.fireCreateMapEvent(PhaseTracker.getCauseStackManager().currentCause());
+        return SpongeCommonEventFactory.fireCreateMapEvent(PhaseTracker.getInstance().currentCause());
     }
 
     /**

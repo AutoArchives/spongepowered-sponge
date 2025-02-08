@@ -47,6 +47,7 @@ import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public final class LivingData {
 
@@ -192,7 +193,7 @@ public final class LivingData {
                     .create(Keys.MAX_HEALTH)
                         .get(h -> (double) h.getMaxHealth())
                         .set((h, v) -> h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(v))
-                    .create(Keys.POTION_EFFECTS)
+                    .createCollection(Keys.POTION_EFFECTS)
                         .get(h -> {
                             final Collection<MobEffectInstance> effects = h.getActiveEffects();
                             return PotionEffectUtil.copyAsPotionEffects(effects);
@@ -203,6 +204,17 @@ public final class LivingData {
                             for (final PotionEffect effect : v) {
                                 h.addEffect(PotionEffectUtil.copyAsEffectInstance(effect));
                             }
+                        })
+                        .offerSingleAnd((h, v) -> {
+                            h.forceAddEffect(PotionEffectUtil.copyAsEffectInstance(v), null);
+                            return true;
+                        })
+                        .removeSingleAnd((h, v) -> {
+                            if (Objects.equals(h.getEffect(((MobEffectInstance) v).getEffect()), v)) {
+                                h.removeEffect(((MobEffectInstance) v).getEffect());
+                                return true;
+                            }
+                            return false;
                         })
                     .create(Keys.SCALE)
                         .get(h -> (double) h.getScale())

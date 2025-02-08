@@ -22,12 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
+package org.spongepowered.common.adventure;
 
-import org.spongepowered.api.entity.living.animal.cow.Cow;
-import org.spongepowered.asm.mixin.Mixin;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.VirtualComponentRenderer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-@Mixin(net.minecraft.world.entity.animal.Cow.class)
-public abstract class CowMixin_API extends AnimalMixin_API implements Cow {
+import java.util.function.Function;
 
+public final class AudienceVirtualComponentRenderer implements VirtualComponentRenderer<Audience> {
+
+    private final Function<Audience, ComponentLike> apply;
+
+    AudienceVirtualComponentRenderer(final Function<Audience, ComponentLike> apply) {
+        this.apply = apply;
+    }
+
+    @Override
+    public @NonNull ComponentLike apply(final @NonNull Audience context) {
+        return this.apply.apply(context);
+    }
 }

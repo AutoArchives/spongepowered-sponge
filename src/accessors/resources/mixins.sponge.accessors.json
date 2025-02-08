@@ -217,7 +217,8 @@
     "world.level.storage.PlayerDataStorageAccessor",
     "world.phys.AABBAccessor",
     "world.scores.PlayerTeamAccessor",
-    "world.scores.ScoreboardAccessor"
+    "world.scores.ScoreboardAccessor",
+    "world.ticks.LevelChunkTicksAccessor"
   ],
   "server": [
     "server.dedicated.DedicatedServerAccessor"

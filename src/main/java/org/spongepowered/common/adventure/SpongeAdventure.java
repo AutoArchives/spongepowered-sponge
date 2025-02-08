@@ -57,6 +57,8 @@ import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.renderer.ComponentRenderer;
+import net.kyori.adventure.text.renderer.TranslatableComponentRenderer;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.TriState;
@@ -96,6 +98,7 @@ import org.spongepowered.api.adventure.ResolveOperation;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeCommon;
@@ -109,6 +112,7 @@ import org.spongepowered.common.launch.Launch;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -122,6 +126,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public final class SpongeAdventure {
 
@@ -144,6 +149,36 @@ public final class SpongeAdventure {
         }
     };
 
+    public static final ComponentRenderer<SpongeRendererContext> SPONGE_COMPONENT_RENDERER = new TranslatableComponentRenderer<>() {
+
+        @Override
+        protected @NonNull Component renderVirtual(final @NonNull VirtualComponent component, final @NonNull SpongeRendererContext context) {
+            context.markContainsVirtualComponents();
+            if (component.renderer() instanceof final AudienceVirtualComponentRenderer audienceVirtualComponentRenderer
+                && context.audience() != null) {
+                return audienceVirtualComponentRenderer.apply(context.audience()).asComponent();
+            }
+            return super.renderVirtual(component, context);
+        }
+
+        @Override
+        protected @Nullable MessageFormat translate(final @NonNull String key, final @NonNull SpongeRendererContext context) {
+            return GlobalTranslator.translator().translate(key, context.locale());
+        }
+
+        @Override
+        protected @NonNull Component renderTranslatable(final @NonNull TranslatableComponent component, final @NonNull SpongeRendererContext context) {
+            final TriState anyTranslations = GlobalTranslator.translator().hasAnyTranslations();
+            if (anyTranslations == TriState.TRUE || anyTranslations == TriState.NOT_SET) {
+                final @Nullable Component translated = GlobalTranslator.translator().translate(component, context.locale());
+                return translated != null
+                    ? translated
+                    : super.renderTranslatable(component, context);
+            }
+            return component;
+        }
+    };
+
     public static final ConfigurateComponentSerializer CONFIGURATE = ConfigurateComponentSerializer.builder()
         .scalarSerializer(GsonComponentSerializer.gson())
         .build();
@@ -151,6 +186,7 @@ public final class SpongeAdventure {
     private static final Set<ServerBossEvent> ACTIVE_BOSS_BARS = ConcurrentHashMap.newKeySet();
 
     public static final ThreadLocal<Locale> ENCODING_LOCALE = new ThreadLocal<>();
+    public static final ThreadLocal<ServerPlayer> ENCODING_PLAYER = new ThreadLocal<>();
 
     // --------------
     // ---- Core ----
@@ -210,7 +246,7 @@ public final class SpongeAdventure {
     }
 
     public static net.minecraft.network.chat.Component asVanilla(final Component component) {
-        return new AdventureTextComponent(component, GlobalTranslator.renderer());
+        return new AdventureTextComponent(component, SpongeAdventure.SPONGE_COMPONENT_RENDERER);
     }
 
     public static Optional<net.minecraft.network.chat.Component> asVanillaOpt(final @Nullable Component component) {
@@ -852,6 +888,11 @@ public final class SpongeAdventure {
         @Override
         public ComponentFlattener flattener() {
             return ComponentFlattenerProvider.INSTANCE;
+        }
+
+        @Override
+        public VirtualComponent receiverVirtualComponent(final @NonNull Function<Audience, ComponentLike> apply) {
+            return Component.virtual(Audience.class, new AudienceVirtualComponentRenderer(apply));
         }
     }
 

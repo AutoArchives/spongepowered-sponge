@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.util.Set;
 
 @Mixin(MushroomCow.class)
-public abstract class MushroomCowMixin_API extends CowMixin_API implements Mooshroom {
+public abstract class MushroomCowMixin_API extends AbstractCowMixin_API implements Mooshroom {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
