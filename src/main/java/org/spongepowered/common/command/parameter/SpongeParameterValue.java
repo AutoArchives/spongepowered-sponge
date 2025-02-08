@@ -134,7 +134,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
         // If we get this far, we failed to parse, return the exceptions
         if (currentExceptions == null) {
-            final var component = Component.translatable("command.exception").args(Component.text("Could not parse element"));
+            final var component = Component.translatable("command.exception").arguments(Component.text("Could not parse element"));
             throw new ArgumentParseException(component, args.input(), args.cursor());
         } else if (currentExceptions.size() == 1) {
             throw currentExceptions.get(0);

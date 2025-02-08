@@ -24,27 +24,38 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.CombatEntry;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(LivingEntity.class)
@@ -62,6 +73,29 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
     @Shadow protected boolean dead;
 
     // @formatter:on
+
+    /**
+     * @author gabizou - June 4th, 2016
+     * @author i509VCB - February 17th, 2020 - 1.14.4
+     * @author gabizou - December 31st, 2021 - 1.16.5
+     * @author gabizou - February 8th, 2025 - 25w06a
+     *
+     * @reason We wrap the original call to allow for throwing events for the server player instance
+     */
+    @WrapOperation(
+        method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/LivingEntity;createItemStackToDrop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"
+        )
+    )
+    @Nullable
+    protected ItemEntity tracker$throwItemDrop(
+        final LivingEntity instance, final ItemStack droppedItem, final boolean dropAround,
+        final boolean traceItem, final Operation<ItemEntity> wrapped
+    ) {
+        return wrapped.call(instance, droppedItem, dropAround, traceItem);
+    }
 
     @Override
     protected void tracker$populateDeathContextIfNeeded(

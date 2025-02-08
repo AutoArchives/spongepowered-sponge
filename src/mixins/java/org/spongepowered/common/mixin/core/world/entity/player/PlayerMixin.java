@@ -102,7 +102,6 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     @Shadow public abstract boolean shadow$isSpectator();
     @Shadow protected abstract int shadow$getPermissionLevel();
     @Shadow public abstract int shadow$getXpNeededForNextLevel();
-    @Shadow @Nullable public abstract ItemEntity shadow$drop(final ItemStack droppedItem, final boolean dropAround, final boolean traceItem);
     @Shadow public abstract FoodData shadow$getFoodData();
     @Shadow public abstract Scoreboard shadow$getScoreboard();
     @Shadow public abstract boolean shadow$isCreative();

@@ -25,15 +25,14 @@
 package org.spongepowered.common.mixin.tracker.server.level;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -47,33 +46,20 @@ import java.util.List;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin_Tracker extends PlayerMixin_Tracker {
 
-    /**
-     * @author gabizou - June 4th, 2016
-     * @author i509VCB - February 17th, 2020 - 1.14.4
-     * @author gabizou - December 31st, 2021 - 1.16.5
-     * @reason We inject a construct event for the item drop and conveniently
-     * can redirect the super call.
-     */
-    @WrapOperation(
-        method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerPlayer;createItemStackToDrop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"
-        )
-    )
-    @Nullable
-    private ItemEntity tracker$throwItemDrop(
-        final ServerPlayer instance, final ItemStack droppedItem, final boolean dropAround,
+
+    @Override
+    protected @Nullable ItemEntity tracker$throwItemDrop(
+        final LivingEntity instance, final ItemStack droppedItem, final boolean dropAround,
         final boolean traceItem, final Operation<ItemEntity> wrapped
     ) {
         if (droppedItem.isEmpty()) {
             return null;
         }
         if (((PlatformEntityBridge) this).bridge$isFakePlayer()) {
-            return super.shadow$drop(droppedItem, dropAround, traceItem);
+            return wrapped.call(instance, droppedItem, dropAround, traceItem);
         }
         if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
-            return super.shadow$drop(droppedItem, dropAround, traceItem);
+            return wrapped.call(instance, droppedItem, dropAround, traceItem);
         }
 
         final double posX1 = this.shadow$getX();

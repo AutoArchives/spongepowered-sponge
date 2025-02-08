@@ -95,7 +95,6 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     @Shadow public ServerGamePacketListenerImpl connection;
     @Nullable private EffectTransactor inventory$effectTransactor = null;
     @Nullable private Object inventory$menuProvider;
-    // @formatter:on
 
     @Shadow public abstract ServerLevel shadow$serverLevel();
     // @formatter:on
@@ -108,17 +107,14 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     // -- Overrides from PlayerMixin_Inventory
 
     @Override
-    protected void impl$beforeSetItemSlot(final EquipmentSlot param0, final ItemStack param1, final CallbackInfo ci) {
+    protected void inventory$wrapSetSlotWithTransaction(EquipmentSlot slot, ItemStack item, Operation<Void> original) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$serverLevel()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final PlayerInventoryTransaction.EventCreator eventCreator = context.getState() instanceof SwapHandItemsState ?
-                PlayerInventoryTransaction.EventCreator.SWAP_HAND : PlayerInventoryTransaction.EventCreator.STANDARD;
+            PlayerInventoryTransaction.EventCreator.SWAP_HAND : PlayerInventoryTransaction.EventCreator.STANDARD;
         this.inventory$effectTransactor = transactor.logPlayerInventoryChangeWithEffect((Player) (Object) this, eventCreator);
-    }
-
-    @Override
-    protected void impl$afterSetItemSlot(final EquipmentSlot param0, final ItemStack param1, final CallbackInfo ci) {
         try (final EffectTransactor ignored = this.inventory$effectTransactor) {
+            original.call(slot, item);
             this.inventoryMenu.broadcastChanges(); // for capture
         } finally {
             this.inventory$effectTransactor = null;

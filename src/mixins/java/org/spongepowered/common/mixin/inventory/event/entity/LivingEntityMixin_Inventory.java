@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -69,6 +71,12 @@ public abstract class LivingEntityMixin_Inventory extends Entity {
 
     protected LivingEntityMixin_Inventory(final EntityType<?> param0, final Level param1) {
         super(param0, param1);
+    }
+
+
+    @WrapMethod(method = "setItemSlot")
+    protected void inventory$wrapSetSlotWithTransaction(EquipmentSlot slot, ItemStack item, Operation<Void> original) {
+        original.call(slot, item);
     }
 
     @Inject(method = "handleHandSwap", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,

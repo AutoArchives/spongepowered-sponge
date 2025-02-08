@@ -24,15 +24,10 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity.player;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -41,13 +36,6 @@ import org.spongepowered.common.mixin.tracker.world.entity.LivingEntityMixin_Tra
 
 @Mixin(Player.class)
 public abstract class PlayerMixin_Tracker extends LivingEntityMixin_Tracker {
-
-    //@formatter:off
-    @Shadow public abstract Component shadow$getDisplayName();
-    @Shadow @Nullable public ItemEntity shadow$drop(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
-        return null; // SHADOWED
-    }
-    //@formatter:on
 
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     public void impl$callDestructEntityDeath(final DamageSource cause, final CallbackInfo ci) {

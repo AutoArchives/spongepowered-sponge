@@ -69,20 +69,20 @@ public class HeldHandSlotLens extends AbstractLens implements SlotLens {
     @Override
     public ItemStack getStack(Fabric fabric) {
         net.minecraft.world.entity.player.Inventory inv = this.getInventoryPlayer(fabric);
-        return inv.getSelected();
+        return inv.getSelectedItem();
     }
 
     @Override
     public boolean setStack(Fabric fabric, ItemStack stack) {
         net.minecraft.world.entity.player.Inventory inv = this.getInventoryPlayer(fabric);
-        inv.items.set(inv.selected, stack);
+        inv.setSelectedItem(stack);
         return true;
     }
 
     @Override
     public int getOrdinal(Fabric fabric) {
         net.minecraft.world.entity.player.Inventory inv = this.getInventoryPlayer(fabric);
-        return inv.selected;
+        return inv.getSelectedSlot();
     }
 
     @Override

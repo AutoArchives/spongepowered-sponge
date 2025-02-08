@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -147,7 +149,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow @Final private MinecraftServer server;
 
     @Shadow @Nullable private EndDragonFight dragonFight;
-    @Shadow @Final private List<ServerPlayer> players;
+    @Shadow @Final List<ServerPlayer> players;
 
     // @formatter:on
 
@@ -386,9 +388,9 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
                 levelData.setWorldBorder(this.getWorldBorder().createSettings());
 
-                levelData.setCustomBossEvents(((ServerLevelBridge) this).bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
+                levelData.setCustomBossEvents(this.bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
 
-                ((ServerLevelBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess()
+                this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess()
                     , (PrimaryLevelData) this.shadow$getLevelData(), this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList()
                         .getSingleplayerData() : null);
 
@@ -453,10 +455,12 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     }
 
-    @Redirect(method = "tickChunk",
+    @WrapOperation(method = "tickThunder",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;isRainingAt(Lnet/minecraft/core/BlockPos;)Z"))
-    private boolean impl$onBeforeThunder(final ServerLevel serverLevel, final BlockPos param0) {
-        final boolean rainingAt = serverLevel.isRainingAt(param0);
+    private boolean impl$onBeforeThunder(
+        final ServerLevel serverLevel, final BlockPos param0, final Operation<Boolean> wrapped
+    ) {
+        final boolean rainingAt = wrapped.call(serverLevel, param0);
         if (rainingAt) {
             final LightningEvent.Pre strike = SpongeEventFactory.createLightningEventPre(PhaseTracker.getInstance().currentCause());
             if (Sponge.eventManager().post(strike)) {

@@ -54,7 +54,7 @@ public class SetCarriedItemTransaction extends InventoryBasedTransaction {
         super((Inventory) player.getInventory());
         this.player = (ServerPlayer) player;
         final PlayerInventory inventory = (PlayerInventory) this.player.getInventory();
-        this.prevSlotId = this.player.getInventory().selected;
+        this.prevSlotId = this.player.getInventory().getSelectedSlot();
         this.prevSlot = inventory.hotbar().slot(this.prevSlotId).orElse(null);
         this.newSlot = inventory.hotbar().slot(newSlot).orElse(null);
     }
@@ -77,7 +77,7 @@ public class SetCarriedItemTransaction extends InventoryBasedTransaction {
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
         this.player.connection.send(new ClientboundSetHeldSlotPacket(this.prevSlotId));
-        this.player.getInventory().selected = this.prevSlotId;
+        this.player.getInventory().setSelectedSlot(this.prevSlotId);
         this.handleEventResults(this.player, event);
     }
 

@@ -170,13 +170,14 @@ public final class PacketPhaseUtil {
         player.containerMenu.suppressRemoteUpdates();
         int slotId = 0;
         if (hand == InteractionHand.OFF_HAND) {
-            player.getInventory().offhand.set(0, itemStack);
-            slotId = (player.getInventory().items.size() + Inventory.getSelectionSize());
+            player.getInventory().setItem(Inventory.SLOT_OFFHAND, itemStack);
+            slotId = (Inventory.INVENTORY_SIZE + Inventory.getSelectionSize());
         } else {
-            player.getInventory().items.set(player.getInventory().selected, itemStack);
+            final var selected = player.getInventory().getSelectedSlot();
+            player.getInventory().setSelectedItem(itemStack);
             // TODO check if window id -2 and slotid = player.getInventory().currentItem works instead of this:
             for (Slot containerSlot : player.containerMenu.slots) {
-                if (containerSlot.container == player.getInventory() && ((SlotAccessor) containerSlot).accessor$slot() == player.getInventory().selected) {
+                if (containerSlot.container == player.getInventory() && ((SlotAccessor) containerSlot).accessor$slot() == selected) {
                     slotId = containerSlot.index;
                     break;
                 }

@@ -24,69 +24,41 @@
  */
 package org.spongepowered.common.mixin.inventory.impl.world.entity.player;
 
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-
-import java.util.List;
 
 @Mixin(Inventory.class)
 public abstract class InventoryMixin_Bridge_Inventory implements PlayerInventoryBridge, InventoryAdapter {
 
-    @Shadow public int selected;
+    @Shadow private int selected;
     @Shadow @Final public Player player;
-    @Shadow @Final public NonNullList<ItemStack> items;
-    @Shadow @Final public NonNullList<ItemStack> armor;
-    @Shadow @Final public NonNullList<ItemStack> offhand;
-    @Shadow @Final private List<NonNullList<ItemStack>> compartments;
-
     @Shadow private int timesChanged;
-
-    private int impl$lastTimesChanged = this.timesChanged;
-
-    private int impl$offhandIndex;
-
-    @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
-    private void onConstructed(final Player playerIn, final CallbackInfo ci) {
-        // Find offhand slot
-        for (final NonNullList<ItemStack> inventory : this.compartments) {
-            if (inventory == this.offhand) {
-                break;
-            }
-            this.impl$offhandIndex += inventory.size();
-        }
-    }
+    @Unique private int impl$lastTimesChanged = this.timesChanged;
 
     @Override
     public int bridge$getHeldItemIndex(final InteractionHand hand) {
-        switch (hand) {
-            case MAIN_HAND:
-                return this.selected;
-            case OFF_HAND:
-                return this.impl$offhandIndex;
-            default:
-                throw new AssertionError(hand);
-        }
+        return switch (hand) {
+            case MAIN_HAND -> this.selected;
+            case OFF_HAND -> Inventory.SLOT_OFFHAND;
+            default -> throw new AssertionError(hand);
+        };
     }
 
     @Override
     public void bridge$setSelectedItem(int itemIndex, final boolean notify) {
         itemIndex = itemIndex % 9;
-        if (notify && this.player instanceof ServerPlayer) {
+        if (notify && this.player instanceof ServerPlayer sp) {
             final var packet = new ClientboundSetHeldSlotPacket(itemIndex);
-            ((ServerPlayer)this.player).connection.send(packet);
+            sp.connection.send(packet);
         }
         this.selected = itemIndex;
     }

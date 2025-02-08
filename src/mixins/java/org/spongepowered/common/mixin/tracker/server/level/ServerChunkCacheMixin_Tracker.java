@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.server.level;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.MobCategory;
@@ -32,7 +34,6 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -42,28 +43,27 @@ import java.util.List;
 @Mixin(ServerChunkCache.class)
 public abstract class ServerChunkCacheMixin_Tracker {
 
-    @Redirect(
-        method = "tickChunks(Lnet/minecraft/util/profiling/ProfilerFiller;JLjava/util/List;)V",
+    @WrapOperation(
+        method = "tickSpawningChunk",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/NaturalSpawner;spawnForChunk(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/LevelChunk;Lnet/minecraft/world/level/NaturalSpawner$SpawnState;Ljava/util/List;)V"
         )
     )
     private void tracker$wrapEntitySpawner(
-        final ServerLevel serverWorld,
-        final LevelChunk targetChunk,
-        final NaturalSpawner.SpawnState spawnState,
-        final List<MobCategory> mobCategories
+        final ServerLevel serverWorld, final LevelChunk targetChunk, final NaturalSpawner.SpawnState spawnState,
+        final List<MobCategory> mobCategories, final Operation<Void> original
     ) {
-        try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.getWorldInstance(serverWorld))
+        try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING
+            .createPhaseContext(PhaseTracker.getWorldInstance(serverWorld))
             .world(serverWorld)) {
             context.buildAndSwitch();
-            NaturalSpawner.spawnForChunk(serverWorld, targetChunk, spawnState, mobCategories);
+            original.call(serverWorld, targetChunk, spawnState, mobCategories);
         }
     }
 
-    @Redirect(
-        method = "tickChunks(Lnet/minecraft/util/profiling/ProfilerFiller;JLjava/util/List;)V",
+    @WrapOperation(
+        method = "tickChunks(Lnet/minecraft/util/profiling/ProfilerFiller;J)V",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/server/level/ServerLevel;tickCustomSpawners(ZZ)V"
@@ -72,12 +72,14 @@ public abstract class ServerChunkCacheMixin_Tracker {
     private void tracker$wrapGeneratorEntitySpawner(
         final ServerLevel serverWorld,
         final boolean spawnHostileMobs,
-        final boolean spawnPeacefulMobs
+        final boolean spawnPeacefulMobs,
+        final Operation<Void> wrapped
     ) {
-        try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.getWorldInstance(serverWorld))
+        try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING
+            .createPhaseContext(PhaseTracker.getWorldInstance(serverWorld))
             .world(serverWorld)) {
             context.buildAndSwitch();
-            serverWorld.tickCustomSpawners(spawnHostileMobs, spawnPeacefulMobs);
+            wrapped.call(serverWorld, spawnHostileMobs, spawnPeacefulMobs);
         }
     }
 }

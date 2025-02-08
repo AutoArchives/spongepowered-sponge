@@ -153,7 +153,7 @@ abstract class ActivePagination {
         }
 
         for (final Component line : toSend) {
-            src.sendMessage(Identity.nil(), line);
+            src.sendMessage(line);
         }
     }
 

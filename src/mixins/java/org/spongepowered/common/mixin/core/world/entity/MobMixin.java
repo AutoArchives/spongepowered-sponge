@@ -60,7 +60,6 @@ public abstract class MobMixin extends LivingEntityMixin {
     @Shadow @Nullable private LivingEntity target;
     @Shadow protected abstract void shadow$registerGoals();
     @Shadow public abstract boolean shadow$isSaddled();
-    @Shadow public abstract void shadow$setItemSlot(EquipmentSlot $$0, ItemStack $$1);
     // @formatter:on
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;registerGoals()V"))

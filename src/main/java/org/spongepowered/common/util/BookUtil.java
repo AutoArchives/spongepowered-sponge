@@ -50,8 +50,8 @@ public final class BookUtil {
         item.offer(Keys.PAGES, book.pages());
 
         final Inventory inventory = ((net.minecraft.world.entity.player.Player) player).getInventory();
-        final int bookSlot = inventory.selected;
-        final net.minecraft.world.item.ItemStack oldItem = inventory.getSelected();
+        final int bookSlot = inventory.getSelectedSlot();
+        final net.minecraft.world.item.ItemStack oldItem = inventory.getSelectedItem();
 
         final List<Packet<? super ClientGamePacketListener>> packets = new ArrayList<>();
 

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.server.level;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
@@ -31,6 +32,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.server.level.ServerLevel;
@@ -213,33 +215,12 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         TrackingUtil.randomTickFluid(this, fluidState, pos, this.random, () -> tick.call(fluidState, worldIn, pos, random));
     }
 
-    @Inject(
-        method = "tickChunk",
-        at = @At(
-            value = "INVOKE_STRING",
-            target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V",
-            args = "ldc=thunder"
-        )
-    )
-    private void tracker$startWeatherTickPhase(final LevelChunk param0, final int param1, final CallbackInfo ci) {
-        TickPhase.Tick.WEATHER.createPhaseContext(PhaseTracker.getWorldInstance((ServerLevel) (Object) this))
-            .buildAndSwitch();
-    }
-
-    @Inject(
-        method = "tickChunk",
-        at = @At(
-            value = "INVOKE_STRING",
-            target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V",
-            args = "ldc=tickBlocks"
-        )
-    )
-    private void tracker$closeWeatherTickPhase(final LevelChunk param0, final int param1, final CallbackInfo ci) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance((ServerLevel) (Object) this).getPhaseContext();
-        if (context.getState() != TickPhase.Tick.WEATHER) {
-            throw new IllegalStateException("Expected to be in a Weather ticking state, but we aren't.");
+    @WrapMethod(method = "tickThunder")
+    private void tracker$startWeatherTickPhase(LevelChunk chunk, Operation<Void> original) {
+        try (final var ignored = TickPhase.Tick.WEATHER.createPhaseContext(PhaseTracker.getWorldInstance((ServerLevel) (Object) this))
+            .buildAndSwitch()) {
+            original.call(chunk);
         }
-        context.close();
     }
 
     @WrapOperation(method = "doBlockEvent(Lnet/minecraft/world/level/BlockEventData;)Z",
@@ -407,7 +388,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      */
     @Redirect(method = "explode", at = @At(value = "INVOKE",
         target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
-    private void tracker$onClientboundExplodePacket(final ServerGamePacketListenerImpl instance, final Packet packet) {
+    private <T extends PacketListener> void tracker$onClientboundExplodePacket(final ServerGamePacketListenerImpl instance, final Packet<T> packet) {
         final var originalPacket = (ClientboundExplodePacket) packet;
         ((ServerLevelBridge) this).bridge$handleExplosionPacket(instance, this.tracker$apiExplosion, originalPacket);
     }
