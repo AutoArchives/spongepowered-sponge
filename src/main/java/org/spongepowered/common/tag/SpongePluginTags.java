@@ -22,33 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.tags;
+package org.spongepowered.common.tag;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryType;
-import org.spongepowered.api.tag.Tag;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(TagKey.class)
-public abstract class TagKeyMixin_API<T> implements Tag<T> {
+import java.util.Map;
+import java.util.Optional;
 
-    // @formatter:off
-    @Shadow @Final private net.minecraft.resources.ResourceKey<? extends Registry<T>> registry;
-    @Shadow @Final private ResourceLocation location;
-    // @formatter:on
+public final class SpongePluginTags {
 
-    @Override
-    public RegistryType<T> registry() {
-        return RegistryType.of((ResourceKey) (Object) this.registry.registry(), (ResourceKey) (Object) this.registry.location());
+    private final Map<RegistryType<?>, Map<ResourceKey, SpongePluginTagModifier<?>>> tags;
+
+    public SpongePluginTags(final Map<RegistryType<?>, Map<ResourceKey, SpongePluginTagModifier<?>>> tags) {
+        this.tags = tags;
     }
 
-    @Override
-    public ResourceKey key() {
-        return (ResourceKey) (Object) this.location;
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> Optional<Map<ResourceKey, SpongePluginTagModifier<T>>> get(final RegistryType<T> registryKey) {
+        return Optional.ofNullable((Map) this.tags.get(registryKey));
     }
 }

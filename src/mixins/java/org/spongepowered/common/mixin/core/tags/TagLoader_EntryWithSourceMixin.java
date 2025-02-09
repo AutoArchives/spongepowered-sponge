@@ -22,33 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.tags;
+package org.spongepowered.common.mixin.core.tags;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.registry.RegistryType;
-import org.spongepowered.api.tag.Tag;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.tags.TagLoader;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.tags.TagLoader_EntryWithSourceBridge;
+import org.spongepowered.common.tag.SpongePluginTagPredicate;
 
-@Mixin(TagKey.class)
-public abstract class TagKeyMixin_API<T> implements Tag<T> {
+import java.util.Set;
 
-    // @formatter:off
-    @Shadow @Final private net.minecraft.resources.ResourceKey<? extends Registry<T>> registry;
-    @Shadow @Final private ResourceLocation location;
-    // @formatter:on
+@Mixin(TagLoader.EntryWithSource.class)
+public abstract class TagLoader_EntryWithSourceMixin implements TagLoader_EntryWithSourceBridge {
+
+    private @MonotonicNonNull Set<SpongePluginTagPredicate<?>> impl$predicates;
 
     @Override
-    public RegistryType<T> registry() {
-        return RegistryType.of((ResourceKey) (Object) this.registry.registry(), (ResourceKey) (Object) this.registry.location());
+    public void bridge$predicates(final Set<SpongePluginTagPredicate<?>> predicates) {
+        this.impl$predicates = predicates;
     }
 
     @Override
-    public ResourceKey key() {
-        return (ResourceKey) (Object) this.location;
+    public @Nullable Set<SpongePluginTagPredicate<?>> bridge$predicates() {
+        return this.impl$predicates;
     }
 }

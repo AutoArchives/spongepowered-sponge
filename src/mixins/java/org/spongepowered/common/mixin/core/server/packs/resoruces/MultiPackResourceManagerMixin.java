@@ -22,33 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.tags;
+package org.spongepowered.common.mixin.core.server.packs.resoruces;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.registry.RegistryType;
-import org.spongepowered.api.tag.Tag;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
+import org.spongepowered.common.tag.SpongePluginTags;
 
-@Mixin(TagKey.class)
-public abstract class TagKeyMixin_API<T> implements Tag<T> {
+@Mixin(MultiPackResourceManager.class)
+public abstract class MultiPackResourceManagerMixin implements ResourceManagerBridge {
 
-    // @formatter:off
-    @Shadow @Final private net.minecraft.resources.ResourceKey<? extends Registry<T>> registry;
-    @Shadow @Final private ResourceLocation location;
-    // @formatter:on
+    @MonotonicNonNull private SpongePluginTags impl$pluginTags;
 
     @Override
-    public RegistryType<T> registry() {
-        return RegistryType.of((ResourceKey) (Object) this.registry.registry(), (ResourceKey) (Object) this.registry.location());
+    public void bridge$pluginProvidedTags(final SpongePluginTags pluginTags) {
+        this.impl$pluginTags = pluginTags;
     }
 
     @Override
-    public ResourceKey key() {
-        return (ResourceKey) (Object) this.location;
+    public SpongePluginTags bridge$pluginProvidedTags() {
+        return this.impl$pluginTags;
     }
 }

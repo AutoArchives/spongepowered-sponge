@@ -24,6 +24,7 @@
         "server.level.ServerEntityMixin_Neo",
         "server.level.ServerPlayerMixin_Neo",
         "server.network.ServerGamePacketListenerImplMixin_Neo",
+        "tags.TagLoaderMixin_NeoForge",
         "world.entity.EntityMixin_Neo",
         "world.entity.LivingEntityMixin_Neo",
         "world.entity.LivingEntityMixin_Neo_Attack_Impl",
