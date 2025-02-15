@@ -500,7 +500,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     )
     private void impl$flagIfRespawnPositionIsGameMechanic(final net.minecraft.server.level.ServerPlayer $$0, final boolean $$1,
             final Entity.RemovalReason $$2, final CallbackInfoReturnable<net.minecraft.server.level.ServerPlayer> cir) {
-        this.impl$isRespawnWithPosition = $$0.getRespawnPosition() != null;
+        this.impl$isRespawnWithPosition = $$0.getRespawnConfig() != null;
     }
 
     @Redirect(

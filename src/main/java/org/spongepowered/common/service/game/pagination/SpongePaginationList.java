@@ -28,7 +28,6 @@ package org.spongepowered.common.service.game.pagination;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.checkerframework.checker.nullness.qual.Nullable;

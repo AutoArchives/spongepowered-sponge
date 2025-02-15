@@ -22,18 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity.monster;
+package org.spongepowered.common.accessor.world;
 
-import net.minecraft.world.entity.animal.sheep.Sheep;
-import net.minecraft.world.entity.monster.Evoker;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(Evoker.class)
-public interface EvokerAccessor {
+@Mixin(DamageSources.class)
+public interface DamageSourcesAccessor {
 
-    @Accessor("wololoTarget") Sheep accessor$wololoTarget();
-
-    @Accessor("wololoTarget") void accessor$wololoTarget(final Sheep wololoTarget);
-
+    @Accessor("inFire") @Mutable void accessor$setInFire(DamageSource source);
 }

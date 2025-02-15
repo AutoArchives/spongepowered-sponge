@@ -528,7 +528,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
         final Object2BooleanMap<CommandMapping> testedMappings = new Object2BooleanOpenHashMap<>();
         for (final Map.Entry<String, SpongeCommandMapping> mappingEntry : this.commandMappings.entrySet()) {
             if (mappingEntry.getKey().startsWith(toCompare)) {
-                if (testedMappings.computeBooleanIfAbsent(mappingEntry.getValue(), mapping -> mapping.registrar().canExecute(cause, mapping))) {
+                if (testedMappings.computeIfAbsent(mappingEntry.getValue(), (CommandMapping mapping) -> mapping.registrar().canExecute(cause, mapping))) {
                     aliases.add(toCompare);
                 }
             }

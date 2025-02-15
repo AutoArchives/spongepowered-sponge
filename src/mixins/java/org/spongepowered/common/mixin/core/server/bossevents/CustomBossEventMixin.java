@@ -24,35 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.server.bossevents;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.mixin.core.server.level.ServerBossEventMixin;
 
 @Mixin(CustomBossEvent.class)
 public abstract class CustomBossEventMixin extends ServerBossEventMixin {
     @Shadow private int max;
 
-    @Redirect(method = {"getValue", "save"},
+    @Redirect(method = {"getValue"},
         at = @At(value = "FIELD", target = "Lnet/minecraft/server/bossevents/CustomBossEvent;value:I"))
     private int impl$valueRead(final CustomBossEvent $this) {
         return (int) (this.bridge$asAdventure().progress() * this.max);
     }
-
-    @Redirect(
-        method = {"save"},
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/server/bossevents/CustomBossEvent;name:Lnet/minecraft/network/chat/Component;"
-        )
-    )
-    private Component impl$nameRead(final CustomBossEvent $this) {
-        return SpongeAdventure.asVanilla(this.bridge$asAdventure().name());
-    }
-
-    // Value writes already update the percent field of superclasses, so we don't need to redirect
 }

@@ -27,27 +27,24 @@ package org.spongepowered.common.accessor.world.entity.animal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.animal.Turtle;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Turtle.class)
 public interface TurtleAccessor {
 
-    @Invoker("getHomePos") BlockPos invoker$getHomePos();
+    @Accessor("homePos") BlockPos invoker$getHomePos();
 
-    @Invoker("getTravelPos") BlockPos invoker$getTravelPos();
+    @Accessor("travelPos") BlockPos invoker$getTravelPos();
 
-    @Invoker("setTravelPos") void invoker$setTravelPos(final BlockPos travelPos);
+    @Accessor("travelPos") void invoker$setTravelPos(final BlockPos travelPos);
 
     @Invoker("setHasEgg") void invoker$setHasEgg(final boolean hasEgg);
 
     @Invoker("setLayingEgg") void invoker$setLayingEgg(final boolean layingEgg);
 
-    @Invoker("isGoingHome") boolean invoker$isGoingHome();
+    @Accessor("goingHome") boolean invoker$isGoingHome();
 
-    @Invoker("setGoingHome") void invoker$setGoingHome(final boolean goingHome);
-
-    @Invoker("isTravelling") boolean invoker$isTravelling();
-
-    @Invoker("setTravelling") void invoker$setTravelling(final boolean travelling);
+    @Accessor("goingHome") void invoker$setGoingHome(final boolean goingHome);
 
 }

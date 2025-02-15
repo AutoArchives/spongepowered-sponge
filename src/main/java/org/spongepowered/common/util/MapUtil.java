@@ -26,6 +26,7 @@ package org.spongepowered.common.util;
 
 import com.google.common.primitives.Bytes;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
@@ -109,7 +110,7 @@ public final class MapUtil {
 
     public static void saveMapUUIDIndex(final CompoundTag tag, final Map<Integer, UUID> index) {
         for (final Map.Entry<Integer, UUID> entry : index.entrySet()) {
-            tag.putUUID(String.valueOf(entry.getKey()), entry.getValue());
+            tag.store(String.valueOf(entry.getKey()), UUIDUtil.CODEC, entry.getValue());
         }
     }
 

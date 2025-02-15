@@ -22,19 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity.animal;
+package org.spongepowered.common.accessor.entity.vehicle;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.common.UntransformedAccessorError;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(Sheep.class)
-public interface SheepAccessor {
+import java.util.Optional;
 
-    @Accessor("DATA_WOOL_ID") static EntityDataAccessor<Byte> accessor$DATA_WOOL_ID() {
-        throw new UntransformedAccessorError();
-    }
+@Mixin(AbstractMinecart.class)
+public interface AbstractMinecartAccessor {
+
+    @Invoker("getCustomDisplayBlockState") Optional<BlockState> accessor$getCustomDisplayBlockState();
 
 }

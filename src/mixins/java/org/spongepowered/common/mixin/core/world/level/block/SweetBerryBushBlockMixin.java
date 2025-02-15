@@ -31,17 +31,17 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
 
 @Mixin(SweetBerryBushBlock.class)
 public abstract class SweetBerryBushBlockMixin extends BlockMixin {
 
-    @Redirect(method = "entityInside(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)V",
+    @Redirect(method = "entityInside",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;sweetBerryBush()Lnet/minecraft/world/damagesource/DamageSource;"))
     private DamageSource impl$spongeRedirectForFireDamage(
         final DamageSources instance, final BlockState state,
@@ -51,11 +51,7 @@ public abstract class SweetBerryBushBlockMixin extends BlockMixin {
         if (level.isClientSide) { // Short Circuit
             return source;
         }
-        final ServerLocation location = ServerLocation.of((ServerWorld) level, pos.getX(), pos.getY(), pos.getZ());
-        var blockSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder()
-            .from((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source).block(location)
-            .block(location.createSnapshot()).build();
-        return (DamageSource) blockSource;
+        return SpongeDamageSources.createBlockBasedDamageSource((ServerWorld) level, pos, source);
     }
 
 }

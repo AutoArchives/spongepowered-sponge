@@ -391,7 +391,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public CompoundTag bridge$writeSpongeLevelData() {
         final CompoundTag data = new CompoundTag();
-        data.putUUID(Constants.Sponge.World.UNIQUE_ID, this.impl$uniqueId);
+        data.store(Constants.Sponge.World.UNIQUE_ID, UUIDUtil.CODEC, this.impl$uniqueId);
 
         // Map Storage
         final CompoundTag mapUUIDIndexTag = new CompoundTag();

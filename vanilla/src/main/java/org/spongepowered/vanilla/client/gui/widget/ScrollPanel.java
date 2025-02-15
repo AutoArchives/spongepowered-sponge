@@ -204,7 +204,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
 
         VertexBuffer $$3 = RenderSystem.getQuadVertices();
         $$3.upload(worldr.buildOrThrow());
-        $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
+        $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
 
 
         final int baseY = this.top + this.border - (int) this.scrollDistance;
@@ -230,7 +230,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             worldr.addVertex(this.barLeft, this.top, 0.0f).setColor(0x00, 0x00, 0x00, 0xFF);
             $$3 = RenderSystem.getQuadVertices();
             $$3.upload(worldr.buildOrThrow());
-            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
+            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
 
             worldr =tess.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             worldr.addVertex(this.barLeft, barTop + barHeight, 0.0f).setColor(0x80, 0x80, 0x80, 0xFF);
@@ -239,7 +239,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             worldr.addVertex(this.barLeft, barTop, 0.0f).setColor(0x80, 0x80, 0x80, 0xFF);
             $$3 = RenderSystem.getQuadVertices();
             $$3.upload(worldr.buildOrThrow());
-            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
+            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
             worldr = tess.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             worldr.addVertex(this.barLeft, barTop + barHeight - 1, 0.0f).setColor(0xC0, 0xC0, 0xC0, 0xFF);
             worldr.addVertex(this.barLeft + this.barWidth - 1, barTop + barHeight - 1, 0.0f).setColor(0xC0, 0xC0, 0xC0, 0xFF);
@@ -247,7 +247,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             worldr.addVertex(this.barLeft, barTop, 0.0f).setColor(0xC0, 0xC0, 0xC0, 0xFF);
             $$3 = RenderSystem.getQuadVertices();
             $$3.upload(worldr.buildOrThrow());
-            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
+            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
         }
 
 //        RenderSystem.enableTexture();

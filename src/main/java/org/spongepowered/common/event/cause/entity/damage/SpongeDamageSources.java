@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.event.cause.entity.damage;
 
+import net.minecraft.core.BlockPos;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 
 public final class SpongeDamageSources {
 
@@ -40,6 +43,16 @@ public final class SpongeDamageSources {
 //        net.minecraft.world.damagesource.DamageSource damageSource = new net.minecraft.world.damagesource.DamageSource();
 //        IGNORED = (DamageSource) damageSource;
         IGNORED = null;
+    }
+
+    public static net.minecraft.world.damagesource.DamageSource createBlockBasedDamageSource(
+        final ServerWorld world, final BlockPos pos, final net.minecraft.world.damagesource.DamageSource original) {
+        final ServerLocation location = ServerLocation.of(world, pos.getX(), pos.getY(), pos.getZ());
+        return (net.minecraft.world.damagesource.DamageSource) DamageSource.builder()
+            .from((DamageSource) original)
+            .block(location)
+            .block(location.createSnapshot())
+            .build();
     }
 
     // SORTFIELDS:OFF

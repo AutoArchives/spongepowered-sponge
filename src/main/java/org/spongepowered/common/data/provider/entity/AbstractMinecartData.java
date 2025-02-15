@@ -31,11 +31,14 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.common.accessor.entity.vehicle.AbstractMinecartAccessor;
 import org.spongepowered.common.bridge.world.entity.vehicle.AbstractMinecartBridge;
 import org.spongepowered.common.data.ByteToBooleanContentUpdater;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
+
+import java.util.Optional;
 
 public final class AbstractMinecartData {
 
@@ -49,9 +52,9 @@ public final class AbstractMinecartData {
         registrator
                 .asMutable(AbstractMinecart.class)
                     .create(Keys.BLOCK_STATE)
-                        .get(h -> h.hasCustomDisplay() ? (BlockState) h.getDisplayBlockState() : null)
-                        .set((h, v) -> h.setDisplayBlockState((net.minecraft.world.level.block.state.BlockState) v))
-                        .delete(h -> h.setCustomDisplay(false))
+                        .get(h -> (BlockState) h.getDisplayBlockState())
+                        .set((h, v) -> h.setCustomDisplayBlockState(Optional.ofNullable((net.minecraft.world.level.block.state.BlockState) v)))
+                        .delete(h -> h.setCustomDisplayBlockState(Optional.empty()))
                     .create(Keys.IS_ON_RAIL)
                         .get(h -> {
                             final BlockPos pos = h.blockPosition();
@@ -90,7 +93,7 @@ public final class AbstractMinecartData {
     // @formatter:on
 
     private static boolean setBlockOffset(final AbstractMinecart holder, final Integer value) {
-        if (!holder.hasCustomDisplay()) {
+        if (((AbstractMinecartAccessor) holder).accessor$getCustomDisplayBlockState().isEmpty()) {
             return false;
         }
         holder.setDisplayOffset(value);

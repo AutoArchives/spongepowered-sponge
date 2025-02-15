@@ -40,7 +40,7 @@ public final class EvokerData {
                 .asMutable(EvokerAccessor.class)
                     .create(Keys.WOLOLO_TARGET)
                         .get(h -> (Sheep) h.accessor$wololoTarget())
-                        .set((h, v) -> h.accessor$wololoTarget((net.minecraft.world.entity.animal.Sheep) v));
+                        .set((h, v) -> h.accessor$wololoTarget((net.minecraft.world.entity.animal.sheep.Sheep) v));
     }
     // @formatter:on
 }

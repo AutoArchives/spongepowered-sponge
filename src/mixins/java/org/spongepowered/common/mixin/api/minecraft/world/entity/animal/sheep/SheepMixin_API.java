@@ -22,18 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity.monster;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.sheep;
 
-import net.minecraft.world.entity.animal.sheep.Sheep;
-import net.minecraft.world.entity.monster.Evoker;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.living.animal.Sheep;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.AnimalMixin_API;
 
-@Mixin(Evoker.class)
-public interface EvokerAccessor {
+import java.util.Set;
 
-    @Accessor("wololoTarget") Sheep accessor$wololoTarget();
+@Mixin(net.minecraft.world.entity.animal.sheep.Sheep.class)
+public abstract class SheepMixin_API extends AnimalMixin_API implements Sheep {
 
-    @Accessor("wololoTarget") void accessor$wololoTarget(final Sheep wololoTarget);
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.DYE_COLOR).asImmutable());
+        values.add(this.requireValue(Keys.IS_SHEARED).asImmutable());
+
+        return values;
+    }
 
 }

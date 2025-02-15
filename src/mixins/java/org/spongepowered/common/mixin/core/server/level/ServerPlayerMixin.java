@@ -971,9 +971,19 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         return this.bridge$changeDimension(transition);
     }
 
-    @Redirect(method = "findRespawnPositionAndUseSpawnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getRespawnDimension()Lnet/minecraft/resources/ResourceKey;"))
-    private ResourceKey<Level> impl$callRespawnPlayerSelectWorld(final net.minecraft.server.level.ServerPlayer player) {
-        var playerRespawnDestination = this.server.getLevel(player.getRespawnDimension());
+    @WrapOperation(method = "findRespawnPositionAndUseSpawnBlock",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/level/ServerPlayer;getRespawnConfig()Lnet/minecraft/server/level/ServerPlayer$RespawnConfig;"
+        ))
+    private net.minecraft.server.level.ServerPlayer.RespawnConfig impl$callRespawnPlayerSelectWorld(
+        final net.minecraft.server.level.ServerPlayer player,
+        final Operation<net.minecraft.server.level.ServerPlayer.RespawnConfig> original,
+        @Share("sponge:overridden-respawn") final LocalRef<ResourceKey<Level>> dimension
+    ) {
+        final var config = original.call(player);
+        final var defaulted = config == null ? Level.OVERWORLD : config.dimension();
+
+        var playerRespawnDestination = this.server.getLevel(defaulted);
         if (playerRespawnDestination == null) {
             SpongeCommon.logger().warn("The player '{}' respawn location was located in a world that isn't loaded or doesn't exist. This is not safe so "
                                        + "the player will be moved to the spawn of the default world.", player.getGameProfile().getName());
@@ -985,7 +995,37 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         SpongeCommon.post(event);
 
         this.impl$respawnLevel = (ServerLevel) event.destinationWorld();
-        return ((ServerLevel) event.destinationWorld()).dimension();
+        dimension.set(((ServerLevel) event.destinationWorld()).dimension());
+        return config;
+    }
+
+    @WrapOperation(
+        method = "findRespawnPositionAndUseSpawnBlock",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getLevel(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/server/level/ServerLevel;")
+    )
+    private ServerLevel impl$useOverriddenLevel(
+        final MinecraftServer instance, final ResourceKey<Level> key, final Operation<ServerLevel> original,
+        @Share("sponge:overridden-respawn") final LocalRef<ResourceKey<Level>> dimension
+    ) {
+        if (dimension.get() != null) {
+            return original.call(instance, dimension.get());
+        }
+
+        return original.call(instance, key);
+    }
+
+    @WrapOperation(
+        method = "findRespawnPositionAndUseSpawnBlock",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;")
+    )
+    private ServerLevel impl$callRespawnPlayerSelectWorld(
+        final MinecraftServer instance, final Operation<ServerLevel> original,
+        @Share("sponge:overridden-respawn") final LocalRef<ResourceKey<Level>> dimension
+    ) {
+        if (dimension.get() != null) {
+            return instance.getLevel(dimension.get());
+        }
+        return original.call(instance);
     }
 
     @Inject(method = "findRespawnPositionAndUseSpawnBlock", at = @At("RETURN"))

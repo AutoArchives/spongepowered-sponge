@@ -53,8 +53,7 @@ public final class TurtleData {
                         .get(TurtleAccessor::invoker$isGoingHome)
                         .set(TurtleAccessor::invoker$setGoingHome)
                     .create(Keys.IS_TRAVELING)
-                        .get(TurtleAccessor::invoker$isTravelling)
-                        .set(TurtleAccessor::invoker$setTravelling)
+                        .get(t -> t.invoker$getTravelPos() != null)
                     .create(Keys.TARGET_POSITION)
                         .get(h -> VecHelper.toVector3i(h.invoker$getTravelPos()))
                         .set((h, v) -> h.invoker$setTravelPos(VecHelper.toBlockPos(v)));

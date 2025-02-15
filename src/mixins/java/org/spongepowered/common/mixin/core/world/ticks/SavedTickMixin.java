@@ -24,20 +24,28 @@
  */
 package org.spongepowered.common.mixin.core.world.ticks;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.mojang.datafixers.Products;
+import com.mojang.datafixers.kinds.App;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.datafixers.util.Function4;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.ticks.SavedTick;
+import net.minecraft.world.ticks.TickPriority;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 @Mixin(SavedTick.class)
 public abstract class SavedTickMixin<T> implements SpongeMutableDataHolder, DataCompoundHolder, CreatorTrackedBridge {
@@ -54,19 +62,39 @@ public abstract class SavedTickMixin<T> implements SpongeMutableDataHolder, Data
         this.impl$compound = nbt;
     }
 
-    @Inject(method = "save", at = @At("RETURN"))
-    private void impl$onSaveTick(final CallbackInfoReturnable<CompoundTag> cir) {
-        if (DataUtil.syncDataToTag(this)) {
-            cir.getReturnValue().merge(this.data$getCompound());
-        }
-    }
-
-    @Inject(method = "loadTick", at = @At("RETURN"))
-    private static <T> void impl$onLoad(final CompoundTag $$0, final Function<String, Optional<T>> $$1, final CallbackInfoReturnable<Optional<SavedTick<T>>> cir) {
-        cir.getReturnValue().ifPresent(tick -> {
-            ((DataCompoundHolder) (Object) tick).data$setCompound($$0);
-            DataUtil.syncTagToData(tick);
-            ((DataCompoundHolder) (Object) tick).data$setCompound(null);
+    /**
+     * @return The codec
+     * @author gabizou - 25w07a - February 15th, 2025
+     * @reason Because SavedTicks are now saved via Codec, we have to modify the codec to inject our
+     * custom data alongside it. This means that we're explicitly not going to be calling the original
+     * operation, but merely adding the existing products and instantiation function. It is why we use
+     * a {@link Redirect} instead of a {@link WrapOperation}. Unless there is a better way to modify
+     * the codec to support the data field additions.
+     */
+    @SuppressWarnings("deprecation")
+    @Redirect(method = "lambda$codec$1", at = @At(value = "INVOKE", target = "Lcom/mojang/datafixers/Products$P4;apply(Lcom/mojang/datafixers/kinds/Applicative;Lcom/mojang/datafixers/util/Function4;)Lcom/mojang/datafixers/kinds/App;"))
+    private static <T> App<RecordCodecBuilder. Mu<SavedTick<T>>, SavedTick<T>> lambda$codec$1(
+        final Products.P4<RecordCodecBuilder.Mu<SavedTick<T>>, T, BlockPos, Integer, TickPriority> products,
+        final Applicative<RecordCodecBuilder.Mu<SavedTick<T>>, ?> instance,
+        final Function4<T, BlockPos, Integer, TickPriority, SavedTick<T>> function
+    ) {
+        final RecordCodecBuilder<SavedTick<T>, Optional<CustomData>> spongeCustomData = Codec.optionalField("customData", CustomData.CODEC, true).forGetter(t -> {
+            final var bridge = ((SavedTickMixin<T>) (Object) t);
+            DataUtil.syncDataToTag(bridge);
+            if (bridge.impl$compound != null) {
+                return Optional.of(CustomData.of(bridge.impl$compound));
+            }
+            return Optional.empty();
         });
+        return products.and(spongeCustomData)
+                .apply(instance, (t, blockPos, integer, tickPriority, customData) -> {
+                    final var tick = function.apply(t, blockPos, integer, tickPriority);
+                    customData.ifPresent(data -> {
+                        ((DataCompoundHolder) (Object) tick).data$setCompound(data.getUnsafe());
+                        DataUtil.syncTagToData(tick);
+                        ((DataCompoundHolder) (Object) tick).data$setCompound(null);
+                    });
+                    return tick;
+                });
     }
 }

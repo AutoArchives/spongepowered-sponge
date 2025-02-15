@@ -24,34 +24,49 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
+import net.minecraft.world.entity.InsideBlockEffectType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.accessor.world.DamageSourcesAccessor;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
+
+import java.util.function.Consumer;
 
 @Mixin(BaseFireBlock.class)
 public abstract class BaseFireBlockMixin extends BlockMixin {
 
-    @Redirect(method = "entityInside",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;inFire()Lnet/minecraft/world/damagesource/DamageSource;"))
-    private DamageSource impl$spongeRedirectForFireDamage(final DamageSources instance, final BlockState blockState, final Level world, final BlockPos blockPos, final Entity entity) {
-        final DamageSource source = instance.inFire();
-        if (world.isClientSide) { // Short Circuit
-            return source;
+    @WrapOperation(method = "entityInside",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/InsideBlockEffectApplier;runAfter(Lnet/minecraft/world/entity/InsideBlockEffectType;Ljava/util/function/Consumer;)V"
+        ))
+    private void impl$spongeRedirectForFireDamage(
+        final InsideBlockEffectApplier instance, final InsideBlockEffectType insideBlockEffectType,
+        final Consumer<Entity> entityConsumer, final Operation<Void> original, final BlockState state,
+        final Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier sameApplier
+    ) {
+        if (world.isClientSide()) {
+            original.call(instance, insideBlockEffectType, entityConsumer);
+            return;
         }
-        final ServerLocation location = ServerLocation.of((ServerWorld) world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
-        var blockSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder()
-                .from((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source).block(location)
-                .block(location.createSnapshot()).build();
-        return (DamageSource) blockSource;
+        // We'll be replacing the DamageSources.inFire() with our own temporarily then roll it back...
+        final var originalInFire = world.damageSources().inFire();
+        final var blockSource = SpongeDamageSources.createBlockBasedDamageSource((ServerWorld) world, pos, originalInFire);
+        try {
+            ((DamageSourcesAccessor) world.damageSources()).accessor$setInFire(blockSource);
+            original.call(instance, insideBlockEffectType, entityConsumer);
+        } finally {
+            ((DamageSourcesAccessor) world.damageSources()).accessor$setInFire(originalInFire);
+        }
     }
+
 }

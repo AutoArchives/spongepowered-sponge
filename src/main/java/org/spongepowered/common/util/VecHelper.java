@@ -87,7 +87,7 @@ public final class VecHelper {
         if (rotation == null) {
             return null;
         }
-        return new org.spongepowered.math.vector.Vector3d(rotation.getX(), rotation.getY(), rotation.getZ());
+        return new org.spongepowered.math.vector.Vector3d(rotation.x(), rotation.y(), rotation.z());
     }
 
     // === MC Vector3i --> Flow Vector3i ===

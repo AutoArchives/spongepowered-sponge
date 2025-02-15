@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Mixin(BeaconBlockEntity.class)
 public abstract class BeaconBlockEntityMixin extends BlockEntityMixin {
@@ -47,11 +47,11 @@ public abstract class BeaconBlockEntityMixin extends BlockEntityMixin {
      */
     @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "rawtypes"})
     @Redirect(method = "loadEffect",
-        at = @At(value = "INVOKE", target = "Ljava/util/Optional;map(Ljava/util/function/Function;)Ljava/util/Optional;")
+        at = @At(value = "INVOKE", target = "Ljava/util/Optional;filter(Ljava/util/function/Predicate;)Ljava/util/Optional;")
     )
     @Nullable
     private static Optional impl$UsePotionUtilInsteadOfCheckingValidPotions(
-        Optional instance, Function mapper) {
+        Optional instance, Predicate predicate) {
         return instance;
     }
 }
