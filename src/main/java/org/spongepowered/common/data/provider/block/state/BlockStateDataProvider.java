@@ -112,6 +112,7 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.LEVEL_HONEY, BlockStateProperties.LEVEL_HONEY);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.LIT, BlockStateProperties.LIT);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.LOCKED, BlockStateProperties.LOCKED);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.MAP, BlockStateProperties.MAP);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.MODE_COMPARATOR, BlockStateProperties.MODE_COMPARATOR);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.MOISTURE, BlockStateProperties.MOISTURE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.NATURAL, BlockStateProperties.NATURAL);
