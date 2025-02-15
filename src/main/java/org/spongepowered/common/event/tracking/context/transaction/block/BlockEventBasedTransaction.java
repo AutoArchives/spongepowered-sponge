@@ -37,7 +37,6 @@ import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
@@ -139,7 +138,7 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
             if (transaction.isValid()) {
                 transaction.custom().ifPresent(b ->
                     transaction.original().location().ifPresent(l ->
-                        b.withLocation(l).restore(true, BlockChangeFlags.NONE)));
+                        b.withLocation(l).restore(true, transaction.customFlag())));
             }
         }
     }

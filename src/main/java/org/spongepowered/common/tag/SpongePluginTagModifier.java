@@ -22,33 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.tags;
+package org.spongepowered.common.tag;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.registry.RegistryType;
-import org.spongepowered.api.tag.Tag;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Mixin(TagKey.class)
-public abstract class TagKeyMixin_API<T> implements Tag<T> {
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-    // @formatter:off
-    @Shadow @Final private net.minecraft.resources.ResourceKey<? extends Registry<T>> registry;
-    @Shadow @Final private ResourceLocation location;
-    // @formatter:on
+public final class SpongePluginTagModifier<T> {
 
-    @Override
-    public RegistryType<T> registry() {
-        return RegistryType.of((ResourceKey) (Object) this.registry.registry(), (ResourceKey) (Object) this.registry.location());
+    private Set<SpongePluginTagPredicate<T>> filters = new HashSet<>();
+    private Map<SpongePluginTag, Set<SpongePluginTagPredicate<T>>> append = new HashMap<>();
+
+    public void filter(final SpongePluginTagPredicate<T> predicate) {
+        this.filters.add(predicate);
     }
 
-    @Override
-    public ResourceKey key() {
-        return (ResourceKey) (Object) this.location;
+    public void append(final SpongePluginTag tag, final @Nullable SpongePluginTagPredicate<T> predicate) {
+        final Set<SpongePluginTagPredicate<T>> predicates = this.append.computeIfAbsent(tag, $ -> new HashSet<>());
+        if (predicate != null) {
+            predicates.add(predicate);
+        }
+    }
+
+    public Set<SpongePluginTagPredicate<T>> filters() {
+        return Collections.unmodifiableSet(this.filters);
+    }
+
+    public Map<SpongePluginTag, Set<SpongePluginTagPredicate<T>>> append() {
+        return Collections.unmodifiableMap(this.append);
     }
 }

@@ -22,33 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.tags;
+package org.spongepowered.common.bridge.tags;
 
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.registry.RegistryType;
-import org.spongepowered.api.tag.Tag;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import net.minecraft.tags.TagEntry;
+import net.minecraft.tags.TagLoader;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Mixin(TagKey.class)
-public abstract class TagKeyMixin_API<T> implements Tag<T> {
+import java.util.List;
+import java.util.function.Consumer;
 
-    // @formatter:off
-    @Shadow @Final private net.minecraft.resources.ResourceKey<? extends Registry<T>> registry;
-    @Shadow @Final private ResourceLocation location;
-    // @formatter:on
+public interface TagLoaderBridge<T> {
 
-    @Override
-    public RegistryType<T> registry() {
-        return RegistryType.of((ResourceKey) (Object) this.registry.registry(), (ResourceKey) (Object) this.registry.location());
+    void bridge$registryKey(ResourceKey<? extends Registry<?>> registryKey);
+
+    void bridge$buildingTagKey(@Nullable ResourceLocation key);
+
+    default boolean bridge$isAdd(final TagLoader.EntryWithSource entry) {
+        return true;
     }
 
-    @Override
-    public ResourceKey key() {
-        return (ResourceKey) (Object) this.location;
+    boolean bridge$acceptTag(TagEntry instance, TagEntry.Lookup<T> lookup, Consumer<T> consumer,
+        final AcceptTag<T> original, List<TagLoader.EntryWithSource> tags, TagLoader.EntryWithSource entry);
+
+    interface AcceptTag<T> {
+        boolean accept(TagEntry instance, TagEntry.Lookup<T> lookup, Consumer<T> consumer);
     }
 }
