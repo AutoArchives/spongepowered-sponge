@@ -380,6 +380,12 @@
             "name": "Decorated Pot Data",
             "entrypoint": "org.spongepowered.test.data.PotDataTest",
             "description": "Decorated Pot Data"
+        },
+        {
+            "id": "neoforgeeventtest",
+            "name": "NeoForge Event Test",
+            "entrypoint": "org.spongepowered.test.neoforge.NeoForgeEventTest",
+            "description": "Testing NeoForge Events"
         }
     ]
 }

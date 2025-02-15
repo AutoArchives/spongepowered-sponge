@@ -79,7 +79,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -228,15 +227,7 @@ public final class Constants {
                 // These are used by pickup/despawn delay for ItemEntity
                 public static final String INFINITE_PICKUP_DELAY = "InfinitePickupDelay";
                 public static final String INFINITE_DESPAWN_DELAY = "InfiniteDespawnDelay";
-                public static final String PREVIOUS_PICKUP_DELAY = "PreviousPickupDelay";
-                public static final String PREVIOUS_DESPAWN_DELAY = "PreviousDespawnDelay";
             }
-
-            public static final class Projectile {
-
-                public static final String PROJECTILE_DAMAGE_AMOUNT = "damageAmount";
-            }
-
             public static final class EyeOfEnder {
 
                 public static final int DESPAWN_TIMER_MAX = 80;
@@ -251,32 +242,11 @@ public final class Constants {
             public static final class Human {
                 public static final byte PLAYER_MODEL_FLAG_ALL = (byte) 0b01111111;
             }
-
-            public static final class DataRegistration {
-                public static final String INVENTORY = "inventory";
-                public static final String BLOCKENTITY = "blockentity";
-                public static final String LOCATION = "location";
-                public static final String BLOCKSTATE = "blockstate";
-                public static final String ENTITY = "entity";
-                public static final String GENERIC = "generic";
-                public static final String ITEMSTACK = "itemstack";
-                public static final String ITEM = "item";
-                public static final String NBT = "nbt";
-            }
-
             public static final class RangedAttackGoal {
                 public static final int INFINITE_ATTACK_TIME = -2;
             }
         }
 
-        public static final class User {
-
-            public static final String USER_SPAWN_X = "SpawnX";
-            public static final String USER_SPAWN_Y = "SpawnY";
-            public static final String USER_SPAWN_Z = "SpawnZ";
-            public static final String USER_SPAWN_FORCED = "SpawnForced";
-            public static final String USER_SPAWN_LIST = "Spawns";
-        }
 
         public static final class World {
 
@@ -334,33 +304,11 @@ public final class Constants {
 
             }
 
-            /**
-             * The NBT structure of the legacy Schematic format used by MCEdit and WorldEdit etc.
-             */
-            public static final class Legacy {
-
-                public static final DataQuery X_POS = of("x");
-                public static final DataQuery Y_POS = of("y");
-                public static final DataQuery Z_POS = of("z");
-                public static final DataQuery MATERIALS = of("Materials");
-                public static final DataQuery WE_OFFSET_X = of("WEOffsetX");
-                public static final DataQuery WE_OFFSET_Y = of("WEOffsetY");
-                public static final DataQuery WE_OFFSET_Z = of("WEOffsetZ");
-                public static final DataQuery BLOCKS = of("Blocks");
-                public static final DataQuery BLOCK_DATA = of("Data");
-                public static final DataQuery ADD_BLOCKS = of("AddBlocks");
-                public static final DataQuery TILE_ENTITIES = of("TileEntities");
-                public static final DataQuery ENTITIES = of("Entities");
-                public static final DataQuery ENTITY_ID = of("id");
-            }
-
         }
 
         public static final class BlockEntityArchetype {
 
             public static final int BASE_VERSION = 1;
-            public static final String TILE_ENTITY_ID = "Id";
-            public static final String TILE_ENTITY_POS = "Pos";
             public static final DataQuery BLOCK_ENTITY_TYPE = of("TileEntityType");
             public static final DataQuery BLOCK_STATE = of("BlockState");
             public static final DataQuery BLOCK_ENTITY_DATA = of("TileEntityData");
@@ -383,7 +331,6 @@ public final class Constants {
 
         public static final class BlockState {
 
-            public static final int BLOCK_TYPE_WITH_DAMAGE_VALUE = 1;
             public static final int STATE_AS_CATALOG_ID = 2;
         }
 
@@ -414,12 +361,8 @@ public final class Constants {
 
     public static final class World {
 
-        public static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
+        public static final Vector3i BLOCK_MIN = new Vector3i(-30000000, -64, -30000000);
         public static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
-        public static final Vector3i BLOCK_SIZE = Constants.World.BLOCK_MAX.sub(Constants.World.BLOCK_MIN).add(Vector3i.ONE);
-        public static final EnumSet<net.minecraft.core.Direction> NOTIFY_DIRECTION_SET = EnumSet
-            .of(net.minecraft.core.Direction.WEST, net.minecraft.core.Direction.EAST, net.minecraft.core.Direction.DOWN,
-                net.minecraft.core.Direction.UP, net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.SOUTH);
         public static final ResourceKey INVALID_WORLD_KEY = ResourceKey.sponge("invalid_world");
         public static final String LEVEL_DAT_OLD = LevelResource.LEVEL_DATA_FILE.getId() + "_old";
         public static final int DEFAULT_BLOCK_CHANGE_LIMIT = 512;

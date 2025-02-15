@@ -313,6 +313,7 @@ tasks {
             }
 
             jvmArguments.add("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
+            jvmArguments.add("-Dmixin.debug.export=true")
 
             sourceSets.forEach {
                 dependsOn(it.classesTaskName)
@@ -355,6 +356,7 @@ tasks {
 
         // Make sure to relocate access widener so that we don't conflict with other coremods
         relocate("net.fabricmc.accesswidener", "org.spongepowered.neoforge.libs.accesswidener")
+        relocate("com.fasterxml.jackson.core", "org.spongepowered.neoforge.libs.jackson.core")
     }
 
     shadowJar {

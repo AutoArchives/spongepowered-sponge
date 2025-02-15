@@ -81,7 +81,6 @@ import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
@@ -140,7 +139,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     @Override
     public Biome biome(final int x, final int y, final int z) {
         if (!this.contains(x, y, z)) {
-            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.min(), this.max());
         }
         return (Biome) (Object) this.level.getBiome(new BlockPos(x, y, z)).value();
     }

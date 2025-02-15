@@ -127,10 +127,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+@SuppressWarnings("DataFlowIssue")
 public final class SpongeAdventure {
 
     public static final AttributeKey<Locale> CHANNEL_LOCALE = AttributeKey.newInstance("sponge:locale");
-    public static final Codec<CompoundTag, String, IOException, IOException> NBT_CODEC = new Codec<CompoundTag, String, IOException, IOException>() {
+    public static final Codec<CompoundTag, String, IOException, IOException> NBT_CODEC = new Codec<>() {
         @Override
         public @NonNull CompoundTag decode(final @NonNull String encoded) throws IOException {
             try {
@@ -314,7 +315,7 @@ public final class SpongeAdventure {
             final List<Component> argList = Arrays.stream(tc.getArgs())
                     .map(arg -> arg instanceof final net.minecraft.network.chat.Component argComponent ?
                                     SpongeAdventure.asAdventure(argComponent) : Component.text(arg.toString())).toList();
-            return Component.translatable().key(tc.getKey()).args(argList);
+            return Component.translatable().key(tc.getKey()).arguments(argList);
         }
         if (contents instanceof final KeybindContents kc) {
             return Component.keybind().keybind(kc.getName());
@@ -332,8 +333,8 @@ public final class SpongeAdventure {
                 nbtBuilder = Component.blockNBT().pos(BlockNBTComponent.Pos.fromString(ds.posPattern()));
             } else if (nc.getDataSource() instanceof final EntityDataSource ds) {
                 nbtBuilder = Component.entityNBT().selector(ds.selectorPattern());
-            } else if (nc.getDataSource() instanceof final StorageDataSource ds) {
-                nbtBuilder = Component.storageNBT().storage(SpongeAdventure.asAdventure(ds.id()));
+            } else if (nc.getDataSource() instanceof StorageDataSource(ResourceLocation id)) {
+                nbtBuilder = Component.storageNBT().storage(SpongeAdventure.asAdventure(id));
             } else {
                 throw new UnsupportedOperationException("Cannot convert NBTContents with DataSource " + nc.getDataSource().getClass());
             }
@@ -351,7 +352,7 @@ public final class SpongeAdventure {
 
     // no caching
     public static Style asAdventure(final net.minecraft.network.chat.Style mcStyle) {
-        final net.kyori.adventure.text.format.Style.Builder builder = net.kyori.adventure.text.format.Style.style();
+        final Style.Builder builder = Style.style();
         final StyleAccessor $access = (StyleAccessor) mcStyle;
 
         builder.font(SpongeAdventure.asAdventure($access.accessor$font())); // font
@@ -454,38 +455,25 @@ public final class SpongeAdventure {
         if (color == null) {
             return null;
         }
-        if (color == ChatFormatting.BLACK) {
-            return NamedTextColor.BLACK;
-        } else if (color == ChatFormatting.DARK_BLUE) {
-            return NamedTextColor.DARK_BLUE;
-        } else if (color == ChatFormatting.DARK_GREEN) {
-            return NamedTextColor.DARK_GREEN;
-        } else if (color == ChatFormatting.DARK_AQUA) {
-            return NamedTextColor.DARK_AQUA;
-        } else if (color == ChatFormatting.DARK_RED) {
-            return NamedTextColor.DARK_RED;
-        } else if (color == ChatFormatting.DARK_PURPLE) {
-            return NamedTextColor.DARK_PURPLE;
-        } else if (color == ChatFormatting.GOLD) {
-            return NamedTextColor.GOLD;
-        } else if (color == ChatFormatting.GRAY) {
-            return NamedTextColor.GRAY;
-        } else if (color == ChatFormatting.DARK_GRAY) {
-            return NamedTextColor.DARK_GRAY;
-        } else if (color == ChatFormatting.BLUE) {
-            return NamedTextColor.BLUE;
-        } else if (color == ChatFormatting.GREEN) {
-            return NamedTextColor.GREEN;
-        } else if (color == ChatFormatting.AQUA) {
-            return NamedTextColor.AQUA;
-        } else if (color == ChatFormatting.RED) {
-            return NamedTextColor.RED;
-        } else if (color == ChatFormatting.LIGHT_PURPLE) {
-            return NamedTextColor.LIGHT_PURPLE;
-        } else if (color == ChatFormatting.YELLOW) {
-            return NamedTextColor.YELLOW;
-        }
-        return NamedTextColor.WHITE;
+        return switch (color) {
+            case BLACK -> NamedTextColor.BLACK;
+            case DARK_BLUE -> NamedTextColor.DARK_BLUE;
+            case DARK_GREEN -> NamedTextColor.DARK_GREEN;
+            case DARK_AQUA -> NamedTextColor.DARK_AQUA;
+            case DARK_RED -> NamedTextColor.DARK_RED;
+            case DARK_PURPLE -> NamedTextColor.DARK_PURPLE;
+            case GOLD -> NamedTextColor.GOLD;
+            case GRAY -> NamedTextColor.GRAY;
+            case DARK_GRAY -> NamedTextColor.DARK_GRAY;
+            case BLUE -> NamedTextColor.BLUE;
+            case GREEN -> NamedTextColor.GREEN;
+            case AQUA -> NamedTextColor.AQUA;
+            case RED -> NamedTextColor.RED;
+            case LIGHT_PURPLE -> NamedTextColor.LIGHT_PURPLE;
+            case YELLOW -> NamedTextColor.YELLOW;
+            default -> NamedTextColor.WHITE;
+        };
+
     }
 
     public static @Nullable Boolean asVanillaNullable(final TextDecoration.State state) {
@@ -579,35 +567,27 @@ public final class SpongeAdventure {
     }
 
     public static ClickEvent.Action asAdventure(final net.minecraft.network.chat.ClickEvent.Action action) {
-        if (action == net.minecraft.network.chat.ClickEvent.Action.OPEN_URL) {
-            return ClickEvent.Action.OPEN_URL;
-        } else if (action == net.minecraft.network.chat.ClickEvent.Action.OPEN_FILE) {
-            return ClickEvent.Action.OPEN_FILE;
-        } else if (action == net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND) {
-            return ClickEvent.Action.RUN_COMMAND;
-        } else if (action == net.minecraft.network.chat.ClickEvent.Action.SUGGEST_COMMAND) {
-            return ClickEvent.Action.SUGGEST_COMMAND;
-        } else if (action == net.minecraft.network.chat.ClickEvent.Action.CHANGE_PAGE) {
-            return ClickEvent.Action.CHANGE_PAGE;
-        }
-        throw new IllegalArgumentException(action.toString());
+        return switch (action) {
+            case OPEN_URL -> ClickEvent.Action.OPEN_URL;
+            case OPEN_FILE -> ClickEvent.Action.OPEN_FILE;
+            case RUN_COMMAND -> ClickEvent.Action.RUN_COMMAND;
+            case SUGGEST_COMMAND -> ClickEvent.Action.SUGGEST_COMMAND;
+            case CHANGE_PAGE -> ClickEvent.Action.CHANGE_PAGE;
+            case COPY_TO_CLIPBOARD -> ClickEvent.Action.COPY_TO_CLIPBOARD;
+            default -> throw new IllegalArgumentException(action.toString());
+        };
     }
 
     public static net.minecraft.network.chat.ClickEvent.Action asVanilla(final ClickEvent.Action action) {
-        if (action == ClickEvent.Action.OPEN_URL) {
-            return net.minecraft.network.chat.ClickEvent.Action.OPEN_URL;
-        } else if (action == ClickEvent.Action.OPEN_FILE) {
-            return net.minecraft.network.chat.ClickEvent.Action.OPEN_FILE;
-        } else if (action == ClickEvent.Action.RUN_COMMAND) {
-            return net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND;
-        } else if (action == ClickEvent.Action.SUGGEST_COMMAND) {
-            return net.minecraft.network.chat.ClickEvent.Action.SUGGEST_COMMAND;
-        } else if (action == ClickEvent.Action.CHANGE_PAGE) {
-            return net.minecraft.network.chat.ClickEvent.Action.CHANGE_PAGE;
-        } else if (action == ClickEvent.Action.COPY_TO_CLIPBOARD) {
-            return net.minecraft.network.chat.ClickEvent.Action.COPY_TO_CLIPBOARD;
-        }
-        throw new IllegalArgumentException(action.toString());
+        return switch (action) {
+            case OPEN_URL -> net.minecraft.network.chat.ClickEvent.Action.OPEN_URL;
+            case OPEN_FILE -> net.minecraft.network.chat.ClickEvent.Action.OPEN_FILE;
+            case RUN_COMMAND -> net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND;
+            case SUGGEST_COMMAND -> net.minecraft.network.chat.ClickEvent.Action.SUGGEST_COMMAND;
+            case CHANGE_PAGE -> net.minecraft.network.chat.ClickEvent.Action.CHANGE_PAGE;
+            case COPY_TO_CLIPBOARD -> net.minecraft.network.chat.ClickEvent.Action.COPY_TO_CLIPBOARD;
+            default -> throw new IllegalArgumentException(action.toString());
+        };
     }
 
     // Horrible-ness

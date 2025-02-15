@@ -169,7 +169,7 @@ public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLik
         Objects.requireNonNull(flag, "flag");
 
         if (!((Level) this).isInWorldBounds(new BlockPos(x, y, z))) {
-            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.min(), this.max());
         }
         try (final @Nullable PhaseContext<@NonNull ?> context = PluginPhase.State.BLOCK_WORKER.switchIfNecessary(PhaseTracker.SERVER)) {
             if (context != null) {

@@ -44,6 +44,7 @@ import org.spongepowered.api.world.generation.ConfigurableChunkGenerator;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfig;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.world.generation.extra.VoidLevelSource;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 
 import java.io.IOException;
@@ -98,5 +99,14 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
     public ChunkGenerator fromDataPack(DataView pack) throws IOException {
         final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
         return (ChunkGenerator) SpongeWorldTemplate.decodeStem(json, SpongeCommon.server().registryAccess()).generator();
+    }
+
+    @Override
+    public ConfigurableChunkGenerator<NoiseGeneratorConfig> customVoid(NoiseGeneratorConfig config) {
+        final var registry = SpongeCommon.vanillaRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+        final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD);
+        final var biomeSource = MultiNoiseBiomeSource.createFromPreset(holder);
+        var noiseGeneratorSettings = (NoiseGeneratorSettings) (Object) Objects.requireNonNull(config, "config");
+        return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) (Object)  new VoidLevelSource(biomeSource, Holder.direct(noiseGeneratorSettings));
     }
 }
