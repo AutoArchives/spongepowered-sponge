@@ -22,26 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity;
+package org.spongepowered.neoforge.mixin.core.neoforge.registries;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
-import org.slf4j.LoggerFactory;
-import org.spongepowered.common.entity.living.human.HumanEntity;
-import org.spongepowered.common.util.Constants;
+import net.neoforged.neoforge.registries.GameData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.entity.SpongeEntityTypes;
 
-public class SpongeEntityTypes {
+@Mixin(GameData.class)
+public class GameDataMixin_Neo {
 
-    public static final EntityType<HumanEntity> HUMAN = EntityType.Builder.of(HumanEntity::new, MobCategory.MISC)
-        .noSave()
-        .sized(0.6F, 1.8F)
-        .clientTrackingRange(Constants.Entity.Player.TRACKING_RANGE)
-        .updateInterval(2)
-        .build("sponge:human");
-
-    public static void register(Registry<EntityType<?>> registry) {
-        LoggerFactory.getLogger("SpongeEntityTypes").info("Registering SpongeEntityTypes");
-        Registry.register(registry, HumanEntity.KEY, SpongeEntityTypes.HUMAN);
+    @Inject(method = "postRegisterEvents", at = @At(value = "INVOKE", target = "Lnet/neoforged/fml/ModLoader;postEventWrapContainerInModOrder(Lnet/neoforged/bus/api/Event;)V", shift = At.Shift.AFTER))
+    private static void neo$registerSpongeTypesLast(final CallbackInfo ci, @Local final Registry<?> registry) {
+        if (Registries.ENTITY_TYPE.equals(registry.key())) {
+            SpongeEntityTypes.register((Registry<EntityType<?>>) registry);
+        }
     }
 }
