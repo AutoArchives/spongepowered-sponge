@@ -48,6 +48,11 @@ public final class ChickenData {
                             h.eggTime = ticks;
                             return true;
                         });
+        // @formatter:on
+        final var chicken = registrator.asMutable(Chicken.class);
+        final var components = EntityDataProviders.of(
+            // TODO - EitherHolder is a different kind of thing
+//            EntityDataProviders.eitherHolderOf()
+        );
     }
-    // @formatter:on
 }
