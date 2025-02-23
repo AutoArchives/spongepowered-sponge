@@ -29,7 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
@@ -48,13 +48,13 @@ public abstract class LivingEntityMixin_Attack_Impl {
     }
 
     @Redirect(method = "resolvePlayerResponsibleForDamage",
-        at = @At(value = "INVOKE" , target = "Lnet/minecraft/world/entity/animal/Wolf;isTame()Z"))
+        at = @At(value = "INVOKE" , target = "Lnet/minecraft/world/entity/animal/wolf/Wolf;isTame()Z"))
     private boolean attackImpl$onWolfIsTame(@Coerce final Object instance) {
         return ((TamableAnimal)instance).isTame();
     }
 
     @Redirect(method = "resolvePlayerResponsibleForDamage",
-        at = @At(value = "INVOKE" , target = "Lnet/minecraft/world/entity/animal/Wolf;getOwnerReference()Lnet/minecraft/world/entity/EntityReference;"))
+        at = @At(value = "INVOKE" , target = "Lnet/minecraft/world/entity/animal/wolf/Wolf;getOwnerReference()Lnet/minecraft/world/entity/EntityReference;"))
     private EntityReference<LivingEntity> attackImpl$onWolfGetOwner(@Coerce final Object instance) {
         return ((TamableAnimal)instance).getOwnerReference();
     }

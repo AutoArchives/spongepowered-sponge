@@ -22,11 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
+package org.spongepowered.common.accessor.world.entity.animal.wolf;
 
-import net.minecraft.world.entity.animal.WolfVariant;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.item.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
-@Mixin(WolfVariant.class)
-public class WollfVariantMixin_API implements org.spongepowered.api.data.type.WolfVariant {
+@Mixin(Wolf.class)
+public interface WolfAccessor {
+
+    @Accessor("DATA_COLLAR_COLOR") static EntityDataAccessor<Integer> accessor$DATA_COLLAR_COLOR() {
+        throw new UntransformedAccessorError();
+    }
+
+    @Accessor("isWet") boolean accessor$isWet();
+
+    @Accessor("isWet") void accessor$isWet(final boolean isWet);
+
+    @Accessor("isShaking") boolean accessor$isShaking();
+
+    @Accessor("isShaking") void accessor$isShaking(final boolean isShaking);
+
+    @Accessor("shakeAnim") void accessor$shakeAnim(final float shakeAnim);
+
+    @Accessor("shakeAnimO") void accessor$shakeAnimO(final float shakeAnim0);
+    @Invoker("setCollarColor") void invoker$setCollarColor(final DyeColor $$0);
+
 }

@@ -39,9 +39,9 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.sheep.Sheep;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -64,8 +64,8 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.accessor.entity.passive.AbstractChestedHorseEntityAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePlayerPacketAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.sheep.SheepAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.wolf.WolfAccessor;
 import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
 import org.spongepowered.common.bridge.network.protocol.PacketBridge;
 import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
@@ -99,11 +99,11 @@ public final class PacketPhaseUtil {
                 if (containerMenu == null || slot.viewedSlot() instanceof Slot) {
                     slot.set(snapshot);
                 } else if (player instanceof ServerPlayer serverPlayer
-                        && containerMenu != player.inventoryMenu && serverPlayer.inventory().containsInventory(slot)) {
+                           && containerMenu != player.inventoryMenu && serverPlayer.inventory().containsInventory(slot)) {
                     final org.spongepowered.api.item.inventory.ItemStack stack = snapshot.asMutable();
                     slot.set(stack);
                     ((net.minecraft.server.level.ServerPlayer) player).connection.send(
-                            new ClientboundSetPlayerInventoryPacket(((SlotAdapter) slot).getOrdinal(), ItemStackUtil.toNative(stack)));
+                        new ClientboundSetPlayerInventoryPacket(((SlotAdapter) slot).getOrdinal(), ItemStackUtil.toNative(stack)));
                 } else {
                     final int slotNumber = ((SlotAdapter) slot).getOrdinal();
                     final Slot nmsSlot = containerMenu.getSlot(slotNumber);
@@ -156,7 +156,7 @@ public final class PacketPhaseUtil {
             if (slot != null) {
                 final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(slot.getItem());
                 final SlotTransaction slotTransaction = new SlotTransaction(
-                        ((InventoryAdapter) containerMenu).inventoryAdapter$getSlot(slotId).get(), snapshot, snapshot);
+                    ((InventoryAdapter) containerMenu).inventoryAdapter$getSlot(slotId).get(), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }
         }
@@ -236,9 +236,9 @@ public final class PacketPhaseUtil {
                         final BlockPos max = new BlockPos((int) (boundingBox.maxX - 0.001D), (int) (boundingBox.maxY - 0.001D), (int) (boundingBox.maxZ - 0.001D));
                         final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
                         if (packetPlayer.level().hasChunksAt(min, max)) {
-                            for(int x = min.getX(); x <= max.getX(); ++x) {
-                                for(int y = min.getY(); y <= max.getY(); ++y) {
-                                    for(int z = min.getZ(); z <= max.getZ(); ++z) {
+                            for (int x = min.getX(); x <= max.getX(); ++x) {
+                                for (int y = min.getY(); y <= max.getY(); ++y) {
+                                    for (int z = min.getZ(); z <= max.getZ(); ++z) {
                                         pos.set(x, y, z);
                                         final Block block = packetPlayer.level().getBlockState(pos).getBlock();
                                         if (((TrackableBlockBridge) block).bridge$hasEntityInsideLogic()) {
@@ -259,8 +259,8 @@ public final class PacketPhaseUtil {
                     // At the very least make an unknown packet state case.
                     final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.getWorldInstance(packetPlayer.serverLevel()));
                     context.source(packetPlayer)
-                           .packetPlayer(packetPlayer)
-                           .packet(packetIn);
+                        .packetPlayer(packetPlayer)
+                        .packet(packetIn);
                     if (!PacketPhase.getInstance().isPacketInvalid(packetIn, packetPlayer, packetState)) {
 
                         PacketPhase.getInstance().populateContext(packetIn, packetPlayer, packetState, context);
@@ -282,7 +282,7 @@ public final class PacketPhaseUtil {
      * Attempts to find the {@link EntityDataAccessor} that was potentially modified
      * when a player interacts with an entity.
      *
-     * @param stack The item the player is holding
+     * @param stack  The item the player is holding
      * @param entity The entity
      * @return A possible data parameter or null if unknown
      */

@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.wolf.WolfAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class WolfData {

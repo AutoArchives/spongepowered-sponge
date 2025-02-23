@@ -22,34 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity.animal;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.wolf;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.item.DyeColor;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.TamableAnimalMixin_API;
 
-@Mixin(Wolf.class)
-public interface WolfAccessor {
+import java.util.Set;
 
-    @Accessor("DATA_COLLAR_COLOR") static EntityDataAccessor<Integer> accessor$DATA_COLLAR_COLOR() {
-        throw new UntransformedAccessorError();
+@Mixin(net.minecraft.world.entity.animal.wolf.Wolf.class)
+public abstract class WolfMixin_API extends TamableAnimalMixin_API implements Wolf {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.DYE_COLOR).asImmutable());
+        values.add(this.requireValue(Keys.IS_ANGRY).asImmutable());
+        values.add(this.requireValue(Keys.IS_BEGGING_FOR_FOOD).asImmutable());
+        values.add(this.requireValue(Keys.IS_WET).asImmutable());
+
+        return values;
     }
-
-    @Accessor("isWet") boolean accessor$isWet();
-
-    @Accessor("isWet") void accessor$isWet(final boolean isWet);
-
-    @Accessor("isShaking") boolean accessor$isShaking();
-
-    @Accessor("isShaking") void accessor$isShaking(final boolean isShaking);
-
-    @Accessor("shakeAnim") void accessor$shakeAnim(final float shakeAnim);
-
-    @Accessor("shakeAnimO") void accessor$shakeAnimO(final float shakeAnim0);
-    @Invoker("setCollarColor") void invoker$setCollarColor(final DyeColor $$0);
-
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.animal;
+package org.spongepowered.common.mixin.core.world.entity.animal.wolf;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.NeutralMob;
@@ -44,7 +44,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.entity.AgableMobMixin;
 
 
-@Mixin(net.minecraft.world.entity.animal.Wolf.class)
+@Mixin(net.minecraft.world.entity.animal.wolf.Wolf.class)
 public abstract class WolfMixin extends AgableMobMixin implements AggressiveEntityBridge {
 
     // @formatter:off
@@ -65,8 +65,8 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
 
 
     @Redirect(method = "mobInteract",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/Wolf;tryToTame(Lnet/minecraft/world/entity/player/Player;)V"))
-    private void impl$onTame(final net.minecraft.world.entity.animal.Wolf instance, final Player player, final Player $$0, final InteractionHand $$1) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/wolf/Wolf;tryToTame(Lnet/minecraft/world/entity/player/Player;)V"))
+    private void impl$onTame(final net.minecraft.world.entity.animal.wolf.Wolf instance, final Player player, final Player $$0, final InteractionHand $$1) {
         try {
             final ItemStack handStack = player.getItemInHand($$1);
             handStack.grow(1);
@@ -80,14 +80,14 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
     }
 
     @Inject(method = "tryToTame",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/Wolf;tame(Lnet/minecraft/world/entity/player/Player;)V"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/wolf/Wolf;tame(Lnet/minecraft/world/entity/player/Player;)V"),
         cancellable = true)
     private void impl$onTame(final Player player, final CallbackInfo ci) {
         try {
 
             PhaseTracker.getInstance().pushCause(player);
             if (SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getInstance().currentCause(), (Wolf) this))) {
-                this.shadow$level().broadcastEntityEvent((net.minecraft.world.entity.animal.Wolf) (Object) this, (byte)6);
+                this.shadow$level().broadcastEntityEvent((net.minecraft.world.entity.animal.wolf.Wolf) (Object) this, (byte)6);
                 ci.cancel();
             }
         } finally {

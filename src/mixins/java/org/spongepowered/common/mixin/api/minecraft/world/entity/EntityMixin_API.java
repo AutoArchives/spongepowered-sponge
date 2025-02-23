@@ -349,7 +349,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public HoverEvent<HoverEvent.ShowEntity> asHoverEvent(final UnaryOperator<HoverEvent.ShowEntity> op) {
         final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
         final ResourceLocation entityTypeKey = entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type());
-        return HoverEvent.showEntity(op.apply(HoverEvent.ShowEntity.of((Key) (Object) entityTypeKey, this.uniqueId(), this.displayName().get())));
+        return HoverEvent.showEntity(op.apply(HoverEvent.ShowEntity.showEntity((Key) (Object) entityTypeKey, this.uniqueId(), this.displayName().get())));
     }
 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

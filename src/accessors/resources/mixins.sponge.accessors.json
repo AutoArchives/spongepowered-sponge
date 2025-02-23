@@ -86,7 +86,7 @@
     "world.entity.animal.RabbitAccessor",
     "world.entity.animal.TropicalFishAccessor",
     "world.entity.animal.TurtleAccessor",
-    "world.entity.animal.WolfAccessor",
+    "world.entity.animal.wolf.WolfAccessor",
     "world.entity.animal.horse.AbstractHorseAccessor",
     "world.entity.animal.horse.HorseAccessor",
     "world.entity.animal.horse.LlamaAccessor",

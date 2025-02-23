@@ -48,12 +48,24 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 
 @Plugin("portaltest")
 public final class PortalTest implements LoadableModule {
 
     public final static class Holder {
+        private static final MethodHandles.Lookup HOLDER_LOOKUP = MethodHandles.publicLookup();
+        private static final MethodHandles.Lookup PORTAL_TEST_LOOKUP;
+
+        static {
+            try {
+                PORTAL_TEST_LOOKUP = MethodHandles.privateLookupIn(PortalTest.class, HOLDER_LOOKUP);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         public final static PortalTestListener INSTANCE = new PortalTestListener();
     }
 
@@ -66,7 +78,7 @@ public final class PortalTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.eventManager().registerListeners(this.pluginContainer, PortalTest.Holder.INSTANCE);
+        Sponge.eventManager().registerListeners(this.pluginContainer, PortalTest.Holder.INSTANCE, PortalTest.Holder.PORTAL_TEST_LOOKUP);
         ctx.cause().first(ServerPlayer.class).ifPresent(player -> {
             final var portalONE = PortalLogic.builder().addSimplePortal((from, fromPos, entity) -> Optional.of(entity.serverLocation().add(Vector3i.ONE))).build();
             player.offer(Keys.PORTAL_LOGIC, portalONE);

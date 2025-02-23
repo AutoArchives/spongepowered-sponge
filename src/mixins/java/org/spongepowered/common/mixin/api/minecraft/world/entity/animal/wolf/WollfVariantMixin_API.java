@@ -22,28 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.wolf;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.living.animal.Wolf;
+import net.minecraft.world.entity.animal.wolf.WolfVariant;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.TamableAnimalMixin_API;
 
-import java.util.Set;
-
-@Mixin(net.minecraft.world.entity.animal.Wolf.class)
-public abstract class WolfMixin_API extends TamableAnimalMixin_API implements Wolf {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.requireValue(Keys.DYE_COLOR).asImmutable());
-        values.add(this.requireValue(Keys.IS_ANGRY).asImmutable());
-        values.add(this.requireValue(Keys.IS_BEGGING_FOR_FOOD).asImmutable());
-        values.add(this.requireValue(Keys.IS_WET).asImmutable());
-
-        return values;
-    }
+@Mixin(WolfVariant.class)
+public class WollfVariantMixin_API implements org.spongepowered.api.data.type.WolfVariant {
 }
