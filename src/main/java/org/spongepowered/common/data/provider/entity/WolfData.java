@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.animal.wolf.Wolf;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.accessor.world.entity.animal.wolf.WolfAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,9 +40,6 @@ public final class WolfData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(Wolf.class)
-                    .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) h.getCollarColor())
-                        .set((h, v) -> ((WolfAccessor)h).invoker$setCollarColor((net.minecraft.world.item.DyeColor) (Object) v))
                     .create(Keys.IS_BEGGING_FOR_FOOD)
                         .get(Wolf::isInterested)
                         .set(Wolf::setIsInterested)
@@ -54,6 +52,17 @@ public final class WolfData {
                             accessor.accessor$shakeAnim(0f);
                             accessor.accessor$shakeAnimO(0f);
                         });
+
+        // @formatter:on
+        final var wolf = registrator.asMutable(Wolf.class);
+        final var providers = EntityDataProviders.of(
+            EntityDataProviders.holderOf(Keys.WOLF_VARIANT, DataComponents.WOLF_VARIANT, Registries.WOLF_VARIANT),
+            EntityDataProviders.holderOf(Keys.WOLF_SOUND_VARIANT, DataComponents.WOLF_SOUND_VARIANT, Registries.WOLF_SOUND_VARIANT),
+            EntityDataProviders.enumOf(Keys.DYE_COLOR, DataComponents.WOLF_COLLAR)
+        );
+        for (var provider : providers) {
+            provider.applyToRegistrator(wolf);
+        }
     }
-    // @formatter:on
+
 }

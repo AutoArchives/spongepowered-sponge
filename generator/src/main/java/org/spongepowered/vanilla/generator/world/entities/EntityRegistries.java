@@ -247,6 +247,15 @@ public class EntityRegistries {
                 Registries.CHICKEN_VARIANT,
                 $-> true,
                 RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
+                "data.type",
+                "WolfSoundVariants",
+                "WOLF_SOUND_VARIANT",
+                context.relativeClass("data.type", "WolfSoundVariant"),
+                Registries.WOLF_SOUND_VARIANT,
+                $ -> true,
+                RegistryScope.SERVER
             )
         );
     }

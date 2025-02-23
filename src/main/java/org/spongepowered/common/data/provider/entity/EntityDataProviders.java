@@ -24,9 +24,76 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.registry.DefaultedRegistryValue;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 
+import java.util.List;
+
 public final class EntityDataProviders extends DataProviderRegistratorBuilder {
+
+    public sealed interface KeyComponentProvider<A extends DefaultedRegistryValue, MC> {
+        <T extends Entity> void applyToRegistrator(DataProviderRegistrator.MutableRegistrator<T> registrator);
+    }
+
+    public static List<KeyComponentProvider<?, ?>> of(KeyComponentProvider<?, ?>... providers) {
+        return List.of(providers);
+    }
+
+    public static <A extends DefaultedRegistryValue, MC> KeyComponentProvider<A, MC> holderOf(
+        Key<Value<A>> apiKey,
+        DataComponentType<Holder<MC>> componentType,
+        ResourceKey<Registry<MC>> resourceKey
+    ) {
+        return new HolderProvider<>(apiKey, componentType, resourceKey);
+    }
+
+    public static <A extends DefaultedRegistryValue, MC extends Enum<MC>> KeyComponentProvider<A, MC> enumOf(
+        Key<Value<A>> apiKey,
+        DataComponentType<MC> componentType
+    ) {
+        return new EnumProvider<>(apiKey, componentType);
+    }
+
+    @SuppressWarnings("unchecked")
+    record HolderProvider<A extends DefaultedRegistryValue, MC>(
+        Key<Value<A>> apiKey,
+        DataComponentType<Holder<MC>> componentType,
+        ResourceKey<Registry<MC>> resourceKey
+    ) implements KeyComponentProvider<A, MC> {
+        public <T extends Entity> void applyToRegistrator(DataProviderRegistrator.MutableRegistrator<T> registrator) {
+            registrator.create(this.apiKey)
+                .get(h -> (A) h.get(this.componentType).value())
+                .setAnd((h, v) -> {
+                    final var holder = h.level().registryAccess().lookup(this.resourceKey)
+                        .map(r -> r.wrapAsHolder((MC) (Object) v));
+                    if (holder.isEmpty()) {
+                        return false;
+                    }
+                    h.setComponent(this.componentType, holder.get());
+                    return true;
+                });
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    record EnumProvider<A extends DefaultedRegistryValue, MC extends Enum<MC>>(
+        Key<Value<A>> apiKey,
+        DataComponentType<MC> componentType
+    ) implements KeyComponentProvider<A, MC> {
+        public <T extends Entity> void applyToRegistrator(DataProviderRegistrator.MutableRegistrator<T> registrator) {
+            registrator.create(this.apiKey)
+                .get(h -> (A) h.get(this.componentType))
+                .set((h, v) -> h.setComponent(this.componentType, (MC) (Object) v));
+        }
+    }
 
     @Override
     public void registerProviders() {
