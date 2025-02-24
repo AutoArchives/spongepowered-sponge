@@ -22,21 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.world.entity;
+package org.spongepowered.neoforge.mixin.core.neoforge.registries;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
+import net.neoforged.neoforge.registries.GameData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.entity.SpongeEntityTypes;
 
-@Mixin(EntityType.class)
-public abstract class EntityTypeMixin_Vanilla {
+@Mixin(GameData.class)
+public class GameDataMixin_Neo {
 
-    @Inject(method = "<clinit>", at = @At("TAIL"))
-    private static void impl$registerSpongeTypes(CallbackInfo ci) {
-        SpongeEntityTypes.register(BuiltInRegistries.ENTITY_TYPE);
+    @Inject(method = "postRegisterEvents", at = @At(value = "INVOKE", target = "Lnet/neoforged/fml/ModLoader;postEventWrapContainerInModOrder(Lnet/neoforged/bus/api/Event;)V", shift = At.Shift.AFTER))
+    private static void neo$registerSpongeTypesLast(final CallbackInfo ci, @Local final Registry<?> registry) {
+        if (Registries.ENTITY_TYPE.equals(registry.key())) {
+            SpongeEntityTypes.register((Registry<EntityType<?>>) registry);
+        }
     }
 }

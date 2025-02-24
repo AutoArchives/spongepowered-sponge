@@ -64,6 +64,7 @@ import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -336,7 +337,11 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         "enabledFeatures"
     }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorldData()Lnet/minecraft/world/level/storage/WorldData;"))
     private WorldData impl$usePerWorldLevelData(final MinecraftServer server) {
-        return (WorldData) this.shadow$getLevelData();
+        final LevelData levelData = this.shadow$getLevelData();
+        if (levelData instanceof final WorldData worldData) {
+            return worldData;
+        }
+        return server.getWorldData();
     }
 
     @Redirect(method = "setDefaultSpawnPos", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerChunkCache;addRegionTicket(Lnet/minecraft/server/level/TicketType;Lnet/minecraft/world/level/ChunkPos;ILjava/lang/Object;)V"))
