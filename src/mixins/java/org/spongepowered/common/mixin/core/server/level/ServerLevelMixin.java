@@ -34,7 +34,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.ProgressListener;
@@ -44,7 +43,7 @@ import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -150,7 +149,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
     private CustomBossEvents impl$bossBarManager;
-    private ChunkProgressListener impl$chunkStatusListener;
+    private ChunkProgressListener impl$chunkProgressListener;
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
@@ -160,7 +159,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             final net.minecraft.resources.ResourceKey $$4, final LevelStem $$5, final ChunkProgressListener $$6, final boolean $$7, final long $$8,
             final List $$9, final boolean $$10, final RandomSequences $$11, final CallbackInfo ci) {
         this.impl$levelSave = $$2;
-        this.impl$chunkStatusListener = $$6;
+        this.impl$chunkProgressListener = $$6;
         this.impl$prevWeather = ((ServerWorld) this).weather();
         ((LevelTicksBridge<?>) this.blockTicks).bridge$level((ServerLevel) (Object) this);
         ((LevelTicksBridge<?>) this.fluidTicks).bridge$level((ServerLevel) (Object) this);
@@ -182,8 +181,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     }
 
     @Override
-    public ChunkProgressListener bridge$getChunkStatusListener() {
-        return this.impl$chunkStatusListener;
+    public ChunkProgressListener bridge$getChunkProgressListener() {
+        return this.impl$chunkProgressListener;
     }
 
     @Override
@@ -320,12 +319,12 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         return server.getWorldData();
     }
 
-    @Redirect(method = "setDefaultSpawnPos", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerChunkCache;addRegionTicket(Lnet/minecraft/server/level/TicketType;Lnet/minecraft/world/level/ChunkPos;ILjava/lang/Object;)V"))
-    private void impl$respectKeepSpawnLoaded(final ServerChunkCache serverChunkProvider, final TicketType<Object> p_217228_1_, final ChunkPos p_217228_2_,
-            final int p_217228_3_, final Object p_217228_4_) {
+    @Redirect(method = "setDefaultSpawnPos", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules;getInt(Lnet/minecraft/world/level/GameRules$Key;)I"))
+    private int impl$respectKeepSpawnLoaded(final GameRules gameRules, final GameRules.Key<GameRules.IntegerValue> key) {
         if ((((ServerWorldProperties) this.shadow$getLevelData()).performsSpawnLogic())) {
-            serverChunkProvider.addRegionTicket(p_217228_1_, p_217228_2_, p_217228_3_, p_217228_4_);
+            return gameRules.getInt(key);
         }
+        return 0;
     }
 
     /**
