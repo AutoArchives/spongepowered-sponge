@@ -139,7 +139,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public abstract class SpongeWorldManager implements WorldManager {
+public class SpongeWorldManager implements WorldManager {
 
     private final MinecraftServer server;
     private final Path defaultWorldDirectory, customWorldsDirectory;
