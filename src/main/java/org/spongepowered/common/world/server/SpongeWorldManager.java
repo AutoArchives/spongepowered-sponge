@@ -43,7 +43,9 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
+import net.minecraft.util.Unit;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
@@ -51,6 +53,7 @@ import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.ForcedChunksSavedData;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
@@ -91,6 +94,7 @@ import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_LevelStorageAccessAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.core.MappedRegistryBridge;
@@ -134,13 +138,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public abstract class SpongeWorldManager implements WorldManager {
+public class SpongeWorldManager implements WorldManager {
 
     private final MinecraftServer server;
     private final Path defaultWorldDirectory, customWorldsDirectory;
     private final Map<net.minecraft.resources.ResourceKey<Level>, ServerLevel> worlds;
-
-    private static final TicketType<ResourceLocation> SPAWN_CHUNKS = TicketType.create("spawn_chunks", ResourceLocation::compareTo);
 
     public SpongeWorldManager(final MinecraftServer server) {
         this.server = server;
@@ -303,10 +305,9 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey.map(ResourceKey::toString).orElse("inline"));
 
-        final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
         final ServerLevel world;
         try {
-            world = this.createNonDefaultLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
+            world = this.createNonDefaultLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null));
         } catch (final IOException e) {
             return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e));
         }
@@ -694,28 +695,31 @@ public abstract class SpongeWorldManager implements WorldManager {
         return this.server().dataPackManager().findPack(DataPackTypes.WORLD, key).orElse(DataPacks.WORLD);
     }
 
-    private void unloadWorld0(final ServerLevel world) throws IOException {
-        final net.minecraft.resources.ResourceKey<Level> registryKey = world.dimension();
+    private void unloadWorld0(final ServerLevel level) throws IOException {
+        final net.minecraft.resources.ResourceKey<Level> registryKey = level.dimension();
 
-        if (world.getPlayers(p -> true).size() != 0) {
+        if (!level.getPlayers(p -> true).isEmpty()) {
             throw new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location()));
         }
 
-        final Optional<ResourceKey> worldTypeKey = this.worldTypeKey(world.dimensionType());
+        final Optional<ResourceKey> worldTypeKey = this.worldTypeKey(level.dimensionType());
         SpongeCommon.logger().info("Unloading world '{}' ({})", registryKey.location(), worldTypeKey.map(ResourceKey::toString).orElse("inline"));
 
-        final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getInstance().currentCause(), (ServerWorld) world);
+        final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getInstance().currentCause(), (ServerWorld) level);
         SpongeCommon.post(unloadWorldEvent);
 
-        final BlockPos spawnPoint = world.getSharedSpawnPos();
-        world.getChunkSource().removeRegionTicket(SpongeWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, registryKey.location());
+        final int lastSpawnChunkRadius = ((ServerLevelAccessor) level).accessor$lastSpawnChunkRadius();
+        if (lastSpawnChunkRadius > 1) {
+            level.getChunkSource().removeRegionTicket(TicketType.START, new ChunkPos(level.getSharedSpawnPos()), lastSpawnChunkRadius, Unit.INSTANCE);
+            ((ServerLevelAccessor) level).accessor$setLastSpawnChunkRadius(1);
+        }
 
-        ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().save();
+        ((PrimaryLevelDataBridge) level.getLevelData()).bridge$configAdapter().save();
 
         try {
-            world.save(null, true, world.noSave);
-            world.close();
-            ((ServerLevelBridge) world).bridge$getLevelSave().close();
+            level.save(null, true, level.noSave);
+            level.close();
+            ((ServerLevelBridge) level).bridge$getLevelSave().close();
         } catch (final Exception ex) {
             throw new IOException(ex);
         }
@@ -723,15 +727,13 @@ public abstract class SpongeWorldManager implements WorldManager {
         this.worlds.remove(registryKey);
     }
 
-    public void loadLevel() {
-
+    public void createLevels(final ChunkProgressListener progressListener) {
         final boolean multiworldEnabled = this.server.isSingleplayer() || (this.server instanceof DedicatedServer ds && ds.getProperties().allowNether);
         if (!multiworldEnabled) {
             SpongeCommon.logger().warn("The option 'allow-nether' has been set to 'false' in the server.properties. "
                     + "Multi-World support has been disabled and no worlds besides the default world will be loaded.");
         }
 
-        final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
         var registry = SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM);
         for (LevelStem template : registry) {
             final ResourceKey worldKey = (ResourceKey) (Object) registry.getKey(template);
@@ -757,14 +759,14 @@ public abstract class SpongeWorldManager implements WorldManager {
                 ((ResourceKeyBridge) levelData).bridge$setKey(((ResourceKey) (Object) registryKey.location()));
                 final List<CustomSpawner> spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(levelData));
 
-                final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), storageSource, levelData, spawners, chunkStatusListener);
+                final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), storageSource, levelData, spawners, progressListener);
 
                 // Ensure that the world border is registered.
                 world.getWorldBorder().applySettings(levelData.getWorldBorder());
                 this.prepareWorld(world);
             } else {
                 try {
-                    final ServerLevel world = this.createNonDefaultLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
+                    final ServerLevel world = this.createNonDefaultLevel(registryKey, template, worldKey, worldTypeKey.orElse(null));
                     // Ensure that the world border is registered.
                     world.getWorldBorder().applySettings(((PrimaryLevelData) world.getLevelData()).getWorldBorder());
                     this.prepareWorld(world);
@@ -775,9 +777,9 @@ public abstract class SpongeWorldManager implements WorldManager {
                 }
             }
         }
+    }
 
-        ((MinecraftServerAccessor) this.server).invoker$forceDifficulty();
-
+    public void prepareLevels() {
         for (final Map.Entry<net.minecraft.resources.ResourceKey<Level>, ServerLevel> entry : this.worlds.entrySet()) {
             try {
                 this.postWorldLoad(entry.getValue(), true).get();
@@ -823,13 +825,12 @@ public abstract class SpongeWorldManager implements WorldManager {
         return (PrimaryLevelData) levelData.worldData();
     }
 
-    // Do not call this for the default world, that is handled very special in loadLevel()
+    // Do not call this for the default world, that is handled very special in createLevels()
     private ServerLevel createNonDefaultLevel(
             final net.minecraft.resources.ResourceKey<Level> registryKey,
             final LevelStem levelStem,
             final ResourceKey worldKey,
-            @Nullable final ResourceKey worldTypeKey,
-            final ChunkProgressListener chunkStatusListener) throws IOException {
+            @Nullable final ResourceKey worldTypeKey) throws IOException {
         final String directoryName = this.getDirectoryName(worldKey);
         final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(worldKey);
         Dynamic<?> dataTag;
@@ -846,7 +847,9 @@ public abstract class SpongeWorldManager implements WorldManager {
             spawners = ImmutableList.of();
         }
         ((ResourceKeyBridge) levelData).bridge$setKey(worldKey);
-        return this.createLevel(registryKey, levelStem, worldKey, worldTypeKey, storageSource, levelData, spawners, chunkStatusListener);
+
+        final ChunkProgressListener progressListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(SpongeWorldManager.getSpawnRadius(levelData));
+        return this.createLevel(registryKey, levelStem, worldKey, worldTypeKey, storageSource, levelData, spawners, progressListener);
     }
 
     private ServerLevel createLevel(
@@ -857,7 +860,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             final LevelStorageSource.LevelStorageAccess storageSource,
             final PrimaryLevelData levelData,
             final List<CustomSpawner> spawners,
-            final ChunkProgressListener chunkStatusListener) {
+            final ChunkProgressListener progressListener) {
 
         ((PrimaryLevelDataBridge) levelData).bridge$populateFromLevelStem(levelStem);
 
@@ -869,7 +872,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         final Executor executor = ((MinecraftServerAccessor) this.server).accessor$executor();
         final ServerLevel world = new ServerLevel(this.server, executor, storageSource, levelData,
-                registryKey, levelStem, chunkStatusListener, levelData.isDebugWorld(), seed, spawners, true, null);
+                registryKey, levelStem, progressListener, levelData.isDebugWorld(), seed, spawners, true, null);
         this.worlds.put(registryKey, world);
 
         return world;
@@ -963,56 +966,51 @@ public abstract class SpongeWorldManager implements WorldManager {
         return Optional.ofNullable(SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).getKey(type)).map(ResourceKey.class::cast);
     }
 
-    private CompletableFuture<ServerLevel> loadSpawnChunksAsync(final ServerLevel world) {
+    /**
+     * Same as loadSpawnChunks but async and without listener.
+     */
+    private CompletableFuture<ServerLevel> loadSpawnChunksAsync(final ServerLevel level) {
+        final ServerChunkCache chunkSource = level.getChunkSource();
+        level.setDefaultSpawnPos(level.getSharedSpawnPos(), level.getSharedSpawnAngle());
 
-        final BlockPos spawnPoint = world.getSharedSpawnPos();
-        final ChunkPos chunkPos = new ChunkPos(spawnPoint);
-        final ServerChunkCache serverChunkProvider = world.getChunkSource();
-//        serverChunkProvider.getLightEngine().setTaskPerBatch(500); was 5 in 1.19.4 , final 1000 in 1.20
+        final int spawnRadius = SpongeWorldManager.getSpawnRadius((PrimaryLevelData) level.getLevelData());
+        final int spawnSize = spawnRadius > 0 ? Mth.square(ChunkProgressListener.calculateDiameter(spawnRadius)) : 0;
 
-        final int borderRadius = 11;
-        final int diameter = ((borderRadius - 1) * 2) + 1;
-        final int spawnChunks = diameter * diameter;
-
-        serverChunkProvider.addRegionTicket(SpongeWorldManager.SPAWN_CHUNKS, chunkPos, borderRadius, world.dimension().location());
         final CompletableFuture<ServerLevel> generationFuture = new CompletableFuture<>();
         Sponge.asyncScheduler().submit(
-                Task.builder().plugin(Launch.instance().platformPlugin())
-                        .execute(task -> {
-                            if (serverChunkProvider.getTickingGenerated() >= spawnChunks) {
-                                Sponge.server().scheduler().submit(Task.builder().plugin(Launch.instance().platformPlugin()).execute(() -> generationFuture.complete(world)).build());
-                                // Notify the future that we are done
-                                task.cancel(); // And cancel this task
-                                MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for world '{}' ({})", world.dimension().location(),
-                                        this.worldTypeKey(world.dimensionType()).map(ResourceKey::toString).orElse("inline"));
-                            }
-                        })
-                        .interval(10, TimeUnit.MILLISECONDS)
-                        .build()
+            Task.builder().plugin(Launch.instance().platformPlugin()).execute(task -> {
+                if (chunkSource.getTickingGenerated() >= spawnSize) {
+                    Sponge.server().scheduler().submit(Task.builder().plugin(Launch.instance().platformPlugin()).execute(() -> generationFuture.complete(level)).build());
+                    // Notify the future that we are done
+                    task.cancel(); // And cancel this task
+                    MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for world '{}' ({})", level.dimension().location(),
+                        this.worldTypeKey(level.dimensionType()).map(ResourceKey::toString).orElse("inline"));
+                }
+            }).interval(10, TimeUnit.MILLISECONDS).build()
         );
-        return generationFuture.thenApply(v -> {
-            this.updateForcedChunks(world, serverChunkProvider);
-//            serverChunkProvider.getLightEngine().setTaskPerBatch(5);
 
-            // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
-            if (!((PrimaryLevelDataBridge) world.getLevelData()).bridge$performsSpawnLogic()) {
-                serverChunkProvider.removeRegionTicket(SpongeWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
-            }
-            return world;
+        return generationFuture.thenApply(v -> {
+            SpongeWorldManager.updateForcedChunks(v, v.getChunkSource());
+            return v;
         });
     }
 
-    private void loadSpawnChunks(final ServerLevel world) {
-        final BlockPos spawnPoint = world.getSharedSpawnPos();
+    /**
+     * Mimic MinecraftServer#prepareLevels
+     */
+    private void loadSpawnChunks(final ServerLevel level) {
+        final BlockPos spawnPoint = level.getSharedSpawnPos();
         final ChunkPos chunkPos = new ChunkPos(spawnPoint);
-        final ChunkProgressListener chunkStatusListener = ((ServerLevelBridge) world).bridge$getChunkStatusListener();
-        chunkStatusListener.updateSpawnPos(chunkPos);
-        final ServerChunkCache serverChunkProvider = world.getChunkSource();
-//        serverChunkProvider.getLightEngine().setTaskPerBatch(500);
+        final ChunkProgressListener progressListener = ((ServerLevelBridge) level).bridge$getChunkProgressListener();
+        progressListener.updateSpawnPos(chunkPos);
+        final ServerChunkCache chunkSource = level.getChunkSource();
         ((MinecraftServerAccessor) this.server).accessor$nextTickTimeNanos(Util.getNanos());
-        serverChunkProvider.addRegionTicket(SpongeWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
+        level.setDefaultSpawnPos(spawnPoint, level.getSharedSpawnAngle());
 
-        while (serverChunkProvider.getTickingGenerated() != 441) {
+        final int spawnRadius = SpongeWorldManager.getSpawnRadius((PrimaryLevelData) level.getLevelData());
+        final int spawnSize = spawnRadius > 0 ? Mth.square(ChunkProgressListener.calculateDiameter(spawnRadius)) : 0;
+
+        while (chunkSource.getTickingGenerated() < spawnSize) {
             ((MinecraftServerAccessor) this.server).accessor$nextTickTimeNanos(Util.getNanos() + 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND);
             ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
         }
@@ -1020,21 +1018,19 @@ public abstract class SpongeWorldManager implements WorldManager {
         ((MinecraftServerAccessor) this.server).accessor$nextTickTimeNanos(Util.getNanos() + 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND);
         ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
 
-        this.updateForcedChunks(world, serverChunkProvider);
+        SpongeWorldManager.updateForcedChunks(level, chunkSource);
 
         ((MinecraftServerAccessor) this.server).accessor$nextTickTimeNanos(Util.getNanos() + 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND);
         ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
-        chunkStatusListener.stop();
-//        serverChunkProvider.getLightEngine().setTaskPerBatch(5);
-
-        // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
-        if (!((PrimaryLevelDataBridge) world.getLevelData()).bridge$performsSpawnLogic()) {
-            serverChunkProvider.removeRegionTicket(SpongeWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
-        }
+        progressListener.stop();
     }
 
-    private void updateForcedChunks(final ServerLevel world, final ServerChunkCache serverChunkProvider) {
-        final ForcedChunksSavedData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSavedData.factory(), "chunks");
+    private static int getSpawnRadius(final PrimaryLevelData levelData) {
+        return ((PrimaryLevelDataBridge) levelData).bridge$performsSpawnLogic() ? levelData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS) : 0;
+    }
+
+    private static void updateForcedChunks(final ServerLevel level, final ServerChunkCache serverChunkProvider) {
+        final ForcedChunksSavedData forcedChunksSaveData = level.getDataStorage().get(ForcedChunksSavedData.factory(), "chunks");
         if (forcedChunksSaveData != null) {
             final LongIterator longIterator = forcedChunksSaveData.getChunks().iterator();
 
