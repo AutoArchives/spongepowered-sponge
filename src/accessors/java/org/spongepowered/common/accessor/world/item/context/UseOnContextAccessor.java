@@ -22,14 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.world.server;
+package org.spongepowered.common.accessor.world.item.context;
 
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.common.world.server.SpongeWorldManager;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.phys.BlockHitResult;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public final class ForgeWorldManager extends SpongeWorldManager {
+@Mixin(UseOnContext.class)
+public interface UseOnContextAccessor {
 
-    public ForgeWorldManager(final MinecraftServer server) {
-        super(server);
-    }
+    @Accessor("hitResult") BlockHitResult accessor$hitResult();
 }

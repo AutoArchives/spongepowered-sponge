@@ -34,6 +34,7 @@ import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
@@ -115,7 +116,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract GameProfileCache shadow$getProfileCache();
     @Shadow public abstract CompletableFuture<Void> shadow$reloadResources(final Collection<String> $$0);
     @Shadow public abstract WorldData shadow$getWorldData();
-    @Shadow protected abstract void loadLevel(); // has overrides!
     @Shadow public abstract boolean shadow$haveTime();
     @Shadow private volatile boolean isSaving;
     // @formatter:on
@@ -184,6 +184,24 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Override
     public void bridge$addToCauseStack(final CauseStackManager.StackFrame frame) {
         frame.pushCause(Sponge.systemSubject());
+    }
+
+    /**
+     * @author Yeregorix
+     * @reason Multi world.
+     */
+    @Overwrite
+    protected void createLevels(final ChunkProgressListener progressListener) {
+        this.worldManager().createLevels(progressListener);
+    }
+
+    /**
+     * @author Yeregorix
+     * @reason Multi world.
+     */
+    @Overwrite
+    private void prepareLevels(final ChunkProgressListener progressListener) {
+        this.worldManager().prepareLevels();
     }
 
     /**
