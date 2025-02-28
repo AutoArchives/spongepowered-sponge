@@ -79,6 +79,8 @@ import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
+import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
@@ -282,16 +284,16 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     public boolean saveAllChunks(final boolean suppressLog, final boolean flush, final boolean isForced) {
         boolean result = false;
 
-        for (final ServerLevel world : this.shadow$getAllLevels()) {
+        for (final ServerLevel level : this.shadow$getAllLevels()) {
             // Sponge start - use our own config
-            final SerializationBehavior serializationBehavior = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
-            final InheritableConfigHandle<WorldConfig> configAdapter = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter();
+            final SerializationBehavior serializationBehavior = ((ServerLevelDataBridge) level.getLevelData()).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+            final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.getForWorld(level);
             final boolean log = configAdapter.get().world.logAutoSave;
 
             // If the server isn't running or we hit Vanilla's save interval or this was triggered
             // by a command, save our configs
             if (!this.shadow$isRunning() || this.tickCount % 6000 == 0 || isForced) {
-                ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().save();
+                configAdapter.save();
             }
 
             final boolean canSaveAtAll = serializationBehavior != SerializationBehavior.NONE;
@@ -318,10 +320,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             // Sponge end
 
             if (log) {
-                LOGGER.info("Saving chunks for level '{}'/{}", world, world.dimension().location());
+                LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().location());
             }
 
-            world.save(null, flush, world.noSave && !isForced);
+            level.save(null, flush, level.noSave && !isForced);
             result = true;
         }
 
@@ -345,14 +347,14 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         // Sponge end
 
         if (flush) {
-            for (final ServerLevel world : this.shadow$getAllLevels()) {
+            for (final ServerLevel level : this.shadow$getAllLevels()) {
                 // Sponge start - use our own config
-                final InheritableConfigHandle<WorldConfig> configAdapter = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter();
+                final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.getForWorld(level);
                 final boolean log = configAdapter.get().world.logAutoSave;
                 // Sponge end
 
                 if (log) {
-                    LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", world.getChunkSource().chunkMap.getStorageName());
+                    LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", level.getChunkSource().chunkMap.getStorageName());
                 }
             }
 
@@ -367,25 +369,14 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      * @reason Set the difficulty without marking as custom
      */
     @Overwrite
-    public void setDifficulty(final Difficulty difficulty, final boolean forceDifficulty) {
-        for (final ServerLevel world : this.shadow$getAllLevels()) {
-            this.bridge$setDifficulty(world, difficulty, forceDifficulty);
-        }
-    }
-
-    @Override
-    public void bridge$setDifficulty(final ServerLevel world, final Difficulty newDifficulty, final boolean forceDifficulty) {
-        if (world.getLevelData().isDifficultyLocked() && !forceDifficulty) {
-            return;
-        }
-
-        if (forceDifficulty && world.getLevelData() instanceof PrimaryLevelDataBridge bridge && bridge.bridge$isVanilla()) {
-            // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
-            if (!bridge.bridge$customDifficulty()) {
-                bridge.bridge$forceSetDifficulty(newDifficulty);
+    public void setDifficulty(final Difficulty difficulty, final boolean force) {
+        for (final ServerLevel level : this.shadow$getAllLevels()) {
+            if (level.getLevelData() instanceof PrimaryLevelData levelData && (force || !levelData.isDifficultyLocked())) {
+                // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
+                if (!((PrimaryLevelDataBridge) levelData).bridge$customDifficulty()) {
+                    ((PrimaryLevelDataBridge) levelData).bridge$forceSetDifficulty(difficulty);
+                }
             }
-        } else {
-            ((PrimaryLevelData) world.getLevelData()).setDifficulty(newDifficulty);
         }
     }
 

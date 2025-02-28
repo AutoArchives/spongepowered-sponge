@@ -22,25 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.levelgen;
+package org.spongepowered.common.mixin.core.world.level.storage;
 
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.world.level.storage.DerivedLevelData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
+import org.spongepowered.common.world.server.SpongeServerLevelData;
 
-@Mixin(NoiseGeneratorSettings.class)
-public abstract class NoiseGeneratorSettingsMixin implements ResourceKeyBridge {
+@Mixin(DerivedLevelData.class)
+public class DerivedLevelDataMixin implements ServerLevelDataBridge {
 
-    private ResourceKey impl$key;
-
-    @Override
-    public ResourceKey bridge$getKey() {
-        return this.impl$key;
-    }
+    private final SpongeServerLevelData impl$spongeData = new SpongeServerLevelData();
 
     @Override
-    public void bridge$setKey(final ResourceKey key) {
-        this.impl$key = key;
+    public SpongeServerLevelData bridge$spongeData() {
+        return this.impl$spongeData;
     }
 }
