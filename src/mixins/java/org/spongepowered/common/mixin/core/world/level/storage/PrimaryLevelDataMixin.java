@@ -41,7 +41,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -55,7 +54,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -259,14 +257,6 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     @Override
     public Optional<UUID> bridge$getUniqueIdForIndex(final int index) {
         return Optional.ofNullable(this.impl$playerUniqueIdMap.get(index));
-    }
-
-    @Override
-    public ServerLevelData overworldData() {
-        if (Level.OVERWORLD.location().equals(this.impl$spongeData.key())) {
-            return this;
-        }
-        return (ServerLevelData) SpongeCommon.server().overworld().getLevelData();
     }
 
     void impl$updateWorldForDifficultyChange(final ServerLevel level, final boolean isLocked) {

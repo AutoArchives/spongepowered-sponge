@@ -271,7 +271,6 @@
     "world.level.dimension.LevelStemMixin",
     "world.level.entity.PersistentEntitySectionManagerMixin",
     "world.level.levelgen.WorldDimensionsMixin",
-    "world.level.levelgen.WorldOptionsMixin",
     "world.level.levelgen.flat.FlatLayerInfoMixin",
     "world.level.levelgen.flat.FlatLevelGeneratorSettingsMixin",
     "world.level.levelgen.structure.LegacyStructureDataHandlerMixin",

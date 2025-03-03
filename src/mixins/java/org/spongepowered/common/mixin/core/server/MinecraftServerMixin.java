@@ -25,8 +25,12 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.google.inject.Injector;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.kyori.adventure.resource.ResourcePackRequest;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.Component;
@@ -41,8 +45,10 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -52,9 +58,11 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -65,6 +73,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -85,12 +94,14 @@ import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -186,13 +197,32 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         frame.pushCause(Sponge.systemSubject());
     }
 
-    /**
-     * @author Yeregorix
-     * @reason Multi world.
-     */
-    @Overwrite
-    protected void createLevels(final ChunkProgressListener progressListener) {
-        this.worldManager().createLevels(progressListener);
+    @Inject(method = "createLevels", at = @At(value = "INVOKE", ordinal = 0,
+        target = "Lnet/minecraft/server/level/ServerLevel;<init>(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;Lnet/minecraft/server/level/progress/ChunkProgressListener;ZJLjava/util/List;ZLnet/minecraft/world/RandomSequences;)V"))
+    private void impl$onCreateDefaultLevel(final CallbackInfo ci, @Local final ServerLevelData levelData, @Local final LevelStem levelStem) {
+        ((PrimaryLevelDataBridge) levelData).bridge$populateFromLevelStem(levelStem);
+        ((ServerLevelDataBridge) levelData).bridge$spongeData().setKey(DefaultWorldKeys.DEFAULT);
+    }
+
+    @Inject(method = "createLevels", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/ServerLevelData;isInitialized()Z"))
+    private void impl$onInitDefaultLevel(final CallbackInfo ci, @Local final ServerLevelData levelData, @Local final ServerLevel level) {
+        final boolean initialized = levelData.isInitialized();
+        final LoadWorldEvent loadWorldEvent = SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getInstance().currentCause(), (ServerWorld) level, initialized);
+        SpongeCommon.post(loadWorldEvent);
+    }
+
+    @Redirect(method = "createLevels", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;entrySet()Ljava/util/Set;"))
+    private Set<?> impl$onCreateOtherLevels(final Registry<?> stemRegistry) {
+        this.worldManager().createNonDefaultLevels();
+        return Set.of(); // prevent vanilla code
+    }
+
+    @WrapMethod(method = "setInitialSpawn")
+    private static void impl$wrapSetInitialSpawn(final ServerLevel level, final ServerLevelData levelData, final boolean generateBonusChest, final boolean debugWorld, final Operation<Void> original) {
+        try (final var state = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext(PhaseTracker.getInstance())) {
+            state.buildAndSwitch();
+            original.call(level, levelData, generateBonusChest, debugWorld);
+        }
     }
 
     /**
