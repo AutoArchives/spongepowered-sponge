@@ -33,6 +33,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -297,6 +298,11 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     protected void tickHeadTurn(final float p_110146_1_) {
         // Make the body rotation follow head rotation
         this.setYRot(this.getYHeadRot());
+    }
+
+    @Override
+    protected HoverEvent createHoverEvent() {
+        return new HoverEvent.ShowEntity(new HoverEvent.EntityTooltipInfo(EntityType.PLAYER, this.getUUID(), this.getName()));
     }
 
     private void setProfileName(final net.minecraft.network.chat.@Nullable Component newName) {

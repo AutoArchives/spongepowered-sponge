@@ -54,6 +54,7 @@ public class SpongeToolRuleFactory implements ToolRule.Factory {
         return (ToolRule) (Object) Tool.Rule.minesAndDrops(holderSet, (float) speed);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ToolRule deniesDrops(final List<BlockType> blocks) {
         // See Tool#forBlocks
@@ -68,6 +69,7 @@ public class SpongeToolRuleFactory implements ToolRule.Factory {
         return (ToolRule) (Object) Tool.Rule.deniesDrops(holderSet);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ToolRule overrideSpeed(final List<BlockType> blocks, final double speed) {
         final var holderSet = HolderSet.direct(blocks.stream().map(Block.class::cast).map(Block::builtInRegistryHolder).toList());
@@ -81,6 +83,7 @@ public class SpongeToolRuleFactory implements ToolRule.Factory {
         return (ToolRule) (Object) Tool.Rule.overrideSpeed(holderSet, (float) speed);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ToolRule forBlocks(final List<BlockType> blocks, @Nullable final Double speed, @Nullable final Boolean drops) {
         // See Tool#forBlocks

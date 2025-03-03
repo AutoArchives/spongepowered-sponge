@@ -65,6 +65,7 @@ import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -158,7 +159,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
     private CustomBossEvents impl$bossBarManager;
-    private ChunkProgressListener impl$chunkStatusListener;
+    private ChunkProgressListener impl$chunkProgressListener;
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
@@ -168,7 +169,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             final net.minecraft.resources.ResourceKey $$4, final LevelStem $$5, final ChunkProgressListener $$6, final boolean $$7, final long $$8,
             final List $$9, final boolean $$10, final RandomSequences $$11, final CallbackInfo ci) {
         this.impl$levelSave = $$2;
-        this.impl$chunkStatusListener = $$6;
+        this.impl$chunkProgressListener = $$6;
         this.impl$prevWeather = ((ServerWorld) this).weather();
         ((LevelTicksBridge<?>) this.blockTicks).bridge$level((ServerLevel) (Object) this);
         ((LevelTicksBridge<?>) this.fluidTicks).bridge$level((ServerLevel) (Object) this);
@@ -190,8 +191,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     }
 
     @Override
-    public ChunkProgressListener bridge$getChunkStatusListener() {
-        return this.impl$chunkStatusListener;
+    public ChunkProgressListener bridge$getChunkProgressListener() {
+        return this.impl$chunkProgressListener;
     }
 
     @Override
@@ -336,7 +337,11 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         "enabledFeatures"
     }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorldData()Lnet/minecraft/world/level/storage/WorldData;"))
     private WorldData impl$usePerWorldLevelData(final MinecraftServer server) {
-        return (WorldData) this.shadow$getLevelData();
+        final LevelData levelData = this.shadow$getLevelData();
+        if (levelData instanceof final WorldData worldData) {
+            return worldData;
+        }
+        return server.getWorldData();
     }
 
     @Redirect(method = "setDefaultSpawnPos",

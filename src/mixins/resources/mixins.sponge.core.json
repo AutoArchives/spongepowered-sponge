@@ -221,7 +221,7 @@
     "world.item.crafting.SingleItemRecipeMixin",
     "world.item.crafting.SmithingTransformRecipe_SerializerMixin",
     "world.item.crafting.SmithingTransformRecipeMixin",
-    "world.item.crafting.StonecutterRecipe_SerializerMixin",
+    "world.item.crafting.SingleItemRecipe_SerializerMixin",
     "world.item.enchantment.EnchantmentMixin",
     "world.level.BaseSpawnerMixin",
     "world.level.BlockGetterMixin",
