@@ -61,10 +61,10 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
         final String rawContent = PlainTextComponentSerializer.plainText().serialize(input);
         try {
             final CompoundTag contents = NbtLegacyHoverEventSerializer.SNBT_CODEC.decode(rawContent);
-            final CompoundTag tag = contents.getCompound(NbtLegacyHoverEventSerializer.ITEM_TAG);
+            final CompoundTag tag = contents.getCompoundOrEmpty(NbtLegacyHoverEventSerializer.ITEM_TAG);
             return HoverEvent.ShowItem.showItem(
-                Key.key(contents.getString(NbtLegacyHoverEventSerializer.ITEM_TYPE)),
-                contents.contains(NbtLegacyHoverEventSerializer.ITEM_COUNT) ? contents.getByte(NbtLegacyHoverEventSerializer.ITEM_COUNT) : 1,
+                Key.key(contents.getStringOr(NbtLegacyHoverEventSerializer.ITEM_TYPE, "")),
+                contents.getByteOr(NbtLegacyHoverEventSerializer.ITEM_COUNT, (byte) 1),
                 tag.isEmpty() ? null : BinaryTagHolder.encode(tag, NbtLegacyHoverEventSerializer.SNBT_CODEC)
             );
         } catch (final CommandSyntaxException ex) {
@@ -78,9 +78,9 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
         try {
             final CompoundTag contents = NbtLegacyHoverEventSerializer.SNBT_CODEC.decode(raw);
             return HoverEvent.ShowEntity.showEntity(
-                Key.key(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_TYPE)),
-                UUID.fromString(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_ID)),
-                componentCodec.decode(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_NAME))
+                Key.key(contents.getStringOr(NbtLegacyHoverEventSerializer.ENTITY_TYPE, "")),
+                UUID.fromString(contents.getStringOr(NbtLegacyHoverEventSerializer.ENTITY_ID, UUID.randomUUID().toString())),
+                componentCodec.decode(contents.getStringOr(NbtLegacyHoverEventSerializer.ENTITY_NAME, ""))
             );
         } catch (final CommandSyntaxException ex) {
             throw new IOException(ex);

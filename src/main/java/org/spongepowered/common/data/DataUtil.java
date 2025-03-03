@@ -164,11 +164,12 @@ public final class DataUtil {
 
         // cleanup v2 data on compound
         if (compound.contains(Constants.Forge.FORGE_DATA)) {
-            final CompoundTag forgeData = compound.getCompound(Constants.Forge.FORGE_DATA);
-            forgeData.remove(Constants.Sponge.Data.V2.SPONGE_DATA);
-            if (forgeData.isEmpty()) {
-                compound.remove(Constants.Forge.FORGE_DATA);
-            }
+            compound.getCompound(Constants.Forge.FORGE_DATA).ifPresent(f -> {
+                f.remove(Constants.Sponge.Data.V2.SPONGE_DATA);
+                if (f.isEmpty()) {
+                    compound.remove(Constants.Forge.FORGE_DATA);
+                }
+            });
         }
     }
 

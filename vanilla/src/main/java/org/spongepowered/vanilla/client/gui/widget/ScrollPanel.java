@@ -28,14 +28,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
 
 import java.util.Collections;
 import java.util.List;
@@ -189,7 +187,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             (int) (this.height * scale));
 
 // TODO fix me       RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, Screen.MENU_BACKGROUND);
+//        RenderSystem.setShaderTexture(0, Screen.MENU_BACKGROUND);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         final float texScale = 32.0F;
         BufferBuilder worldr = tess.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -202,15 +200,15 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
         worldr.addVertex(this.left, this.top, 0.0f).setUv(this.left / texScale, (this.top + (int) this.scrollDistance) / texScale)
             .setColor(0x20, 0x20, 0x20, 0xFF);
 
-        VertexBuffer $$3 = RenderSystem.getQuadVertices();
-        $$3.upload(worldr.buildOrThrow());
-        $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
+//        VertexBuffer $$3 = RenderSystem.getQuadVertices();
+//        $$3.upload(worldr.buildOrThrow());
+//        $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
 
 
         final int baseY = this.top + this.border - (int) this.scrollDistance;
         this.drawPanel(stack, this.right, baseY, tess, mouseX, mouseY);
 
-        RenderSystem.disableDepthTest();
+//        RenderSystem.disableDepthTest();
 
         final int extraHeight = (this.getContentHeight() + this.border) - this.height;
         if (extraHeight > 0) {
@@ -228,30 +226,30 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             worldr.addVertex(this.barLeft + this.barWidth, this.bottom, 0.0f).setColor(0x00, 0x00, 0x00, 0xFF);
             worldr.addVertex(this.barLeft + this.barWidth, this.top, 0.0f).setColor(0x00, 0x00, 0x00, 0xFF);
             worldr.addVertex(this.barLeft, this.top, 0.0f).setColor(0x00, 0x00, 0x00, 0xFF);
-            $$3 = RenderSystem.getQuadVertices();
-            $$3.upload(worldr.buildOrThrow());
-            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
+//            $$3 = RenderSystem.getQuadVertices();
+//            $$3.upload(worldr.buildOrThrow());
+//            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
 
             worldr =tess.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             worldr.addVertex(this.barLeft, barTop + barHeight, 0.0f).setColor(0x80, 0x80, 0x80, 0xFF);
             worldr.addVertex(this.barLeft + this.barWidth, barTop + barHeight, 0.0f).setColor(0x80, 0x80, 0x80, 0xFF);
             worldr.addVertex(this.barLeft + this.barWidth, barTop, 0.0f).setColor(0x80, 0x80, 0x80, 0xFF);
             worldr.addVertex(this.barLeft, barTop, 0.0f).setColor(0x80, 0x80, 0x80, 0xFF);
-            $$3 = RenderSystem.getQuadVertices();
-            $$3.upload(worldr.buildOrThrow());
-            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
+//            $$3 = RenderSystem.getQuadVertices();
+//            $$3.upload(worldr.buildOrThrow());
+//            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
             worldr = tess.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             worldr.addVertex(this.barLeft, barTop + barHeight - 1, 0.0f).setColor(0xC0, 0xC0, 0xC0, 0xFF);
             worldr.addVertex(this.barLeft + this.barWidth - 1, barTop + barHeight - 1, 0.0f).setColor(0xC0, 0xC0, 0xC0, 0xFF);
             worldr.addVertex(this.barLeft + this.barWidth - 1, barTop, 0.0f).setColor(0xC0, 0xC0, 0xC0, 0xFF);
             worldr.addVertex(this.barLeft, barTop, 0.0f).setColor(0xC0, 0xC0, 0xC0, 0xFF);
-            $$3 = RenderSystem.getQuadVertices();
-            $$3.upload(worldr.buildOrThrow());
-            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
+//            $$3 = RenderSystem.getQuadVertices();
+//            $$3.upload(worldr.buildOrThrow());
+//            $$3.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), null);
         }
 
 //        RenderSystem.enableTexture();
-        RenderSystem.disableBlend();
+//        RenderSystem.disableBlend();
         RenderSystem.disableScissor();
     }
 

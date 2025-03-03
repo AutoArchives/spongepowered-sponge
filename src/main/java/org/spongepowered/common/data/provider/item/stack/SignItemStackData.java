@@ -31,11 +31,14 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.block.entity.SignText;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Arrays;
 import java.util.List;
 
 public final class SignItemStackData {
@@ -53,16 +56,16 @@ public final class SignItemStackData {
                             if (tag.isEmpty()) {
                                 return null;
                             }
-                            final String id = tag.getString(Constants.Item.BLOCK_ENTITY_ID);
+
+                            final String id = tag.getStringOr(Constants.Item.BLOCK_ENTITY_ID, "");
                             if (!id.equalsIgnoreCase(Constants.TileEntity.SIGN)) {
                                 return null;
                             }
-                          final GsonComponentSerializer gcs = GsonComponentSerializer.gson();
-                            final List<Component> texts = Lists.newArrayListWithCapacity(4);
-                            for (int i = 0; i < 4; i++) {
-                                texts.add(gcs.deserialize(tag.getString("Text" + (i + 1))));
-                            }
-                            return texts;
+                            return tag.read("front_text", SignText.DIRECT_CODEC).map(t -> t.getMessages(false))
+                                .stream()
+                                .flatMap(Arrays::stream)
+                                .map(SpongeAdventure::asAdventure)
+                                .toList();
                         })
                         .set((h, v) -> {
                             final GsonComponentSerializer gcs = GsonComponentSerializer.gson();

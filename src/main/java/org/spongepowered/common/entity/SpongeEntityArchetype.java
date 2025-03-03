@@ -53,6 +53,7 @@ import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3f;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -95,14 +96,14 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
         if (this.position != null) {
             return Optional.of(this.position);
         }
-        if (!this.compound.contains(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_LIST)) {
+        if (!this.compound.contains(Constants.Entity.ENTITY_POSITION)) {
             return Optional.empty();
         }
         try {
-            final ListTag pos = this.compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
-            final double x = pos.getDouble(0);
-            final double y = pos.getDouble(1);
-            final double z = pos.getDouble(2);
+            final ListTag pos = this.compound.getListOrEmpty(Constants.Entity.ENTITY_POSITION);
+            final double x = pos.getDoubleOr(0, 0);
+            final double y = pos.getDoubleOr(1, 0);
+            final double z = pos.getDoubleOr(2, 0);
             this.position = new Vector3d(x, y, z);
             return Optional.of(this.position);
         } catch (final Exception e) {
@@ -183,9 +184,9 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
     }
 
     private Vector3d getRotation() {
-        final ListTag tag = this.compound.getList("Rotation", 5);
-        final float rotationYaw = tag.getFloat(0);
-        final float rotationPitch = tag.getFloat(1);
+        final var rotation = this.compound.read("Rotation", Constants.Entity.ROTATIONS_CODEC).orElse(Vector3f.ZERO);
+        final float rotationYaw = rotation.x();
+        final float rotationPitch = rotation.z();
         return new Vector3d(rotationPitch, rotationYaw, 0);
     }
 

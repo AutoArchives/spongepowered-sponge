@@ -185,7 +185,7 @@ public final class EntityUtil {
         final var tag = logic.entityToSpawn();
         final var resourceLocation = tag.getString(Constants.Entity.ENTITY_TYPE_ID);
         final var entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
-        final var type = entityTypeRegistry.getOptional(ResourceLocation.parse(resourceLocation))
+        final var type = resourceLocation.flatMap(location -> entityTypeRegistry.getOptional(ResourceLocation.parse(location)))
             .map(org.spongepowered.api.entity.EntityType.class::cast)
             .orElse(EntityTypes.PIG.get());
 
@@ -211,8 +211,11 @@ public final class EntityUtil {
 
         for (final var weightedEntity : spawnData.unwrap()) {
             final CompoundTag nbt = weightedEntity.value().entityToSpawn();
-            final String resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
-            final var mcType = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getOptional(ResourceLocation.parse(resourceLocation));
+            final Optional<String> resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
+            if (resourceLocation.isEmpty()) {
+                continue;
+            }
+            final var mcType = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getOptional(ResourceLocation.parse(resourceLocation.get()));
             final var type = mcType.map(org.spongepowered.api.entity.EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
             final EntityArchetype archetype = SpongeEntityArchetypeBuilder.pooled()

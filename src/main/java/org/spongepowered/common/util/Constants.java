@@ -31,9 +31,12 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.HashBiMap;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.serialization.Codec;
+import net.minecraft.Util;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Rotations;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
@@ -70,12 +73,15 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.math.vector.Vector3f;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -200,6 +206,7 @@ public final class Constants {
         public static final class PlayerData {
 
             public static final DataQuery PLAYER_DATA_JOIN = of("FirstJoin");
+            public static final Codec<Instant> INSTANT_CODEC = Codec.LONG.xmap(Instant::ofEpochMilli, Instant::toEpochMilli);
             public static final DataQuery PLAYER_DATA_LAST = of("LastPlayed");
         }
 
@@ -736,6 +743,13 @@ public final class Constants {
         public static final String ENTITY_POSITION = "Pos";
         public static final String ENTITY_DIMENSION = "Dimension";
         public static final String ENTITY_ROTATION = "Rotation";
+        public static final Codec<Vector3f> ROTATIONS_CODEC = Codec.FLOAT
+            .listOf()
+            .comapFlatMap(
+                $$0 -> Util.fixedSize($$0, 2).map($$0x -> new Vector3f($$0x.get(0), $$0x.get(1), 0)),
+                $$0 -> List.of($$0.x(), $$0.y())
+            );
+
         public static final String ENTITY_UUID = "UUID";
         // Entities
         public static final DataQuery CLASS = of("EntityClass");
@@ -1021,22 +1035,22 @@ public final class Constants {
         public static final byte TAG_ANY_NUMERIC = 99;
 
         public static CompoundTag filterSpongeCustomData(final CompoundTag rootCompound) {
-            if (rootCompound.contains(Forge.FORGE_DATA, NBT.TAG_COMPOUND)) {
-                final CompoundTag forgeCompound = rootCompound.getCompound(Forge.FORGE_DATA);
-                if (forgeCompound.contains(Sponge.Data.V2.SPONGE_DATA, NBT.TAG_COMPOUND)) {
+            if (rootCompound.contains(Forge.FORGE_DATA)) {
+                final CompoundTag forgeCompound = rootCompound.getCompoundOrEmpty(Forge.FORGE_DATA);
+                if (forgeCompound.contains(Sponge.Data.V2.SPONGE_DATA)) {
                     NBT.cleanseInnerCompound(forgeCompound);
                 }
                 if (forgeCompound.isEmpty()) {
                     rootCompound.remove(Forge.FORGE_DATA);
                 }
-            } else if (rootCompound.contains(Sponge.Data.V2.SPONGE_DATA, NBT.TAG_COMPOUND)) {
+            } else if (rootCompound.contains(Sponge.Data.V2.SPONGE_DATA)) {
                 NBT.cleanseInnerCompound(rootCompound);
             }
             return rootCompound;
         }
 
         private static void cleanseInnerCompound(final CompoundTag compound) {
-            final CompoundTag inner = compound.getCompound(Sponge.Data.V2.SPONGE_DATA);
+            final CompoundTag inner = compound.getCompoundOrEmpty(Sponge.Data.V2.SPONGE_DATA);
             if (inner.isEmpty()) {
                 compound.remove(Sponge.Data.V2.SPONGE_DATA);
             }

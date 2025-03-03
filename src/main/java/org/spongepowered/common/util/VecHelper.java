@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.util;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Rotations;
 import net.minecraft.core.Vec3i;
@@ -34,9 +37,27 @@ import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.world.server.SpongeServerLocation;
 import org.spongepowered.math.vector.Vector2i;
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3f;
 import org.spongepowered.math.vector.Vector3i;
 
 public final class VecHelper {
+
+    public static final MapCodec<Vector3f> VECTOR3F_CODEC = RecordCodecBuilder.mapCodec(i ->
+        i.group(
+            Codec.FLOAT.fieldOf("x").forGetter(Vector3f::x),
+            Codec.FLOAT.fieldOf("y").forGetter(Vector3f::y),
+            Codec.FLOAT.fieldOf("z").forGetter(Vector3f::z)
+        ).apply(i, Vector3f::new)
+    );
+
+    public static final MapCodec<Vector3d> VECTOR3D_CODEC = RecordCodecBuilder.mapCodec(i ->
+        i.group(
+            Codec.DOUBLE.fieldOf("x").forGetter(Vector3d::x),
+            Codec.DOUBLE.fieldOf("y").forGetter(Vector3d::y),
+            Codec.DOUBLE.fieldOf("z").forGetter(Vector3d::z)
+        ).apply(i, Vector3d::new)
+    );
 
     // === Flow Vector3d --> BlockPos ===
 
@@ -216,14 +237,12 @@ public final class VecHelper {
 
     public static CompoundTag toCompound(final org.spongepowered.math.vector.Vector3d vector) {
         final CompoundTag compound = new CompoundTag();
-        compound.putDouble("x", vector.x());
-        compound.putDouble("y", vector.y());
-        compound.putDouble("z", vector.z());
+        compound.store(VECTOR3D_CODEC, vector);
         return compound;
     }
 
     public static org.spongepowered.math.vector.Vector3d fromCompound(final CompoundTag compound) {
-        return new org.spongepowered.math.vector.Vector3d(compound.getDouble("x"), compound.getDouble("y"), compound.getDouble("z"));
+        return compound.read(VECTOR3D_CODEC).orElse(Vector3d.ZERO);
     }
 
     private VecHelper() {

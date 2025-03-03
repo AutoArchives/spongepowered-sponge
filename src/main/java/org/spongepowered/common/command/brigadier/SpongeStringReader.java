@@ -193,7 +193,8 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     public String parseNBTString() throws ArgumentParseException {
         final int startCursor = this.getCursor();
         try {
-            TagParser.parseAsArgument(NbtOps.INSTANCE, this);
+            TagParser.create(NbtOps.INSTANCE)
+                .parseAsArgument(this);
         } catch (final CommandSyntaxException ex) {
             this.setCursor(startCursor);
             throw new ArgumentParseException(

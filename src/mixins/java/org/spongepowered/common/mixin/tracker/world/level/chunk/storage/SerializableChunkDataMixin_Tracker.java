@@ -37,6 +37,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 @Mixin(SerializableChunkData.class)
@@ -84,7 +85,7 @@ public abstract class SerializableChunkDataMixin_Tracker implements Serializable
 
     @Override
     public void bridge$parseTrackerData(final CompoundTag fullTag) {
-        final CompoundTag spongeData = fullTag.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
+        final Optional<CompoundTag> spongeData = fullTag.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
         this.tracker$intPlayerPos = new HashMap<>();
         this.tracker$shortPlayerPos = new HashMap<>();
 
@@ -92,22 +93,25 @@ public abstract class SerializableChunkDataMixin_Tracker implements Serializable
             return;
         }
 
-        final ListTag list = spongeData.getList(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, 10);
-        for (final Tag tag : list) {
+        final Optional<ListTag> list = spongeData.get().getList(Constants.Sponge.SPONGE_BLOCK_POS_TABLE);
+        if (list.isEmpty()) {
+            return;
+        }
+        for (final Tag tag : list.get()) {
             final PlayerTracker tracker = new PlayerTracker();
             final CompoundTag data = (CompoundTag) tag;
             final boolean isShortPos = data.contains("pos");
             if (data.contains("owner")) {
-                tracker.creatorindex = data.getInt("owner");
+                tracker.creatorindex = data.getIntOr("owner", 0);
             }
             if (data.contains("notifier")) {
-                tracker.notifierIndex = data.getInt("notifier");
+                tracker.notifierIndex = data.getIntOr("notifier", 0);
             }
             if (tracker.notifierIndex != -1 || tracker.creatorindex != -1) {
                 if (isShortPos) {
-                    this.tracker$shortPlayerPos.put(data.getShort("pos"), tracker);
+                    this.tracker$shortPlayerPos.put(data.getShortOr("pos", (short) 0), tracker);
                 } else {
-                    this.tracker$intPlayerPos.put(data.getInt("ipos"), tracker);
+                    this.tracker$intPlayerPos.put(data.getIntOr("ipos", 0), tracker);
                 }
             }
         }

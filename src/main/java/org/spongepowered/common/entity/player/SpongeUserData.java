@@ -27,10 +27,12 @@ package org.spongepowered.common.entity.player;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.core.Rotations;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
@@ -86,6 +88,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.FileUtil;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3f;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,7 +157,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
                 compound = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());
             }
             // See PlayerDataAccess - keep this line up to date.
-            final int version = compound.contains("DataVersion", 3) ? compound.getInt("DataVersion") : -1;
+            final int version = compound.getIntOr("DataVersion", -1);
             DataFixTypes.PLAYER.updateToCurrentVersion(DataFixers.getDataFixer(), compound, version);
             return new SpongeUserData(profile, compound);
         } catch (final IOException e) {
@@ -198,9 +201,10 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     private UserInventory loadInventory() {
         if (this.inventory == null) {
             this.inventory = new SpongeUserInventory(this);
-            final ListTag listNBT = this.compound.getList(Constants.Entity.Player.INVENTORY, 10);
+            final ListTag listNBT = this.compound.getListOrEmpty(Constants.Entity.Player.INVENTORY);
             this.inventory.readList(listNBT);
-            this.inventory.currentItem = this.compound.getInt(Constants.Entity.Player.SELECTED_ITEM_SLOT);
+            this.compound.getInt(Constants.Entity.Player.SELECTED_ITEM_SLOT)
+                .ifPresent(slotId -> this.inventory.currentItem = slotId);
         }
         return (UserInventory) this.inventory;
     }
@@ -208,8 +212,8 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     private SpongeUserData loadEnderInventory() {
         if (this.enderChest == null) {
             this.enderChest = new SpongeUserInventoryEnderchest(this);
-            if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9)) {
-                final ListTag nbttaglist1 = this.compound.getList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
+            if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY)) {
+                final ListTag nbttaglist1 = this.compound.getListOrEmpty(Constants.Entity.Player.ENDERCHEST_INVENTORY);
                 this.enderChest.fromTag(nbttaglist1, SpongeCommon.server().registryAccess());
             }
         }
@@ -220,16 +224,16 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         this.reset();
         this.compound = compound;
 
-        if (!compound.contains(Constants.Sponge.World.WORLD_KEY)) {
-            this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.WORLD_KEY));
-        }
-        final ListTag position = compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
-        final ListTag rotation = compound.getList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
-        this.x = position.getDouble(0);
-        this.y = position.getDouble(1);
-        this.z = position.getDouble(2);
-        this.yaw = rotation.getFloat(0);
-        this.pitch = rotation.getFloat(1);
+        compound.read(Constants.Sponge.World.WORLD_KEY, ResourceLocation.CODEC)
+            .ifPresent(key -> this.worldKey = (ResourceKey) (Object) key);
+
+        final var rotation = compound.read(Constants.Entity.ENTITY_ROTATION, Rotations.CODEC).orElse(new Rotations(0, 0, 0));
+        final var position = compound.read(Constants.Entity.ENTITY_POSITION, Constants.Entity.ROTATIONS_CODEC).orElse(Vector3f.ZERO);
+        this.x = position.x();
+        this.y = position.y();
+        this.z = position.z();
+        this.yaw = rotation.x();
+        this.pitch = rotation.y();
 
         this.isConstructing = true;
         DataUtil.syncTagToData(this);

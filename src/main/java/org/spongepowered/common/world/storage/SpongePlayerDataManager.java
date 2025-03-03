@@ -58,24 +58,28 @@ public final class SpongePlayerDataManager {
         }
         Instant lastPlayed = creation;
         // first try to migrate bukkit join data stuff
-        if (compound.contains(Constants.Bukkit.BUKKIT, Constants.NBT.TAG_COMPOUND)) {
-            final CompoundTag bukkitCompound = compound.getCompound(Constants.Bukkit.BUKKIT);
-            creation = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_FIRST_PLAYED));
-            lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_LAST_PLAYED));
+        if (compound.contains(Constants.Bukkit.BUKKIT)) {
+            final CompoundTag bukkitCompound = compound.getCompoundOrEmpty(Constants.Bukkit.BUKKIT);
+            creation = Instant.ofEpochMilli(bukkitCompound.getLongOr(Constants.Bukkit.BUKKIT_FIRST_PLAYED, 0));
+            lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLongOr(Constants.Bukkit.BUKKIT_LAST_PLAYED, 0));
         }
         // migrate canary join data
-        if (compound.contains(Constants.Canary.ROOT, Constants.NBT.TAG_COMPOUND)) {
-            final CompoundTag canaryCompound = compound.getCompound(Constants.Canary.ROOT);
-            creation = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.FIRST_JOINED));
-            lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.LAST_JOINED));
+        if (compound.contains(Constants.Canary.ROOT)) {
+            final CompoundTag canaryCompound = compound.getCompoundOrEmpty(Constants.Canary.ROOT);
+            creation = Instant.ofEpochMilli(canaryCompound.getLongOr(Constants.Canary.FIRST_JOINED, 0));
+            lastPlayed = Instant.ofEpochMilli(canaryCompound.getLongOr(Constants.Canary.LAST_JOINED, 0));
         }
         final Path playerFile = this.playersDirectory.resolve(playerEntity.uniqueId() + ".dat");
         if (Files.isReadable(playerFile)) {
             final CompoundTag playerFileCompound;
             try (final InputStream stream = Files.newInputStream(playerFile)) {
                 playerFileCompound = NbtIo.readCompressed(stream, NbtAccounter.unlimitedHeap());
-                creation = Instant.ofEpochMilli(playerFileCompound.getLong(Constants.Sponge.PlayerData.PLAYER_DATA_JOIN.toString()));
-                lastPlayed = Instant.ofEpochMilli(playerFileCompound.getLong(Constants.Sponge.PlayerData.PLAYER_DATA_LAST.toString()));
+                creation = playerFileCompound
+                    .read(Constants.Sponge.PlayerData.PLAYER_DATA_JOIN.toString(), Constants.Sponge.PlayerData.INSTANT_CODEC)
+                    .orElse(Instant.now());
+                lastPlayed = playerFileCompound
+                    .read(Constants.Sponge.PlayerData.PLAYER_DATA_LAST.toString(), Constants.Sponge.PlayerData.INSTANT_CODEC)
+                    .orElse(Instant.now());
             } catch (final Exception e) {
                 throw new RuntimeException("Failed to decompress playerdata for playerfile " + playerFile, e);
             }

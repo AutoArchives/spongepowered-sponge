@@ -48,7 +48,7 @@ public abstract class LevelStorageSourceMixin_Vanilla {
             method = "readLevelDataTagFixed",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/nbt/CompoundTag;getCompound(Ljava/lang/String;)Lnet/minecraft/nbt/CompoundTag;",
+                    target = "Lnet/minecraft/nbt/CompoundTag;getCompoundOrEmpty(Ljava/lang/String;)Lnet/minecraft/nbt/CompoundTag;",
                     ordinal = 0
             )
     )

@@ -172,11 +172,10 @@ public class SpongeUserInventory implements Container {
         this.armorInventory.clear();
         this.offHandInventory.clear();
 
-        for (int i = 0; i < nbtTagListIn.size(); ++i) {
-            final CompoundTag nbttagcompound = nbtTagListIn.getCompound(i);
-            final int j = nbttagcompound.getByte("Slot") & 255;
-            final ItemStack itemstack = ItemStack.parse(SpongeCommon.server().registryAccess(), nbttagcompound).get();
-
+        for (int i = 0; i < nbtTagListIn.size(); i++) {
+            CompoundTag slotTag = nbtTagListIn.getCompoundOrEmpty(i);
+            int j = slotTag.getByteOr("Slot", (byte)0) & 255;
+            ItemStack itemstack = ItemStack.parse(SpongeCommon.server().registryAccess(), slotTag).orElse(ItemStack.EMPTY);
             if (!itemstack.isEmpty()) {
                 if (j >= 0 && j < this.mainInventory.size()) {
                     this.mainInventory.set(j, itemstack);

@@ -715,22 +715,23 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    @Redirect(
-            method = "applyEffectsFromBlocks(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;)V",
+    @WrapOperation(
+            method = "applyEffectsFromBlocks(Ljava/util/List;)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/Block;stepOn(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/Entity;)V"
             )
     )
-    private void impl$onStepOnCollide(final Block block, final Level world, final BlockPos pos, final BlockState state, final Entity entity) {
+    private void impl$onStepOnCollide(final Block block, final Level world, final BlockPos pos, final BlockState state,
+                                      final Entity entity, Operation<Void> original) {
         if (!ShouldFire.COLLIDE_BLOCK_EVENT_STEP_ON || world.isClientSide) {
-            block.stepOn(world, pos, state, entity);
+            original.call(block, world, pos, state, entity);
             return;
         }
 
         final org.spongepowered.api.util.Direction dir = org.spongepowered.api.util.Direction.NONE;
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, dir, SpongeCommonEventFactory.CollisionType.STEP_ON)) {
-            block.stepOn(world, pos, state, entity);
+            original.call(block, world, pos, state, entity);
             this.impl$lastCollidedBlockPos = pos;
         }
 

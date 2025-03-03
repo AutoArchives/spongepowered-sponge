@@ -266,7 +266,11 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
             return Optional.empty();
         }
 
-        final String blockEntityId = this.compound.getString(Constants.Item.BLOCK_ENTITY_ID);
+        final var blockEntityIDOpt = this.compound.getString(Constants.Item.BLOCK_ENTITY_ID);
+        if (blockEntityIDOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        final var blockEntityID = blockEntityIDOpt.get();
 
         final CompoundTag compound = this.compound.copy();
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X);
@@ -276,7 +280,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
         return Optional.of(SpongeBlockEntityArchetypeBuilder.pooled()
                 .state(this.state())
-                .blockEntity((BlockEntityType) SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).getOptional(ResourceLocation.tryParse(blockEntityId)).orElse(null))
+                .blockEntity((BlockEntityType) SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).getOptional(ResourceLocation.tryParse(blockEntityID)).orElse(null))
                 .blockEntityData(NBTTranslator.INSTANCE.translate(compound))
                 .build());
     }
