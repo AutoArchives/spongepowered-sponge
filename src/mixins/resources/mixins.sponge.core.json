@@ -202,7 +202,6 @@
     "world.item.FireworkRocketItemMixin",
     "world.item.FishingRodItemMixin",
     "world.item.ItemCooldownsMixin",
-    "world.item.ItemMixin",
     "world.item.ItemStackMixin",
     "world.item.MapItemMixin",
     "world.item.ServerItemCooldownsMixin",
