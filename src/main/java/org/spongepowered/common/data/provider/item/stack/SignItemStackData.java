@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import com.google.common.collect.Lists;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.component.DataComponents;
@@ -39,7 +38,6 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Arrays;
-import java.util.List;
 
 public final class SignItemStackData {
 

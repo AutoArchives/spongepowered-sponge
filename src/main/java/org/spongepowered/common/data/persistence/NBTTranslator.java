@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.persistence;
 
+import static org.spongepowered.api.data.persistence.DataQuery.of;
+
 import com.google.common.collect.Lists;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.nbt.ByteArrayTag;
@@ -51,8 +53,6 @@ import org.spongepowered.common.util.Preconditions;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 public final class NBTTranslator implements DataTranslator<CompoundTag> {
 
