@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.nbt;
 
 import com.google.common.collect.Maps;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import org.apache.logging.log4j.Level;
@@ -39,7 +38,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 
 /**
  * @author Zidane - Minecraft 1.14.4
@@ -59,11 +58,11 @@ public abstract class CompoundTagMixin {
 
     @Redirect(method = "copy()Lnet/minecraft/nbt/CompoundTag;",
         at = @At(value = "INVOKE",
-            target ="Lnet/minecraft/Util;mapValues(Ljava/util/Map;Ljava/util/function/Function;)Ljava/util/Map;"))
-    private Map<String, Tag> impl$checkForOverflowOnCopy(Map<String, Tag> fromMap, Function<? super Tag, Tag> function) {
-        return Util.mapValues(fromMap, (tag) -> {
+            target ="Ljava/util/Map;forEach(Ljava/util/function/BiConsumer;)V"))
+    private <K, V> void impl$checkForOverflowOnCopy(Map<K, V> instance, BiConsumer<? super K, ? super V> consumer) {
+        instance.forEach((k, v) -> {
             try {
-                return tag == null ? null : tag.copy();
+                consumer.accept(k, v);
             } catch (StackOverflowError e) {
                 final PrettyPrinter printer = new PrettyPrinter(60)
                     .add("StackOverflow from trying to copy this compound")
@@ -90,7 +89,6 @@ public abstract class CompoundTagMixin {
                 }
                 printer.add();
                 printer.log(SpongeCommon.logger(), Level.ERROR);
-                return null;
             }
         });
     }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,16 +33,17 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.entity.item.PrimedTntBridge;
@@ -52,21 +54,23 @@ import org.spongepowered.common.mixin.core.block.BlockMixin;
 @Mixin(TntBlock.class)
 public abstract class TntBlockMixin extends BlockMixin {
 
-    private boolean primeCancelled;
+    @Unique
+    private boolean impl$primeCancelled;
 
+    @Unique
     private boolean impl$onRemove(Level world, BlockPos pos, boolean isMoving) {
-        final boolean removed = !this.primeCancelled && world.removeBlock(pos, isMoving);
-        this.primeCancelled = false;
+        final boolean removed = !this.impl$primeCancelled && world.removeBlock(pos, isMoving);
+        this.impl$primeCancelled = false;
         return removed;
     }
 
-    @Inject(method = "prime(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/LivingEntity;)V",
+    @Inject(method = "prime(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/LivingEntity;)Z",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"),
-        locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
-    private static void impl$ThrowPrimeAndMaybeCancel(final Level worldIn, final BlockPos pos,
-            @Nullable final LivingEntity igniter, final CallbackInfo ci, final PrimedTnt tnt) {
+    private static void impl$ThrowPrimeAndMaybeCancel(
+        final Level level, final BlockPos pos, final LivingEntity igniter, final CallbackInfoReturnable<Boolean> cir,
+        @Local final PrimedTnt tnt) {
         ((PrimedTntBridge) tnt).bridge$setDetonator(igniter);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
@@ -74,7 +78,7 @@ public abstract class TntBlockMixin extends BlockMixin {
                     frame.addContext(EventContextKeys.IGNITER, (Living) igniter);
                 }
                 if (!((FusedExplosiveBridge) tnt).bridge$shouldPrime()) {
-                    ci.cancel();
+                    cir.setReturnValue(false);
                 }
             }
         }
@@ -115,8 +119,8 @@ public abstract class TntBlockMixin extends BlockMixin {
             target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"))
     private boolean impl$removeActivated(final Level world, final BlockPos pos, final BlockState state, final int flag) {
         // Called when player manually ignites TNT
-        final boolean removed = !this.primeCancelled && world.setBlock(pos, state, flag);
-        this.primeCancelled = false;
+        final boolean removed = !this.impl$primeCancelled && world.setBlock(pos, state, flag);
+        this.impl$primeCancelled = false;
         return removed;
     }
 
