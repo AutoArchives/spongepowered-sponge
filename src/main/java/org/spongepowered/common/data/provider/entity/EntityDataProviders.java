@@ -42,6 +42,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         AreaEffectCloudData.register(this.registrator);
         ArmorStandData.register(this.registrator);
         ArrowData.register(this.registrator);
+        AxolotlData.register(this.registrator);
         BatData.register(this.registrator);
         BedData.register(this.registrator);
         BlazeData.register(this.registrator);
