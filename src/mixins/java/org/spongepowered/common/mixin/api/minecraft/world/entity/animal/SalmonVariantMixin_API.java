@@ -22,28 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
-import net.minecraft.world.entity.animal.Pufferfish;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.animal.PufferfishAccessor;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import net.minecraft.world.entity.animal.Salmon;
+import org.spongepowered.api.data.type.SalmonSize;
+import org.spongepowered.asm.mixin.Mixin;
 
-public final class PufferfishData {
+@Mixin(Salmon.Variant.class)
+public abstract class SalmonVariantMixin_API implements SalmonSize {
 
-    private PufferfishData() {
-    }
-
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(Pufferfish.class)
-                    .create(Keys.SCALE)
-                        .get(h -> (double) PufferfishAccessor.invoker$getScale(h.getPuffState()))
-                    .create(Keys.PUFFER_FISH_PUFFINESS_STATE)
-                        .get(Pufferfish::getPuffState)
-                        .set(Pufferfish::setPuffState)
-        ;
-    }
-    // @formatter:on
 }

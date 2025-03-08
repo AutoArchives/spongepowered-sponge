@@ -24,26 +24,22 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.Pufferfish;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.animal.PufferfishAccessor;
+import org.spongepowered.api.data.type.AxolotlVariant;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public final class PufferfishData {
-
-    private PufferfishData() {
+public class AxolotlData {
+    private AxolotlData() {
     }
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(Pufferfish.class)
-                    .create(Keys.SCALE)
-                        .get(h -> (double) PufferfishAccessor.invoker$getScale(h.getPuffState()))
-                    .create(Keys.PUFFER_FISH_PUFFINESS_STATE)
-                        .get(Pufferfish::getPuffState)
-                        .set(Pufferfish::setPuffState)
-        ;
+            .asMutable(Axolotl.class)
+                .create(Keys.AXOLOTL_VARIANT)
+                    .get(a -> (AxolotlVariant) (Object) a.getVariant())
+                    .set((h, v) -> h.setVariant((Axolotl.Variant)  (Object) v));
     }
     // @formatter:on
 }

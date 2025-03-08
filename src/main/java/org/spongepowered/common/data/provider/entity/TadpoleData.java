@@ -24,26 +24,29 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.Pufferfish;
+import net.minecraft.world.entity.animal.frog.Tadpole;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.animal.PufferfishAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.frog.TadpoleAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
-public final class PufferfishData {
+public class TadpoleData {
 
-    private PufferfishData() {
-    }
-
-    // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
+        // @formatter:off
         registrator
-                .asMutable(Pufferfish.class)
-                    .create(Keys.SCALE)
-                        .get(h -> (double) PufferfishAccessor.invoker$getScale(h.getPuffState()))
-                    .create(Keys.PUFFER_FISH_PUFFINESS_STATE)
-                        .get(Pufferfish::getPuffState)
-                        .set(Pufferfish::setPuffState)
+            .asMutable(TadpoleAccessor.class)
+            .create(Keys.BABY_TICKS)
+            .get(h -> h.accessor$getAge() < 0 ? new SpongeTicks(Tadpole.ticksToBeFrog-h.accessor$getAge()) : null)
+            .setAnd((h, v) -> {
+                final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                if (v.isInfinite() || ticks < 0) {
+                    return false;
+                }
+                h.accessor$setAge(-ticks);
+                return true;
+            })
         ;
+        // @formatter:on
     }
-    // @formatter:on
 }
