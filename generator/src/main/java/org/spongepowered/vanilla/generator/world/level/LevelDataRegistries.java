@@ -70,7 +70,9 @@ public class LevelDataRegistries {
                 "Biomes",
                 "BIOME",
                 context.relativeClass("world.biome", "Biome"),
-                Registries.BIOME
+                Registries.BIOME,
+                a -> true,
+                RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
                 "world.generation.carver",
@@ -219,6 +221,15 @@ public class LevelDataRegistries {
                 "FLUID_TYPE",
                 context.relativeClass("fluid", "FluidType"),
                 Registries.FLUID
+            ),
+            new RegistryEntriesGenerator<>(
+                "world.server",
+                "WorldArchetypeTypes",
+                "WORLD_ARCHETYPE_TYPE",
+                context.relativeClass("world.server", "WorldArchetypeType"),
+                Registries.LEVEL_STEM,
+                $ -> true,
+                RegistryScope.SERVER
             )
         );
     }

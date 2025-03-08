@@ -60,6 +60,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.api.world.DefaultWorldKeys;
@@ -93,14 +94,14 @@ import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
-import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -427,13 +428,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         return this.impl$serviceProvider;
     }
 
-    @Inject(method = "reloadResources", at = @At(value = "HEAD"))
-    public void impl$reloadResources(final Collection<String> datapacksToLoad, final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        final List<String> reloadablePacks = ((SpongeDataPackManager) this.dataPackManager()).registerPacks();
-        datapacksToLoad.addAll(reloadablePacks);
-        this.shadow$getPackRepository().reload();
-    }
-
     @Override
     public String toString() {
         return this.getClass().getSimpleName();
@@ -457,5 +451,11 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         if (this.impl$spongeMainThreadExecutor.pollTask()) {
             cir.setReturnValue(true);
         }
+    }
+
+    @Override
+    public void bridge$reloadServerRegistries(final RegistryHolder holder) {
+        ((SpongeRegistryHolder) holder).setRootMinecraftRegistry(this.shadow$registryAccess());
+        Launch.instance().lifecycle().beginEstablishServerRegistries(holder);
     }
 }

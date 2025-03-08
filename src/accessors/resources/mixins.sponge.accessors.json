@@ -31,6 +31,7 @@
     "network.protocol.game.ServerboundMovePlayerPacketAccessor",
     "network.protocol.game.ServerboundMoveVehiclePacketAccessor",
     "network.protocol.handshake.ClientIntentionPacketAccessor",
+    "resources.RegistryDataLoader_LoaderAccessor",
     "resources.ResourceKeyAccessor",
     "server.MinecraftServerAccessor",
     "server.level.ChunkMap_TrackedEntityAccessor",

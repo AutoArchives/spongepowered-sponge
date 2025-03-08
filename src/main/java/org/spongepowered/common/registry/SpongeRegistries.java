@@ -26,9 +26,9 @@ package org.spongepowered.common.registry;
 
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.flag.FeatureFlagSet;
-import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.common.registry.loader.CommandRegistryLoader;
@@ -36,6 +36,8 @@ import org.spongepowered.common.registry.loader.DynamicSpongeRegistryLoader;
 import org.spongepowered.common.registry.loader.SpongeCommonRegistryLoader;
 import org.spongepowered.common.registry.loader.SpongeRegistryLoader;
 import org.spongepowered.common.registry.loader.VanillaRegistryLoader;
+
+import java.util.List;
 
 public final class SpongeRegistries {
 
@@ -83,6 +85,7 @@ public final class SpongeRegistries {
         holder.createFrozenRegistry(RegistryTypes.MAP_DECORATION_ORIENTATION, SpongeRegistryLoader.mapDecorationOrientation());
         holder.createFrozenRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoader.mapShade());
         holder.createFrozenRegistry(RegistryTypes.NOISE_CONFIG, SpongeRegistryLoader.noiseConfig());
+        holder.createFrozenRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, CommandRegistryLoader.valueParameter());
 
         SpongeRegistries.registerEarlyDynamicRegistries(holder);
     }
@@ -94,20 +97,19 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.TELEPORT_HELPER_FILTER, DynamicSpongeRegistryLoader.teleportHelperFilter(), true);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void registerServerRegistries(final SpongeRegistryHolder holder, final FeatureFlagSet featureFlags) {
+        holder.createFrozenRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, (h) ->
+            CommandRegistryLoader.clientCompletionKey(CommandBuildContext.simple(
+                new RegistryAccess.ImmutableRegistryAccess((List) h.streamRegistries().toList()), featureFlags)), RegistryTypes.WORLD_ARCHETYPE_TYPE);
 
-    public static void registerGlobalRegistriesDimensionLayer(final SpongeRegistryHolder holder, final RegistryAccess.Frozen registryAccess, final FeatureFlagSet featureFlags) {
-        if (holder.findRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE).isPresent()) {
-            return; // Already done
-        }
-        final RegistryAccess.ImmutableRegistryAccess builtInRegistryAccess = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList());
-        final CommandBuildContext cbCtx = CommandBuildContext.simple(builtInRegistryAccess, featureFlags);
-        holder.createOrReplaceFrozenRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, CommandRegistryLoader.clientCompletionKey(cbCtx));
-        holder.createOrReplaceFrozenRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, CommandRegistryLoader.valueParameter(cbCtx));
+        holder.createFrozenRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoader::flatGeneratorConfig, RegistryTypes.WORLD_ARCHETYPE_TYPE);
 
-        holder.createOrReplaceFrozenRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoader.flatGeneratorConfig(registryAccess));
+        SpongeRegistries.registerDynamicServerRegistries(holder);
     }
 
-    public static void registerServerRegistries(final RegistryHolder holder) {
+    private static void registerDynamicServerRegistries(final SpongeRegistryHolder holder) {
+        holder.createRegistry(RegistryTypes.ADVANCEMENT, (RegistryLoader<Advancement>) null, true);
+        holder.createRegistry(RegistryTypes.RECIPE, (RegistryLoader<Recipe<?>>) null, true);
     }
-
 }

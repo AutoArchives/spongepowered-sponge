@@ -29,6 +29,7 @@ import net.kyori.adventure.resource.ResourcePackRequest;
 import net.minecraft.util.thread.BlockableEventLoop;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.common.user.SpongeUserManager;
 
@@ -45,4 +46,6 @@ public interface MinecraftServerBridge {
     SpongeUserManager bridge$userManager();
 
     BlockableEventLoop<Runnable> bridge$spongeMainThreadExecutor();
+
+    void bridge$reloadServerRegistries(RegistryHolder holder);
 }
