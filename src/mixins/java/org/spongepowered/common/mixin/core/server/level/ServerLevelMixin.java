@@ -41,7 +41,6 @@ import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
@@ -52,7 +51,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.CustomSpawner;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.Block;
@@ -67,7 +67,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.Vec3;
@@ -93,7 +92,6 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.asm.mixin.Final;
@@ -107,16 +105,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
+import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -127,6 +124,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
+import org.spongepowered.common.world.server.SpongeServerLevelData;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
@@ -136,7 +134,7 @@ import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 
 @Mixin(ServerLevel.class)
-public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge, PlatformServerLevelBridge, ResourceKeyBridge {
+public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge {
 
     // @formatter:off
     @Shadow @Final private ServerLevelData serverLevelData;
@@ -165,11 +163,29 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private long impl$preTickTime = 0L;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$cacheLevelSave(final MinecraftServer $$0, final Executor $$1, final LevelStorageSource.LevelStorageAccess $$2, final ServerLevelData $$3,
-            final net.minecraft.resources.ResourceKey $$4, final LevelStem $$5, final ChunkProgressListener $$6, final boolean $$7, final long $$8,
-            final List $$9, final boolean $$10, final RandomSequences $$11, final CallbackInfo ci) {
-        this.impl$levelSave = $$2;
-        this.impl$chunkProgressListener = $$6;
+    private void impl$onInit(
+        final MinecraftServer server, final Executor executor, final LevelStorageSource.LevelStorageAccess storage, final ServerLevelData levelData,
+        final net.minecraft.resources.ResourceKey<Level> key, final LevelStem levelStem, final ChunkProgressListener listener, final boolean debug, final long biomeSeed,
+        final List<CustomSpawner> spawners, final boolean tick, final RandomSequences randomSequences, final CallbackInfo ci
+    ) {
+        final SpongeServerLevelData spongeData = ((ServerLevelDataBridge) levelData).bridge$spongeData();
+
+        final ResourceKey worldKey = ((ServerWorld) this).key();
+        if (spongeData.key() == null) {
+            SpongeCommon.logger().warn("Level data ({}) has no key associated but is used by world {} ({}).", levelData.getClass().getSimpleName(), worldKey, this.getClass().getSimpleName());
+            spongeData.setKey(worldKey);
+        } else if (!spongeData.key().equals(worldKey)) {
+            SpongeCommon.logger().warn("Level data ({}) has key {} but is used by world {} ({}).", levelData.getClass().getSimpleName(), spongeData.key(), worldKey, this.getClass().getSimpleName());
+        }
+
+        if (spongeData.configAdapter() == null) {
+            final DimensionType dimensionType = levelStem.type().value();
+            final ResourceKey worldTypeKey = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).getKey(dimensionType);
+            spongeData.setConfigAdapter(SpongeGameConfigs.createWorld(worldTypeKey, spongeData.key()));
+        }
+
+        this.impl$levelSave = storage;
+        this.impl$chunkProgressListener = listener;
         this.impl$prevWeather = ((ServerWorld) this).weather();
         ((LevelTicksBridge<?>) this.blockTicks).bridge$level((ServerLevel) (Object) this);
         ((LevelTicksBridge<?>) this.fluidTicks).bridge$level((ServerLevel) (Object) this);
@@ -177,8 +193,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final Boolean createDragonFight = ((DimensionTypeBridge) (Object) this.shadow$dimensionType()).bridge$createDragonFight();
         if (createDragonFight != null) {
             if (createDragonFight) {
-                final long seed = $$0.getWorldData().worldGenOptions().seed();
-                this.dragonFight = new EndDragonFight((ServerLevel) (Object) this, seed, $$0.getWorldData().endDragonFightData());
+                final long seed = server.getWorldData().worldGenOptions().seed();
+                this.dragonFight = new EndDragonFight((ServerLevel) (Object) this, seed, server.getWorldData().endDragonFightData());
             } else {
                 this.dragonFight = null;
             }
@@ -320,11 +336,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     }
 
     @Override
-    public ResourceKey bridge$getKey() {
-        return (ResourceKey) (Object) this.shadow$dimension().location();
-    }
-
-    @Override
     public long[] bridge$recentTickTimes() {
         return this.impl$recentTickTimes;
     }
@@ -347,12 +358,13 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Redirect(method = "setDefaultSpawnPos",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerChunkCache;addTicketWithRadius(Lnet/minecraft/server/level/TicketType;Lnet/minecraft/world/level/ChunkPos;I)V"
+            target = "Lnet/minecraft/world/level/GameRules;getInt(Lnet/minecraft/world/level/GameRules$Key;)I"
         ))
-    private void impl$respectKeepSpawnLoaded(ServerChunkCache serverChunkProvider, TicketType type, ChunkPos pos, int radius) {
-        if ((((ServerWorldProperties) this.shadow$getLevelData()).performsSpawnLogic())) {
-            serverChunkProvider.addTicketWithRadius(type, pos, radius);
+    private int impl$respectKeepSpawnLoaded(GameRules gameRules, GameRules.Key<GameRules.IntegerValue> key) {
+        if ((((ServerLevelDataBridge) this.shadow$getLevelData()).bridge$performsSpawnLogic())) {
+            return gameRules.getInt(key);
         }
+        return 0;
     }
 
     /**
@@ -361,24 +373,19 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
      */
     @Overwrite
     public void save(@Nullable final ProgressListener progress, final boolean flush, final boolean skipSave) {
-
         final boolean isManualSave = this.impl$isManualSave;
-
         this.impl$isManualSave = false;
 
         final Cause currentCause = PhaseTracker.getInstance().currentCause();
-
         if (Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPre(currentCause, ((ServerWorld) this)))) {
             return; // cancelled save
         }
 
-        final PrimaryLevelData levelData = (PrimaryLevelData) this.shadow$getLevelData();
-
+        final ServerLevelData levelData = (ServerLevelData) this.shadow$getLevelData();
         final ServerChunkCache chunkProvider = ((ServerLevel) (Object) this).getChunkSource();
 
         if (!skipSave) {
-
-            final SerializationBehavior behavior = ((PrimaryLevelDataBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+            final SerializationBehavior behavior = ((ServerLevelDataBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
 
             if (progress != null) {
                 progress.progressStartNoAbort(Component.translatable("menu.savingLevel"));
@@ -393,11 +400,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
                 levelData.setWorldBorder(this.getWorldBorder().createSettings());
 
-                levelData.setCustomBossEvents(this.bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
-
-                this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess()
-                    , (PrimaryLevelData) this.shadow$getLevelData(), this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList()
-                        .getSingleplayerData() : null);
+                if (levelData instanceof WorldData worldData) {
+                    worldData.setCustomBossEvents(this.bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
+                    this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess(), worldData, this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList().getSingleplayerData() : null);
+                }
 
                 // Sponge End
             }
@@ -415,7 +421,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 this.entityManager.autoSave();
             }
 
-            Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, ((ServerWorld) this)));
+            Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, (ServerWorld) this));
         }
     }
 
@@ -488,7 +494,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     }
 
     private void impl$setWorldOnBorder() {
-        ((WorldBorderBridge) this.shadow$getWorldBorder()).bridge$setAssociatedWorld(this.bridge$getKey());
+        ((WorldBorderBridge) this.shadow$getWorldBorder()).bridge$setAssociatedWorld(((ServerWorld) this).key());
     }
 
     @Inject(method = "globalLevelEvent", at = @At("HEAD"), cancellable = true)
