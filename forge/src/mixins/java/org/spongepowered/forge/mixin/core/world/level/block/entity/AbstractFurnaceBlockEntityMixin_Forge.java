@@ -121,7 +121,7 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
         final var recipe = entity.bridge$getCurrentRecipe();
         final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(entity.items.get(0));
         final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entityIn, cooking, Optional.of(fuel),
-                recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id()));
+                recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id().location()));
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             return entity.cookingTimer; // dont tick down
