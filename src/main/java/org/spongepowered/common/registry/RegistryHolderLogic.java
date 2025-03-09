@@ -237,7 +237,7 @@ public final class RegistryHolderLogic implements RegistryHolder, HolderLookup.P
         final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> registry = this.roots.get(RegistryRoots.SPONGE);
         registry.stream()
             .filter(r -> force || (((WritableRegistryBridge<?>) r).bridge$eventCalled() && ((WritableRegistryBridge<?>) r).bridge$pendingDependencies()
-                .allMatch(t -> this.findRegistry(t).map(v -> ((MappedRegistryAccessor<?>) v).accessor$frozen() || ((WritableRegistryBridge<?>) v).bridge$eventCalled()).orElse(false))))
+                .allMatch(t -> this.findRegistry(t).map(v -> ((MappedRegistryAccessor<?>) v).accessor$frozen() && ((WritableRegistryBridge<?>) v).bridge$eventCalled()).orElse(false))))
             .forEach(r -> dependencies.addEntry(
                 ((Registry<?>) r).type(), new SpongeRegistryDependencyEntry<>(r, ((WritableRegistryBridge<?>) r).bridge$pendingDependencies().toList())));
         dependencies.orderByDependencies(($, v) -> v.cookie().freeze());
