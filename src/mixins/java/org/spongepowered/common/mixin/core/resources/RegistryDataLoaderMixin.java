@@ -87,9 +87,11 @@ public class RegistryDataLoaderMixin {
     @WrapOperation(method = "load(Lnet/minecraft/resources/RegistryDataLoader$LoadingFunction;Ljava/util/List;Ljava/util/List;)Lnet/minecraft/core/RegistryAccess$Frozen;",
         at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V", ordinal = 1))
     private static void impl$onLoad(final List<RegistryDataLoader_LoaderAccessor<?>> instance, final Consumer<?> consumer, final Operation<Void> original) {
+        // TODO: Remote layer
         final DependencySorter<RegistryType<?>, SpongeRegistryDependencyEntry<RegistryDataLoader_LoaderAccessor<?>>> dependencies = new DependencySorter<>();
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         instance.stream()
+            .filter(l -> ((RegistryDataLoader_LoaderBridge) l).bridge$registryHolder() != null)
             .collect(Collectors.groupingBy(l -> ((RegistryDataLoader_LoaderBridge) l).bridge$registryHolder(), Collectors.toSet()))
             .forEach((k, v) -> {
                 ((SpongeRegistryHolder) k).setRootMinecraftRegistry(new RegistryAccess.ImmutableRegistryAccess(
