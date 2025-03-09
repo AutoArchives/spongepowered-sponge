@@ -99,7 +99,7 @@ public final class BiomeData {
                     .create(Keys.GRASS_COLOR)
                         .get(h -> h.getSpecialEffects().getGrassColorOverride().map(Color::ofRgb).orElse(null))
                     .create(Keys.BACKGROUND_MUSIC)
-                        .get(h -> h.getSpecialEffects().getBackgroundMusic().map(SoundConfig.BackgroundMusic.class::cast).orElse(null))
+                        .get(h -> h.getSpecialEffects().getBackgroundMusic().map(e -> e.unwrap().getFirst().value()).map(SoundConfig.BackgroundMusic.class::cast).orElse(null))
                     .create(Keys.AMBIENT_ADDITIONAL_SOUND)
                         .get(h -> h.getSpecialEffects().getAmbientAdditionsSettings().map(SoundConfig.Additional.class::cast).orElse(null))
                     .create(Keys.AMBIENT_MOOD)

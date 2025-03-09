@@ -24,10 +24,15 @@
  */
 package org.spongepowered.common.item.util;
 
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.TransmuteResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackLike;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.common.item.SpongeItemStackSnapshot;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +49,21 @@ public abstract class ItemStackUtil {
             return stack == null ? ItemStackUtil.emptyNative() : (net.minecraft.world.item.ItemStack) (Object) stack;
         }
         throw new NativeStackException("The supplied item stack was not native to the current platform");
+    }
+
+    public static TransmuteResult toTransmute(final @Nullable ItemStackLike stack) {
+        if (stack == null) {
+            return new TransmuteResult(Items.AIR);
+        }
+        return switch ((Object) stack) {
+            case net.minecraft.world.item.ItemStack itemStack:
+                yield new TransmuteResult(itemStack.getItemHolder(), itemStack.getCount(), itemStack.getComponentsPatch());
+            case SpongeItemStackSnapshot snapshot:
+                final var direct = Holder.direct(((Item) stack.type()));
+                yield new TransmuteResult(direct, snapshot.quantity(), snapshot.getComponentsPatch());
+            default:
+                throw new NativeStackException("The supplied item stack was not native to the current platform");
+        };
     }
 
     /**

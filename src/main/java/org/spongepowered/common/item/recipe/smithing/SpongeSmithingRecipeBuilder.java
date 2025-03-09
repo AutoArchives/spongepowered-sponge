@@ -26,38 +26,37 @@ package org.spongepowered.common.item.recipe.smithing;
 
 
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.datapack.DataPack;
-import org.spongepowered.api.datapack.DataPacks;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackLike;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.RecipeInput;
 import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
-public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, SmithingRecipe.Builder> implements
+@DefaultQualifier(NonNull.class)
+public final class SpongeSmithingRecipeBuilder implements
         SmithingRecipe.Builder, SmithingRecipe.Builder.BaseStep, SmithingRecipe.Builder.AdditionStep, SmithingRecipe.Builder.ResultStep, SmithingRecipe.Builder.EndStep {
 
-    private ItemStack result;
-    private Ingredient template;
-    private Ingredient base;
-    private Ingredient addition;
-    private Function<SmithingRecipeInput, net.minecraft.world.item.ItemStack> resultFunction;
+    private @MonotonicNonNull ItemStack result;
+    private @MonotonicNonNull Ingredient template;
+    private @MonotonicNonNull Ingredient base;
+    private @MonotonicNonNull Ingredient addition;
+    private @MonotonicNonNull Function<SmithingRecipeInput, net.minecraft.world.item.ItemStack> resultFunction;
     private @Nullable String group;
-    private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
 
@@ -122,15 +121,9 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
     }
 
     @Override
-    public EndStep pack(final DataPack<RecipeRegistration> pack) {
-        this.pack = pack;
-        return this;
-    }
-
-    @Override
-    public RecipeRegistration build0() {
-        return new SpongeSmithingRecipeRegistration((ResourceLocation) (Object) key, this.group, this.template, this.base, this.addition,
-                ItemStackUtil.toNative(this.result), this.resultFunction, this.pack, this.recipeCategory);
+    public SmithingRecipe build() {
+        return (SmithingRecipe) new SpongeSmithingRecipe(Optional.ofNullable(this.template), this.base, Optional.ofNullable(this.addition),
+                ItemStackUtil.toTransmute(this.result), this.resultFunction);
     }
 
     @Override
@@ -140,7 +133,6 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
         this.base = null;
         this.addition = null;
         this.group = null;
-        this.pack = DataPacks.RECIPE;
-        return super.reset();
+        return this;
     }
 }

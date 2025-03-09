@@ -109,6 +109,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         AreaEffectCloudData.register(this.registrator);
         ArmorStandData.register(this.registrator);
         ArrowData.register(this.registrator);
+        AxolotlData.register(this.registrator);
         BatData.register(this.registrator);
         BedData.register(this.registrator);
         BlazeData.register(this.registrator);
@@ -170,6 +171,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         PufferfishData.register(this.registrator);
         RabbitData.register(this.registrator);
         RavagerData.register(this.registrator);
+        SalmonData.register(this.registrator);
         ServerPlayerData.register(this.registrator);
         SheepData.register(this.registrator);
         ShulkerBulletData.register(this.registrator);
@@ -177,6 +179,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         SlimeData.register(this.registrator);
         SpellcastingIllagerData.register(this.registrator);
         SpiderData.register(this.registrator);
+        TadpoleData.register(this.registrator);
         TameableData.register(this.registrator);
         ThrowableItemProjectileData.register(this.registrator);
         TNTData.register(this.registrator);
