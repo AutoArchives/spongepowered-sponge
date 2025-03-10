@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.registries;
+package org.spongepowered.vanilla.mixin.core.registries;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,10 +32,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.launch.Launch;
 
 @Mixin(BuiltInRegistries.class)
-public abstract class BuiltInRegistriesMixin {
+public abstract class BuiltInRegistriesMixin_Vanilla {
 
-    @Inject(method = "bootStrap", at = @At(value = "HEAD"))
-    private static void impl$beforeCreateContents(final CallbackInfo ci) {
-        Launch.instance().lifecycle().establishEarlyGlobalRegistries();
+    @Inject(method = "bootStrap", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/registries/BuiltInRegistries;freeze()V"))
+    private static void impl$beforeFreeze(final CallbackInfo ci) {
+        Launch.instance().lifecycle().establishGlobalRegistries();
     }
 }

@@ -123,6 +123,11 @@ public final class SpongeLifecycle implements Lifecycle {
         holder.setRootMinecraftRegistry((Registry<Registry<?>>) BuiltInRegistries.REGISTRY);
 
         SpongeRegistries.registerEarlyGlobalRegistries(holder);
+    }
+
+    @Override
+    public void establishGlobalRegistries() {
+        final SpongeRegistryHolder holder = (SpongeRegistryHolder) this.game;
 
         // Plugin registries
         this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
