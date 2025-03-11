@@ -25,7 +25,7 @@
 package org.spongepowered.common.world.server;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.server.WorldArchetypeType;
+import org.spongepowered.api.world.server.WorldArchetype;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 
 import java.util.Optional;
@@ -67,10 +67,10 @@ public record SpongeServerWorldPropertiesLoadOptions(
         }
     }
 
-    public record CreateOperationImpl(WorldArchetypeType worldArchetype, @Nullable Consumer<ServerWorldProperties> callback) implements CreateOperation {
+    public record CreateOperationImpl(WorldArchetype worldArchetype, @Nullable Consumer<ServerWorldProperties> callback) implements CreateOperation {
 
         @Override
-        public WorldArchetypeType worldArchetype() {
+        public WorldArchetype worldArchetype() {
             return this.worldArchetype;
         }
 
@@ -100,7 +100,7 @@ public record SpongeServerWorldPropertiesLoadOptions(
         }
 
         @Override
-        public CreateStep create(final WorldArchetypeType worldArchetype) {
+        public CreateStep create(final WorldArchetype worldArchetype) {
             this.createOperation = new CreateOperationImpl(worldArchetype, null);
             return this;
         }

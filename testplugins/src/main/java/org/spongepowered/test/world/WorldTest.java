@@ -50,6 +50,7 @@ import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.server.WorldArchetype;
 import org.spongepowered.api.world.server.WorldArchetypeType;
 import org.spongepowered.api.world.server.WorldArchetypeTypes;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
@@ -176,7 +177,7 @@ public final class WorldTest {
         final WorldType worldType = context.requireOne(worldTypeParameter);
         final WorldArchetypeType worldArchetypeType = WorldArchetypeType.of(worldType, ChunkGenerator.overworld());
 
-        this.game.server().worldManager().loadWorld(key, ServerWorldProperties.LoadOptions.create(worldArchetypeType)).whenComplete((r, t) -> {
+        this.game.server().worldManager().loadWorld(key, ServerWorldProperties.LoadOptions.create(WorldArchetype.of(worldArchetypeType))).whenComplete((r, t) -> {
             if (t != null) {
                 context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
             } else if (r.isPresent()) {
