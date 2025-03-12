@@ -50,4 +50,9 @@ public class GameDataMixin_Neo {
     private static void neo$onRegisterEvents(final CallbackInfo ci) {
         Launch.instance().lifecycle().establishGlobalRegistries();
     }
+
+    @Inject(method = "freezeData", at = @At("TAIL"))
+    private static void neo$onFreezeData(final CallbackInfo ci) {
+        Launch.instance().lifecycle().endEstablishGlobalRegistries();
+    }
 }

@@ -37,6 +37,7 @@ import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 @Plugin("customregistrytest")
@@ -64,7 +65,7 @@ public final class CustomRegistryTest {
 
     @Listener
     public void onRegisterRegistryValuesGameScoped(final RegisterRegistryValueEvent.GameScoped event) {
-        event.registry(GAME_CUSTOM_REGISTRY, r -> r.register(GAME_CUSTOM_VALUE.location(), 10));
+        event.registry(GAME_CUSTOM_REGISTRY, (h, r) -> r.register(GAME_CUSTOM_VALUE.location(), 10), RegistryTypes.ITEM_TYPE);
     }
 
     @Listener

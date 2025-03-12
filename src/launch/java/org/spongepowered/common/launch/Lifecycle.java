@@ -54,6 +54,8 @@ public interface Lifecycle {
 
     void establishGlobalRegistries();
 
+    void endEstablishGlobalRegistries();
+
     void establishDataProviders();
 
     void callRegisterDataEvent();

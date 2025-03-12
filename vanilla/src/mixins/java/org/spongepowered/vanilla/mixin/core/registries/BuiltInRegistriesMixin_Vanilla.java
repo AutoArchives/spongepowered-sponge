@@ -38,4 +38,9 @@ public abstract class BuiltInRegistriesMixin_Vanilla {
     private static void impl$beforeFreeze(final CallbackInfo ci) {
         Launch.instance().lifecycle().establishGlobalRegistries();
     }
+
+    @Inject(method = "freeze", at = @At("TAIL"))
+    private static void impl$afterFreeze(final CallbackInfo ci) {
+        Launch.instance().lifecycle().endEstablishGlobalRegistries();
+    }
 }

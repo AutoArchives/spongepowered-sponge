@@ -137,9 +137,10 @@ public final class SpongeLifecycle implements Lifecycle {
 
         this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game,
             holder.streamRegistries().collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()))));
+    }
 
-        // Freeze Dynamic Registries - Values are now available
-        holder.registryHolder().freezeSpongeDynamicRegistries(true);
+    public void endEstablishGlobalRegistries() {
+        ((SpongeRegistryHolder) this.game).registryHolder().freezeSpongeDynamicRegistries(true);
     }
 
     @Override

@@ -51,4 +51,9 @@ public class GameDataMixin_Forge {
     private static void forge$onRegisterEvents(final CallbackInfo ci) {
         Launch.instance().lifecycle().establishGlobalRegistries();
     }
+
+    @Inject(method = "freezeData", at = @At("TAIL"))
+    private static void forge$onFreezeData(final CallbackInfo ci) {
+        Launch.instance().lifecycle().endEstablishGlobalRegistries();
+    }
 }
