@@ -17,7 +17,7 @@ plugins {
     alias(libs.plugins.shadow)
     id("implementation-structure")
     alias(libs.plugins.blossom)
-    id("net.minecraftforge.gradle") version "[6.0.24,6.2)"
+    alias(libs.plugins.forgeGradle)
 }
 
 val commonProject = parent!!
