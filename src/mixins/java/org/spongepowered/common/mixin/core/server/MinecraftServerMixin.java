@@ -37,6 +37,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -57,6 +58,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
@@ -94,9 +96,11 @@ import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.event.lifecycle.FreezeRegistryEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
@@ -158,6 +162,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             return MinecraftServerMixin.this.serverThread;
         }
     };
+    private RegistryHolderLogic impl$registryHolder;
 
     @Override
     public Subject subject() {
@@ -457,5 +462,21 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     public void bridge$reloadServerRegistries(final RegistryHolder holder) {
         ((SpongeRegistryHolder) holder).setRootMinecraftRegistry(this.shadow$registryAccess());
         Launch.instance().lifecycle().beginEstablishServerRegistries(holder);
+    }
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    public void impl$onInit(final CallbackInfo ci, final @Local(argsOnly = true) WorldStem levelStem) {
+        this.bridge$reloadedServerRegistries(((SpongeRegistryHolder) levelStem.resourceManager()).registryHolder());
+    }
+
+    @Override
+    public void bridge$reloadedServerRegistries(final RegistryHolderLogic holder) {
+        this.impl$registryHolder = holder;
+        Sponge.game().eventManager().post(FreezeRegistryEventImpl.PostImpl.EngineImpl.server(Cause.of(EventContext.empty(), Sponge.game()), Sponge.game(), holder));
+    }
+
+    @Override
+    public RegistryHolderLogic bridge$registryHolder() {
+        return this.impl$registryHolder;
     }
 }

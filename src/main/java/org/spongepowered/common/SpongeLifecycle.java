@@ -56,6 +56,7 @@ import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterChannelEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
+import org.spongepowered.common.event.lifecycle.FreezeRegistryEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterTagEventImpl;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -141,6 +142,8 @@ public final class SpongeLifecycle implements Lifecycle {
 
     public void endEstablishGlobalRegistries() {
         ((SpongeRegistryHolder) this.game).registryHolder().freezeSpongeDynamicRegistries(true);
+
+        this.game.eventManager().post(new FreezeRegistryEventImpl.PostImpl.GameImpl(Cause.of(EventContext.empty(), this.game), this.game));
     }
 
     @Override
@@ -235,6 +238,8 @@ public final class SpongeLifecycle implements Lifecycle {
                 this.game, client, client.streamRegistries(RegistryRoots.SPONGE).collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()))));
 
         ((SpongeRegistryHolder) client).registryHolder().freezeSpongeDynamicRegistries(true);
+
+        this.game.eventManager().post(FreezeRegistryEventImpl.PostImpl.EngineImpl.client(Cause.of(EventContext.empty(), this.game), this.game, client));
     }
 
     @Override

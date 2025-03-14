@@ -33,6 +33,7 @@
     "network.protocol.handshake.ClientIntentionPacketAccessor",
     "resources.RegistryDataLoader_LoaderAccessor",
     "resources.ResourceKeyAccessor",
+    "server.MinecraftServer_ReloadableResourcesAccessor",
     "server.MinecraftServerAccessor",
     "server.level.ChunkMap_TrackedEntityAccessor",
     "server.level.ChunkMapAccessor",

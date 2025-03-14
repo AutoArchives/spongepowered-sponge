@@ -36,9 +36,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.server.MinecraftServer_ReloadableResourcesAccessor;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.forge.ForgeServer;
+
+import java.util.Collection;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Forge implements ForgeServer {
@@ -57,8 +64,13 @@ public abstract class MinecraftServerMixin_Forge implements ForgeServer {
     }
 
     @ModifyExpressionValue(method = "lambda$reloadResources$29", at = @At(value = "NEW", target = "Lnet/minecraft/server/packs/resources/MultiPackResourceManager;"))
-    private MultiPackResourceManager impl$onReloadResources(final MultiPackResourceManager original) {
+    private MultiPackResourceManager forge$onReloadResources(final MultiPackResourceManager original) {
         ((MinecraftServerBridge) this).bridge$reloadServerRegistries((RegistryHolder) original);
         return original;
+    }
+
+    @Inject(method = "lambda$reloadResources$30", at = @At("TAIL"))
+    public void forge$onReloadedResources(final Collection<?> $$0x, final @Coerce MinecraftServer_ReloadableResourcesAccessor $$1x, final CallbackInfo ci) {
+        ((MinecraftServerBridge) this).bridge$reloadedServerRegistries(((SpongeRegistryHolder) $$1x.accessor$resourceManager()).registryHolder());
     }
 }
