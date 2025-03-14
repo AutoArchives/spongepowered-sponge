@@ -52,11 +52,11 @@ import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBri
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryEvent;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryValueEvent;
+import org.spongepowered.common.event.lifecycle.FreezeRegistryEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterChannelEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
-import org.spongepowered.common.event.lifecycle.FreezeRegistryEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterTagEventImpl;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
