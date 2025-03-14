@@ -114,24 +114,26 @@ public final class RegistryHolderLogic implements RegistryHolder, HolderLookup.P
         this.roots.put(RegistryRoots.MINECRAFT, rootRegistry);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Registry<T> registry(final RegistryType<T> type) {
-        final var root = this.roots.get(Objects.requireNonNull(type, "type").root());
+        final var root = (Registry<Registry<?>>) this.roots.get(Objects.requireNonNull(type, "type").root());
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
         }
-        final var registry = root.getOptional((ResourceLocation) (Object) type.location())
+        final var registry = root.findValue(type.location())
             .orElseThrow(() -> new ValueNotFoundException(String.format("No '%s' registry has been defined in root '%s'", type.location(), type.root())));
         return (Registry<T>) registry;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Optional<Registry<T>> findRegistry(final RegistryType<T> type) {
-        final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(Objects.requireNonNull(type, "type").root());
+        final Registry<Registry<?>> root = (Registry<Registry<?>>) this.roots.get(Objects.requireNonNull(type, "type").root());
         if (root == null) {
             return Optional.empty();
         }
-        return (Optional<Registry<T>>) (Object) root.getOptional((ResourceLocation) (Object) type.location());
+        return root.findValue(type.location());
     }
 
     @Override
