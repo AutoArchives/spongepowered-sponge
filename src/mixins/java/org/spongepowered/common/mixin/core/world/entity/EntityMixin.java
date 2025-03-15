@@ -186,9 +186,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow @javax.annotation.Nullable public PortalProcessor portalProcess;
     @Shadow public abstract boolean save(final CompoundTag $$0);
     @Shadow public abstract Level level();
-
-    @Shadow @Final private List movementThisTick;
     // @formatter:on
+
 
 
     private boolean impl$isConstructing = true;
@@ -735,16 +734,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             original.call(block, world, pos, state, entity);
             this.impl$lastCollidedBlockPos = pos;
         }
-    }
 
-    @Inject(method = "removeLatestMovementRecordingBatch", at = @At("HEAD"), cancellable = true)
-    private void impl$catchEmptyRemoval(CallbackInfo ci) {
-        // This prevents a no element exception leading to a crash. It is highly possible that
-        // this is a bug, but whether it's from Vanilla or Sponge, I'm not certain. It's also possible
-        // this can be triggered by a rogue client missending packets, leading to a player being
-        if (this.movementThisTick.isEmpty()) {
-            ci.cancel();
-        }
     }
 
     @WrapOperation(method = "lambda$checkInsideBlocks$0",
