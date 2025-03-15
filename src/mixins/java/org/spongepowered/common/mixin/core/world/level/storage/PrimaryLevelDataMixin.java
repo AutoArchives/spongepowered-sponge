@@ -307,6 +307,8 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     public void bridge$readSpongeLevelData(final Dynamic<Tag> dynamic) {
         dynamic.get(Constants.Sponge.Data.V2.SPONGE_DATA).get().ifSuccess(v2 -> {
             v2.get(Constants.Sponge.World.UNIQUE_ID).read(UUIDUtil.CODEC).result().ifPresent(this.impl$spongeData::setUniqueId);
+            v2.get(Constants.Sponge.World.WORLD_KEY).read(ResourceLocation.CODEC).result()
+                .map(org.spongepowered.api.ResourceKey.class::cast).ifPresent(this.impl$spongeData::setKey);
 
             v2.get(Constants.Map.MAP_UUID_INDEX).readMap(Codec.STRING, UUIDUtil.CODEC).result().ifPresent(value -> {
                 final BiMap<Integer, UUID> mapIndex = HashBiMap.create();
@@ -332,6 +334,10 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     public CompoundTag bridge$writeSpongeLevelData() {
         final CompoundTag data = new CompoundTag();
         data.putUUID(Constants.Sponge.World.UNIQUE_ID, this.impl$spongeData.uniqueId());
+
+        if (this.impl$spongeData.key() != null) {
+            data.putString(Constants.Sponge.World.WORLD_KEY, this.impl$spongeData.key().formatted());
+        }
 
         // Map Storage
         final CompoundTag mapUUIDIndexTag = new CompoundTag();
