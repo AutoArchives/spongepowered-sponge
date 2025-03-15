@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.registries;
 
-
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,15 +31,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.launch.Launch;
 
-
 @Mixin(BuiltInRegistries.class)
 public abstract class BuiltInRegistriesMixin {
 
-    // We hook in here if we extend existing vanilla BuiltInRegistries with our own
-    // This methods should then be called during bootstrap
-
-    @Inject(method = "freeze", at = @At(value = "HEAD"))
-    private static void impl$onFreeze(final CallbackInfo ci) {
+    @Inject(method = "bootStrap", at = @At(value = "HEAD"))
+    private static void impl$beforeCreateContents(final CallbackInfo ci) {
         Launch.instance().lifecycle().establishEarlyGlobalRegistries();
     }
 }

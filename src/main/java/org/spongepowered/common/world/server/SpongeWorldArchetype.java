@@ -22,24 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity;
+package org.spongepowered.common.world.server;
 
-import net.kyori.adventure.text.Component;
-import net.minecraft.world.entity.HumanoidArm;
-import org.spongepowered.api.data.type.HandPreference;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
+import org.spongepowered.api.world.server.WorldArchetype;
+import org.spongepowered.api.world.server.WorldArchetypeType;
 
-@Mixin(HumanoidArm.class)
-public abstract class HumanoidArmMixin_API implements HandPreference {
+import java.util.Objects;
+import java.util.Optional;
 
-    // @formatter:off
-    @Shadow @Final private String translationKey;
-    // @formatter:on
+public record SpongeWorldArchetype(WorldArchetypeType type, Optional<WorldGenerationConfig> generationConfig) implements WorldArchetype {
 
-    @Override
-    public Component asComponent() {
-        return Component.translatable(this.translationKey);
+    public static final class BuilderImpl implements WorldArchetype.Builder {
+
+        private WorldArchetypeType type;
+        private WorldGenerationConfig generationConfig;
+
+        @Override
+        public Builder type(final WorldArchetypeType type) {
+            this.type = type;
+            return this;
+        }
+
+        @Override
+        public Builder generationConfig(final WorldGenerationConfig generationConfig) {
+            this.generationConfig = generationConfig;
+            return this;
+        }
+
+        @Override
+        public WorldArchetype build() {
+            return new SpongeWorldArchetype(Objects.requireNonNull(this.type, "type"), Optional.ofNullable(this.generationConfig));
+        }
     }
 }

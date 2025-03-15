@@ -81,8 +81,8 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
 
         final SpongeRegistryHolder holder = this.getHolder();
         final RegistryType<T> type = RegistryType.of(RegistryRoots.SPONGE, key);
-        holder.createRegistry(type, defaultValues, isDynamic);
-        return null;
+        holder.createRegistry(type, defaultValues, isDynamic, dependencies);
+        return type;
     }
 
     protected abstract SpongeRegistryHolder getHolder();

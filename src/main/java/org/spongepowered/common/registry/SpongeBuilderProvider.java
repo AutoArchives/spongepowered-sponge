@@ -131,6 +131,7 @@ import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.TicketType;
+import org.spongepowered.api.world.server.WorldArchetype;
 import org.spongepowered.api.world.server.WorldArchetypeType;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
@@ -237,6 +238,7 @@ import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.server.SpongeServerWorldPropertiesLoadOptions;
 import org.spongepowered.common.world.server.SpongeTicketTypeBuilder;
+import org.spongepowered.common.world.server.SpongeWorldArchetype;
 import org.spongepowered.common.world.server.SpongeWorldArchetypeType;
 import org.spongepowered.common.world.server.SpongeWorldTypeBuilder;
 import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
@@ -389,6 +391,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(TicketType.Builder.class, SpongeTicketTypeBuilder::new)
                 .register(PortalLogic.Builder.class, SpongePortalLogicBuilder::new)
                 .register(ServerWorldProperties.LoadOptions.Builder.class, SpongeServerWorldPropertiesLoadOptions.BuilderImpl::new)
+                .register(WorldArchetype.Builder.class, SpongeWorldArchetype.BuilderImpl::new)
         ;
     }
 }

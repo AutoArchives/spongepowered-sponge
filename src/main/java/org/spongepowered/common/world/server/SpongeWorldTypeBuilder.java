@@ -24,12 +24,10 @@
  */
 package org.spongepowered.common.world.server;
 
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -43,7 +41,6 @@ import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Range;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeEffect;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
@@ -72,8 +69,6 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
     @Override
     public WorldType.Builder reset() {
         this.data = DataManipulator.mutableOf();
-        final DimensionType defaultOverworld = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).getValue(BuiltinDimensionTypes.OVERWORLD);
-        this.from((WorldType) (Object) defaultOverworld);
         return this;
     }
 

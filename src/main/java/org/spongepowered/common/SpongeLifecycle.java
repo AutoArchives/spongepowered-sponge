@@ -52,6 +52,7 @@ import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBri
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryEvent;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryValueEvent;
+import org.spongepowered.common.event.lifecycle.FreezeRegistryEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterChannelEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
@@ -123,6 +124,11 @@ public final class SpongeLifecycle implements Lifecycle {
         holder.setRootMinecraftRegistry((Registry<Registry<?>>) BuiltInRegistries.REGISTRY);
 
         SpongeRegistries.registerEarlyGlobalRegistries(holder);
+    }
+
+    @Override
+    public void establishGlobalRegistries() {
+        final SpongeRegistryHolder holder = (SpongeRegistryHolder) this.game;
 
         // Plugin registries
         this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
@@ -132,9 +138,12 @@ public final class SpongeLifecycle implements Lifecycle {
 
         this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game,
             holder.streamRegistries().collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()))));
+    }
 
-        // Freeze Dynamic Registries - Values are now available
-        holder.registryHolder().freezeSpongeDynamicRegistries(true);
+    public void endEstablishGlobalRegistries() {
+        ((SpongeRegistryHolder) this.game).registryHolder().freezeSpongeDynamicRegistries(true);
+
+        this.game.eventManager().post(new FreezeRegistryEventImpl.PostImpl.GameImpl(Cause.of(EventContext.empty(), this.game), this.game));
     }
 
     @Override
@@ -229,6 +238,8 @@ public final class SpongeLifecycle implements Lifecycle {
                 this.game, client, client.streamRegistries(RegistryRoots.SPONGE).collect(Collectors.toMap(org.spongepowered.api.registry.Registry::type, Function.identity()))));
 
         ((SpongeRegistryHolder) client).registryHolder().freezeSpongeDynamicRegistries(true);
+
+        this.game.eventManager().post(FreezeRegistryEventImpl.PostImpl.EngineImpl.client(Cause.of(EventContext.empty(), this.game), this.game, client));
     }
 
     @Override

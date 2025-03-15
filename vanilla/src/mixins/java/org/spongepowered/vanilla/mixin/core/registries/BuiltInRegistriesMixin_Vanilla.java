@@ -22,38 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.minecraftforge.registries;
+package org.spongepowered.vanilla.mixin.core.registries;
 
-import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.registries.GameData;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.entity.SpongeEntityTypes;
 import org.spongepowered.common.launch.Launch;
 
-@Mixin(GameData.class)
-public class GameDataMixin_Forge {
+@Mixin(BuiltInRegistries.class)
+public abstract class BuiltInRegistriesMixin_Vanilla {
 
-    @Inject(method = "postRegisterEvents", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/ModLoader;postEventWrapContainerInModOrder(Lnet/minecraftforge/eventbus/api/Event;)V", shift = At.Shift.AFTER))
-    private static void forge$registerSpongeTypesLast(final CallbackInfo ci, @Nullable @Local final Registry<?> vanillaRegistry) {
-        if (vanillaRegistry != null && Registries.ENTITY_TYPE.equals(vanillaRegistry.key())) {
-            SpongeEntityTypes.register((Registry<EntityType<?>>) vanillaRegistry);
-        }
-    }
-
-    @Inject(method = "postRegisterEvents", at = @At("HEAD"))
-    private static void forge$onRegisterEvents(final CallbackInfo ci) {
+    @Inject(method = "bootStrap", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/registries/BuiltInRegistries;freeze()V"))
+    private static void impl$beforeFreeze(final CallbackInfo ci) {
         Launch.instance().lifecycle().establishGlobalRegistries();
     }
 
-    @Inject(method = "freezeData", at = @At("TAIL"))
-    private static void forge$onFreezeData(final CallbackInfo ci) {
+    @Inject(method = "freeze", at = @At("TAIL"))
+    private static void impl$afterFreeze(final CallbackInfo ci) {
         Launch.instance().lifecycle().endEstablishGlobalRegistries();
     }
 }
