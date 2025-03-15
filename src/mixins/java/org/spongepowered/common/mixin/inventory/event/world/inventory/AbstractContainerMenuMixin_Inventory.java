@@ -34,6 +34,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.ContainerSynchronizer;
 import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.inventory.RemoteSlot;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -78,7 +79,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Final @Shadow private List<ContainerListener> containerListeners;
     @Shadow private boolean suppressRemoteUpdates;
     @Final @Shadow private List<DataSlot> dataSlots;
-    @Shadow @Final private NonNullList<ItemStack> remoteSlots;
+    @Shadow @Final private NonNullList<RemoteSlot> remoteSlots;
     @Shadow @Nullable private ContainerSynchronizer synchronizer;
 
     @Shadow protected abstract void shadow$doClick(int param0, int param1, ClickType param2, Player param3);
@@ -303,9 +304,9 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                     listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
                 }
                 if (synchronize) {
-                    final ItemStack remoteStack = this.remoteSlots.get(i);
-                    if (!ItemStack.matches(remoteStack, newStack)) {
-                        this.remoteSlots.set(i, newStack.copy());
+                    final RemoteSlot remoteStack = this.remoteSlots.get(i);
+                    if (!remoteStack.matches(oldStack)) {
+                        remoteStack.force(oldStack);
                         if (this.synchronizer != null) {
                             this.synchronizer.sendSlotChange(((AbstractContainerMenu) (Object) this), i, newStack);
                         }

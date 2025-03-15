@@ -107,10 +107,10 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
 
     @Override
     boolean isContainerEventAllowed(final PhaseContext<@Nullable ?> context) {
-        if (!(context instanceof InventoryPacketContext)) {
+        if (!(context instanceof InventoryPacketContext ipc)) {
             return false;
         }
-        final int containerId = ((InventoryPacketContext) context).<ServerboundContainerClickPacket>getPacket().getContainerId();
+        final int containerId = ipc.<ServerboundContainerClickPacket>getPacket().containerId();
         return containerId != this.player.containerMenu.containerId;
     }
 

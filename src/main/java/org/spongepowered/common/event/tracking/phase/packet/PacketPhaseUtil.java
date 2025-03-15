@@ -66,6 +66,7 @@ import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePl
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.sheep.SheepAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.wolf.WolfAccessor;
+import org.spongepowered.common.accessor.world.inventory.AbstractContainerMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
 import org.spongepowered.common.bridge.network.protocol.PacketBridge;
 import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
@@ -136,9 +137,9 @@ public final class PacketPhaseUtil {
         }
         final ItemStack cursor = ItemStackUtil.fromSnapshotToNative(cursorSnap);
         player.containerMenu.setCarried(cursor);
-        player.containerMenu.setRemoteCarried(cursor);
-        if (player instanceof net.minecraft.server.level.ServerPlayer) {
-            ((net.minecraft.server.level.ServerPlayer) player).connection.send(new ClientboundSetCursorItemPacket(cursor));
+        ((AbstractContainerMenuAccessor) player.containerMenu).accessor$synchronizeCarriedToRemote();
+        if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+            sp.connection.send(new ClientboundSetCursorItemPacket(cursor));
         }
     }
 

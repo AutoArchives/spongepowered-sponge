@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.inventory.impl.server.level;
 
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerInventoryPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,6 +38,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.List;
+
 @Mixin(targets = "net/minecraft/server/level/ServerPlayer$1")
 public abstract class ServerPlayer_Mixin_Inventory {
 
@@ -46,12 +48,15 @@ public abstract class ServerPlayer_Mixin_Inventory {
     // @formatter:on
 
     @Inject(method = "sendInitialData", at = @At("RETURN"))
-    private void inventory$sendOffhand(final AbstractContainerMenu containerMenu, final NonNullList<ItemStack> $$1, final ItemStack $$2, final int[] $$3, final CallbackInfo ci) {
+    private void inventory$sendOffhand(
+        final AbstractContainerMenu containerMenu, final List<ItemStack> $$1, final ItemStack $$2,
+        final int[] $$3, final CallbackInfo ci
+    ) {
         if (containerMenu == this.this$0.inventoryMenu) {
             return;
         }
 
-        final org.spongepowered.api.item.inventory.Slot offhand
+        final Slot offhand
                 = ((org.spongepowered.api.entity.living.player.server.ServerPlayer) this.this$0).inventory().offhand();
         this.this$0.connection.send(
                 new ClientboundSetPlayerInventoryPacket(((SlotAdapter) offhand).getOrdinal(), ItemStackUtil.toNative(offhand.peek())));

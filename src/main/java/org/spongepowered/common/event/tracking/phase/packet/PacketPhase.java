@@ -234,11 +234,11 @@ public final class PacketPhase {
     // Inventory packet specific methods
 
     private static BasicInventoryPacketState fromWindowPacket(final ServerboundContainerClickPacket windowPacket) {
-        final int mode = 0x01 << 9 << windowPacket.getClickType().ordinal();
-        final int packed = windowPacket.getButtonNum();
+        final int mode = 0x01 << 9 << windowPacket.clickType().ordinal();
+        final int packed = windowPacket.buttonNum();
         final int unpacked = mode == Constants.Networking.MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
 
-        final BasicInventoryPacketState inventory = PacketPhase.fromState(PacketPhase.clickType(windowPacket.getSlotNum()) | mode | unpacked);
+        final BasicInventoryPacketState inventory = PacketPhase.fromState(PacketPhase.clickType(windowPacket.slotNum()) | mode | unpacked);
         if (inventory == PacketPhase.Inventory.INVENTORY) {
             SpongeCommon.logger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
         }

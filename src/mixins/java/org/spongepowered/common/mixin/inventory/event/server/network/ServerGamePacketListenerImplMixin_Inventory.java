@@ -103,13 +103,13 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     private void impl$onSpectatorClick(final AbstractContainerMenu menu, final ServerboundContainerClickPacket packet) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.serverLevel()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        try (final EffectTransactor ignored = transactor.logClickContainer(menu, packet.getSlotNum(), packet.getButtonNum(), packet.getClickType(),
+        try (final EffectTransactor ignored = transactor.logClickContainer(menu, packet.slotNum(), packet.buttonNum(), packet.clickType(),
             this.player
         )) {
             if (menu instanceof MenuBridge bridge) {
                 final SpongeInventoryMenu spongeMenu = bridge.bridge$getMenu();
                 if (spongeMenu != null) {
-                    spongeMenu.onClick(packet.getSlotNum(), packet.getButtonNum(), packet.getClickType(), this.player, ((Container) menu));
+                    spongeMenu.onClick(packet.slotNum(), packet.buttonNum(), packet.clickType(), this.player, ((Container) menu));
                 }
             }
             menu.sendAllDataToRemote();
