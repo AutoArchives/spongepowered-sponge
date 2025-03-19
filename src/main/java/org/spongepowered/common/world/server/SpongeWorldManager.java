@@ -279,7 +279,7 @@ public class SpongeWorldManager implements WorldManager {
         }
 
         final ServerWorldProperties.LoadOptions.@Nullable CreateOperation createOperation = propertiesLoadOption.createOperation().orElse(null);
-        if (createOperation != null && !this.worldExists(key)) {
+        if (createOperation != null) {
             try {
                 final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(key);
                 try {
@@ -388,7 +388,7 @@ public class SpongeWorldManager implements WorldManager {
         }
 
         final ServerWorldProperties.LoadOptions.@Nullable CreateOperation createOperation = propertiesLoadOptions.createOperation().orElse(null);
-        if (createOperation != null && !this.worldExists(key)) {
+        if (createOperation != null) {
             final ServerWorldProperties properties = (ServerWorldProperties) this.initializeLevelData(key, () -> this.createLevelData(
                 registryKey, createOperation.worldArchetype())).data();
             createOperation.createCallback().ifPresent(c -> c.accept(properties));
