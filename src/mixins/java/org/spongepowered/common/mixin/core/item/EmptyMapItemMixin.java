@@ -25,16 +25,16 @@
 package org.spongepowered.common.mixin.core.item;
 
 import com.google.common.collect.Sets;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.EmptyMapItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapId;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.Value;
@@ -47,8 +47,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -61,17 +61,12 @@ import java.util.Set;
 public abstract class EmptyMapItemMixin {
 
     @Redirect(method = "use",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/item/MapItem;create(Lnet/minecraft/world/level/Level;IIBZZ)Lnet/minecraft/world/item/ItemStack;"))
-    private ItemStack impl$createMapWithSpongeData(final Level level, final int x, final int y, final byte scale,
-                                                   final boolean trackingPosition, final boolean unlimitedTracking,
-                                                   final Level level2,
-                                                   final net.minecraft.world.entity.player.Player playerIn,
-                                                   final InteractionHand usedHand) {
-        if (level.isClientSide()) { // ignore on client
-            return MapItem.create(level, x, y, scale, trackingPosition, unlimitedTracking);
-        }
-
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/item/MapItem;create(Lnet/minecraft/server/level/ServerLevel;IIBZZ)Lnet/minecraft/world/item/ItemStack;"))
+    private ItemStack impl$createMapWithSpongeData(
+        final ServerLevel level, final int x, final int y, final byte scale,
+        final boolean trackingPosition, final boolean unlimitedTracking, final Level level2,
+        final net.minecraft.world.entity.player.Player playerIn, final InteractionHand usedHand) {
         final Player player = (Player) playerIn;
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
@@ -81,15 +76,15 @@ public abstract class EmptyMapItemMixin {
             frame.addContext(EventContextKeys.USED_ITEM, player.itemInHand(handType).asImmutable());
 
             final Set<Value<?>> mapValues = Sets.newHashSet(
-                    Value.immutableOf(Keys.MAP_LOCATION, Vector2i.from((int)playerIn.getX(), (int)playerIn.getZ())),
-                    Value.immutableOf(Keys.MAP_WORLD, ((ServerWorld)level).key()),
-                    Value.immutableOf(Keys.MAP_TRACKS_PLAYERS, trackingPosition),
-                    Value.immutableOf(Keys.MAP_UNLIMITED_TRACKING, unlimitedTracking),
-                    Value.immutableOf(Keys.MAP_SCALE, (int)scale)
-                    // No need to have the defaults
-                    //Value.immutableOf(Keys.MAP_CANVAS, MapCanvas.blank()),
-                    //Value.immutableOf(Keys.MAP_LOCKED, Constants.Map.DEFAULT_MAP_LOCKED),
-                    //Value.immutableOf(Keys.MAP_DECORATIONS, Sets.newHashSet())
+                Value.immutableOf(Keys.MAP_LOCATION, Vector2i.from((int) playerIn.getX(), (int) playerIn.getZ())),
+                Value.immutableOf(Keys.MAP_WORLD, ((ServerWorld) level).key()),
+                Value.immutableOf(Keys.MAP_TRACKS_PLAYERS, trackingPosition),
+                Value.immutableOf(Keys.MAP_UNLIMITED_TRACKING, unlimitedTracking),
+                Value.immutableOf(Keys.MAP_SCALE, (int) scale)
+                // No need to have the defaults
+                //Value.immutableOf(Keys.MAP_CANVAS, MapCanvas.blank()),
+                //Value.immutableOf(Keys.MAP_LOCKED, Constants.Map.DEFAULT_MAP_LOCKED),
+                //Value.immutableOf(Keys.MAP_DECORATIONS, Sets.newHashSet())
             );
 
             final Optional<MapInfo> optMapInfo = SpongeCommonEventFactory.fireCreateMapEvent(frame.currentCause(), mapValues);
@@ -104,15 +99,21 @@ public abstract class EmptyMapItemMixin {
         }
     }
 
-    @Inject(method = "use", at = @At(value = "FIELD",
-            target = "Lnet/minecraft/world/level/Level;isClientSide:Z", opcode = Opcodes.GETFIELD),
-            locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    private void impl$returnFailResultIfMapWasNotCreated(final Level level,
-                                                         final net.minecraft.world.entity.player.Player playerIn,
-                                                         final InteractionHand handIn,
-                                                         final CallbackInfoReturnable<InteractionResult> cir,
-                                                         final ItemStack itemstack) {
-        if (itemstack.isEmpty()) {
+    @Inject(
+        method = "use",
+        slice = @Slice(
+            from = @At(value = "CONSTANT", args = "classValue=net/minecraft/server/level/ServerLevel"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;consume(ILnet/minecraft/world/entity/LivingEntity;)V")
+        ),
+        at = @At(value = "FIELD", target = "Lnet/minecraft/world/InteractionResult;SUCCESS:Lnet/minecraft/world/InteractionResult$Success;"),
+        cancellable = true
+    )
+    private void impl$returnFailResultIfMapWasNotCreated(
+        final Level level, final net.minecraft.world.entity.player.Player player,
+        final InteractionHand hand, final CallbackInfoReturnable<InteractionResult> cir,
+        @Local ItemStack stack
+    ) {
+        if (stack.isEmpty()) {
             cir.cancel();
             cir.setReturnValue(InteractionResult.FAIL);
         }

@@ -70,6 +70,9 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     @Shadow public abstract void shadow$setChanged();
     //@formatter:on
 
+    @Shadow
+    public abstract CompoundTag saveWithFullMetadata(HolderLookup.Provider $$0);
+
     @Nullable private LocatableBlock api$LocatableBlock;
     private boolean api$canTickRequested = false;
     private boolean api$canTick;
