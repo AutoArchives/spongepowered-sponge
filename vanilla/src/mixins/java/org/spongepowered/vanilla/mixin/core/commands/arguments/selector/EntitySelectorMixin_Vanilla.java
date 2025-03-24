@@ -22,31 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.vanilla.mixin.core.commands.arguments.selector;
 
-import net.minecraft.world.entity.monster.EnderMan;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.monster.EnderManAccessor;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
 
-public final class EndermanData {
+@Mixin(EntitySelector.class)
+public abstract class EntitySelectorMixin_Vanilla {
 
-    private EndermanData() {
+    @WrapOperation(method = "checkPermissions", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/CommandSourceStack;hasPermission(I)Z"))
+    private boolean vanilla$onCheckSelectorPermission(final CommandSourceStack instance, final int $$0, final Operation<Boolean> original) {
+        if (EntitySelectorParser.allowSelectors(instance)) {
+            return true;
+        }
+        return original.call(instance, $$0);
     }
-
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(EnderMan.class)
-                    .create(Keys.IS_SCREAMING)
-                        .get(EnderMan::isCreepy)
-                        .set((h, v) -> h.getEntityData().set(EnderManAccessor.accessor$DATA_CREEPY(), v))
-                    .create(Keys.BLOCK_STATE)
-                        .get(h -> (BlockState) h.getCarriedBlock())
-                        .set((h, v) -> h.setCarriedBlock((net.minecraft.world.level.block.state.BlockState) v))
-                        .delete(h -> h.setCarriedBlock(null));
-        ;
-    }
-    // @formatter:on
 }
