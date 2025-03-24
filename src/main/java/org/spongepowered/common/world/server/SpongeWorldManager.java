@@ -619,7 +619,7 @@ public class SpongeWorldManager implements WorldManager {
             final boolean disableLevelSaving = loadedWorld.noSave;
             loadedWorld.noSave = true;
             ((IOWorkerBridge) loadedWorld.getChunkSource().chunkMap.chunkScanner()).bridge$forciblyClear();
-            this.unloadWorld0(loadedWorld)
+            return this.unloadWorld0(loadedWorld)
                 .thenCompose($ -> this.deleteWorld0(key))
                 .whenComplete(($, e) -> {
                     if (e != null) {
@@ -682,7 +682,7 @@ public class SpongeWorldManager implements WorldManager {
         final net.minecraft.resources.ResourceKey<Level> registryKey = level.dimension();
 
         if (!level.getPlayers(p -> true).isEmpty()) {
-            CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location())));
+            return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location())));
         }
 
         // We first tell the world to save without flushing
