@@ -27,15 +27,20 @@ package org.spongepowered.neoforge.mixin.core.world.entity;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.entity.TrackedDamageBridge;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStep;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
@@ -48,6 +53,11 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
 
     @Shadow protected Stack<DamageContainer> damageContainers;
 
+    @Shadow public abstract ItemStack shadow$getUseItem();
+
+    // Note, this is actually already defined in LivingEntityMixin_Damage
+    private boolean damage$inventoryChanged;
+
     @Override
     public float damage$getContainerDamage(final float damage) {
         return this.damageContainers.peek().getNewDamage();
@@ -58,12 +68,37 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
         this.damageContainers.peek().setNewDamage(damage);
     }
 
+    @Inject(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;FI)V"))
+    private void damage$onHurtShield(final CallbackInfoReturnable<Boolean> cir) {
+        this.damage$inventoryChanged = true;
+    }
+
+    @WrapOperation(method = "hurtServer",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F"
+        ))
+    private float damage$initiateBlockingStep(
+        final LivingEntity self, final ServerLevel level, final DamageSource source, final float originalDamage,
+        final Operation<Float> original) {
+        final SpongeDamageTracker tracker = this.damage$tracker();
+        if (tracker == null) {
+            return original.call(self, level, source, originalDamage);
+        }
+
+        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(this.shadow$getUseItem()));
+        float damage = (float) step.applyChildrenBefore(originalDamage);
+        return original.call(self, level, source, damage);
+    }
+
     @SuppressWarnings("UnstableApiUsage")
-    @WrapOperation(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/CommonHooks;onDamageBlock(Lnet/minecraft/world/entity/LivingEntity;Lnet/neoforged/neoforge/common/damagesource/DamageContainer;Z)Lnet/neoforged/neoforge/event/entity/living/LivingShieldBlockEvent;"))
-    private LivingShieldBlockEvent damage$modifyBeforeAndAfterShield(final LivingEntity self, final DamageContainer container, final boolean blocked, final Operation<LivingShieldBlockEvent> operation) {
+    @WrapOperation(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/CommonHooks;onDamageBlock(Lnet/minecraft/world/entity/LivingEntity;Lnet/neoforged/neoforge/common/damagesource/DamageContainer;FZ)Lnet/neoforged/neoforge/event/entity/living/LivingShieldBlockEvent;"))
+    private LivingShieldBlockEvent damage$modifyBeforeAndAfterShield(
+        final LivingEntity self, final DamageContainer container, final float originalBlockedDamage,
+        final boolean blocked, final Operation<LivingShieldBlockEvent> operation
+    ) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         if (tracker == null || !blocked) { // don't capture when vanilla wouldn't block
-            return operation.call(self, container, false);
+            return operation.call(self, container, originalBlockedDamage, false);
         }
 
         final float originalDamage = container.getNewDamage();
@@ -72,10 +107,10 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
         container.setNewDamage(damage);
         final LivingShieldBlockEvent event;
         if (step.isSkipped()) {
-            event = new LivingShieldBlockEvent(self, container, true);
+            event = new LivingShieldBlockEvent(self, container, damage, true);
             event.setBlocked(true);
         } else {
-            event = operation.call(self, container, true);
+            event = operation.call(self, container, damage, true);
             container.setBlockedDamage(event);
             damage = container.getNewDamage();
         }
@@ -83,7 +118,7 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
         return event;
     }
 
-    @WrapWithCondition(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/damagesource/DamageContainer;setBlockedDamage(Lnet/neoforged/neoforge/event/entity/living/LivingShieldBlockEvent;)V"))
+    @WrapWithCondition(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/common/damagesource/DamageContainer;setBlockedDamage(Lnet/neoforged/neoforge/event/entity/living/LivingShieldBlockEvent;)V"))
     private boolean damage$cancelSetBlockedDamage(final DamageContainer container, final LivingShieldBlockEvent event) {
         // We already did it above
         return false;

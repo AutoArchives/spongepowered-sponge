@@ -91,11 +91,6 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
         }
     }
 
-    @Inject(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"))
-    private void damage$onHurtShield(final CallbackInfoReturnable<Boolean> cir) {
-        this.damage$inventoryChanged = true;
-    }
-
     @ModifyVariable(method = "hurtServer", argsOnly = true, at = @At("STORE"), index = 3, slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F"),
         to = @At(value = "FIELD", target = "Lnet/minecraft/tags/DamageTypeTags;IS_FREEZING:Lnet/minecraft/tags/TagKey;")

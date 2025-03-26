@@ -23,6 +23,7 @@
     "network.ConnectionMixin_Forge",
     "network.protocol.common.ClientboundCustomPayloadPacketMixin_Forge",
     "network.protocol.common.ServerboundCustomPayloadPacketMixin_Forge",
+    "resources.RegistryDataLoaderMixin_Forge",
     "server.BootstrapMixin_Forge",
     "server.MinecraftServerMixin_Forge",
     "server.commands.SpreadPlayersCommandMixin_Forge",
