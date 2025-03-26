@@ -31,14 +31,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BlocksAttacks;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
@@ -98,27 +96,6 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
             cir.setReturnValue(false);
         }
         this.attackImpl$baseDamage = damageTaken;
-    }
-
-    /**
-     * Prepare {@link org.spongepowered.common.util.DamageEventUtil.Hurt} for damage event
-     */
-    @Inject(method = "hurtServer", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;noActionTime:I"))
-    private void attackImpl$preventEarlyBlock1(final ServerLevel level, final DamageSource $$0, final float $$1, final CallbackInfoReturnable<Boolean> cir) {
-        this.attackImpl$hurt = new DamageEventUtil.Hurt($$0, new ArrayList<>());
-    }
-
-    /**
-     * Prevents shield usage before event
-     * Captures the blocked damage as a function
-     */
-    @Redirect(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"))
-    private void attackImpl$preventEarlyBlock1(
-        final BlocksAttacks instance, final net.minecraft.world.level.Level level,
-        final ItemStack stack, final LivingEntity target, final InteractionHand hand, final float damage) {
-        // this.hurtCurrentlyUsedShield(damageToShield);
-        // $$6.hurtBlockingItem(this.level(), this.getUseItem(), this, this.getUsedItemHand(), $$5);
-        this.attackImpl$hurt.functions().add(DamageEventUtil.createShieldFunction(target));
     }
 
     /**

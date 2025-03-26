@@ -24,22 +24,60 @@
  */
 package org.spongepowered.vanilla.mixin.core.world.entity;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlocksAttacks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.util.DamageEventUtil;
+
+import java.util.ArrayList;
 
 
 @Mixin(value = LivingEntity.class, priority = 900)
 public abstract class LivingEntityMixin_Attack_Impl {
+
+    // Shared with the common version
+    private DamageEventUtil.Hurt attackImpl$hurt;
+
+    /**
+     * Prepare {@link org.spongepowered.common.util.DamageEventUtil.Hurt} for damage event
+     */
+    @Inject(method = "hurtServer", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;noActionTime:I"))
+    private void attackImpl$vanilla$preventEarlyBlock1(final ServerLevel level, final DamageSource $$0, final float $$1, final CallbackInfoReturnable<Boolean> cir) {
+        this.attackImpl$hurt = new DamageEventUtil.Hurt($$0, new ArrayList<>());
+    }
+
+    /**
+     * Prevents shield usage before event
+     * Captures the blocked damage as a function
+     */
+    @WrapOperation(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"))
+    private void attackImpl$preventItemBlocking(
+        final BlocksAttacks instance, final net.minecraft.world.level.Level $$0, final ItemStack $$1,
+        final LivingEntity target, final InteractionHand $$3, final float $$4, final Operation<Void> original
+    ) {
+        // this.hurtCurrentlyUsedShield(damageToShield);
+        // $$6.hurtBlockingItem(this.level(), this.getUseItem(), this, this.getUsedItemHand(), $$5);
+        this.attackImpl$hurt.functions().add(DamageEventUtil.createShieldFunction(target));
+    }
+
 
     @SuppressWarnings("InvalidInjectorMethodSignature")
     @ModifyConstant(method = "resolvePlayerResponsibleForDamage", constant = @Constant(classValue = Wolf.class, ordinal = 0))

@@ -24,19 +24,54 @@
  */
 package org.spongepowered.neoforge.mixin.core.world.entity;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlocksAttacks;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.util.DamageEventUtil;
+
+import java.util.ArrayList;
 
 @Mixin(LivingEntity.class)
 public class LivingEntityMixin_Neo_Attack_Impl {
 
     protected DamageEventUtil.DamageEventResult attackImpl$actuallyHurtResult;
+    protected DamageEventUtil.Hurt attackImpl$hurt;
+
+    /**
+     * Prepare {@link org.spongepowered.common.util.DamageEventUtil.Hurt} for damage event
+     */
+    @Inject(method = "hurtServer", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;noActionTime:I"))
+    private void attackImpl$neo$preventEarlyBlock1(final ServerLevel level, final DamageSource $$0, final float $$1, final CallbackInfoReturnable<Boolean> cir) {
+        this.attackImpl$hurt = new DamageEventUtil.Hurt($$0, new ArrayList<>());
+    }
+
+    /**
+     * Prevents shield usage before event
+     * Captures the blocked damage as a function
+     */
+    @WrapOperation(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;FI)V"))
+    private void attackImpl$preventItemBlocking(
+        final BlocksAttacks instance, final Level level, final ItemStack itemStack, final LivingEntity target,
+        final InteractionHand interactionHand, final float v, final int i, final Operation<Void> original
+    ) {
+        // this.hurtCurrentlyUsedShield(damageToShield);
+        // $$6.hurtBlockingItem(this.level(), this.getUseItem(), this, this.getUsedItemHand(), $$5);
+        this.attackImpl$hurt.functions().add(DamageEventUtil.createShieldFunction(target));
+    }
 
     /**
      * Set absorbed damage after calling {@link LivingEntity#setAbsorptionAmount} in which we called the event
