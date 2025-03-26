@@ -53,7 +53,7 @@ final class CompassItemData {
                 .create(Keys.LODESTONE)
                     .get(stack -> {
                         final @Nullable LodestoneTracker component = stack.get(DataComponents.LODESTONE_TRACKER);
-                        if (component == null) {
+                        if (component == null || component.target().isEmpty()) {
                             return null;
                         }
                         final GlobalPos globalPos = component.target().get();

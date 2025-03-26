@@ -57,7 +57,7 @@ public final class ArmorItemStackData {
                                 return null;
                             }
                             return equippable.assetId()
-                                .map(rl -> (ResourceKey) (Object) rl)
+                                .map(rl -> (ResourceKey) (Object) rl.location())
                                 .flatMap(rk -> RegistryTypes.ARMOR_MATERIAL.get().findEntry(rk))
                                 .map(RegistryEntry::value)
                                 .orElse(null);

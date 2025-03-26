@@ -103,7 +103,7 @@ public class LevelDataRegistries {
                 "FLAT_GENERATOR_CONFIG",
                 context.relativeClass("world.generation.config.flat", "FlatGeneratorConfig"),
                 Registries.FLAT_LEVEL_GENERATOR_PRESET,
-                a -> true, RegistryScope.GAME
+                a -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
                 "world.generation.config.noise",
