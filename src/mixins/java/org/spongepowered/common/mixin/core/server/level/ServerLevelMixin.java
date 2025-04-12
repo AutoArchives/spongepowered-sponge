@@ -24,11 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
@@ -36,7 +40,6 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.util.ProgressListener;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -87,7 +90,6 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -135,7 +137,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow private int emptyTime;
 
     @Shadow @NonNull public abstract MinecraftServer shadow$getServer();
-    @Shadow protected abstract void shadow$saveLevelData();
     @Shadow @Final private MinecraftServer server;
 
     @Shadow public abstract void levelEvent(@Nullable Player $$0, int $$1, BlockPos $$2, int $$3);
@@ -339,62 +340,45 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         return 0;
     }
 
-    /**
-     * @author zidane - December 17th, 2020 - Minecraft 1.16.4
-     * @reason Honor our serialization behavior in performing saves
-     */
-    @Overwrite
-    public void save(@Nullable final ProgressListener progress, final boolean flush, final boolean skipSave) {
-        final boolean isManualSave = this.impl$isManualSave;
+    @Inject(method = "save", at = @At("HEAD"), cancellable = true)
+    public void impl$postSaveWorldEventPre(final CallbackInfo ci, final @Share("manualSave") LocalBooleanRef manualSave) {
+        manualSave.set(this.impl$isManualSave);
         this.impl$isManualSave = false;
 
         final Cause currentCause = PhaseTracker.getInstance().currentCause();
         if (Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPre(currentCause, ((ServerWorld) this)))) {
-            return; // cancelled save
+            ci.cancel();
         }
+    }
 
+    @WrapOperation(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;saveLevelData()V"))
+    public void impl$wrapSaveLevelData(final ServerLevel self, final Operation<Void> original) {
         final ServerLevelData levelData = (ServerLevelData) this.shadow$getLevelData();
-        final ServerChunkCache chunkProvider = ((ServerLevel) (Object) this).getChunkSource();
+        final SerializationBehavior behavior = ((ServerLevelDataBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
 
-        if (!skipSave) {
-            final SerializationBehavior behavior = ((ServerLevelDataBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+        if (behavior != SerializationBehavior.NONE) {
+            original.call(self);
 
-            if (progress != null) {
-                progress.progressStartNoAbort(Component.translatable("menu.savingLevel"));
+            // per-world WorldInfo/WorldBorder/BossBars
+            levelData.setWorldBorder(this.getWorldBorder().createSettings());
+            if (levelData instanceof WorldData worldData) {
+                worldData.setCustomBossEvents(this.bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
+                this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess(), worldData, this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList().getSingleplayerData() : null);
             }
-
-            // We always save the metadata unless it is NONE
-            if (behavior != SerializationBehavior.NONE) {
-
-                this.shadow$saveLevelData();
-
-                // Sponge Start - We do per-world WorldInfo/WorldBorders/BossBars
-
-                levelData.setWorldBorder(this.getWorldBorder().createSettings());
-
-                if (levelData instanceof WorldData worldData) {
-                    worldData.setCustomBossEvents(this.bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
-                    this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess(), worldData, this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList().getSingleplayerData() : null);
-                }
-
-                // Sponge End
-            }
-            if (progress != null) {
-                progress.progressStage(Component.translatable("menu.savingChunks"));
-            }
-
-            if (behavior == SerializationBehavior.AUTOMATIC || (isManualSave && behavior == SerializationBehavior.MANUAL)) {
-                chunkProvider.save(flush);
-            }
-
-            if (flush) {
-                this.entityManager.saveAll();
-            } else {
-                this.entityManager.autoSave();
-            }
-
-            Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, (ServerWorld) this));
         }
+    }
+
+    @WrapWithCondition(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerChunkCache;save(Z)V"))
+    public boolean impl$wrapChunkCacheSave(final ServerChunkCache chunkCache, final boolean flush, final @Share("manualSave") LocalBooleanRef manualSave) {
+        final ServerLevelData levelData = (ServerLevelData) this.shadow$getLevelData();
+        final SerializationBehavior behavior = ((ServerLevelDataBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+        return behavior == SerializationBehavior.AUTOMATIC || (manualSave.get() && behavior == SerializationBehavior.MANUAL);
+    }
+
+    @Inject(method = "save", at = @At("TAIL"))
+    public void impl$postSaveWorldEventPost(final CallbackInfo ci) {
+        final Cause currentCause = PhaseTracker.getInstance().currentCause();
+        Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, (ServerWorld) this));
     }
 
     @Inject(method = "advanceWeatherCycle",
