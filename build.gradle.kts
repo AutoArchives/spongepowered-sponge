@@ -150,10 +150,6 @@ dependencies {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
-    applaunchConfig(libs.configurate.jackson) {
-        exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
-    }
     applaunchConfig(libs.log4j.core)
     applaunchConfig(libs.log4j.jpl)
     applaunchConfig(apiLibs.pluginSpi) {

@@ -25,16 +25,15 @@
 package org.spongepowered.common.event.cause.entity.damage;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepType;
 import org.spongepowered.api.registry.RegistryTypes;
 
-public final class SpongeDamageModifierType implements DamageModifierType {
+public final class SpongeDamageStepType implements DamageStepType {
 
     @Override
     public String toString() {
-        return RegistryTypes.DAMAGE_MODIFIER_TYPE.get().findValueKey(this)
+        return RegistryTypes.DAMAGE_STEP_TYPE.get().findValueKey(this)
                 .map(ResourceKey::toString)
-                .map("DamageModifierType[%s]"::formatted)
-                .orElse(super.toString());
+                .orElseGet(super::toString);
     }
 }

@@ -203,7 +203,7 @@
     "minecraft.world.entity.animal.sniffer.SnifferMixin_API",
     "minecraft.world.entity.animal.wolf.WolfMixin_API",
     "minecraft.world.entity.animal.wolf.WolfSoundVariantMixin_API",
-    "minecraft.world.entity.animal.wolf.WollfVariantMixin_API",
+    "minecraft.world.entity.animal.wolf.WolfVariantMixin_API",
     "minecraft.world.entity.boss.EnderDragonPartMixin_API",
     "minecraft.world.entity.boss.enderdragon.EndCrystalMixin_API",
     "minecraft.world.entity.boss.enderdragon.EnderDragonMixin_API",

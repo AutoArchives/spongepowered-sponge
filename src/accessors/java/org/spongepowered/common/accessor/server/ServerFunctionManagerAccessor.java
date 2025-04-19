@@ -22,25 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.world.entity;
+package org.spongepowered.common.accessor.server;
 
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stat;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.ServerFunctionLibrary;
+import net.minecraft.server.ServerFunctionManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(LivingEntity.class)
-public class LivingEntityMixin_Forge_Attack_Impl {
+@Mixin(ServerFunctionManager.class)
+public interface ServerFunctionManagerAccessor {
 
-    /**
-     * Prevents {@link ServerPlayer#awardStat} from running before event
-     */
-    @Redirect(method = "getDamageAfterMagicAbsorb",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/stats/Stat;I)V"))
-    public void attackImpl$onAwardStatDamageResist(final ServerPlayer instance, final Stat<?> resourceLocation, final int i) {
-        // do nothing
-    }
-
+    @Accessor("library") ServerFunctionLibrary accessor$library();
 }
