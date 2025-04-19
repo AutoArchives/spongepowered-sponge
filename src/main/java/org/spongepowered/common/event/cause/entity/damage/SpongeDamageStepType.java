@@ -22,12 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.item.enchantment;
+package org.spongepowered.common.event.cause.entity.damage;
 
-import net.minecraft.world.item.enchantment.Enchantment;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepType;
+import org.spongepowered.api.registry.RegistryTypes;
 
-@Mixin(Enchantment.class)
-public abstract class EnchantmentMixin {
+public final class SpongeDamageStepType implements DamageStepType {
 
+    @Override
+    public String toString() {
+        return RegistryTypes.DAMAGE_STEP_TYPE.get().findValueKey(this)
+                .map(ResourceKey::toString)
+                .orElseGet(super::toString);
+    }
 }

@@ -22,31 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity;
+package org.spongepowered.common.bridge.world.entity;
 
-import net.minecraft.world.entity.LivingEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.util.DamageEventUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
 
-// Forge and Vanilla
-@Mixin(value = LivingEntity.class, priority = 900)
-public class LivingEntityMixin_Shared_Attack_Impl {
+public interface TrackedDamageBridge {
 
-    protected DamageEventUtil.DamageEventResult attackImpl$actuallyHurtResult;
+    @Nullable
+    SpongeDamageTracker damage$tracker();
 
-    /**
-     * Set absorbed damage after calling {@link LivingEntity#setAbsorptionAmount} in which we called the event
-     */
-    @ModifyVariable(method = "actuallyHurt", ordinal = 2,
-        slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setAbsorptionAmount(F)V", ordinal = 0)),
-        at = @At(value = "STORE", ordinal = 0))
-    public float attackImpl$setAbsorbed(final float value) {
-        if (this.attackImpl$actuallyHurtResult.event().isCancelled()) {
-            return 0;
+    default float damage$firePostEvent(float damage) {
+        final SpongeDamageTracker tracker = this.damage$tracker();
+        if (tracker == null) {
+            return damage;
         }
-        return this.attackImpl$actuallyHurtResult.damageAbsorbed().orElse(0f);
+        damage = tracker.endStep(DamageStepTypes.ABSORPTION, damage);
+        damage = tracker.callDamagePostEvent((org.spongepowered.api.entity.Entity) this, damage);
+        this.damage$setContainerDamage(damage);
+        return damage;
+    }
+
+    // Neo hook
+    default void damage$setContainerDamage(final float damage) {}
+
+    // Neo hook
+    default float damage$getContainerDamage(final float damage) {
+        return damage;
     }
 }
