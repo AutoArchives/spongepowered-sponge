@@ -40,8 +40,8 @@ public final class RecipeUtil {
         }
         final var server = SpongeCommon.server();
         return new ContextMap.Builder()
-            .withParameter(SlotDisplayContext.FUEL_VALUES, server.fuelValues())
-            .withParameter(SlotDisplayContext.REGISTRIES, server.registryAccess())
+            .withParameter(SlotDisplayContext.FUEL_VALUES, server.theGame().fuelValues())
+            .withParameter(SlotDisplayContext.REGISTRIES, server.theGame().registryAccess())
             .create(SlotDisplayContext.CONTEXT);
     }
 

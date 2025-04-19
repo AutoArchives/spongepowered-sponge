@@ -139,7 +139,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     private boolean isConstructing;
 
     public static SpongeUserData create(final GameProfile profile) throws IOException {
-        final ServerLevel world = SpongeCommon.server().overworld();
+        final ServerLevel world = SpongeCommon.server().theGame().overworld();
         if (world == null) {
             SpongeCommon.logger().warn("Overworld not initialized, cannot create users!");
             throw new IllegalStateException("Overworld not initialized, cannot create users!");
@@ -214,7 +214,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY)) {
                 final ListTag nbttaglist1 = this.compound.getListOrEmpty(Constants.Entity.Player.ENDERCHEST_INVENTORY);
-                this.enderChest.fromTag(nbttaglist1, SpongeCommon.server().registryAccess());
+                this.enderChest.fromTag(nbttaglist1, SpongeCommon.server().theGame().registryAccess());
             }
         }
         return this;
@@ -248,7 +248,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         this.loadEnderInventory();
 
         compound.put(Constants.Entity.Player.INVENTORY, this.inventory.writeList(new ListTag()));
-        compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.createTag(SpongeCommon.server().registryAccess()));
+        compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.createTag(SpongeCommon.server().theGame().registryAccess()));
         compound.putInt(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
         compound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.x, this.y, this.z));
@@ -464,7 +464,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public Optional<ServerPlayer> player() {
-        return Optional.ofNullable((ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.profile.getId()));
+        return Optional.ofNullable((ServerPlayer) SpongeCommon.server().theGame().playerList().getPlayer(this.profile.getId()));
     }
 
     @Override

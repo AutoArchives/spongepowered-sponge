@@ -40,7 +40,7 @@ public class SpongePortalLogicFactory implements PortalLogic.Factory {
 
     @Override
     public PortalLogic endPortal() {
-        return (PortalLogic) Blocks.END_PORTAL;
+        return (PortalLogic) Blocks.NETHER_PORTAL;
     }
 
     @Override

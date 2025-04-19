@@ -127,7 +127,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     private BrigadierCommandRegistrar brigadierRegistrar;
 
     public static SpongeCommandManager get(final MinecraftServer server) {
-        return ((CommandsBridge) server.getCommands()).bridge$commandManager();
+        return ((CommandsBridge) server.theGame().getCommands()).bridge$commandManager();
     }
 
     @Inject
@@ -280,7 +280,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     @Override
     public void updateCommandTreeForPlayer(final @NonNull ServerPlayer player) {
         Objects.requireNonNull(player, "player");
-        SpongeCommon.server().getCommands().sendCommands((net.minecraft.server.level.ServerPlayer) player);
+        SpongeCommon.server().theGame().getCommands().sendCommands((net.minecraft.server.level.ServerPlayer) player);
     }
 
     @Override

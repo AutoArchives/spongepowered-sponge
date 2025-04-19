@@ -380,7 +380,7 @@ public abstract class SpongeUserView implements User, BridgeSubject {
 
         @SuppressWarnings("ConstantConditions")
         protected DataHolder.Mutable dataHolderBackingObject() {
-            final @Nullable ServerPlayer serverPlayer = (ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.uuid);
+            final @Nullable ServerPlayer serverPlayer = (ServerPlayer) SpongeCommon.server().theGame().playerList().getPlayer(this.uuid);
             if (serverPlayer != null) {
                 return serverPlayer;
             }

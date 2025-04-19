@@ -89,7 +89,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
         Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         Preconditions.checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
 
-        final var advancement = SpongeCommon.server().getAdvancements().get(this.impl$advancementKey);
+        final var advancement = SpongeCommon.server().theGame().getAdvancements().get(this.impl$advancementKey);
         if (advancement == null) {
             throw new IllegalStateException("The advancement of this advancement progress is unloaded: " + this.impl$advancementKey);
         }
@@ -353,7 +353,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
     private Optional<Advancement> impl$getOptionalAdvancement() {
         Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         Preconditions.checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
-        final AdvancementHolder advancement = SpongeCommon.server().getAdvancements().get(this.impl$advancementKey);
+        final AdvancementHolder advancement = SpongeCommon.server().theGame().getAdvancements().get(this.impl$advancementKey);
         return Optional.ofNullable(advancement).map(AdvancementHolder::value).map(Advancement.class::cast);
     }
 }

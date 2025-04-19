@@ -57,12 +57,12 @@ final class CompassItemData {
                             return null;
                         }
                         final GlobalPos globalPos = component.target().get();
-                        return ServerLocation.of((ServerWorld) SpongeCommon.server().getLevel(globalPos.dimension()),
+                        return ServerLocation.of((ServerWorld) SpongeCommon.server().theGame().getLevel(globalPos.dimension()),
                                 VecHelper.toVector3d(globalPos.pos()));
                     })
                     .set((stack, location) -> {
                         final ResourceKey<Level> dim = ((ServerLevel) location.world()).dimension();
-                        stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(Optional.of(new GlobalPos(dim, VecHelper.toBlockPos(location))), true));
+                        stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(Optional.of(new GlobalPos(dim, VecHelper.toBlockPos(location))), true, true));
                     })
                 .create(Keys.LODESTONE_TRACKED)
                     .delete(stack -> stack.remove(DataComponents.LODESTONE_TRACKER))
@@ -72,12 +72,12 @@ final class CompassItemData {
                     })
                     .set((stack, isTracked) -> {
                         var oldTarget = Optional.ofNullable(stack.get(DataComponents.LODESTONE_TRACKER)).flatMap(LodestoneTracker::target);
-                        stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(oldTarget, isTracked));
+                        stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(oldTarget, isTracked, true));
                     })
                     .delete(stack -> {
                         var oldTarget = Optional.ofNullable(stack.get(DataComponents.LODESTONE_TRACKER)).flatMap(LodestoneTracker::target);
                         if (oldTarget.isPresent()) {
-                            stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(oldTarget, false));
+                            stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(oldTarget, false, true));
                         } else {
                             stack.remove(DataComponents.LODESTONE_TRACKER);
                         }

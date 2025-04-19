@@ -56,7 +56,7 @@ public final class IdentifiableData {
                         .set((h, v) -> ((SpongeDataHolderBridge) h).bridge$offer(Keys.LAST_DATE_JOINED, v))
                         .supports(h -> h instanceof ServerPlayer || h instanceof SpongeUserData)
                     .create(Keys.LAST_DATE_PLAYED)
-                        .get(h -> SpongeCommon.server().getPlayerList().getPlayer(h.uniqueId()) != null
+                        .get(h -> SpongeCommon.server().theGame().playerList().getPlayer(h.uniqueId()) != null
                             ? Instant.now()
                             : ((SpongeDataHolderBridge) h).bridge$get(Keys.LAST_DATE_PLAYED).orElse(null))
                         .set((h, v) -> ((SpongeDataHolderBridge) h).bridge$offer(Keys.LAST_DATE_PLAYED, v))

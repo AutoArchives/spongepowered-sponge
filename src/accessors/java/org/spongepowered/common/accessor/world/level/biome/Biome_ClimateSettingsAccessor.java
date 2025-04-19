@@ -25,10 +25,11 @@
 package org.spongepowered.common.accessor.world.level.biome;
 
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.ClimateSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(Biome.ClimateSettings.class)
+@Mixin(ClimateSettings.class)
 public interface Biome_ClimateSettingsAccessor {
 
     @Accessor("temperatureModifier") Biome.TemperatureModifier accessor$temperatureModifier();

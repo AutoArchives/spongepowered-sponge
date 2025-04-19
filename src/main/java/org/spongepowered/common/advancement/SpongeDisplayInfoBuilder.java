@@ -106,7 +106,7 @@ public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
         final net.minecraft.network.chat.Component description = SpongeAdventure.asVanilla(this.description);
         final net.minecraft.advancements.AdvancementType frameType = (net.minecraft.advancements.AdvancementType) (Object) this.advancementType;
         final ItemStack icon = (ItemStack) (Object) this.icon.asMutable();
-        return (DisplayInfo) new net.minecraft.advancements.DisplayInfo(icon, title, description, null,
+        return (DisplayInfo) new net.minecraft.advancements.DisplayInfo(icon, title, description, null, null,
                 frameType, this.showToast, this.announceToChat, this.hidden);
     }
 

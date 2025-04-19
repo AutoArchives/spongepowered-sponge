@@ -84,7 +84,7 @@ public final class WorldPropertiesData {
                     .create(Keys.SERIALIZATION_BEHAVIOR)
                         .get(h -> h.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC))
                     .create(Keys.VIEW_DISTANCE)
-                        .get(h -> h.bridge$viewDistance().orElseGet(() -> SpongeCommon.server().getPlayerList().getViewDistance()))
+                        .get(h -> h.bridge$viewDistance().orElseGet(() -> SpongeCommon.server().theGame().playerList().getViewDistance()))
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> h.bridge$displayName().orElse(null))
                     .create(Keys.PERFORM_SPAWN_LOGIC)

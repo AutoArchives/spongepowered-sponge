@@ -97,7 +97,7 @@ public final class SpongeCommon {
     }
 
     public static RegistryAccess.Frozen vanillaRegistryAccess() {
-        return SpongeCommon.server().registryAccess();
+        return SpongeCommon.server().theGame().registryAccess();
     }
 
     public static <E> Registry<E> vanillaRegistry(ResourceKey<? extends Registry<? extends E>> key) {

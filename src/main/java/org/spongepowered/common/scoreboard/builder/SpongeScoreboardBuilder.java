@@ -68,7 +68,7 @@ public final class SpongeScoreboardBuilder implements Scoreboard.Builder {
 
     @Override
     public Scoreboard build() throws IllegalStateException {
-        Scoreboard scoreboard = (Scoreboard) new ServerScoreboard(SpongeCommon.server());
+        Scoreboard scoreboard = (Scoreboard) new ServerScoreboard(SpongeCommon.server().theGame().playerList()::broadcastAll);
         for (Objective objective: this.objectives) {
             scoreboard.addObjective(objective);
         }

@@ -27,9 +27,13 @@ package org.spongepowered.common.world.server;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.mines.MineSpawnStrategy;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.WorldArchetypeType;
+
+import java.util.List;
+import java.util.Optional;
 
 public final class SpongeWorldArchetypeType implements WorldArchetypeType.Builder {
 
@@ -61,6 +65,12 @@ public final class SpongeWorldArchetypeType implements WorldArchetypeType.Builde
 
     @Override
     public WorldArchetypeType build() {
-        return (WorldArchetypeType) (Object) new LevelStem(Holder.direct((DimensionType) (Object) this.worldType), (net.minecraft.world.level.chunk.ChunkGenerator) this.chunkGenerator);
+        return (WorldArchetypeType) (Object) new LevelStem(
+            Holder.direct((DimensionType) (Object) this.worldType),
+            Optional.ofNullable((net.minecraft.world.level.chunk.ChunkGenerator) this.chunkGenerator),
+            List.of(),
+            Optional.empty(),
+            MineSpawnStrategy.SURFACE
+        );
     }
 }

@@ -57,7 +57,7 @@ public final class SpongeNetherPortalExitCalculator implements PortalLogic.Porta
         if (!fromLevel.dimension().equals(this.origin)) {
             return Optional.empty(); // configured Portals go only in one direction
         }
-        final var toLevel = fromLevel.getServer().getLevel(this.target);
+        final var toLevel = fromLevel.theGame().getLevel(this.target);
         if (toLevel == null) {
             return Optional.empty();
         }

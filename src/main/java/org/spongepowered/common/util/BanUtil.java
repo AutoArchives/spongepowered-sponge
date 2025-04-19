@@ -35,7 +35,7 @@ public final class BanUtil {
 
     public static String addressToBanCompatibleString(final InetAddress address) {
         // This *should* be a static method, but apparently not...
-        final IpBanList ipBans = SpongeCommon.server().getPlayerList().getIpBans();
+        final IpBanList ipBans = SpongeCommon.server().theGame().playerList().getIpBans();
         return ((IpBanListAccessor) ipBans).invoker$getIpFromAddress(new InetSocketAddress(address, 0));
     }
 

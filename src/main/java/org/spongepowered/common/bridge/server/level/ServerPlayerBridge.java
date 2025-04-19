@@ -25,16 +25,9 @@
 package org.spongepowered.common.bridge.server.level;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.Holder;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
-import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -81,30 +74,9 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     Set<SkinPart> bridge$getSkinParts();
 
-    void bridge$setSkinParts(final Set<SkinPart> skinParts);
-
     net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend();
 
     void bridge$setConnectionMessageToSend(net.minecraft.network.chat.Component message);
-
-    default void bridge$sendDimensionData(final Connection manager, final DimensionType dimensionType, final ResourceKey<Level> key) {
-    }
-
-    default void bridge$sendChangeDimension(final Holder<DimensionType> dimensionType, final ResourceKey<Level> key, final long hashedSeed,
-            final GameType gameType, final GameType previousGameType, final boolean isDebug, final boolean isFlat, final byte dataToKeepMask) {
-        ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(
-            dimensionType,
-            key,
-            hashedSeed,
-            gameType,
-            previousGameType,
-            isDebug,
-            isFlat,
-            ((ServerPlayer) this).getLastDeathLocation(),
-            ((ServerPlayer) this).getPortalCooldown(),
-            ((ServerPlayer) this).serverLevel().getSeaLevel()
-        ), dataToKeepMask));
-    }
 
     boolean bridge$kick(final Component message);
 

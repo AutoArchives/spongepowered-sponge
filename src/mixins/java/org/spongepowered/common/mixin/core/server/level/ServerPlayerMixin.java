@@ -365,18 +365,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    public void bridge$setSkinParts(final Set<SkinPart> skinParts) {
-        int mask = 0;
-        for (final SkinPart part : skinParts) {
-            mask |= ((SpongeSkinPart) part).getMask();
-        }
-
-        this.shadow$getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte) mask);
-        this.impl$skinParts = ImmutableSet.copyOf(skinParts);
-        this.impl$skinPartMask = mask;
-    }
-
-    @Override
     public boolean bridge$sleepingIgnored() {
         return this.impl$sleepingIgnored;
     }

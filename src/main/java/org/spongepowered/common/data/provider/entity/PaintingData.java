@@ -54,7 +54,7 @@ public final class PaintingData {
                         .setAnd((h, v) -> {
                             if (!h.level().isClientSide) {
                                 final Holder<PaintingVariant> oldArt = h.getVariant();
-                                var newArt = SpongeCommon.server().registryAccess().lookupOrThrow(Registries.PAINTING_VARIANT).wrapAsHolder((PaintingVariant) (Object) v);
+                                var newArt = SpongeCommon.server().theGame().registryAccess().lookupOrThrow(Registries.PAINTING_VARIANT).wrapAsHolder((PaintingVariant) (Object) v);
                                 ((PaintingAccessor) h).invoker$setVariant(newArt);
                                 ((HangingEntityAccessor) h).invoker$setDirection(h.getDirection());
                                 if (!h.survives()) {

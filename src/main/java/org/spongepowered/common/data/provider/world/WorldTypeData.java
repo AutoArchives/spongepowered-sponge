@@ -101,12 +101,13 @@ public final class WorldTypeData {
     }
 
     private static WorldTypeEffect worldTypeEffect(final DimensionType type) {
-        final var key = (ResourceKey) (Object) type.effectsLocation();
-        @Nullable final WorldTypeEffect effect = DimensionEffectProvider.INSTANCE.get(key);
-        if (effect == null) {
-            throw new IllegalStateException(String.format("The effect '%s' has not been registered!", key));
-        }
-        return effect;
+//        final var key = (ResourceKey) (Object) type.dimensionSpecialEffects();
+//        @Nullable final WorldTypeEffect effect = DimensionEffectProvider.INSTANCE.get(key);
+//        if (effect == null) {
+//            throw new IllegalStateException(String.format("The effect '%s' has not been registered!", key));
+//        }
+//        return effect;
+        return null;
     }
 
     @Nullable

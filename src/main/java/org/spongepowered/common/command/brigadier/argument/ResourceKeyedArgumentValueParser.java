@@ -80,7 +80,7 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
 
         @Override
         public final List<CommandCompletion> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
-            final CommandDispatcher<CommandSourceStack> dispatcher = SpongeCommon.server().getCommands().getDispatcher();
+            final CommandDispatcher<CommandSourceStack> dispatcher = SpongeCommon.server().theGame().getCommands().getDispatcher();
             final SpongeCommandContextBuilder builder = new SpongeCommandContextBuilder(
                     dispatcher,
                     (CommandSourceStack) cause,

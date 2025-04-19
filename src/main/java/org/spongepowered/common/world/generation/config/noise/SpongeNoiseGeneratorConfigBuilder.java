@@ -162,7 +162,8 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
             this.disableMobGeneration,
             this.aquifers,
             this.oreVeins,
-            this.legacyRandomSource
+            this.legacyRandomSource,
+            1
         );
         return (NoiseGeneratorConfig) (Object) settings;
     }

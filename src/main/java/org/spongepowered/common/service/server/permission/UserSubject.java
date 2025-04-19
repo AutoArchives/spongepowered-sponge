@@ -102,7 +102,7 @@ public class UserSubject extends SpongeSubject {
         final ServerOpListEntry entry = SpongePermissionService.getOps().get(this.player);
         if (entry == null) {
             // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
-            return SpongeCommon.server().getPlayerList().isOp(this.player) ? SpongeCommon.server().getOperatorUserPermissionLevel() : 0;
+            return SpongeCommon.server().theGame().playerList().isOp(this.player) ? SpongeCommon.server().getOperatorUserPermissionLevel() : 0;
         } else {
             return entry.getLevel();
         }

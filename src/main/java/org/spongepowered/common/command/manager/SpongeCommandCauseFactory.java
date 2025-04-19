@@ -86,12 +86,12 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
                                 .map(rot -> new Vec2((float) rot.x(), (float) rot.y()))
                                 .orElse(Vec2.ZERO),
                         context.get(EventContextKeys.LOCATION).map(x -> (ServerLevel) x.world())
-                                .orElseGet(() -> locatable == null ? SpongeCommon.server().getLevel(Level.OVERWORLD) :
+                                .orElseGet(() -> locatable == null ? SpongeCommon.server().theGame().getLevel(Level.OVERWORLD) :
                                         (ServerLevel) locatable.serverLocation().world()),
                         4,
                         name,
                         displayName,
-                        SpongeCommon.server(),
+                        SpongeCommon.server().theGame(),
                         iCommandSource instanceof Entity ? (net.minecraft.world.entity.Entity) iCommandSource : null
                 );
             }

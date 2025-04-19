@@ -114,16 +114,17 @@ public final class SpongeAdvancementBuilder implements Advancement.Builder.RootS
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
 
         var displayInfo = Optional.ofNullable(this.displayInfo).map(di -> new net.minecraft.advancements.DisplayInfo(
-                ItemStackUtil.fromSnapshotToNative(di.icon()),
-                SpongeAdventure.asVanilla(di.title()),
-                SpongeAdventure.asVanilla(di.description()),
+            ItemStackUtil.fromSnapshotToNative(di.icon()),
+            SpongeAdventure.asVanilla(di.title()),
+            SpongeAdventure.asVanilla(di.description()),
+            SpongeAdventure.asVanilla(di.title()),
 // TODO - Define how we want to expose ClientResource that is a combo of resource location and asset location
 //                Optional.ofNullable(this.backgroundPath),
-                Optional.empty(),
-                (net.minecraft.advancements.AdvancementType) (Object) di.type(),
-                di.doesShowToast(),
-                di.doesAnnounceToChat(),
-                di.isHidden()));
+            Optional.empty(),
+            (net.minecraft.advancements.AdvancementType) (Object) di.type(),
+            di.doesShowToast(),
+            di.doesAnnounceToChat(),
+            di.isHidden()));
         final var advancement = new net.minecraft.advancements.Advancement(Optional.ofNullable((this.parent)), displayInfo, rewards, result.first(), new AdvancementRequirements(result.second()), false);
         ((AdvancementBridge) (Object) advancement).bridge$setCriterion(this.criterion);
         return (Advancement) (Object) advancement;

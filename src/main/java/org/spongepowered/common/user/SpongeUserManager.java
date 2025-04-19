@@ -106,7 +106,7 @@ public final class SpongeUserManager implements UserManager {
 
     private CompletableFuture<@Nullable User> fetchUser(final UUID uniqueId, final boolean always) {
         final UUID uuidToUse = this.ensureNonEmptyUUID(uniqueId);
-        if (this.server.getPlayerList().getPlayer(uniqueId) != null) {
+        if (this.server.theGame().playerList().getPlayer(uniqueId) != null) {
             return CompletableFuture.completedFuture(SpongeUserView.create(uniqueId));
         }
         final @Nullable SpongeUserData currentUser = this.userCache.getIfPresent(uuidToUse);
@@ -163,7 +163,7 @@ public final class SpongeUserManager implements UserManager {
 
     @Override
     public CompletableFuture<Boolean> delete(final UUID uuid) {
-        if (SpongeCommon.server().getPlayerList().getPlayer(Objects.requireNonNull(uuid, "uuid")) != null) {
+        if (SpongeCommon.server().theGame().playerList().getPlayer(Objects.requireNonNull(uuid, "uuid")) != null) {
             // cannot delete live player.
             return CompletableFuture.completedFuture(false);
         }
@@ -280,7 +280,7 @@ public final class SpongeUserManager implements UserManager {
     }
 
     private PlayerDataStorage getSaveHandler() {
-        return ((PlayerListAccessor) this.server.getPlayerList()).accessor$playerIo();
+        return ((PlayerListAccessor) this.server.theGame().playerList()).accessor$playerIo();
     }
 
     private Path getSaveHandlerDirectory() {

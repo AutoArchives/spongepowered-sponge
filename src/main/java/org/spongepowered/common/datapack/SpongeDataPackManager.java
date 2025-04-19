@@ -48,10 +48,10 @@ public final class SpongeDataPackManager implements DataPackManager {
 
     // see ReloadCommand#discoverNewPacks
     private List<String> discoverNewPacks() {
-        final PackRepository packRepo = this.server.getPackRepository();
+        final PackRepository packRepo = this.server.theGame().getPackRepository();
         final List<String> toReload = new ArrayList<>(packRepo.getSelectedIds());
         packRepo.reload();
-        final List<String> disabled = this.server.getWorldData().getDataConfiguration().dataPacks().getDisabled();
+        final List<String> disabled = this.server.theGame().getWorldData().getDataConfiguration().dataPacks().getDisabled();
         for (final String available : packRepo.getAvailableIds()) {
             if (!disabled.contains(available) && !toReload.contains(available)) {
                 toReload.add(available);
@@ -63,6 +63,6 @@ public final class SpongeDataPackManager implements DataPackManager {
     @Override
     public CompletableFuture<Void> reload() {
         this.ignoreNext = false;
-        return this.server.reloadResources(this.discoverNewPacks());
+        return this.server.theGame().reloadResources(this.discoverNewPacks());
     }
 }

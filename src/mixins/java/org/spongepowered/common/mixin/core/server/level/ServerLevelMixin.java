@@ -402,7 +402,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
                 if (levelData instanceof WorldData worldData) {
                     worldData.setCustomBossEvents(this.bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
-                    this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess(), worldData, this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList().getSingleplayerData() : null);
+                    this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess(), worldData, this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().theGame().playerList().getSingleplayerData() : null);
                 }
 
                 // Sponge End

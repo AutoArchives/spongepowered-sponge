@@ -28,6 +28,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.dimension.DimensionSpecialEffects;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,6 +46,7 @@ import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 
+import java.util.Optional;
 import java.util.OptionalLong;
 
 public final class SpongeWorldTypeBuilder implements WorldType.Builder {
@@ -111,7 +113,16 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
                     bedsUsable, respawnAnchorsUsable,
                     floor, height, logicalHeight,
                     (TagKey<Block>) (Object) infiniburn,
-                    (ResourceLocation) (Object) effect.key(),
+                    new DimensionSpecialEffects(
+                        Optional.of(192.0F),
+                        true,
+                        Optional.of(DimensionSpecialEffects.OverworldSky.INSTANCE),
+                        false,
+                        false,
+                        DimensionSpecialEffects.FogScaler.OVERWORLD,
+                        false,
+                        true
+                    ),
                     ambientLighting,
                     new DimensionType.MonsterSettings(piglinSafe, hasRaids, monsterSpawnLightTest, monsterSpawnBlockLightLimit));
             if ((Object) dimensionType instanceof DimensionTypeBridge bridge) {

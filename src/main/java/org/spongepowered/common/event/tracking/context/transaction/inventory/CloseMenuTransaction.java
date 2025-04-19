@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -170,7 +169,7 @@ public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainer
                 title = null;
             }
             slotInventory.startOpen(player);
-            player.connection.send(new ClientboundOpenScreenPacket(container.containerId, container.getType(), title));
+//            player.connection.send(new ClientboundOpenScreenPacket(container.containerId, container.getType(), title));
             // resync data to client
             container.broadcastFullState();
         } else {

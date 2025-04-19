@@ -417,7 +417,7 @@ public class SpongeWorldManager implements WorldManager {
 
     private void saveLevelDat(final WorldData worldData, final ResourceKey key) throws IOException {
         try (var storageSource = this.getLevelStorageAccess(key)) {
-            storageSource.saveDataTag(this.server.registryAccess(), worldData, null);
+            storageSource.saveDataTag(this.server.theGame().registryAccess(), worldData, null);
         }
     }
 
@@ -649,8 +649,8 @@ public class SpongeWorldManager implements WorldManager {
             }
 
             final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) this.server).accessor$storageSource();
-            final PrimaryLevelData levelData = (PrimaryLevelData) this.server.getWorldData();
-            storageSource.saveDataTag(SpongeCommon.server().registryAccess(), levelData, null);
+            final PrimaryLevelData levelData = (PrimaryLevelData) this.server.theGame().getWorldData();
+            storageSource.saveDataTag(SpongeCommon.server().theGame().registryAccess(), levelData, null);
 
             return true;
         }, SpongeCommon.server());
@@ -807,8 +807,8 @@ public class SpongeWorldManager implements WorldManager {
     }
 
     private LevelDataLoadResult readLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey, final Dynamic<?> dataTag) {
-        final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        final net.minecraft.core. RegistryAccess.Frozen access = this.server.registryAccess();
+        final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.theGame().getWorldData();
+        final net.minecraft.core. RegistryAccess.Frozen access = this.server.theGame().registryAccess();
         final LevelDataAndDimensions levelData = LevelStorageSource.getLevelDataAndDimensions(
             dataTag, defaultLevelData.getDataConfiguration(), access.lookupOrThrow(Registries.LEVEL_STEM), access);
         return new LevelDataLoadResult((PrimaryLevelData) levelData.worldData(),
@@ -822,7 +822,7 @@ public class SpongeWorldManager implements WorldManager {
 
     private LevelDataLoadResult createLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey, final WorldArchetype archetype) {
         final LevelStem levelStem = (LevelStem) (Object) archetype.type();
-        final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
+        final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.theGame().getWorldData();
         final LevelSettings levelSettings = this.createLevelSettings(defaultLevelData, this.getDirectoryName((ResourceKey) (Object) registryKey.location()));
         return new LevelDataLoadResult(
             new PrimaryLevelData(levelSettings, (WorldOptions) archetype.generationConfig().orElse((WorldGenerationConfig) defaultLevelData.worldGenOptions()),
@@ -863,8 +863,8 @@ public class SpongeWorldManager implements WorldManager {
         final Executor executor = ((MinecraftServerAccessor) this.server).accessor$executor();
         final ChunkProgressListener progressListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(SpongeWorldManager.getSpawnRadius(levelData));
 
-        final ServerLevel world = new ServerLevel(this.server, executor, storageSource, levelData,
-            registryKey, levelStem, progressListener, levelData.isDebugWorld(), seed, spawners, true, null);
+        final ServerLevel world = new ServerLevel(this.server.theGame(), executor, storageSource, levelData,
+            registryKey, levelStem.type(), progressListener, levelData.isDebugWorld(), seed, spawners, true, null);
         this.worlds.put(registryKey, world);
 
         // Ensure that the world border is registered.
@@ -922,10 +922,10 @@ public class SpongeWorldManager implements WorldManager {
         }
 
         // Initialize PlayerData in PlayerList, add WorldBorder listener. We change the method in PlayerList to handle per-world border
-        this.server.getPlayerList().addWorldborderListener(level);
+        this.server.theGame().playerList().addWorldborderListener(level);
 
         if (levelData instanceof WorldData worldData && worldData.getCustomBossEvents() != null) {
-            ((ServerLevelBridge) level).bridge$getBossBarManager().load(worldData.getCustomBossEvents(), level.registryAccess());
+            ((ServerLevelBridge) level).bridge$getBossBarManager().load(worldData.getCustomBossEvents(), level.theGame().registryAccess());
         }
 
         return level;
@@ -1056,7 +1056,7 @@ public class SpongeWorldManager implements WorldManager {
     @SuppressWarnings("deprecation")
     private static PrimaryLevelData.SpecialWorldProperty specialWorldProperty(final LevelStem stem) {
         // Copied from WorldDimensions#specialWorldProperty
-        final ChunkGenerator generator = stem.generator();
+        final ChunkGenerator generator = stem.generator().orElse(null);
         if (generator instanceof DebugLevelSource) {
             return PrimaryLevelData.SpecialWorldProperty.DEBUG;
         } else {

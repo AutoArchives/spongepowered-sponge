@@ -61,11 +61,11 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
         return new CommandSourceStack(this,
                 Vec3.ZERO,
                 Vec2.ZERO,
-                SpongeCommon.server().getLevel(Level.OVERWORLD),
+                SpongeCommon.server().theGame().getLevel(Level.OVERWORLD),
                 4,
                 "System Subject",
                 net.minecraft.network.chat.Component.literal("System Subject"),
-                SpongeCommon.server(),
+                SpongeCommon.server().theGame(),
                 null);
     }
 

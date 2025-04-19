@@ -63,7 +63,7 @@ public interface ServerLevelDataBridge {
             return null;
         }
 
-        final ServerLevel level = SpongeCommon.server().getLevel(SpongeWorldManager.createRegistryKey(key));
+        final ServerLevel level = SpongeCommon.server().theGame().getLevel(SpongeWorldManager.createRegistryKey(key));
         if (level == null) {
             return null;
         }
@@ -119,7 +119,7 @@ public interface ServerLevelDataBridge {
     default void bridge$triggerViewDistanceLogic() {
         final ServerLevel level = this.bridge$level();
         if (level != null) {
-            final int distance = this.bridge$viewDistance().orElseGet(() -> level.getServer().getPlayerList().getViewDistance());
+            final int distance = this.bridge$viewDistance().orElseGet(() -> level.theGame().playerList().getViewDistance());
             level.getChunkSource().setViewDistance(distance);
             final ClientboundSetChunkCacheRadiusPacket packet = new ClientboundSetChunkCacheRadiusPacket(distance);
             level.players().forEach(p -> p.connection.send(packet));

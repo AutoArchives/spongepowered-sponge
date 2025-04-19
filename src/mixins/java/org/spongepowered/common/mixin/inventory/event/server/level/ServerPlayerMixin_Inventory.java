@@ -30,7 +30,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Cancellable;
 import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -272,7 +271,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
                     // expected fallback for unknown types
                     title = null;
                 }
-                this.connection.send(new ClientboundOpenScreenPacket(this.containerMenu.containerId, this.containerMenu.getType(), title));
+//                this.connection.send(new ClientboundOpenScreenPacket(this.containerMenu.containerId, this.containerMenu.getType(), title));
             }
             return;
         }

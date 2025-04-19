@@ -215,7 +215,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
 
     public void bridge$populateFromLevelStem(final LevelStem dimension) {
         this.impl$dimensionType = dimension.type().value();
-        this.impl$chunkGenerator = dimension.generator();
+        this.impl$chunkGenerator = dimension.generator().orElse(null);
 
         // Legacy back compat
         final LevelStemBridge bridge = (LevelStemBridge) (Object) dimension;
@@ -278,7 +278,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     }
 
     void impl$updateWorldForDifficultyChange(final ServerLevel level, final boolean isLocked) {
-        final MinecraftServer server = level.getServer();
+        final MinecraftServer server = level.theGame().server();
         final Difficulty difficulty = this.getDifficulty();
 
         if (difficulty == Difficulty.HARD) {

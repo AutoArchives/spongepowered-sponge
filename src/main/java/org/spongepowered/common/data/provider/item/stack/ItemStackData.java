@@ -111,7 +111,7 @@ public final class ItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.BURN_TIME)
-                        .get(h -> SpongeCommon.server().fuelValues().burnDuration(h))
+                        .get(h -> SpongeCommon.server().theGame().fuelValues().burnDuration(h))
                     .create(Keys.CONTAINER_ITEM)
                         .get(h -> (ItemType) h.getItem().getCraftingRemainder().getItem())
                     .create(Keys.DISPLAY_NAME)

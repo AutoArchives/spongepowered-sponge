@@ -42,7 +42,7 @@ public final class LevelStemData {
                     .create(Keys.WORLD_TYPE)
                         .get(h -> (WorldType) (Object) h.type().value())
                     .create(Keys.CHUNK_GENERATOR)
-                        .get(h -> (ChunkGenerator) h.generator())
+                        .get(h -> (ChunkGenerator) h.generator().orElse(null))
         ;
 
     }

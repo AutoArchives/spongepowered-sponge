@@ -376,7 +376,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
 
             if ((Entity) (Object) this instanceof ServerPlayer) {
-                for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
+                for (final ServerPlayer entityPlayerMP : SpongeCommon.server().theGame().playerList().getPlayers()) {
                     if ((Object) this == entityPlayerMP) {
                         continue;
                     }
@@ -384,7 +384,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 }
             }
         } else {
-            for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
+            for (final ServerPlayer entityPlayerMP : SpongeCommon.server().theGame().playerList().getPlayers()) {
                 if ((Object) this == entityPlayerMP) {
                     continue;
                 }

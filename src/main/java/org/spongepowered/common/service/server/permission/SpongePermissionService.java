@@ -96,7 +96,7 @@ public final class SpongePermissionService implements PermissionService {
     }
 
     static ServerOpList getOps() {
-        return SpongeCommon.server().getPlayerList().getOps();
+        return SpongeCommon.server().theGame().playerList().getOps();
     }
 
     static int getServerOpLevel() {

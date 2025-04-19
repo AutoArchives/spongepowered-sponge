@@ -50,7 +50,7 @@ public final class VanillaConsole extends SimpleTerminalConsole {
             final SpongeCommandManager manager = SpongeCommandManager.get(this.server);
             return manager == null ? null : manager.getDispatcher();
         };
-        final Supplier<CommandSourceStack> commandSourceProvider = this.server::createCommandSourceStack;
+        final Supplier<CommandSourceStack> commandSourceProvider = this.server.theGame()::createCommandSourceStack;
 
         return super.buildReader(builder
             .appName(Launch.instance().platformPlugin().metadata().name().get())
@@ -66,7 +66,7 @@ public final class VanillaConsole extends SimpleTerminalConsole {
 
     @Override
     protected void runCommand(String command) {
-        this.server.handleConsoleInput(command, this.server.createCommandSourceStack());
+        this.server.handleConsoleInput(command, this.server.theGame().createCommandSourceStack());
     }
 
     @Override

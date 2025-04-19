@@ -30,6 +30,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.AmbientAdditionsSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
+import net.minecraft.world.level.biome.BiomeBuilder;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.MobSpawnSettings;
@@ -145,14 +146,14 @@ public final class SpongeBiomeBuilder implements Biome.Builder {
             Holder.direct((net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) feature))));
         carvers.forEach((carver) -> generationBuilder.addCarver(Holder.direct((ConfiguredWorldCarver<?>) (Object) carver)));
 
-        final net.minecraft.world.level.biome.Biome.BiomeBuilder vanillaBuilder = new net.minecraft.world.level.biome.Biome.BiomeBuilder()
-            .hasPrecipitation(precipitation)
-            .temperature(temperature.floatValue())
-            .downfall(downfall.floatValue())
-            .temperatureAdjustment((net.minecraft.world.level.biome.Biome.TemperatureModifier) (Object) temperatureModifier)
-            .specialEffects(effectsBuilder.build())
-            .mobSpawnSettings(spawnerBuilder.build())
-            .generationSettings(generationBuilder.build());
+        final BiomeBuilder vanillaBuilder = new BiomeBuilder()
+//            .hasPrecipitation(precipitation)
+//            .temperature(temperature.floatValue())
+//            .downfall(downfall.floatValue())
+//            .temperatureAdjustment((net.minecraft.world.level.biome.Biome.TemperatureModifier) (Object) temperatureModifier)
+            .specialEffects(effectsBuilder)
+            .mobSpawnSettings(spawnerBuilder)
+            .generationSettings(generationBuilder);
         return (Biome) (Object) vanillaBuilder.build();
     }
 }
