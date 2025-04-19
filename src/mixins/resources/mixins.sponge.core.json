@@ -60,6 +60,7 @@
     "server.PlayerAdvancementsMixin",
     "server.ReloadableServerResourcesMixin",
     "server.ServerAdvancementManagerMixin",
+    "server.ServerFunctionLibraryMixin",
     "server.ServerFunctionManagerMixin",
     "server.ServerScoreboardMixin",
     "server.WorldLoaderMixin",
