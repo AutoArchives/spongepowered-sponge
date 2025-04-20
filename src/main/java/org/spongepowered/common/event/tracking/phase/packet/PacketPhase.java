@@ -121,8 +121,6 @@ public final class PacketPhase {
         static final IPhaseState<BasicPacketContext> INVALID = new InvalidPacketState();
         static final IPhaseState<BasicPacketContext> START_RIDING_JUMP = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> ANIMATION = new AnimationPacketState();
-        static final IPhaseState<BasicPacketContext> PRESS_SHIFT_KEY = new BasicPacketState();
-        static final IPhaseState<BasicPacketContext> RELEASE_SHIFT_KEY = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> START_SPRINTING = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> STOP_SPRINTING = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> STOP_SLEEPING = new StopSleepingPacketState();
@@ -336,8 +334,6 @@ public final class PacketPhase {
     }
 
     private static final ImmutableMap<ServerboundPlayerCommandPacket.Action, IPhaseState<? extends PacketContext<?>>> PLAYER_ACTION_MAPPINGS = ImmutableMap.<ServerboundPlayerCommandPacket.Action, IPhaseState<? extends PacketContext<?>>>builder()
-            .put(ServerboundPlayerCommandPacket.Action.PRESS_SHIFT_KEY, PacketPhase.General.PRESS_SHIFT_KEY)
-            .put(ServerboundPlayerCommandPacket.Action.RELEASE_SHIFT_KEY, PacketPhase.General.RELEASE_SHIFT_KEY)
             .put(ServerboundPlayerCommandPacket.Action.STOP_SLEEPING, PacketPhase.General.STOP_SLEEPING)
             .put(ServerboundPlayerCommandPacket.Action.START_SPRINTING, PacketPhase.General.START_SPRINTING)
             .put(ServerboundPlayerCommandPacket.Action.STOP_SPRINTING, PacketPhase.General.STOP_SPRINTING)

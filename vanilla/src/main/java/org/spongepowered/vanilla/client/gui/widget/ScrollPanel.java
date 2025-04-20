@@ -183,12 +183,12 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
         final Tesselator tess = Tesselator.getInstance();
 
         final double scale = this.client.getWindow().getGuiScale();
-        RenderSystem.enableScissor((int) (this.left * scale), (int) (this.client.getWindow().getHeight() - (this.bottom * scale)), (int) (this.width * scale),
-            (int) (this.height * scale));
+//        RenderSystem.enableScissor((int) (this.left * scale), (int) (this.client.getWindow().getHeight() - (this.bottom * scale)), (int) (this.width * scale),
+//            (int) (this.height * scale));
 
 // TODO fix me       RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 //        RenderSystem.setShaderTexture(0, Screen.MENU_BACKGROUND);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+//        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         final float texScale = 32.0F;
         BufferBuilder worldr = tess.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         worldr.addVertex(this.left, this.bottom, 0.0f).setUv(this.left / texScale, (this.bottom + (int) this.scrollDistance) / texScale)
@@ -250,7 +250,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
 
 //        RenderSystem.enableTexture();
 //        RenderSystem.disableBlend();
-        RenderSystem.disableScissor();
+//        RenderSystem.disableScissor();
     }
 
     @Override

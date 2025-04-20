@@ -64,7 +64,7 @@ public final class AreaEffectCloudData {
                         })
                     .create(Keys.PARTICLE_EFFECT)
                         .get(h -> SpongeParticleHelper.spongeParticleOptions(h.getParticle()))
-                        .set((h, v) -> h.setParticle(SpongeParticleHelper.vanillaParticleOptions(v)))
+                        .set((h, v) -> h.setCustomParticle(SpongeParticleHelper.vanillaParticleOptions(v)))
                     .create(Keys.RADIUS)
                         .get(h -> (double) h.getRadius())
                         .set((h, v) -> h.setRadius(v.floatValue()))

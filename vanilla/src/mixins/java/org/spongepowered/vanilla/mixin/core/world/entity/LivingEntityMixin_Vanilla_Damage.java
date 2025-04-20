@@ -46,21 +46,21 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 @Mixin(value = LivingEntity.class, priority = 900)
 public abstract class LivingEntityMixin_Vanilla_Damage implements TrackedDamageBridge {
 
-    @ModifyExpressionValue(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isInvulnerableTo(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)Z"))
-    private boolean damage$modifyBeforeAndAfterShield(final boolean original) {
-        if (!original) {
-            return false;
-        }
-
+    @ModifyExpressionValue(method = "hurtServer", at = @At(value = "CONSTANT", args = "floatValue=0.0"),
+        slice = @Slice(
+            from = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;noActionTime:I"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F")
+        ))
+    private float damage$modifyBeforeAndAfterShield(final float original) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         if (tracker == null) {
-            return true;
+            return original;
         }
 
-        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(((LivingEntity) (Object) this).getUseItem()));
+        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(((LivingEntity) (Object) this).getItemBlockingWith()));
         step.applyChildrenBefore((float) tracker.preEvent().baseDamage());
         step.applyChildrenAfter(0);
-        return !step.isSkipped();
+        return !step.isSkipped() ? 0.0F : (float) step.damageAfterChildren().getAsDouble();
     }
 
     @ModifyVariable(method = "applyItemBlocking", at = @At("STORE"), index = 9, slice = @Slice(

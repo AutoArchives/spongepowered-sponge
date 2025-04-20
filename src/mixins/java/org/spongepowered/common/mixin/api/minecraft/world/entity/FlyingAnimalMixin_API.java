@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
-import net.minecraft.world.entity.FlyingMob;
+import net.minecraft.world.entity.animal.FlyingAnimal;
 import org.spongepowered.api.entity.Aerial;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(FlyingMob.class)
-public abstract class FlyingMobMixin_API extends MobMixin_API implements Aerial {
+@Mixin(FlyingAnimal.class)
+public interface FlyingAnimalMixin_API extends Aerial {
 
 }

@@ -52,8 +52,8 @@ public final class SpongeCommon {
 
     private static final Logger LOGGER = LogManager.getLogger(Launch.instance().id());
     private static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion(
-        SharedConstants.getCurrentVersion().getName(),
-        SharedConstants.getCurrentVersion().getProtocolVersion()
+        SharedConstants.getCurrentVersion().name(),
+        SharedConstants.getCurrentVersion().protocolVersion()
     );
 
     @Inject private @Nullable static SpongeGame game;

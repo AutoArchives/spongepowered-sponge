@@ -46,7 +46,7 @@ public final class SchematicUpdater1_to_2 implements DataContentUpdater {
     @Override
     public DataView update(final DataView content) {
         content.set(Constants.Sponge.Schematic.VERSION, 2);
-        content.set(Constants.Sponge.Schematic.DATA_VERSION, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+        content.set(Constants.Sponge.Schematic.DATA_VERSION, SharedConstants.getCurrentVersion().dataVersion().version());
         content.getViewList(Constants.Sponge.Schematic.Versions.V1_TILE_ENTITY_DATA).ifPresent(tiles -> {
             tiles.forEach(tile -> {
                 // Remove unnecessary version information.

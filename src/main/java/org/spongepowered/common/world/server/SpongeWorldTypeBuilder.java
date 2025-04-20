@@ -45,6 +45,7 @@ import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 
+import java.util.Optional;
 import java.util.OptionalLong;
 
 public final class SpongeWorldTypeBuilder implements WorldType.Builder {
@@ -113,6 +114,7 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
                     (TagKey<Block>) (Object) infiniburn,
                     (ResourceLocation) (Object) effect.key(),
                     ambientLighting,
+                    Optional.empty(),
                     new DimensionType.MonsterSettings(piglinSafe, hasRaids, monsterSpawnLightTest, monsterSpawnBlockLightLimit));
             if ((Object) dimensionType instanceof DimensionTypeBridge bridge) {
                 bridge.bridge$decorateData(spongeData);

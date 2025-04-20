@@ -128,7 +128,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final int dataVersion = schematicView.getInt(Constants.Sponge.Schematic.DATA_VERSION).get();
         // DataFixer will be able to upgrade entity and tile entity data if and only if we're running a valid server and
         // the data version is outdated.
-        final boolean needsFixers = dataVersion < SharedConstants.getCurrentVersion().getDataVersion().getVersion() && SchematicTranslator.VANILLA_FIXER != null;
+        final boolean needsFixers = dataVersion < SharedConstants.getCurrentVersion().dataVersion().version() && SchematicTranslator.VANILLA_FIXER != null;
 
 
         final DataView updatedView;
@@ -420,7 +420,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         data.set(Constants.Sponge.Schematic.LENGTH, (short) length);
 
         data.set(Constants.Sponge.Schematic.VERSION, Constants.Sponge.Schematic.CURRENT_VERSION);
-        data.set(Constants.Sponge.Schematic.DATA_VERSION, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+        data.set(Constants.Sponge.Schematic.DATA_VERSION, SharedConstants.getCurrentVersion().dataVersion().version());
         for (final DataQuery metaKey : schematic.metadata().keys(false)) {
             data.set(Constants.Sponge.Schematic.METADATA.then(metaKey), schematic.metadata().get(metaKey).get());
         }

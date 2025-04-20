@@ -67,7 +67,7 @@ public final class Context {
     }
 
     public String gameVersion() {
-        return SharedConstants.getCurrentVersion().getName();
+        return SharedConstants.getCurrentVersion().name();
     }
 
     public RegistryAccess registries() {
