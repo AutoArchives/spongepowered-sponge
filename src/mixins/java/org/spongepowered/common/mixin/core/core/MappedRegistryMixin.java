@@ -46,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.accessor.core.MappedRegistryAccessor;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.core.RegistryBridge;
@@ -165,8 +166,10 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     @Inject(method = "freeze", at = @At(value = "FIELD", target = "Lnet/minecraft/core/MappedRegistry;frozen:Z", opcode = Opcodes.PUTFIELD))
     private void impl$onFreeze(final CallbackInfoReturnable<Registry<T>> cir) {
         this.impl$dependencies.forEach(t -> {
-            if (!this.impl$registryHolder.findRegistry(t)
-                .map(r -> ((MappedRegistryMixin<?>) r).frozen)
+            final Optional<? extends org.spongepowered.api.registry.Registry<?>> registry = this.impl$registryHolder.findRegistry(t);
+            final var accessor = registry.map(r -> ((MappedRegistryAccessor<?>) r));
+            final var isFrozen = accessor.map(MappedRegistryAccessor::accessor$frozen);
+            if (!isFrozen
                 .orElse(false)) {
                 throw new ValueNotFoundException(String.format("Dependency %s was not found!", t));
             }

@@ -106,7 +106,7 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
             return damage;
         }
         final SpongeDamageStep step = tracker.currentStep(DamageStepTypes.SHIELD);
-        return step == null ? damage : (float) step.damageAfterChildren().getAsDouble();
+        return step == null ? damage : (float) step.damageAfterChildren().orElseGet(() -> step.applyChildrenAfter(damage));
     }
 
     @ModifyVariable(method = "hurtServer", at = @At("LOAD"), argsOnly = true, slice = @Slice(
