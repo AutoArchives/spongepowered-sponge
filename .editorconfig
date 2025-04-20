@@ -14,3 +14,6 @@ indent_size = 2
 
 [*.yaml]
 indent_size = 2
+
+[verification-metadata.xml]
+indent_size = 3
