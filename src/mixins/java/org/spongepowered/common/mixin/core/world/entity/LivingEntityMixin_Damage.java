@@ -125,7 +125,11 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
         cir.setReturnValue((float) step.damageBeforeChildren().getAsDouble() - damage);
     }
 
-    @Inject(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"))
+    @SuppressWarnings("MixinAnnotationTarget")
+    @Inject(method = "applyItemBlocking", at = {
+        @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"), // Vanilla and Forge
+        @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;FI)V") // Neo
+    })
     private void damage$onHurtShield(final CallbackInfoReturnable<Boolean> cir) {
         this.damage$inventoryChanged = true;
     }
