@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.core.world.entity;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Cancellable;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -57,6 +59,7 @@ import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStep;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -91,17 +94,53 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
         }
     }
 
-    @ModifyVariable(method = "hurtServer", argsOnly = true, at = @At("STORE"), index = 3, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F"),
-        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/DamageTypeTags;IS_FREEZING:Lnet/minecraft/tags/TagKey;")
-    ))
-    private float damage$setDamageAfterShield(final float damage) {
+    @ModifyVariable(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;resolveBlockedDamage(Lnet/minecraft/world/damagesource/DamageSource;FD)F"), argsOnly = true)
+    private float damage$modifyBeforeShield(final float originalDamage, @Local final ItemStack stack, @Cancellable final CallbackInfoReturnable<Float> cir) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         if (tracker == null) {
-            return damage;
+            return originalDamage;
+        }
+        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(stack));
+        final float inputDamage = (float) step.applyChildrenBefore(originalDamage);
+        if (step.isSkipped()) {
+            final float outputDamage = (float) step.applyChildrenAfter(inputDamage);
+            cir.setReturnValue(originalDamage - outputDamage);
+        }
+        return inputDamage;
+    }
+
+    @Inject(method = "applyItemBlocking", at = @At("RETURN"), cancellable = true, slice = @Slice(
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;resolveBlockedDamage(Lnet/minecraft/world/damagesource/DamageSource;FD)F")
+    ))
+    private void damage$modifyAfterShield(final ServerLevel level, final DamageSource source, float damage, final CallbackInfoReturnable<Float> cir) {
+        final SpongeDamageTracker tracker = this.damage$tracker();
+        if (tracker == null) {
+            return;
         }
         final SpongeDamageStep step = tracker.currentStep(DamageStepTypes.SHIELD);
-        return step == null ? damage : (float) step.damageAfterChildren().orElseGet(() -> step.applyChildrenAfter(damage));
+        if (step == null) {
+            return;
+        }
+        damage = (float) step.applyChildrenAfter(damage - cir.getReturnValueF());
+        cir.setReturnValue((float) step.damageBeforeChildren().getAsDouble() - damage);
+    }
+
+    @Inject(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"))
+    private void damage$onHurtShield(final CallbackInfoReturnable<Boolean> cir) {
+        this.damage$inventoryChanged = true;
+    }
+
+    @ModifyVariable(method = "hurtServer", at = @At("STORE"), slice = @Slice(
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F"),
+        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/DamageTypeTags;IS_FREEZING:Lnet/minecraft/tags/TagKey;"))
+    )
+    private boolean damage$setBlockedFlag(final boolean blocked) {
+        final SpongeDamageTracker tracker = this.damage$tracker();
+        if (tracker == null) {
+            return blocked;
+        }
+        final SpongeDamageStep step = tracker.lastStep(DamageStepTypes.SHIELD);
+        return step == null ? blocked : step.damageAfterSelf().getAsDouble() < step.damageBeforeSelf().getAsDouble();
     }
 
     @ModifyVariable(method = "hurtServer", at = @At("LOAD"), argsOnly = true, slice = @Slice(

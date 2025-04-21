@@ -24,14 +24,8 @@
  */
 package org.spongepowered.forge.mixin.core.world.entity;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.living.ShieldBlockEvent;
-import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,9 +34,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.world.entity.TrackedDamageBridge;
-import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStep;
-import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_Forge_Damage implements TrackedDamageBridge {
@@ -56,52 +47,6 @@ public abstract class LivingEntityMixin_Forge_Damage implements TrackedDamageBri
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F")))
     private float damage$doNotReturnEarly(final float constant) {
         return Float.NaN;
-    }
-
-    @WrapOperation(method = "hurtServer",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F"
-        ))
-    private float damage$initiateBlockingStep(
-        final LivingEntity self, final ServerLevel level, final DamageSource source, final float originalDamage,
-        final Operation<Float> original) {
-        final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null) {
-            return original.call(self, level, source, originalDamage);
-        }
-
-        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(this.shadow$getUseItem()));
-        float damage = (float) step.applyChildrenBefore(originalDamage);
-        return original.call(self, level, source, damage);
-    }
-
-
-    @WrapOperation(method = "applyItemBlocking", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/event/ForgeEventFactory;onShieldBlock(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;FLnet/minecraft/world/item/ItemStack;)Lnet/minecraftforge/event/entity/living/ShieldBlockEvent;"))
-    private ShieldBlockEvent damage$modifyBeforeAndAfterShield(
-        final LivingEntity self, final DamageSource source, final float originalDamage, final ItemStack stack,
-        final Operation<ShieldBlockEvent> operation
-    ) {
-        final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null) {
-            return operation.call(self, source, originalDamage, stack);
-        }
-        final var step = tracker.currentStep(DamageStepTypes.SHIELD);
-        if (step == null) {
-            return operation.call(self, source, originalDamage, stack);
-        }
-        float damage = (float) step.damageBeforeSelf().getAsDouble();
-        final ShieldBlockEvent event;
-        if (step.isSkipped()) {
-            event = new ShieldBlockEvent(self, source, damage, stack);
-            event.setCanceled(true);
-        } else {
-            event = operation.call(self, source, damage, stack);
-            if (!event.isCanceled()) {
-                damage -= event.getBlockedDamage();
-            }
-        }
-        step.applyChildrenAfter(damage);
-        return event;
     }
 
     @ModifyArg(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;onLivingDamage(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;F)F"))
