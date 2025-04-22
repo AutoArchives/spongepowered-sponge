@@ -24,12 +24,10 @@
  */
 package org.spongepowered.vanilla.mixin.core.world.entity;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.wolf.Wolf;
-import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
@@ -39,61 +37,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.world.entity.TrackedDamageBridge;
-import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStep;
-import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(value = LivingEntity.class, priority = 900)
 public abstract class LivingEntityMixin_Vanilla_Damage implements TrackedDamageBridge {
-
-    @ModifyExpressionValue(method = "hurtServer", at = @At(value = "CONSTANT", args = "floatValue=0.0"),
-        slice = @Slice(
-            from = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;noActionTime:I"),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F")
-        ))
-    private float damage$modifyBeforeAndAfterShield(final float original) {
-        final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null) {
-            return original;
-        }
-
-        final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(((LivingEntity) (Object) this).getItemBlockingWith()));
-        step.applyChildrenBefore((float) tracker.preEvent().baseDamage());
-        step.applyChildrenAfter(0);
-        return !step.isSkipped() ? 0.0F : (float) step.damageAfterChildren().getAsDouble();
-    }
-
-    @ModifyVariable(method = "applyItemBlocking", at = @At("STORE"), index = 9, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;resolveBlockedDamage(Lnet/minecraft/world/damagesource/DamageSource;FD)F"),
-        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V")
-    ))
-    private float damage$setBlockedDamage(final float damage) {
-        final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null) {
-            return damage;
-        }
-        final SpongeDamageStep step = tracker.currentStep(DamageStepTypes.SHIELD);
-        return step == null ? damage : (float) Math.max(step.damageBeforeSelf().getAsDouble(), 0);
-    }
-
-    @ModifyVariable(method = "hurtServer",
-        at = @At("STORE"),
-        slice = @Slice(
-            from = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F"
-            ),
-            to = @At(value = "FIELD", target = "Lnet/minecraft/tags/DamageTypeTags;IS_FREEZING:Lnet/minecraft/tags/TagKey;")
-        )
-    )
-    private boolean damage$setBlockedFlag(final boolean blocked) {
-        final SpongeDamageTracker tracker = this.damage$tracker();
-        if (tracker == null) {
-            return blocked;
-        }
-        final SpongeDamageStep step = tracker.currentStep(DamageStepTypes.SHIELD);
-        return step == null ? blocked : step.damageAfterChildren().getAsDouble() <= 0;
-    }
 
     @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), argsOnly = true, slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"),
