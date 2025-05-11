@@ -29,8 +29,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.TagValueInput;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -200,7 +202,8 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
                 @Nullable BlockEntity te = world.getBlockEntity(pos);
                 if (te != null) {
                     te.setBlockState((net.minecraft.world.level.block.state.BlockState) this.blockState);
-                    te.loadWithComponents(this.compound, world.registryAccess());
+                    final var input = TagValueInput.create(ProblemReporter.DISCARDING, world.registryAccess(), this.compound);
+                    te.loadWithComponents(input);
                 } else {
                     // Because, some mods will "unintentionally" only obey some of the rules but not all.
                     // In cases like this, we need to directly just say "fuck it" and deserialize from the compound directly.

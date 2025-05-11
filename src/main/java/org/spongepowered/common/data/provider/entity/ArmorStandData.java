@@ -60,10 +60,10 @@ public final class ArmorStandData {
                             final Map<BodyPart, Vector3d> values = new HashMap<>();
                             values.put(BodyParts.HEAD.get(), VecHelper.toVector3d(h.getHeadPose()));
                             values.put(BodyParts.CHEST.get(), VecHelper.toVector3d(h.getBodyPose()));
-                            values.put(BodyParts.LEFT_ARM.get(), VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$leftArmPose()));
-                            values.put(BodyParts.RIGHT_ARM.get(), VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$rightArmPose()));
-                            values.put(BodyParts.LEFT_LEG.get(), VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$leftLegPose()));
-                            values.put(BodyParts.RIGHT_LEG.get(), VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$rightLegPose()));
+                            values.put(BodyParts.LEFT_ARM.get(), VecHelper.toVector3d(h.getLeftArmPose()));
+                            values.put(BodyParts.RIGHT_ARM.get(), VecHelper.toVector3d(h.getRightArmPose()));
+                            values.put(BodyParts.LEFT_LEG.get(), VecHelper.toVector3d(h.getLeftLegPose()));
+                            values.put(BodyParts.RIGHT_LEG.get(), VecHelper.toVector3d(h.getRightLegPose()));
                             return values;
                         })
                         .set((h, v) -> {
@@ -167,16 +167,16 @@ public final class ArmorStandData {
                             ((ArmorStandAccessor) h).accessor$disabledSlots(disabledSlots);
                         })
                     .create(Keys.LEFT_ARM_ROTATION)
-                        .get(h -> VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$leftArmPose()))
+                        .get(h -> VecHelper.toVector3d(h.getLeftArmPose()))
                         .set((h, v) -> h.setLeftArmPose(VecHelper.toRotation(v)))
                     .create(Keys.LEFT_LEG_ROTATION)
-                        .get(h -> VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$leftLegPose()))
+                        .get(h -> VecHelper.toVector3d(h.getLeftLegPose()))
                         .set((h, v) -> h.setLeftLegPose(VecHelper.toRotation(v)))
                     .create(Keys.RIGHT_ARM_ROTATION)
-                        .get(h -> VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$rightArmPose()))
+                        .get(h -> VecHelper.toVector3d(h.getRightArmPose()))
                         .set((h, v) -> h.setRightArmPose(VecHelper.toRotation(v)))
                     .create(Keys.RIGHT_LEG_ROTATION)
-                        .get(h -> VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$rightLegPose()))
+                        .get(h -> VecHelper.toVector3d(h.getRightLegPose()))
                         .set((h, v) -> h.setRightLegPose(VecHelper.toRotation(v)));
     }
     // @formatter:on

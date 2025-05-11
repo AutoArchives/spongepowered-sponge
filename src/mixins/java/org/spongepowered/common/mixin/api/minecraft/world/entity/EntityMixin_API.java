@@ -29,17 +29,20 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
@@ -105,7 +108,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason var1);
     @Shadow public abstract void shadow$discard();
     @Shadow public abstract void shadow$lookAt(EntityAnchorArgument.Anchor param0, Vec3 param1);
-    @Shadow public abstract CompoundTag shadow$saveWithoutId(CompoundTag $$0);
+    @Shadow public abstract void shadow$saveWithoutId(ValueOutput $$0);
     @Shadow public abstract Level shadow$level();
     @Shadow public abstract Vec3 shadow$position();
     // @formatter:on
@@ -268,10 +271,10 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public DataContainer toContainer() {
         final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
-        final CompoundTag compound = new CompoundTag();
-        compound.putString("id", entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()).toString());
-        this.shadow$saveWithoutId(compound);
-        final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(compound);
+        final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, this.level.registryAccess());
+        output.store("id", net.minecraft.world.entity.EntityType.CODEC, this.type);
+        this.shadow$saveWithoutId(output);
+        final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(output.buildResult());
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Entity.CLASS, this.getClass().getName())
@@ -303,10 +306,11 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         try {
             final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
-            final CompoundTag compound = new CompoundTag();
-            compound.putString("id", entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()).toString());
-            this.shadow$saveWithoutId(compound);
-            final Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, this.shadow$getCommandSenderWorld(), EntitySpawnReason.COMMAND,
+            final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, this.level.registryAccess());
+            output.putString("id", entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()).toString());
+            this.shadow$saveWithoutId(output);
+            final var input = TagValueInput.create(ProblemReporter.DISCARDING, this.level.registryAccess(), output.buildResult());
+            final @Nullable Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(input, this.shadow$getCommandSenderWorld(), EntitySpawnReason.COMMAND,
                 (createdEntity) -> {
                     createdEntity.setUUID(UUID.randomUUID());
                     return createdEntity;

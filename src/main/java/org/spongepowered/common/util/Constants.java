@@ -72,6 +72,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3f;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -147,6 +148,7 @@ public final class Constants {
              * {@link org.spongepowered.api.data.persistence.DataStore} based data
              */
             public static final class V3 {
+                public static final String SPONGE_TAG_KEY = "sponge-data";
                 public static final DataQuery SPONGE_DATA_ROOT = DataQuery.of("sponge-data");
                 public static final DataQuery CONTENT_VERSION = DataQuery.of("version");
                 public static final DataQuery CONTENT = DataQuery.of("content");
@@ -740,6 +742,12 @@ public final class Constants {
         // These are used by Minecraft's internals for entity spawning
         public static final String ENTITY_TYPE_ID = "id";
         public static final String ENTITY_POSITION = "Pos";
+        public static final Codec<Vector3d> ENTITY_POSITION_CODEC = Codec.DOUBLE.listOf()
+            .comapFlatMap(
+                rawList -> Util.fixedSize(rawList, 3)
+                    .map(list -> new Vector3d(list.get(0), list.get(1), list.get(2))),
+                vec -> List.of(vec.x(), vec.y(), vec.z())
+            );
         public static final String ENTITY_DIMENSION = "Dimension";
         public static final String ENTITY_ROTATION = "Rotation";
         public static final Codec<Vector3f> ROTATIONS_CODEC = Codec.FLOAT

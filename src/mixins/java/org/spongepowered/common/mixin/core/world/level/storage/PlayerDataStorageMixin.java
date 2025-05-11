@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.level.storage;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.PlayerDataStorage;
+import net.minecraft.world.level.storage.ValueInput;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Final;
@@ -53,8 +53,8 @@ public abstract class PlayerDataStorageMixin {
     @Shadow @Final private File playerDir;
     // @formatter:on
 
-    @Redirect(method = "lambda$load$1", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;load(Lnet/minecraft/nbt/CompoundTag;)V"))
-    private void impl$readSpongePlayerData(final Player playerEntity, final CompoundTag compound) throws IOException {
+    @Redirect(method = "lambda$load$1", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;load(Lnet/minecraft/world/level/storage/ValueInput;)V"))
+    private void impl$readSpongePlayerData(final Player playerEntity, final ValueInput compound) throws IOException {
         playerEntity.load(compound);
         if (((ServerPlayer) playerEntity).get(Keys.FIRST_DATE_JOINED).isEmpty()) {
             final Path file = new File(this.playerDir, playerEntity.getStringUUID() + ".dat").toPath();

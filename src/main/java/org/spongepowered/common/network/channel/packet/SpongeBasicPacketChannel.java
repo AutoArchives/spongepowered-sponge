@@ -180,6 +180,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
             }
         }
 
+        @SuppressWarnings("deprecated")
         @Override
         public <R extends Packet> CompletableFuture<R> sendToServer(final RequestPacket<R> packet) {
             throw new UnsupportedOperationException(

@@ -32,7 +32,6 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MutableComponent;
@@ -51,12 +50,14 @@ import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.storage.PlayerDataStorage;
+import net.minecraft.world.level.storage.ValueInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
@@ -152,7 +153,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Final private PlayerDataStorage playerIo;
 
     @Shadow public abstract MinecraftServer shadow$getServer();
-    @Shadow public abstract Optional<CompoundTag> shadow$load(final net.minecraft.server.level.ServerPlayer $$0);
+    @Shadow public abstract Optional<ValueInput> shadow$load(final net.minecraft.server.level.ServerPlayer $$0, final ProblemReporter $$1);
     @Shadow public abstract boolean shadow$canBypassPlayerLimit(com.mojang.authlib.GameProfile param0);
     @Shadow protected abstract boolean shadow$verifyChatTrusted(final PlayerChatMessage $$0);
     @Shadow protected abstract void shadow$broadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
@@ -249,11 +250,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "placeNewPlayer",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/players/PlayerList;load(Lnet/minecraft/server/level/ServerPlayer;)Ljava/util/Optional;"
+            target = "Lnet/minecraft/server/players/PlayerList;load(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/util/ProblemReporter;)Ljava/util/Optional;"
         )
     )
-    private Optional<CompoundTag> impl$setPlayerDataForNewPlayers(final PlayerList playerList, final net.minecraft.server.level.ServerPlayer playerIn) {
-        final Optional<CompoundTag> compound = this.shadow$load(playerIn);
+    private Optional<ValueInput> impl$setPlayerDataForNewPlayers(
+        final PlayerList playerList, final net.minecraft.server.level.ServerPlayer playerIn,
+        final ProblemReporter problemReporter
+        ) {
+        final Optional<ValueInput> compound = this.shadow$load(playerIn, problemReporter);
         if (compound.isEmpty()) {
             final Instant now = Instant.now();
             ((ServerPlayer) playerIn).offer(Keys.FIRST_DATE_JOINED, now);
@@ -480,10 +484,10 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Redirect(method = "load",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerPlayer;load(Lnet/minecraft/nbt/CompoundTag;)V"
+            target = "Lnet/minecraft/server/level/ServerPlayer;load(Lnet/minecraft/world/level/storage/ValueInput;)V"
         )
     )
-    private void impl$setSpongePlayerDataForSinglePlayer(final net.minecraft.server.level.ServerPlayer entity, final CompoundTag compound) {
+    private void impl$setSpongePlayerDataForSinglePlayer(final net.minecraft.server.level.ServerPlayer entity, final ValueInput compound) {
         entity.load(compound);
 
         if (((ServerPlayer) entity).get(Keys.FIRST_DATE_JOINED).isEmpty()) {

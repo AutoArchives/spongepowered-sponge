@@ -25,6 +25,8 @@
 package org.spongepowered.common.entity;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -135,13 +137,14 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
             throw new IllegalArgumentException("Attempting to archetype a non-serializable entity: " + entity);
         }
         this.entityType = entityType;
-        final CompoundTag compound = new CompoundTag();
         net.minecraft.world.entity.Entity mcEntity = (net.minecraft.world.entity.Entity) entity;
+        final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, mcEntity.level().registryAccess());
         if (entityType == SpongeEntityTypes.HUMAN) {
-            mcEntity.saveWithoutId(compound);
+            mcEntity.saveWithoutId(output);
         } else {
-            mcEntity.saveAsPassenger(compound);
+            mcEntity.saveAsPassenger(output);
         }
+        final CompoundTag compound = output.buildResult();
         this.position = new Vector3d(mcEntity.getX(), mcEntity.getY(), mcEntity.getZ());
         SpongeEntityArchetypeBuilder.stripCompound(compound);
         this.position = entity.position();

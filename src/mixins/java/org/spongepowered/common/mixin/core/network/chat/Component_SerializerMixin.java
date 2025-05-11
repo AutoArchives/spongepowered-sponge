@@ -25,19 +25,20 @@
 package org.spongepowered.common.mixin.core.network.chat;
 
 import com.google.gson.GsonBuilder;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(net.minecraft.network.chat.Component.Serializer.class)
+@Mixin(targets = "net/minecraft/network/codec/ByteBufCodecs$34")
 public abstract class Component_SerializerMixin {
 
     // inject into the anonymous function to build a gson instance
-    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "com/google/gson/GsonBuilder.disableHtmlEscaping()Lcom/google/gson/GsonBuilder;", remap = false), remap = false)
-    private static GsonBuilder impl$injectAdventureGson(final GsonBuilder gson) {
-        gson.disableHtmlEscaping();
-        GsonComponentSerializer.gson().populator().apply(gson);
-        return gson;
+    @WrapOperation(method = "<clinit>", at = @At(value = "INVOKE", target = "com/google/gson/GsonBuilder.disableHtmlEscaping()Lcom/google/gson/GsonBuilder;", remap = false), remap = false)
+    private static GsonBuilder impl$injectAdventureGson(GsonBuilder instance, Operation<GsonBuilder> original) {
+        original.call(instance);
+        GsonComponentSerializer.gson().populator().apply(instance);
+        return instance;
     }
 }

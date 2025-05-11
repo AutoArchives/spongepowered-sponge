@@ -27,10 +27,12 @@ package org.spongepowered.common.event.tracking.context.transaction.world;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.damagesource.CombatEntry;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -71,9 +73,9 @@ public final class EntityPerformingDropsTransaction extends WorldBasedTransactio
         final Entity entity = this.destroyingEntity;
         this.worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier((ServerLevel) entity.level(), "ServerLevel");
 
-        final CompoundTag tag = new CompoundTag();
-        entity.saveWithoutId(tag);
-        this.entityTag = tag;
+        final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, entity.level().registryAccess());
+        entity.saveWithoutId(output);
+        this.entityTag = output.buildResult();
 
         final @Nullable DamageSource lastAttacker;
         if (entity instanceof LivingEntity) {

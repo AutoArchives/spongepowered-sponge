@@ -27,9 +27,11 @@ package org.spongepowered.common.mixin.core.world.level;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
@@ -52,6 +54,7 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -107,8 +110,10 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Shadow public abstract boolean shadow$isRaining();
     @Shadow public abstract net.minecraft.world.level.block.entity.@Nullable BlockEntity shadow$getBlockEntity(BlockPos p_175625_1_);
     @Shadow public abstract WorldBorder shadow$getWorldBorder();
+    @Shadow public abstract RegistryAccess shadow$registryAccess();
     //@Shadow protected abstract void shadow$postGameEventInRadius(@javax.annotation.Nullable net.minecraft.world.entity.Entity $$0, GameEvent $$1, BlockPos $$2, int $$3);
     // @formatter on
+
 
 
     @Override
@@ -168,7 +173,9 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
                     final var e = ((net.minecraft.world.entity.Entity) createdEntity);
                     // mimicing Entity#restoreFrom
                     dataFixed.remove("Dimension");
-                    e.load((CompoundTag) dataFixed.getValue());
+                    final var tag = (CompoundTag) dataFixed.getValue();
+                    final var input = TagValueInput.create(ProblemReporter.DISCARDING, this.shadow$registryAccess(), tag);
+                    e.load(input);
                     // position needs a reset
                     e.snapTo(proposedPosition.x(), proposedPosition.y(), proposedPosition.z());
                 });

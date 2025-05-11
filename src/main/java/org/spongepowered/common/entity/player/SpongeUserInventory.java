@@ -26,12 +26,14 @@ package org.spongepowered.common.entity.player;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.spongepowered.common.SpongeCommon;
 
 import java.util.Arrays;
@@ -134,56 +136,55 @@ public class SpongeUserInventory implements Container {
      * Writes the inventory out as a list of compound tags. This is where the slot indices are used (+100 for armor, +80
      * for crafting).
      */
-    public ListTag writeList(final ListTag nbtTagListIn) {
+    public void writeList(final ValueOutput.TypedOutputList<ItemStackWithSlot> nbtTagListIn) {
         for (int i = 0; i < this.mainInventory.size(); ++i) {
-            if (!this.mainInventory.get(i).isEmpty()) {
-                final CompoundTag nbttagcompound = new CompoundTag();
-                nbttagcompound.putByte("Slot", (byte) i);
-                nbtTagListIn.add(this.mainInventory.get(i).save(SpongeCommon.server().registryAccess(), nbttagcompound));
+            final var stack = this.mainInventory.get(i);
+            if (!stack.isEmpty()) {
+                final var slottedItem = new ItemStackWithSlot(i, stack);
+                nbtTagListIn.add(slottedItem);
             }
         }
 
         for (int j = 0; j < this.armorInventory.size(); ++j) {
-            if (!this.armorInventory.get(j).isEmpty()) {
+            final var armorItem = this.armorInventory.get(j);
+            if (!armorItem.isEmpty()) {
                 final CompoundTag nbttagcompound1 = new CompoundTag();
                 nbttagcompound1.putByte("Slot", (byte) (j + 100));
-                nbtTagListIn.add(this.armorInventory.get(j).save(SpongeCommon.server().registryAccess(), nbttagcompound1));
+                final var slottedItem = new ItemStackWithSlot(j + 100, armorItem);
+                nbtTagListIn.add(slottedItem);
             }
         }
 
         for (int k = 0; k < this.offHandInventory.size(); ++k) {
-            if (!this.offHandInventory.get(k).isEmpty()) {
+            final var offhandItem = this.offHandInventory.get(k);
+            if (!offhandItem.isEmpty()) {
                 final CompoundTag nbttagcompound2 = new CompoundTag();
                 nbttagcompound2.putByte("Slot", (byte) (k + 150));
-                nbtTagListIn.add(this.offHandInventory.get(k).save(SpongeCommon.server().registryAccess(), nbttagcompound2));
+                nbtTagListIn.add(new ItemStackWithSlot(k + 150, offhandItem));
             }
         }
 
         this.dirty = false;
-
-        return nbtTagListIn;
     }
 
     /**
      * Reads from the given tag list and fills the slots in the inventory with the correct items.
      */
-    public void readList(final ListTag nbtTagListIn) {
+    public void readList(final ValueInput.TypedInputList<ItemStackWithSlot> nbtTagListIn) {
         this.mainInventory.clear();
         this.armorInventory.clear();
         this.offHandInventory.clear();
 
-        for (int i = 0; i < nbtTagListIn.size(); i++) {
-            CompoundTag slotTag = nbtTagListIn.getCompoundOrEmpty(i);
-            int j = slotTag.getByteOr("Slot", (byte)0) & 255;
-            ItemStack itemstack = ItemStack.parse(SpongeCommon.server().registryAccess(), slotTag).orElse(ItemStack.EMPTY);
-            if (!itemstack.isEmpty()) {
-                if (j >= 0 && j < this.mainInventory.size()) {
-                    this.mainInventory.set(j, itemstack);
-                } else if (j >= 100 && j < this.armorInventory.size() + 100) {
-                    this.armorInventory.set(j - 100, itemstack);
-                } else if (j >= 150 && j < this.offHandInventory.size() + 150) {
-                    this.offHandInventory.set(j - 150, itemstack);
-                }
+        for (final var input : nbtTagListIn) {
+            final var slot = input.slot();
+            if (slot >= 0 && slot < this.mainInventory.size()) {
+                this.mainInventory.set(slot, input.stack());
+            } else if (slot >= 100 && slot < this.armorInventory.size() + 100) {
+                this.armorInventory.set(slot - 100, input.stack());
+            } else if (slot >= 150 && slot < this.offHandInventory.size() + 150) {
+                this.offHandInventory.set(slot - 150, input.stack());
+            } else {
+                SpongeCommon.logger().warn("Skipping Slot {} as it does not exist in the inventory", slot);
             }
         }
     }

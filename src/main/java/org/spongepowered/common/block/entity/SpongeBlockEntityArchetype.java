@@ -28,8 +28,10 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.TagValueInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -114,7 +116,8 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
         compound.putInt(Constants.TileEntity.Y_POS, blockpos.getY());
         compound.putInt(Constants.TileEntity.Z_POS, blockpos.getZ());
         tileEntity.setBlockState((net.minecraft.world.level.block.state.BlockState) currentState);
-        tileEntity.loadWithComponents(compound, minecraftWorld.registryAccess());
+        final var input = TagValueInput.create(ProblemReporter.DISCARDING, minecraftWorld.registryAccess(), compound);
+        tileEntity.loadWithComponents(input);
         return Optional.of((org.spongepowered.api.block.entity.BlockEntity) tileEntity);
     }
 

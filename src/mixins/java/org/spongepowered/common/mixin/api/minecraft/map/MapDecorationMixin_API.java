@@ -24,9 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.map;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
+import com.mojang.serialization.JsonOps;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.map.decoration.MapDecorationType;
@@ -35,6 +41,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
@@ -56,6 +63,15 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
     @Shadow @Final private Optional<Component> name;
     // @formatter:on
 
+    @Unique
+    private static final Gson impl$gson = impl$gson();
+
+    @Unique
+    private static Gson impl$gson() {
+        final GsonBuilder builder = new GsonBuilder().disableHtmlEscaping();
+        GsonComponentSerializer.gson().populator().apply(builder);
+        return builder.create();
+    }
 
     @Override
     public MapDecorationType type() {
@@ -106,7 +122,12 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
                 .set(Constants.Map.DECORATION_X, this.x)
                 .set(Constants.Map.DECORATION_Y, this.y)
                 .set(Constants.Map.DECORATION_ROTATION, (byte) MapUtil.normalizeDecorationOrientation(this.rot));
-        this.name.ifPresent(component -> data.set(Constants.Map.NAME, Component.Serializer.toJson(component, SpongeCommon.server().registryAccess())));
+        this.name.ifPresent(component -> {
+            final var json = ComponentSerialization.CODEC
+                .encodeStart(SpongeCommon.scopedHolder().createSerializationContext(JsonOps.INSTANCE), component)
+                .getOrThrow(JsonParseException::new);
+            data.set(Constants.Map.NAME, impl$gson.toJson(json));
+        });
         return data;
     }
 }

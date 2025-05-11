@@ -27,7 +27,9 @@ package org.spongepowered.common.event.tracking.context.transaction.world;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -91,7 +93,9 @@ public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEnt
     @Override
     protected void captureState() {
         super.captureState();
-        this.entityTag = this.entityToSpawn.saveWithoutId(new CompoundTag());
+        final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, this.worldSupplier.get().registryAccess());
+        this.entityToSpawn.saveWithoutId(output);
+        this.entityTag = output.buildResult();
     }
 
     @Override

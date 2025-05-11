@@ -70,6 +70,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -188,23 +190,20 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    public void readAdditionalSaveData(final CompoundTag tag) {
+    public void readAdditionalSaveData(final ValueInput tag) {
         super.readAdditionalSaveData(tag);
-        if (tag.contains("profile")) {
-              ResolvableProfile.CODEC
-                .parse(NbtOps.INSTANCE, tag.get("profile"))
-                .resultOrPartial($$0x -> SpongeCommon.logger().error("Failed to load profile from player head: {}", $$0x))
-                .ifPresent(profile -> this.fakeProfile = profile);
-
-            this.setUUID(this.fakeProfile.id().get());
-        }
+        tag.read("profile", ResolvableProfile.CODEC)
+            .ifPresent(profile -> {
+                this.fakeProfile = profile;
+                this.setUUID(this.fakeProfile.id().get());
+            });
     }
 
     @Override
-    public void addAdditionalSaveData(final CompoundTag tag) {
+    public void addAdditionalSaveData(final ValueOutput tag) {
         super.addAdditionalSaveData(tag);
         final DataResult<Tag> result = ResolvableProfile.CODEC.encodeStart(NbtOps.INSTANCE, this.fakeProfile);
-        result.ifSuccess(gameProfile -> tag.put("profile", gameProfile));
+        result.ifSuccess(gameProfile -> tag.storeNullable("profile", ResolvableProfile.CODEC, this.fakeProfile));
     }
 
     @Override

@@ -25,6 +25,8 @@
 package org.spongepowered.common.entity;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -229,7 +231,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
             if (newEntity != null) {
                 final net.minecraft.world.entity.Entity nmsEntity = (net.minecraft.world.entity.Entity) newEntity;
                 if (this.compound != null) {
-                    nmsEntity.load(this.compound);
+                    final var input = TagValueInput.create(ProblemReporter.DISCARDING, nmsEntity.level().registryAccess(), this.compound);
+                    nmsEntity.load(input);
                 }
 
                 final boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity);

@@ -28,6 +28,7 @@ package org.spongepowered.common.world.storage;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.world.level.storage.ValueInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.data.Keys;
@@ -52,20 +53,22 @@ public final class SpongePlayerDataManager {
         this.playersDirectory = ((SpongeWorldManager) this.server.worldManager()).getDefaultWorldDirectory().resolve("data").resolve(SpongePlayerDataManager.SPONGE_DATA);
     }
 
-    public void readLegacyPlayerData(final ServerPlayer playerEntity, final CompoundTag compound, @Nullable Instant creation) {
+    public void readLegacyPlayerData(final ServerPlayer playerEntity, final ValueInput compound, @Nullable Instant creation) {
         if (creation == null) {
             creation = Instant.now();
         }
         Instant lastPlayed = creation;
         // first try to migrate bukkit join data stuff
-        if (compound.contains(Constants.Bukkit.BUKKIT)) {
-            final CompoundTag bukkitCompound = compound.getCompoundOrEmpty(Constants.Bukkit.BUKKIT);
+        final var bukkit = compound.child(Constants.Bukkit.BUKKIT);
+        if (bukkit.isPresent()) {
+            final var bukkitCompound = bukkit.get();
             creation = Instant.ofEpochMilli(bukkitCompound.getLongOr(Constants.Bukkit.BUKKIT_FIRST_PLAYED, 0));
             lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLongOr(Constants.Bukkit.BUKKIT_LAST_PLAYED, 0));
         }
         // migrate canary join data
-        if (compound.contains(Constants.Canary.ROOT)) {
-            final CompoundTag canaryCompound = compound.getCompoundOrEmpty(Constants.Canary.ROOT);
+        final var canary = compound.child(Constants.Canary.ROOT);
+        if (canary.isPresent()) {
+            final var canaryCompound = canary.get();
             creation = Instant.ofEpochMilli(canaryCompound.getLongOr(Constants.Canary.FIRST_JOINED, 0));
             lastPlayed = Instant.ofEpochMilli(canaryCompound.getLongOr(Constants.Canary.LAST_JOINED, 0));
         }

@@ -27,10 +27,12 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.struct
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -53,6 +55,7 @@ import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.holder.SpongeArchetypeVolumeDataHolder;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.VecHelper;
@@ -196,7 +199,8 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
     // TODO caching?
     private Stream<EntityArchetypeEntry> api$buildEntityArchetypeList() {
         return this.entityInfoList.stream().map(info -> {
-            final Optional<EntityType<?>> by = EntityType.by(info.nbt);
+            final var input = TagValueInput.create(ProblemReporter.DISCARDING, SpongeCommon.scopedHolder(), info.nbt);
+            final Optional<EntityType<?>> by = EntityType.by(input);
             if (by.isPresent()) {
                 final DataContainer data = NBTTranslator.INSTANCE.translateFrom(info.nbt);
                 final EntityArchetype archetype = EntityArchetype.builder().type((org.spongepowered.api.entity.EntityType<?>) by.get()).entityData(data).build();

@@ -25,6 +25,8 @@
 package org.spongepowered.common.entity;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -118,8 +120,10 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.entityType = entity.type();
         this.uniqueId = entity.uniqueId();
         this.manipulator = ((SpongeDataHolderBridge) entity).bridge$getManipulator().copy();
-        this.compound = new CompoundTag();
-        ((net.minecraft.world.entity.Entity) entity).saveWithoutId(this.compound);
+        final var mcEntity = (net.minecraft.world.entity.Entity) entity;
+        final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, mcEntity.level().registryAccess());
+        mcEntity.saveWithoutId(output);
+        this.compound = output.buildResult();
         return this;
     }
 
@@ -166,8 +170,9 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.rotation = transform.rotation();
         this.scale = transform.scale();
         this.manipulator = DataManipulator.mutableOf((Entity) minecraftEntity);
-        this.compound = new CompoundTag();
-        minecraftEntity.saveWithoutId(this.compound);
+        final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, minecraftEntity.level().registryAccess());
+        minecraftEntity.saveWithoutId(output);
+        this.compound = output.buildResult();
         return this;
     }
 

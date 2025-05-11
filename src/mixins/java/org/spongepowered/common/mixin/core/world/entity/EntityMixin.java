@@ -54,6 +54,7 @@ import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.PortalProcessor;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -62,6 +63,9 @@ import net.minecraft.world.level.block.Portal;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -184,7 +188,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract boolean shadow$onGround();
     @Shadow @Nullable protected abstract String shadow$getEncodeId();
     @Shadow @javax.annotation.Nullable public PortalProcessor portalProcess;
-    @Shadow public abstract boolean save(final CompoundTag $$0);
     @Shadow public abstract Level level();
     // @formatter:on
 
@@ -939,16 +942,25 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Inject(method = "saveWithoutId", at = @At("RETURN"))
-    private void impl$WriteSpongeDataToCompound(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
-        if (DataUtil.syncDataToTag(this)) {
-            compound.merge(this.data$getCompound());
+    private void impl$WriteSpongeDataToCompound(final ValueOutput out, final CallbackInfo ci) {
+        if (out instanceof TagValueOutput tag) {
+            if (DataUtil.syncDataToTag(this)) {
+                // TODO - technically this shouldn't be used but we can access the build result
+                //   here, ideally we may have to consider migrating the existing data serialization
+                //   process to the new "style".
+                tag.buildResult().merge(this.data$getCompound());
+            }
         }
     }
 
     @Inject(method = "load", at = @At("RETURN"))
-    private void impl$ReadSpongeDataFromCompound(final CompoundTag compound, final CallbackInfo ci) {
+    private void impl$ReadSpongeDataFromCompound(final ValueInput input, final CallbackInfo ci) {
         // TODO If we are in Forge data is already present
-        this.data$setCompound(compound); // For vanilla we set the incoming nbt
+        final var spongeData = input.read(Constants.Sponge.Data.V3.SPONGE_TAG_KEY, CustomData.CODEC);
+        if (spongeData.isEmpty()) {
+            return;
+        }
+        this.data$setCompound(spongeData.get().copyTag()); // For vanilla we set the incoming nbt
         // Deserialize custom data...
         DataUtil.syncTagToData(this);
         this.data$setCompound(null); // done reading

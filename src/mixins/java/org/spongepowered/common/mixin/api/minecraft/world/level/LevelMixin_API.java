@@ -26,10 +26,11 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
@@ -43,6 +44,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -119,8 +122,10 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             EntityTypeTest<net.minecraft.world.entity.Entity, T> entityTypeTest,
             net.minecraft.world.phys.AABB param1,
             @Nullable Predicate<? super T> param2);
+    @Shadow public abstract RegistryAccess shadow$registryAccess();
 
     // @formatter:on
+
 
 
     private Context api$context;
@@ -282,8 +287,9 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         // BlockEntity stores its location, as well as it being mutable and stuff, so just setting what we've given here
         // would cause unexpected bugs.
         final net.minecraft.world.level.block.entity.BlockEntity mcOriginalBlockEntity = (net.minecraft.world.level.block.entity.BlockEntity) Objects.requireNonNull(blockEntity, "blockEntity");
+        final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, this.shadow$registryAccess());
         // Save the nbt so we can copy it, specifically wout the metadata of x,y,z coordinates
-        final CompoundTag tag = mcOriginalBlockEntity.saveWithId(mcOriginalBlockEntity.getLevel().registryAccess());
+        mcOriginalBlockEntity.saveWithId(output);
         // Ensure that where we are placing this blockentity is the right blockstate, so that minecraft will actually accept it.
         this.world().setBlock(x, y, z, (org.spongepowered.api.block.BlockState) mcOriginalBlockEntity.getBlockState());
 
@@ -292,7 +298,8 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             .orElseThrow(() -> new IllegalStateException("Failed to create Block Entity at " + this.location(Vector3i.from(x, y, z))));
 
         // Load the data into it.
-        mcNewBlockEntity.loadWithComponents(tag, mcOriginalBlockEntity.getLevel().registryAccess());
+        final var input = TagValueInput.create(ProblemReporter.DISCARDING, this.shadow$registryAccess(), output.buildResult());
+        mcNewBlockEntity.loadWithComponents(input);
         // Finally, inform minecraft about our actions.
         this.shadow$setBlockEntity(mcNewBlockEntity);
     }

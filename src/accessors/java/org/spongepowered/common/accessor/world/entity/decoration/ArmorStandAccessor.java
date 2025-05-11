@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.accessor.world.entity.decoration;
 
-import net.minecraft.core.Rotations;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,14 +36,6 @@ public interface ArmorStandAccessor {
     @Accessor("disabledSlots") int accessor$disabledSlots();
 
     @Accessor("disabledSlots") void accessor$disabledSlots(final int disabledSlots);
-
-    @Accessor("leftArmPose") Rotations accessor$leftArmPose();
-
-    @Accessor("rightArmPose") Rotations accessor$rightArmPose();
-
-    @Accessor("leftLegPose") Rotations accessor$leftLegPose();
-
-    @Accessor("rightLegPose") Rotations accessor$rightLegPose();
 
     @Invoker("isDisabled") boolean invoker$isDisabled(final EquipmentSlot slot);
 

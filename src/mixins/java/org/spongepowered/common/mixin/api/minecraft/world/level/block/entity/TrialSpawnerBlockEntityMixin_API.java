@@ -45,13 +45,13 @@ public abstract class TrialSpawnerBlockEntityMixin_API extends BlockEntityMixin_
         }
         final var thisLevel = (ServerLevel) this.level;
         final var spawner = this.getTrialSpawner();
-        final var spawnerData = (TrialSpawnerDataAccessor) spawner.getData();
-        final var spawnerConfig = spawner.getConfig();
+        final var spawnerData = (TrialSpawnerDataAccessor) spawner.getStateData();
+        final var spawnerConfig = spawner.activeConfig();
 
-        final var additionalPlayers = spawner.getData().countAdditionalPlayers(this.worldPosition);
+        final var additionalPlayers = spawner.getStateData().countAdditionalPlayers(this.worldPosition);
         final var nextSpawnAt = spawnerData.accessor$nextMobSpawnsAt();
         spawnerData.accessor$nextMobSpawnsAt(0);
-        if (force || spawner.getData().isReadyToSpawnNextMob(thisLevel, spawnerConfig, additionalPlayers)) {
+        if (force || spawner.getStateData().isReadyToSpawnNextMob(thisLevel, spawnerConfig, additionalPlayers)) {
             // See TrialSpawnerState#tickAndGetNext
             spawner.spawnMob(thisLevel, this.worldPosition).ifPresent(spawned -> {
                 spawnerData.accessor$currentMobs().add(spawned);

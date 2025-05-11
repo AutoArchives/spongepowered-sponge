@@ -32,6 +32,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -49,6 +50,8 @@ import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.entity.EntitySection;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -241,8 +244,9 @@ public final class VolumeStreamUtils {
         final Level level
     ) {
         return shouldCarbonCopy ? (pos, entity) -> {
-            final CompoundTag nbt = new CompoundTag();
-            entity.save(nbt);
+            final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+            entity.saveWithoutId(output);
+            final var input = TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), output.buildResult());
             final net.minecraft.world.entity.@Nullable Entity cloned = entity.getType().create(level, EntitySpawnReason.COMMAND);
             Objects.requireNonNull(
                 cloned,
@@ -250,7 +254,7 @@ public final class VolumeStreamUtils {
                     "EntityType[%s] creates a null Entity!",
                     net.minecraft.world.entity.EntityType.getKey(entity.getType())
                 )
-            ).load(nbt);
+            ).load(input);
             backingVolume.spawnEntity((org.spongepowered.api.entity.Entity) cloned);
         } : (pos, tile) -> {
         };
@@ -261,14 +265,16 @@ public final class VolumeStreamUtils {
         final boolean shouldCarbonCopy, final ObjectArrayMutableBlockEntityBuffer backingVolume, final @Nullable Level level
     ) {
         return shouldCarbonCopy ? (pos, tile) -> {
-            final CompoundTag nbt = tile.saveWithFullMetadata(tile.getLevel().registryAccess()); // TODO NPE possible?
+            final var registryAccess = tile.getLevel().registryAccess();
+            final CompoundTag nbt = tile.saveWithFullMetadata(registryAccess);
             final BlockState state = tile.getBlockState();
             final net.minecraft.world.level.block.entity.@Nullable BlockEntity cloned = tile.getType().create(pos, state);
+            final var input = TagValueInput.create(ProblemReporter.DISCARDING, registryAccess, nbt);
             Objects.requireNonNull(
                 cloned,
                 () -> String.format(
                     "TileEntityType[%s] creates a null TileEntity!", BlockEntityType.getKey(tile.getType()))
-            ).loadWithComponents(nbt, tile.getLevel().registryAccess()); // TODO NPE possible?
+            ).loadWithComponents(input);
 
             if (level != null) {
                 ((BlockEntityAccessor) cloned).accessor$level(level);

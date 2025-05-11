@@ -29,17 +29,20 @@ import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.Rotations;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -201,8 +204,9 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     private UserInventory loadInventory() {
         if (this.inventory == null) {
             this.inventory = new SpongeUserInventory(this);
-            final ListTag listNBT = this.compound.getListOrEmpty(Constants.Entity.Player.INVENTORY);
-            this.inventory.readList(listNBT);
+            final var input = TagValueInput.create(ProblemReporter.DISCARDING, SpongeCommon.scopedHolder(), this.compound);
+            final var inventoryInput = input.listOrEmpty(Constants.Entity.Player.INVENTORY, ItemStackWithSlot.CODEC);
+            this.inventory.readList(inventoryInput);
             this.compound.getInt(Constants.Entity.Player.SELECTED_ITEM_SLOT)
                 .ifPresent(slotId -> this.inventory.currentItem = slotId);
         }
@@ -213,8 +217,9 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         if (this.enderChest == null) {
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY)) {
-                final ListTag nbttaglist1 = this.compound.getListOrEmpty(Constants.Entity.Player.ENDERCHEST_INVENTORY);
-                this.enderChest.fromTag(nbttaglist1, SpongeCommon.server().registryAccess());
+                final var input = TagValueInput.create(ProblemReporter.DISCARDING, SpongeCommon.scopedHolder(), this.compound);
+                final var enderChestItems = input.listOrEmpty(Constants.Entity.Player.ENDERCHEST_INVENTORY, ItemStackWithSlot.CODEC);
+                this.enderChest.fromSlots(enderChestItems);
             }
         }
         return this;
@@ -228,7 +233,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
             .ifPresent(key -> this.worldKey = (ResourceKey) (Object) key);
 
         final var rotation = compound.read(Constants.Entity.ENTITY_ROTATION, Rotations.CODEC).orElse(new Rotations(0, 0, 0));
-        final var position = compound.read(Constants.Entity.ENTITY_POSITION, Constants.Entity.ROTATIONS_CODEC).orElse(Vector3f.ZERO);
+        final var position = compound.read(Constants.Entity.ENTITY_POSITION, Constants.Entity.ENTITY_POSITION_CODEC).orElse(Vector3d.ZERO);
         this.x = position.x();
         this.y = position.y();
         this.z = position.z();
@@ -241,18 +246,22 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     }
 
     public void writeCompound(final CompoundTag compound) {
-
-        compound.putString(Constants.Sponge.World.WORLD_KEY, this.worldKey.formatted());
+        final var holder = SpongeCommon.scopedHolder();
+        final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, holder);
+        output.putString(Constants.Sponge.World.WORLD_KEY, this.worldKey.formatted());
 
         this.loadInventory();
         this.loadEnderInventory();
 
-        compound.put(Constants.Entity.Player.INVENTORY, this.inventory.writeList(new ListTag()));
-        compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.createTag(SpongeCommon.server().registryAccess()));
-        compound.putInt(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
+        final var inventory = output.list(Constants.Entity.Player.INVENTORY, ItemStackWithSlot.CODEC);
+        this.inventory.writeList(inventory);
+        final var enderChestInventory = output.list(Constants.Entity.Player.ENDERCHEST_INVENTORY, ItemStackWithSlot.CODEC);
+        this.enderChest.storeAsSlots(enderChestInventory);
 
-        compound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.x, this.y, this.z));
-        compound.put(Constants.Entity.ENTITY_ROTATION, Constants.NBT.newFloatNBTList(this.yaw, this.pitch));
+        output.putInt(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
+        output.store(Constants.Entity.ENTITY_POSITION, Constants.Entity.ENTITY_POSITION_CODEC, new Vector3d(this.x, this.y, this.z));
+        output.store(Constants.Entity.ENTITY_ROTATION, Constants.Entity.ROTATIONS_CODEC, new Vector3f(this.yaw, this.pitch, 0));
+        compound.merge(output.buildResult());
 
         if (DataUtil.syncDataToTag(this)) {
             compound.merge(this.data$getCompound());
