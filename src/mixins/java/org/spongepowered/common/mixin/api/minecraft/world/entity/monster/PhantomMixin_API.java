@@ -28,7 +28,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Phantom;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.FlyingAnimalMixin_API;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.MobMixin_API;
 
 import java.util.Set;

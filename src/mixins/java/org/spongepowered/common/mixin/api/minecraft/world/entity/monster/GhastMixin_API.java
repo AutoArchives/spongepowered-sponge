@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
 import org.spongepowered.api.entity.living.monster.Ghast;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.FlyingAnimalMixin_API;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.MobMixin_API;
 
 @Mixin(net.minecraft.world.entity.monster.Ghast.class)
