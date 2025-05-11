@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.entity.item;
 
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,6 +33,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(PrimedTnt.class)
 public interface PrimedTntAccessor {
 
-    @Accessor("owner") void accessor$owner(final LivingEntity owner);
+    @Accessor("owner") void accessor$owner(final EntityReference<LivingEntity> owner);
 
 }

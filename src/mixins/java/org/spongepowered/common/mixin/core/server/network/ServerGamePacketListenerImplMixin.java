@@ -397,7 +397,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
                 if (ShouldFire.INTERACT_ITEM_EVENT_PRIMARY) {
                     final Vec3 startPos = this.player.getEyePosition(1);
                     final Vec3 endPos = startPos.add(this.player.getLookAngle().scale(5d)); // TODO hook for blockReachDistance?
-                    final HitResult result = this.player.serverLevel().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
+                    final HitResult result = this.player.level().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
                     if (result.getType() == HitResult.Type.MISS) {
                         final ItemStack heldItem = this.player.getItemInHand(hand);
                         SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, heldItem, hand);
@@ -445,7 +445,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
                     return; // prevents Mismatch in destroy block pos warning
                 }
             }
-            final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.player.serverLevel());
+            final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.player.level());
             try (final CauseStackManager.StackFrame frame = tracker.pushCauseFrame();
                  final PhaseContext<?> context = PlayerPhase.State.PLAYER_INTERACT.createPhaseContext(tracker)
                     .creator(this.player.getUUID())

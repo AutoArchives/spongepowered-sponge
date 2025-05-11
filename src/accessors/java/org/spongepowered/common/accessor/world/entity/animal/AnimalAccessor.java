@@ -24,17 +24,18 @@
  */
 package org.spongepowered.common.accessor.world.entity.animal;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.animal.Animal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.UUID;
 
 @Mixin(Animal.class)
 public interface AnimalAccessor {
 
-    @Accessor("loveCause") UUID accessor$loveCause();
+    @Accessor("loveCause") EntityReference<ServerPlayer> accessor$loveCause();
 
-    @Accessor("loveCause") void accessor$loveCause(final UUID loveCause);
+    @Accessor("loveCause") void accessor$loveCause(final EntityReference<ServerPlayer> loveCause);
 
 }

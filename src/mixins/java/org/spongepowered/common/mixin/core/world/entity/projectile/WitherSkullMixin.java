@@ -36,7 +36,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.accessor.world.entity.projectile.ProjectileAccessor;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.world.entity.projectile.WitherSkullBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -59,7 +58,7 @@ public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin im
         if (this.impl$damageSet) {
             return this.impl$damage;
         }
-        if (((ProjectileAccessor) this).accessor$ownerUUID() != null) {
+        if (this.owner != null) {
             return Constants.Entity.WitherSkull.DEFAULT_WITHER_CREATED_SKULL_DAMAGE;
         }
         return Constants.Entity.WitherSkull.DEFAULT_NO_SOURCE_SKULL_DAMAGE;

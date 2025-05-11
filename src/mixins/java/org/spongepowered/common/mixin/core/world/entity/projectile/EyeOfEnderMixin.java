@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.projectile.EyeOfEnder;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,27 +33,24 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(EyeOfEnder.class)
 public abstract class EyeOfEnderMixin extends EntityMixin implements LocationTargetingBridge {
 
     // @formatter:off
-    @Shadow private double tx;
-    @Shadow private double ty;
-    @Shadow private double tz;
+    @Shadow private Vec3 target;
     // @formatter:on
 
     @Override
     public Vector3d bridge$getTargetedPosition() {
-        return new Vector3d(this.tx, this.ty, this.tz);
+        return VecHelper.toVector3d(this.target);
     }
 
     @Override
     public void bridge$setTargetedPosition(final Vector3d vec) {
-        this.tx = vec.x();
-        this.ty = vec.y();
-        this.tz = vec.z();
+        this.target = VecHelper.toVanillaVector3d(vec);
     }
 
     @Inject(

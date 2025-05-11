@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import org.spongepowered.api.block.BlockState;
@@ -43,7 +44,7 @@ public final class TNTData {
                 .asMutable(PrimedTnt.class)
                     .create(Keys.DETONATOR)
                         .get(h -> (Living) h.getOwner())
-                        .set((h, v) -> ((PrimedTntAccessor) h).accessor$owner((LivingEntity) v))
+                        .set((h, v) -> ((PrimedTntAccessor) h).accessor$owner(new EntityReference<>((LivingEntity) v)))
                     .create(Keys.BLOCK_STATE)
                         .get(h -> (BlockState) h.getBlockState())
                         .set((h, v) -> h.setBlockState((net.minecraft.world.level.block.state.BlockState) v));

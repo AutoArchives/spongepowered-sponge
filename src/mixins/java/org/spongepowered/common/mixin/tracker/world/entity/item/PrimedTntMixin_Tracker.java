@@ -38,12 +38,13 @@ import org.spongepowered.common.mixin.tracker.world.entity.EntityMixin_Tracker;
 @Mixin(PrimedTnt.class)
 public abstract class PrimedTntMixin_Tracker extends EntityMixin_Tracker {
 
-    @Shadow @Nullable private LivingEntity owner;
+    @Shadow @Nullable public abstract LivingEntity shadow$getOwner();
 
     @Override
     protected void tracker$populateDeathContextIfNeeded(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
-        if (this.owner != null) {
-            frame.addContext(EventContextKeys.IGNITER, (Living) this.owner);
+        final var owner = this.shadow$getOwner();
+        if (owner != null) {
+            frame.addContext(EventContextKeys.IGNITER, (Living) owner);
         }
         super.tracker$populateDeathContextIfNeeded(frame, context);
     }

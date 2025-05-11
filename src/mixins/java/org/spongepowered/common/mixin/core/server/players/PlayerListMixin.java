@@ -344,7 +344,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(final org.slf4j.Logger logger, final String s, final Object[] objects,
             final Connection conn, final net.minecraft.server.level.ServerPlayer player) {
         logger.info("{}[{}] logged in to world '{}' with entity id {} at ({}, {}, {})", player.getName().getString(), player,
-                ((ServerWorld)player.serverLevel()).key(), player.getId(), player.getX(), player.getY(), player.getZ());
+                ((ServerWorld)player.level()).key(), player.getId(), player.getX(), player.getY(), player.getZ());
     }
 
     @Redirect(method = "placeNewPlayer",
@@ -386,13 +386,13 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/server/players/PlayerList;viewDistance:I"))
     private int impl$usePerWorldViewDistance(final PlayerList self, final Connection co, final net.minecraft.server.level.ServerPlayer player, final CommonListenerCookie cookie) {
-        return ((ServerLevelDataBridge) player.serverLevel().getLevelData()).bridge$viewDistance().orElse(self.getViewDistance());
+        return ((ServerLevelDataBridge) player.level().getLevelData()).bridge$viewDistance().orElse(self.getViewDistance());
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
     private CustomBossEvents impl$getPerWorldBossBarManager(
             final MinecraftServer minecraftServer, final Connection netManager, final net.minecraft.server.level.ServerPlayer playerIn) {
-        return ((ServerLevelBridge) playerIn.serverLevel()).bridge$getBossBarManager();
+        return ((ServerLevelBridge) playerIn.level()).bridge$getBossBarManager();
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;updateEntireScoreboard(Lnet/minecraft/server/ServerScoreboard;Lnet/minecraft/server/level/ServerPlayer;)V"))
@@ -449,7 +449,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         ((ServerPlayerBridge) mcPlayer).bridge$setConnectionMessageToSend(null);
 
-        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(mcPlayer.serverLevel());
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(mcPlayer.level());
         final PhaseContext<?> context = phaseTracker.getPhaseContext();
         phaseTracker.pushCause(event);
         final TransactionalCaptureSupplier transactor = context.getTransactor();
@@ -461,7 +461,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
     private CustomBossEvents impl$getPerWorldBossBarManager(final MinecraftServer minecraftServer, final net.minecraft.server.level.ServerPlayer playerIn) {
-        return ((ServerLevelBridge) playerIn.serverLevel()).bridge$getBossBarManager();
+        return ((ServerLevelBridge) playerIn.level()).bridge$getBossBarManager();
     }
 
     @Inject(method = "remove", at = @At("HEAD"))
@@ -557,7 +557,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private void impl$callRespawnPlayerPostEvent(final net.minecraft.server.level.ServerPlayer player, final boolean $$1, final Entity.RemovalReason $$2,
             final CallbackInfoReturnable<net.minecraft.server.level.ServerPlayer> cir, final @Local TeleportTransition dimensionTransition) {
         final ServerPlayer recreatedPlayer = (ServerPlayer) cir.getReturnValue();
-        final ServerWorld originalWorld = (ServerWorld) player.serverLevel();
+        final ServerWorld originalWorld = (ServerWorld) player.level();
 
         final RespawnPlayerEvent.Post event = SpongeEventFactory.createRespawnPlayerEventPost(PhaseTracker.getInstance().currentCause(),
                 recreatedPlayer.world(), originalWorld, (ServerWorld) dimensionTransition.newLevel(), recreatedPlayer);

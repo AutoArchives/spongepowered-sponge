@@ -66,7 +66,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     @Redirect(method = "handleSetCreativeModeSlot",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/InventoryMenu;broadcastChanges()V"))
     private void impl$onBroadcastCreativeActionResult(final InventoryMenu inventoryMenu, final ServerboundSetCreativeModeSlotPacket packetIn) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final ItemStack itemstack = packetIn.itemStack();
 
@@ -79,7 +79,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     @Redirect(method = "handleSetCreativeModeSlot",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;drop(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/world/entity/item/ItemEntity;"))
     private ItemEntity impl$onBroadcastCreativeActionResult(final ServerPlayer serverPlayer, final ItemStack stack, final boolean param1) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logCreativeClickContainer(-1, ItemStackUtil.snapshotOf(stack), this.player)) {
             return serverPlayer.drop(stack, param1);
@@ -92,7 +92,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;stopUsingItem()V"))
     )
     private void impl$onHandleSetCarriedItem(final ServerboundSetCarriedItemPacket packet, final CallbackInfo ci) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final int slotIdx = packet.getSlot();
         transactor.logPlayerCarriedItem(this.player, slotIdx);
@@ -101,7 +101,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
 
     @Redirect(method = "handleContainerClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;sendAllDataToRemote()V"))
     private void impl$onSpectatorClick(final AbstractContainerMenu menu, final ServerboundContainerClickPacket packet) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logClickContainer(menu, packet.slotNum(), packet.buttonNum(), packet.clickType(),
             this.player
@@ -120,7 +120,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;useItem(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult impl$onHandleUseItem(final ServerPlayerGameMode serverPlayerGameMode, final ServerPlayer param0,
             final Level param1, final ItemStack param2, final InteractionHand param3) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logSecondaryInteractItemTransaction(param0, param2)) {
             final var pipeline = ((TrackedWorldBridge) param1).bridge$startItemInteractionUseChange(param1, param0, param3, param2);
@@ -131,7 +131,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     @Redirect(method = "handleRenameItem(Lnet/minecraft/network/protocol/game/ServerboundRenameItemPacket;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AnvilMenu;setItemName(Ljava/lang/String;)Z"))
     private boolean impl$onHandleRenameItem(final AnvilMenu menu, final String name) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final var ignored = transactor.logIgnoredInventory(this.player.containerMenu)) {
             return menu.setItemName(name);
@@ -141,7 +141,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     @Inject(method = "handleSelectTrade", at = @At("RETURN"))
     private void impl$onHandleSelectTrade(final ServerboundSelectTradePacket param0, final CallbackInfo ci) {
         if (this.player.containerMenu instanceof MerchantMenu) {
-            final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.serverLevel()).getPhaseContext();
+            final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.level()).getPhaseContext();
             final TransactionalCaptureSupplier transactor = context.getTransactor();
             transactor.logSelectTrade(this.player, param0.getItem());
             this.player.containerMenu.broadcastChanges(); // capture

@@ -41,13 +41,13 @@ import org.spongepowered.vanilla.mixin.core.world.entity.LivingEntityMixin_Vanil
 public abstract class ServerPlayerMixin_Vanilla extends LivingEntityMixin_Vanilla implements ServerPlayerBridge {
 
     // @formatter:off
-    @Shadow public abstract ServerLevel shadow$serverLevel();
+    @Shadow public abstract ServerLevel shadow$level();
     // @formatter:on
 
     // override from LivingEntityMixin_Vanilla
     @Override
     protected void vanilla$onElytraUse(final CallbackInfo ci) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
         try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.STANDARD)) {

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.EntityReference;
+import net.minecraft.world.entity.projectile.ShulkerBullet;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Direction;
@@ -44,8 +46,14 @@ public final class ShulkerBulletData {
                         .get(h -> h.accessor$currentMoveDirection() == null ? Direction.NONE : Constants.DirectionFunctions.getFor(h.accessor$currentMoveDirection()))
                         .set((h, v) -> h.accessor$currentMoveDirection(Constants.DirectionFunctions.getFor(v)))
                     .create(Keys.TARGET_ENTITY)
-                        .get(h -> (Entity) h.accessor$finalTarget())
-                        .set((h, v) -> h.accessor$finalTarget((net.minecraft.world.entity.Entity) v));
+                        .get(h -> {
+                            final var target = h.accessor$finalTarget();
+                            if (target == null || ((ShulkerBullet) h).level() == null) {
+                                return null;
+                            }
+                            return (Entity) target.getEntity(((ShulkerBullet) h).level(), net.minecraft.world.entity.Entity.class);
+                        })
+                        .set((h, v) -> h.accessor$finalTarget(new EntityReference<>((net.minecraft.world.entity.Entity) v)));
     }
     // @formatter:on
 }

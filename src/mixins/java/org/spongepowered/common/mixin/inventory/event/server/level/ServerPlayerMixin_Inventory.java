@@ -95,7 +95,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     @Nullable private EffectTransactor inventory$effectTransactor = null;
     @Nullable private Object inventory$menuProvider;
 
-    @Shadow public abstract ServerLevel shadow$serverLevel();
+    @Shadow public abstract ServerLevel shadow$level();
     // @formatter:on
 
     // Ignore
@@ -107,7 +107,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
 
     @Override
     protected void inventory$wrapSetSlotWithTransaction(EquipmentSlot slot, ItemStack item, Operation<Void> original) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final PlayerInventoryTransaction.EventCreator eventCreator = context.getState() instanceof SwapHandItemsState ?
             PlayerInventoryTransaction.EventCreator.SWAP_HAND : PlayerInventoryTransaction.EventCreator.STANDARD;
@@ -123,7 +123,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     @Inject(method = "drop(Z)Z",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;removeFromSelected(Z)Lnet/minecraft/world/item/ItemStack;"))
     protected void impl$beforeRemoveItem(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         this.inventory$effectTransactor = transactor.logDropFromPlayerInventory((ServerPlayer) (Object) this, param0);
     }
@@ -147,7 +147,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             entity.playerTouch(player);
             return;
         }
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$level()).getPhaseContext();
         try (final EffectTransactor ignored = context.getTransactor().logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
             entity.playerTouch(player);
             this.inventoryMenu.broadcastChanges(); // capture
@@ -162,7 +162,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
 
     @Override
     protected void inventory$onUpdateUsingItem(final LivingEntity thisPlayer) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$serverLevel()).getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect((ServerPlayer) (Object) this, PlayerInventoryTransaction.EventCreator.STANDARD)) {
             this.shadow$completeUsingItem();
@@ -181,7 +181,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         )
     )
     private void impl$afterOpenHorseInventory(final AbstractHorse $$0, final Container $$1, final CallbackInfo ci) {
-        PhaseTracker.getWorldInstance(this.shadow$serverLevel()).getPhaseContext()
+        PhaseTracker.getWorldInstance(this.shadow$level()).getPhaseContext()
             .getTransactor()
             .logContainerSet((ServerPlayer) (Object) this);
     }
@@ -251,7 +251,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
 
     @WrapMethod(method = "doCloseContainer")
     private void impl$onPreDoCloseContainer(final Operation<Void> original) {
-        final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.shadow$serverLevel());
+        final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.shadow$level());
         final ItemStackSnapshot resultingCursor = ItemStackUtil.snapshotOf(this.containerMenu.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(resultingCursor, resultingCursor);
         final InteractContainerEvent.Close event = SpongeEventFactory.createInteractContainerEventClosePre(
@@ -286,7 +286,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     @WrapOperation(method = "doCloseContainer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;removed(Lnet/minecraft/world/entity/player/Player;)V"))
     private void impl$onDoCloseContainerCaptureRemoval(final AbstractContainerMenu instance, final Player player, final Operation<Void> original) {
-        final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.shadow$serverLevel());
+        final PhaseTracker tracker = PhaseTracker.getWorldInstance(this.shadow$level());
         final PhaseContext<@NonNull ?> context = tracker.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logCloseInventory(context, player)) {

@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.ConduitBlockEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.accessor.world.level.block.entity.ConduitBlockEntityAccessor;
@@ -39,7 +43,18 @@ public final class ConduitData {
         //@formatter:off
         registrator.asMutable(ConduitBlockEntityAccessor.class)
             .create(Keys.TARGET_ENTITY)
-                .get(c -> (Entity) c.accessor$destroyTarget())
+                .get(c -> {
+                    final var conduit = (ConduitBlockEntity) c;
+                    final @Nullable EntityReference<LivingEntity> target = c.accessor$destroyTarget();
+                    if (target == null) {
+                        return null;
+                    }
+                    final @Nullable Level level = conduit.getLevel();
+                    if (level == null) {
+                        return null;
+                    }
+                    return (Entity) target.getEntity(level, LivingEntity.class);
+                })
                 .deleteAnd(c -> {
                     if (c.accessor$destroyTarget() == null) {
                         return false;
@@ -48,10 +63,10 @@ public final class ConduitData {
                     return true;
                 })
                 .setAnd((c, e) -> {
-                    if (!(e instanceof LivingEntity)) {
+                    if (!(e instanceof LivingEntity le)) {
                         return false;
                     }
-                    c.accessor$setDestroyTarget((LivingEntity) e);
+                    c.accessor$setDestroyTarget(new EntityReference<>(le));
                     return true;
                 });
         //@formatter:on

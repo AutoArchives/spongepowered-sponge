@@ -102,7 +102,7 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
             isFlat,
             ((ServerPlayer) this).getLastDeathLocation(),
             ((ServerPlayer) this).getPortalCooldown(),
-            ((ServerPlayer) this).serverLevel().getSeaLevel()
+            ((ServerPlayer) this).level().getSeaLevel()
         ), dataToKeepMask));
     }
 

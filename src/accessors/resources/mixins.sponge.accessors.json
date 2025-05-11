@@ -127,7 +127,6 @@
     "world.entity.projectile.EyeOfEnderAccessor",
     "world.entity.projectile.FireworkRocketEntityAccessor",
     "world.entity.projectile.FishingHookAccessor",
-    "world.entity.projectile.ProjectileAccessor",
     "world.entity.projectile.ShulkerBulletAccessor",
     "world.entity.raid.RaidAccessor",
     "world.entity.raid.RaiderAccessor",

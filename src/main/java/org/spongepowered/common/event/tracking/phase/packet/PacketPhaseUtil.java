@@ -258,7 +258,7 @@ public final class PacketPhaseUtil {
                 } else {
                     final IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
-                    final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.getWorldInstance(packetPlayer.serverLevel()));
+                    final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.getWorldInstance(packetPlayer.level()));
                     context.source(packetPlayer)
                         .packetPlayer(packetPlayer)
                         .packet(packetIn);

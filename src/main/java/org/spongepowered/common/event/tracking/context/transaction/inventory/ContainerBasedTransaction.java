@@ -288,7 +288,7 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
             // TODO push event to cause?
             // TODO prevent event when there is no preview?
             final SlotTransaction previewTransaction = this.getPreviewTransaction(this.craftingInventory.result(), event.transactions());
-            final var recipe = sp.serverLevel().recipeAccess().getRecipeFor(RecipeType.CRAFTING, this.craftingContainer.asCraftInput(), player.level());
+            final var recipe = sp.level().recipeAccess().getRecipeFor(RecipeType.CRAFTING, this.craftingContainer.asCraftInput(), player.level());
             final CraftItemEvent.Preview previewEvent = SpongeEventFactory.createCraftItemEventPreview(event.cause(), (Container) this.menu, this.craftingInventory, event.cursorTransaction(), previewTransaction,
                     recipe.map(RecipeHolder::value).map(CraftingRecipe.class::cast), recipe.map(r -> (ResourceKey) (Object) r.id().location()), Optional.empty(), event.transactions());
             SpongeCommon.post(previewEvent);

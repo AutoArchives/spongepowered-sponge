@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.entity.ConduitBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,8 +34,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ConduitBlockEntity.class)
 public interface ConduitBlockEntityAccessor {
 
-    @Accessor("destroyTarget") @Nullable LivingEntity accessor$destroyTarget();
+    @Accessor("destroyTarget") @Nullable EntityReference<LivingEntity> accessor$destroyTarget();
 
-    @Accessor("destroyTarget") void accessor$setDestroyTarget(@Nullable LivingEntity target);
+    @Accessor("destroyTarget") void accessor$setDestroyTarget(@Nullable EntityReference<LivingEntity> target);
 
 }

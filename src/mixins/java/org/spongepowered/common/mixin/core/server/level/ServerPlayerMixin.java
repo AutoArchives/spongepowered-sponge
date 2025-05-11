@@ -175,7 +175,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow private float lastSentHealth;
     @Shadow private int lastSentFood;
 
-    @Shadow public abstract ServerLevel shadow$serverLevel();
+    @Shadow public abstract ServerLevel shadow$level();
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
     @Shadow public abstract void shadow$doCloseContainer();
     @Shadow public abstract boolean shadow$setGameMode(GameType param0);
@@ -325,7 +325,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     public boolean bridge$keepInventory() {
-        return Objects.requireNonNullElseGet(this.impl$keepInventory, () -> this.shadow$serverLevel().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY));
+        return Objects.requireNonNullElseGet(this.impl$keepInventory, () -> this.shadow$level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY));
     }
 
     @Override
@@ -461,7 +461,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
 
         final var originalNewLevel = originalTransition.newLevel();
-        final var oldLevel = this.shadow$serverLevel();
+        final var oldLevel = this.shadow$level();
 
         // SpongeStart
         final var transition = this.impl$fireDimensionTransitionEvents(originalTransition, thisPlayer);
@@ -533,10 +533,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final net.minecraft.server.level.ServerPlayer thisPlayer
     ) {
         var transition = originalTransition;
-        var isDimensionChange = transition.newLevel() != thisPlayer.serverLevel();
+        var isDimensionChange = transition.newLevel() != thisPlayer.level();
 
         if (!this.impl$moveEventsFired) {
-            final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(thisPlayer.serverLevel());
+            final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(thisPlayer.level());
             final var contextToSwitchTo = EntityPhase.State.PORTAL_DIMENSION_CHANGE.createPhaseContext(phaseTracker).worldChange()
                 .player();
             final boolean hasMovementContext = phaseTracker.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
@@ -570,7 +570,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                         }
                     }
 
-                    final var reposition = this.bridge$fireRepositionEvent((ServerWorld) thisPlayer.serverLevel(), (ServerWorld) transition.newLevel(), originalDest);
+                    final var reposition = this.bridge$fireRepositionEvent((ServerWorld) thisPlayer.level(), (ServerWorld) transition.newLevel(), originalDest);
                     if (reposition.isCancelled()) {
                         return null; // we did not move yet so just return
                     }
@@ -959,7 +959,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
      */
     @Overwrite
     private boolean isPvpAllowed() {
-        return ((ServerWorld) this.shadow$serverLevel()).properties().pvp();
+        return ((ServerWorld) this.shadow$level()).properties().pvp();
     }
 
     /**
@@ -987,11 +987,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         if (playerRespawnDestination == null) {
             SpongeCommon.logger().warn("The player '{}' respawn location was located in a world that isn't loaded or doesn't exist. This is not safe so "
                                        + "the player will be moved to the spawn of the default world.", player.getGameProfile().getName());
-            playerRespawnDestination = player.server.overworld();
+            playerRespawnDestination = player.getServer().overworld();
         }
 
         final RespawnPlayerEvent.SelectWorld event = SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getInstance().currentCause(),
-            (ServerWorld) playerRespawnDestination, (ServerWorld) player.serverLevel(), (ServerWorld) playerRespawnDestination, (ServerPlayer) player);
+            (ServerWorld) playerRespawnDestination, (ServerWorld) player.level(), (ServerWorld) playerRespawnDestination, (ServerPlayer) player);
         SpongeCommon.post(event);
 
         this.impl$respawnLevel = (ServerLevel) event.destinationWorld();

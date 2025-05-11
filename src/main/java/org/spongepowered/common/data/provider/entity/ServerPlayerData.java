@@ -133,20 +133,20 @@ public final class ServerPlayerData {
         // should work without this on ServerSideConnectionEvent.Login
         if (h.level().getEntity(h.getId()) == h && !h.isRemoved()) {
             // Remove Entity
-            h.serverLevel().getChunkSource().removeEntity(h);
+            h.level().getChunkSource().removeEntity(h);
             // Remove from TabList
             h.getServer().getPlayerList().broadcastAll(new ClientboundPlayerInfoRemovePacket(List.of(h.getUUID())));
             // Add back to TabList
             h.getServer().getPlayerList().broadcastAll(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(h)));
             // Add Entity
-            h.serverLevel().getChunkSource().addEntity(h);
+            h.level().getChunkSource().addEntity(h);
             // Reconnect local player
-            final var commonSpawnInfo = h.createCommonSpawnInfo(h.serverLevel());
+            final var commonSpawnInfo = h.createCommonSpawnInfo(h.level());
             h.connection.send(new ClientboundRespawnPacket(commonSpawnInfo, (byte) 0));
             // tp - just in case
             h.connection.teleport(h.getX(), h.getY(), h.getZ(), h.getYRot(), h.getXRot());
             // resend remaining player data... (see ServerPlayer#changeDimension)
-            h.connection.send(new ClientboundChangeDifficultyPacket(h.serverLevel().getLevelData().getDifficulty(), h.serverLevel().getLevelData().isDifficultyLocked()));
+            h.connection.send(new ClientboundChangeDifficultyPacket(h.level().getLevelData().getDifficulty(), h.level().getLevelData().isDifficultyLocked()));
             h.connection.send(new ClientboundPlayerAbilitiesPacket(h.getAbilities()));
             final PlayerList playerList = h.getServer().getPlayerList();
             playerList.sendAllPlayerInfo(h);

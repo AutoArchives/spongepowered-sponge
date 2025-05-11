@@ -106,7 +106,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Shadow @Final private PlayerAdvancements advancements;
     @Shadow public ServerGamePacketListenerImpl connection;
 
-    @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$serverLevel();
+    @Shadow public abstract net.minecraft.server.level.@NonNull ServerLevel shadow$level();
     @Shadow public abstract void shadow$sendSystemMessage(final net.minecraft.network.chat.Component $$0);
 
     // @formatter:on
@@ -119,7 +119,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public ServerWorld world() {
-        return (ServerWorld) this.shadow$serverLevel();
+        return (ServerWorld) this.shadow$level();
     }
 
     @Override

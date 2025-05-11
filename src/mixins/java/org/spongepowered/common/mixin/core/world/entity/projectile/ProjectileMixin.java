@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.phys.HitResult;
@@ -48,13 +49,12 @@ import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 public abstract class ProjectileMixin extends EntityMixin {
 
     // @formatter:off
-    @Shadow protected abstract void shadow$onHit(HitResult result);
-    @Shadow public abstract void shadow$setOwner(@Nullable Entity p_212361_1_);
     @Shadow public abstract @Nullable Entity shadow$getOwner();
     @Shadow protected abstract ProjectileDeflection shadow$hitTargetOrDeflectSelf(HitResult result);
-    @Shadow protected abstract void onHit(HitResult result);
 
+    @Shadow @Nullable protected EntityReference<Entity> owner;
     // @formatter:on
+
     private ProjectileSource impl$projectileSource = UnknownProjectileSource.UNKNOWN;
 
     protected ProjectileSource impl$getProjectileSource() {
@@ -68,7 +68,7 @@ public abstract class ProjectileMixin extends EntityMixin {
         return this.impl$projectileSource;
     }
 
-    @Inject(method = "setOwner", at = @At("RETURN"))
+    @Inject(method = "setOwner(Lnet/minecraft/world/entity/Entity;)V", at = @At("RETURN"))
     private void impl$assignProjectileSource(final @Nullable Entity owner, final CallbackInfo ci) {
         this.impl$projectileSource = owner == null ? UnknownProjectileSource.UNKNOWN : (EntityProjectileSource) owner;
     }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.EntityReference;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.animal.AnimalAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -38,8 +39,8 @@ public final class AnimalData {
         registrator
                 .asMutable(AnimalAccessor.class)
                     .create(Keys.BREEDER)
-                        .get(AnimalAccessor::accessor$loveCause)
-                        .set(AnimalAccessor::accessor$loveCause);
+                        .get(a -> a.accessor$loveCause().getUUID())
+                        .set(((animalAccessor, uuid) -> animalAccessor.accessor$loveCause(new EntityReference<>(uuid))));
     }
     // @formatter:on
 }
