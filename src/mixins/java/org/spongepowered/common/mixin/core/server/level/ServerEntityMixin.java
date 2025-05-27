@@ -146,6 +146,7 @@ public abstract class ServerEntityMixin {
         // is the player itself, and we need to synchronize it to them.
         // In vanilla, it is not possible to ride player entities
         // so we never end up hitting this code path.
-        return this::shadow$broadcastAndSend;
+        // noinspection Convert2MethodRef https://github.com/SpongePowered/Mixin/issues/406
+        return p -> this.shadow$broadcastAndSend(p);
     }
 }
