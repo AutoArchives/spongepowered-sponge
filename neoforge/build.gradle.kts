@@ -1,12 +1,15 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import net.fabricmc.loom.api.LoomGradleExtensionAPI
+import net.neoforged.moddevgradle.dsl.NeoForgeExtension
+import org.spongepowered.gradle.impl.AWToAT
 
 buildscript {
     repositories {
         maven("https://repo.spongepowered.org/repository/maven-public") {
             name = "sponge"
         }
-        maven("https://maven.architectury.dev/")
+        maven("https://maven.neoforged.net/releases/") {
+            name = "neoforge"
+        }
     }
 }
 
@@ -14,7 +17,7 @@ plugins {
     alias(libs.plugins.shadow)
     id("implementation-structure")
     alias(libs.plugins.blossom)
-    id("dev.architectury.loom")
+    alias(libs.plugins.modDevGradle)
 }
 
 val commonProject = parent!!
@@ -41,6 +44,7 @@ repositories {
 }
 
 // SpongeNeo libraries
+val bootLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootLibraries")
 val serviceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceLibraries")
 val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLibraries")
 
@@ -49,26 +53,21 @@ val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = confi
 val serviceShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceShadedLibraries")
 val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameShadedLibraries")
 
-configurations.named("forgeRuntimeLibrary") {
-    extendsFrom(serviceLibrariesConfig.get())
-}
-
 // ModLauncher layers
+val bootLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootLayer") {
+    extendsFrom(bootLibrariesConfig.get())
+}
 val serviceLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceLayer") {
+    extendsFrom(bootLayerConfig.get())
     extendsFrom(serviceLibrariesConfig.get())
-    extendsFrom(configurations.getByName("forgeDependencies"))
 }
 val langLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("langLayer") {
-    extendsFrom(configurations.getByName("forgeDependencies"))
+    extendsFrom(bootLayerConfig.get())
 }
 val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLayer") {
     extendsFrom(serviceLayerConfig.get())
     extendsFrom(langLayerConfig.get())
     extendsFrom(gameLibrariesConfig.get())
-
-    afterEvaluate {
-        extendsFrom(configurations.getByName("minecraftNamedCompile"))
-    }
 }
 
 // SpongeCommon source sets
@@ -151,40 +150,68 @@ configurations.configureEach {
     }
 }
 
-extensions.configure(LoomGradleExtensionAPI::class) {
-    silentMojangMappingsLicense()
-    accessWidenerPath.set(file("../src/main/resources/common.accesswidener"))
+val awFiles: Set<File> = files(main.get().resources, forgeMain.resources).filter { it.name.endsWith(".accesswidener") }.files
+val atFile = project.layout.buildDirectory.file("generated/resources/at.cfg").get().asFile
+AWToAT.convert(awFiles, atFile)
 
-    mixin {
-        useLegacyMixinAp.set(false)
+val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
+
+extensions.configure(NeoForgeExtension::class) {
+    version = neoForgeVersion
+    accessTransformers.from(atFile)
+
+    runs {
+        configureEach {
+            // jvmArgument("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
+
+            programArguments.addAll(mixinConfigs.flatMap { sequenceOf("--mixin.config", it) })
+
+            disableIdeRun() // Source sets are broken
+        }
+
+        create("client") {
+            client()
+        }
+
+        create("server") {
+            server()
+            programArgument("--nogui")
+        }
     }
 
     mods {
-        named("main") {
+        create("applaunch") {
+            sourceSet(forgeAppLaunch)
+            sourceSet(applaunch.get())
+        }
+
+        create("lang") {
+            sourceSet(forgeLang)
+        }
+
+        create("main") {
+            sourceSet(forgeMain)
             sourceSet(forgeMixins)
             sourceSet(forgeAccessors)
             sourceSet(forgeLaunch)
 
-            sourceSet(main.get(), commonProject)
-            sourceSet(mixins.get(), commonProject)
-            sourceSet(accessors.get(), commonProject)
-            sourceSet(launch.get(), commonProject)
+            sourceSet(main.get())
+            sourceSet(mixins.get())
+            sourceSet(accessors.get())
+            sourceSet(launch.get())
+        }
 
-            configuration(gameManagedLibrariesConfig.get())
-            configuration(gameShadedLibrariesConfig.get())
+        testPluginsProject?.also {
+            create("testplugins") {
+                sourceSet(it.sourceSets.getByName("main"))
+            }
         }
     }
 }
 
-dependencies {
-    "minecraft"("com.mojang:minecraft:${minecraftVersion}")
-    "neoForge"("net.neoforged:neoforge:$neoForgeVersion")
-    "mappings"(loom.layered {
-        officialMojangMappings {
-            nameSyntheticMembers = true
-        }
-    })
+bootLibrariesConfig.get().extendsFrom(configurations.getByName("modDevCompileDependencies"))
 
+dependencies {
     val service = serviceLibrariesConfig.name
     service(apiLibs.pluginSpi)
     service(project(transformersProject.path)) {
@@ -213,13 +240,23 @@ dependencies {
     val gameShadedLibraries = gameShadedLibrariesConfig.name
     gameShadedLibraries("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
 
-    afterEvaluate {
-        spongeImpl.copyModulesExcludingProvided(serviceLibrariesConfig.get(), configurations.getByName("forgeDependencies"), serviceShadedLibrariesConfig.get())
-        spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), serviceLayerConfig.get(), gameManagedLibrariesConfig.get())
+    spongeImpl.copyModulesExcludingProvided(serviceLibrariesConfig.get(), bootLayerConfig.get(), serviceShadedLibrariesConfig.get())
+    spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), serviceLayerConfig.get(), gameManagedLibrariesConfig.get())
+}
 
-        "forgeRuntimeLibrary"(files(tasks.named("forgeServicesJar"), tasks.named("forgeLangJar")))
+// Put libs in game layer
+extensions.configure(NeoForgeExtension::class) {
+    val gameLibs: MutableList<File> = mutableListOf()
+    gameLibs.addAll(gameManagedLibrariesConfig.get())
+    gameLibs.addAll(gameShadedLibrariesConfig.get())
+    val resourcesEnv = gameLibs.joinToString(File.pathSeparator)
+    runs.configureEach {
+        jvmArgument("-Dsponge.resources=" + resourcesEnv)
     }
 }
+
+// Put libs in boot layer
+configurations.getByName("additionalRuntimeClasspath").extendsFrom(serviceShadedLibrariesConfig.get())
 
 val forgeManifest = java.manifest {
     attributes(
@@ -234,8 +271,6 @@ val forgeManifest = java.manifest {
     System.getenv()["GIT_COMMIT"]?.apply { attributes("Git-Commit" to this) }
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
-
-val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
 
 tasks {
     jar {
@@ -285,35 +320,6 @@ tasks {
         from(forgeAppLaunch.output)
 
         duplicatesStrategy = DuplicatesStrategy.WARN
-    }
-
-    afterEvaluate {
-        withType(net.fabricmc.loom.task.AbstractRunTask::class) {
-            // Tip: don't set classpath here, it is ignored by bootstrap-launcher
-            // Add boot jars into forgeRuntimeLibrary instead
-
-            testPluginsProject?.also {
-                val testPluginsOutput = it.sourceSets.getByName("main").output
-                val dirs: MutableList<File> = mutableListOf()
-                dirs.add(testPluginsOutput.resourcesDir!!)
-                dirs.addAll(testPluginsOutput.classesDirs)
-                environment["SPONGE_PLUGINS"] = dirs.joinToString("&")
-
-                dependsOn(it.tasks.classes)
-            }
-
-            argumentProviders += CommandLineArgumentProvider {
-                mixinConfigs.asSequence()
-                        .flatMap { sequenceOf("--mixin.config", it) }
-                        .toList()
-            }
-
-            // jvmArguments.add("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
-
-            sourceSets.forEach {
-                dependsOn(it.classesTaskName)
-            }
-        }
     }
 
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
