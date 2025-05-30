@@ -45,44 +45,43 @@ repositories {
 }
 
 // SpongeNeo libraries
-val bootLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootLibraries")
-val serviceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceLibraries")
-val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLibraries")
+val bootLibrariesConfig = configurations.register("bootLibraries")
+val serviceLibrariesConfig = configurations.register("serviceLibraries")
+val gameLibrariesConfig = configurations.register("gameLibraries")
 
-val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameManagedLibraries")
+val gameManagedLibrariesConfig = configurations.register("gameManagedLibraries")
 
-val serviceShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceShadedLibraries")
-val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameShadedLibraries")
+val serviceShadedLibrariesConfig = configurations.register("serviceShadedLibraries")
+val gameShadedLibrariesConfig = configurations.register("gameShadedLibraries")
 
 // ModLauncher layers
-val bootLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootLayer") {
+val bootLayerConfig = configurations.register("bootLayer") {
     extendsFrom(bootLibrariesConfig.get())
 }
-val serviceLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceLayer") {
+val serviceLayerConfig = configurations.register("serviceLayer") {
     extendsFrom(bootLayerConfig.get())
     extendsFrom(serviceLibrariesConfig.get())
 }
-val langLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("langLayer") {
+val langLayerConfig = configurations.register("langLayer") {
     extendsFrom(bootLayerConfig.get())
 }
-val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLayer") {
+val gameLayerConfig = configurations.register("gameLayer") {
     extendsFrom(serviceLayerConfig.get())
     extendsFrom(langLayerConfig.get())
     extendsFrom(gameLibrariesConfig.get())
 }
 
 // SpongeCommon source sets
-val launchConfig: NamedDomainObjectProvider<Configuration> = commonProject.configurations.named("launch")
-val accessors: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("accessors")
-val launch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("launch")
-val applaunch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("applaunch")
-val mixins: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("mixins")
-val main: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("main")
+val commonAccessors = commonProject.sourceSets.named("accessors")
+val commonLaunch = commonProject.sourceSets.named("launch")
+val commonAppLaunch = commonProject.sourceSets.named("applaunch")
+val commonMixins = commonProject.sourceSets.named("mixins")
+val commonMain = commonProject.sourceSets.named("main")
 
 // SpongeNeo source sets
 // Service layer
-val forgeAppLaunch by sourceSets.register("applaunch") {
-    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
+val appLaunch by sourceSets.register("applaunch") {
+    spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(serviceLayerConfig.get())
@@ -90,54 +89,54 @@ val forgeAppLaunch by sourceSets.register("applaunch") {
 }
 
 // Lang layer
-val forgeLang by sourceSets.register("lang") {
+val lang by sourceSets.register("lang") {
     configurations.named(implementationConfigurationName) {
         extendsFrom(langLayerConfig.get())
     }
 }
 
 // Game layer
-val forgeLaunch by sourceSets.register("launch") {
-    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(launch.get(), this)
-    spongeImpl.addDependencyToImplementation(main.get(), this)
-    spongeImpl.addDependencyToImplementation(forgeAppLaunch, this)
+val launch by sourceSets.register("launch") {
+    spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(commonMain.get(), this)
+    spongeImpl.addDependencyToImplementation(appLaunch, this)
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(gameLayerConfig.get())
     }
 }
-val forgeAccessors by sourceSets.register("accessors") {
-    spongeImpl.addDependencyToImplementation(accessors.get(), this)
+val accessors by sourceSets.register("accessors") {
+    spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(gameLayerConfig.get())
     }
 }
-val forgeMixins by sourceSets.register("mixins") {
-    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(launch.get(), this)
-    spongeImpl.addDependencyToImplementation(accessors.get(), this)
-    spongeImpl.addDependencyToImplementation(mixins.get(), this)
-    spongeImpl.addDependencyToImplementation(main.get(), this)
-    spongeImpl.addDependencyToImplementation(forgeAppLaunch, this)
-    spongeImpl.addDependencyToImplementation(forgeLaunch, this)
-    spongeImpl.addDependencyToImplementation(forgeAccessors, this)
+val mixins by sourceSets.register("mixins") {
+    spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
+    spongeImpl.addDependencyToImplementation(commonMixins.get(), this)
+    spongeImpl.addDependencyToImplementation(commonMain.get(), this)
+    spongeImpl.addDependencyToImplementation(appLaunch, this)
+    spongeImpl.addDependencyToImplementation(launch, this)
+    spongeImpl.addDependencyToImplementation(accessors, this)
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(gameLayerConfig.get())
     }
 }
-val forgeMain by sourceSets.named("main") {
-    spongeImpl.addDependencyToImplementation(applaunch.get(), this)
-    spongeImpl.addDependencyToImplementation(launch.get(), this)
-    spongeImpl.addDependencyToImplementation(accessors.get(), this)
-    spongeImpl.addDependencyToImplementation(main.get(), this)
-    spongeImpl.addDependencyToImplementation(forgeAppLaunch, this)
-    spongeImpl.addDependencyToImplementation(forgeLaunch, this)
-    spongeImpl.addDependencyToImplementation(forgeAccessors, this)
+val main by sourceSets.named("main") {
+    spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
+    spongeImpl.addDependencyToImplementation(commonMain.get(), this)
+    spongeImpl.addDependencyToImplementation(appLaunch, this)
+    spongeImpl.addDependencyToImplementation(launch, this)
+    spongeImpl.addDependencyToImplementation(accessors, this)
 
-    spongeImpl.addDependencyToImplementation(this, forgeMixins)
+    spongeImpl.addDependencyToImplementation(this, mixins)
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(gameLayerConfig.get())
@@ -151,7 +150,7 @@ configurations.configureEach {
     }
 }
 
-val awFiles: Set<File> = files(main.get().resources, forgeMain.resources).filter { it.name.endsWith(".accesswidener") }.files
+val awFiles: Set<File> = files(commonMain.get().resources, main.resources).filter { it.name.endsWith(".accesswidener") }.files
 val atFile = project.layout.buildDirectory.file("generated/resources/at.cfg").get().asFile
 AWToAT.convert(awFiles, atFile)
 
@@ -182,24 +181,24 @@ extensions.configure(NeoForgeExtension::class) {
 
     mods {
         create("applaunch") {
-            sourceSet(forgeAppLaunch)
-            sourceSet(applaunch.get())
+            sourceSet(appLaunch)
+            sourceSet(commonAppLaunch.get())
         }
 
         create("lang") {
-            sourceSet(forgeLang)
+            sourceSet(lang)
         }
 
         create("main") {
-            sourceSet(forgeMain)
-            sourceSet(forgeMixins)
-            sourceSet(forgeAccessors)
-            sourceSet(forgeLaunch)
+            sourceSet(main)
+            sourceSet(mixins)
+            sourceSet(accessors)
+            sourceSet(launch)
 
-            sourceSet(main.get())
-            sourceSet(mixins.get())
-            sourceSet(accessors.get())
-            sourceSet(launch.get())
+            sourceSet(commonMain.get())
+            sourceSet(commonMixins.get())
+            sourceSet(commonAccessors.get())
+            sourceSet(commonLaunch.get())
         }
 
         testPluginsProject?.also {
@@ -259,7 +258,7 @@ extensions.configure(NeoForgeExtension::class) {
 // Put libs in boot layer
 configurations.getByName("additionalRuntimeClasspath").extendsFrom(serviceShadedLibrariesConfig.get())
 
-val forgeManifest = java.manifest {
+val neoManifest = java.manifest {
     attributes(
             "Specification-Title" to "SpongeNeo",
             "Specification-Vendor" to "SpongePowered",
@@ -273,62 +272,62 @@ val forgeManifest = java.manifest {
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
 
+sourceSets {
+    main {
+        blossom.resources {
+            property("apiVersion", apiVersion)
+            property("version", version.toString())
+            property("description", description.toString())
+            property("neoForgeVersion", neoForgeVersion)
+        }
+    }
+
+    configureEach {
+        val sourceSet = this
+        if (sourceSet.name != "main") {
+            tasks.register(sourceSet.name + "Jar", Jar::class.java) {
+                group = "build"
+                archiveClassifier.set(sourceSet.name)
+                manifest.from(neoManifest)
+                from(sourceSet.output)
+            }
+        }
+    }
+}
+
 tasks {
     withType(RunGameTask::class) {
         standardInput = System.`in`
     }
 
     jar {
-        manifest.from(forgeManifest)
-    }
-    val forgeAppLaunchJar by registering(Jar::class) {
-        archiveClassifier.set("applaunch")
-        manifest.from(forgeManifest)
-        from(forgeAppLaunch.output)
-    }
-    val forgeLaunchJar by registering(Jar::class) {
-        archiveClassifier.set("launch")
-        manifest.from(forgeManifest)
-        from(forgeLaunch.output)
-    }
-    val forgeAccessorsJar by registering(Jar::class) {
-        archiveClassifier.set("accessors")
-        manifest.from(forgeManifest)
-        from(forgeAccessors.output)
-    }
-    val forgeMixinsJar by registering(Jar::class) {
-        archiveClassifier.set("mixins")
-        manifest.from(forgeManifest)
-        from(forgeMixins.output)
-    }
-    val forgeLangJar by registering(Jar::class) {
-        archiveClassifier.set("lang")
-        manifest {
-            from(forgeManifest)
-            attributes(
-                "Automatic-Module-Name" to "spongeneo.lang",
-                "FMLModType" to "LIBRARY"
-            )
-        }
-        from(forgeLang.output)
+        manifest.from(neoManifest)
     }
 
-    val forgeServicesJar by registering(Jar::class) {
+    val langJar by existing(Jar::class) {
+        manifest.attributes(
+            "Automatic-Module-Name" to "spongeneo.lang",
+            "FMLModType" to "LIBRARY"
+        )
+    }
+
+    val servicesJar by registering(Jar::class) {
+        group = "build"
         archiveClassifier.set("services")
 
         manifest {
-            from(forgeManifest)
+            from(neoManifest)
             attributes("Automatic-Module-Name" to "spongeneo.services")
         }
 
-        from(commonProject.sourceSets.named("applaunch").map { it.output })
-        from(forgeAppLaunch.output)
+        from(commonAppLaunch.map { it.output })
+        from(appLaunch.output)
 
         duplicatesStrategy = DuplicatesStrategy.WARN
     }
 
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
-    forgeAppLaunch.resources.srcDir(installerResources)
+    appLaunch.resources.srcDir(installerResources)
 
     val emitDependencies by registering(org.spongepowered.gradle.impl.OutputDependenciesToJson::class) {
         group = "sponge"
@@ -337,11 +336,12 @@ tasks {
 
         outputFile.set(installerResources.map { it.file("sponge-libraries.json") })
     }
-    named(forgeAppLaunch.processResourcesTaskName).configure {
+
+    named(appLaunch.processResourcesTaskName) {
         dependsOn(emitDependencies)
     }
 
-    val forgeServicesShadowJar by register("servicesShadowJar", ShadowJar::class) {
+    val servicesShadowJar by register("servicesShadowJar", ShadowJar::class) {
         group = "shadow"
         archiveClassifier.set("services")
 
@@ -350,15 +350,15 @@ tasks {
         exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "**/module-info.class")
 
         manifest {
-            from(forgeManifest)
+            from(neoManifest)
             attributes(
                 "Automatic-Module-Name" to "spongeneo.services",
                 "Multi-Release" to true
             )
         }
 
-        from(commonProject.sourceSets.named("applaunch").map { it.output })
-        from(forgeAppLaunch.output)
+        from(commonAppLaunch.map { it.output })
+        from(appLaunch.output)
 
         // Make sure to relocate access widener so that we don't conflict with other coremods
         relocate("net.fabricmc.accesswidener", "org.spongepowered.neoforge.libs.accesswidener")
@@ -372,55 +372,44 @@ tasks {
         configurations = listOf(gameShadedLibrariesConfig.get())
 
         manifest {
+            from(neoManifest)
             attributes(
                 "Access-Widener" to "common.accesswidener",
                 "Superclass-Transformer" to "common.superclasschange,neoforge.superclasschange",
                 "MixinConfigs" to mixinConfigs.joinToString(",")
             )
-            from(forgeManifest)
         }
 
-        from(commonProject.sourceSets.main.map { it.output })
-        from(commonProject.sourceSets.named("mixins").map {it.output })
-        from(commonProject.sourceSets.named("accessors").map {it.output })
-        from(commonProject.sourceSets.named("launch").map {it.output })
+        from(commonMain.map { it.output })
+        from(commonMixins.map { it.output })
+        from(commonAccessors.map { it.output })
+        from(commonLaunch.map { it.output })
 
-        from(forgeLaunch.output)
-        from(forgeAccessors.output)
-        from(forgeMixins.output)
+        from(launch.output)
+        from(accessors.output)
+        from(mixins.output)
     }
 
     val universalJar = register("universalJar", Jar::class) {
         group = "build"
         archiveClassifier.set("universal")
 
-        manifest.from(forgeServicesShadowJar.manifest)
+        manifest.from(servicesShadowJar.manifest)
 
-        from(forgeServicesShadowJar.archiveFile.map { zipTree(it) })
-        mustRunAfter(forgeServicesJar)
+        from(servicesShadowJar.archiveFile.map { zipTree(it) })
+        mustRunAfter(servicesJar)
 
         into("jars") {
             from(shadowJar)
             rename("spongeneo-(.*)-mod.jar", "spongeneo-mod.jar")
 
-            from(forgeLangJar)
+            from(langJar)
             rename("spongeneo-(.*)-lang.jar", "spongeneo-lang.jar")
         }
     }
 
     assemble {
         dependsOn(universalJar)
-    }
-}
-
-sourceSets {
-    main {
-        blossom.resources {
-            property("apiVersion", apiVersion)
-            property("version", version.toString())
-            property("description", description.toString())
-            property("neoForgeVersion", neoForgeVersion)
-        }
     }
 }
 
@@ -432,19 +421,19 @@ publishing {
             artifact(tasks["jar"])
             artifact(tasks["sourcesJar"])
 
-            artifact(tasks["forgeLangJar"])
+            artifact(tasks["langJar"])
             artifact(tasks["langSourcesJar"])
 
-            artifact(tasks["forgeMixinsJar"])
+            artifact(tasks["mixinsJar"])
             artifact(tasks["mixinsSourcesJar"])
 
-            artifact(tasks["forgeAccessorsJar"])
+            artifact(tasks["accessorsJar"])
             artifact(tasks["accessorsSourcesJar"])
 
-            artifact(tasks["forgeLaunchJar"])
+            artifact(tasks["launchJar"])
             artifact(tasks["launchSourcesJar"])
 
-            artifact(tasks["forgeAppLaunchJar"])
+            artifact(tasks["applaunchJar"])
             artifact(tasks["applaunchSourcesJar"])
 
             pom {
