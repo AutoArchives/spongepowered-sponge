@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.neoforged.moddevgradle.dsl.NeoForgeExtension
+import net.neoforged.moddevgradle.internal.RunGameTask
 import org.spongepowered.gradle.impl.AWToAT
 
 buildscript {
@@ -273,6 +274,10 @@ val forgeManifest = java.manifest {
 }
 
 tasks {
+    withType(RunGameTask::class) {
+        standardInput = System.`in`
+    }
+
     jar {
         manifest.from(forgeManifest)
     }

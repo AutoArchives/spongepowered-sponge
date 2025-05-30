@@ -1,5 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import net.minecraftforge.gradle.common.util.RunConfig
 import net.minecraftforge.gradle.userdev.UserDevExtension
+import org.gradle.api.tasks.JavaExec
 import org.gradle.internal.DefaultTaskExecutionRequest
 import org.spongepowered.gradle.impl.AWToAT
 import org.spongepowered.gradle.impl.IdeHelper
@@ -271,6 +273,12 @@ val forgeManifest = java.manifest {
 }
 
 tasks {
+    withType(JavaExec::class) {
+        if (group == RunConfig.RUNS_GROUP) {
+            standardInput = System.`in`
+        }
+    }
+
     jar {
         manifest.from(forgeManifest)
     }
