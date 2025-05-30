@@ -311,21 +311,6 @@ tasks {
         )
     }
 
-    val servicesJar by registering(Jar::class) {
-        group = "build"
-        archiveClassifier.set("services")
-
-        manifest {
-            from(neoManifest)
-            attributes("Automatic-Module-Name" to "spongeneo.services")
-        }
-
-        from(commonAppLaunch.map { it.output })
-        from(appLaunch.output)
-
-        duplicatesStrategy = DuplicatesStrategy.WARN
-    }
-
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
     appLaunch.resources.srcDir(installerResources)
 
@@ -397,7 +382,6 @@ tasks {
         manifest.from(servicesShadowJar.manifest)
 
         from(servicesShadowJar.archiveFile.map { zipTree(it) })
-        mustRunAfter(servicesJar)
 
         into("jars") {
             from(shadowJar)
