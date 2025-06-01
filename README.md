@@ -15,19 +15,19 @@ The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms
 
 [![SpongeVanilla Latest](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
 
-[![SpongeVanilla 1.21.1](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=1.21.1&queryOpt=%3Aversion%3D1.21.1*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.1*)
+[![SpongeVanilla 1.21.3](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=1.21.3&queryOpt=%3Aversion%3D1.21.3*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.3*)
 
 ### SpongeForge
 
 [![SpongeForge Latest](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeforge?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeforge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
 
-[![SpongeForge 1.21.1](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeforge?label=1.21.1&queryOpt=%3Aversion%3D1.21.1*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeforge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.1*)
+[![SpongeForge 1.21.3](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeforge?label=1.21.3&queryOpt=%3Aversion%3D1.21.3*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeforge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.3*)
 
 ### SpongeNeo
 
 [![SpongeNeo Latest](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeneo?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeneo%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
 
-[![SpongeNeo 1.21.1](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeneo?label=1.21.1&queryOpt=%3Aversion%3D1.21.1*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeneo%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.1*)
+[![SpongeNeo 1.21.3](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeneo?label=1.21.3&queryOpt=%3Aversion%3D1.21.3*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeneo%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.3*)
 
 
 ## Prerequisites
@@ -42,7 +42,7 @@ The following steps will ensure your project is cloned properly.
 
 ## Setup
 **Note**: Sponge uses [Gradle] as its build system. The repo includes the Gradle wrapper that will automatically download the correct Gradle 
-version. Local installations of Gradle may work (as long as they are using Gradle 8.7+) but are untested. To execute the Gradle wrapper, run the 
+version. Local installations of Gradle may work (as long as they are using Gradle 8.8+) but are untested. To execute the Gradle wrapper, run the 
 `./gradlew` script on Unix systems or only `gradlew` on Windows systems.
 
 To have browsable sources for use in-IDE, run `./gradlew :decompile`. This command will need to be re-ran after any change to
