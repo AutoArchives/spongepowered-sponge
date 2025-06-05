@@ -8,10 +8,12 @@ import org.spongepowered.gradle.impl.IdeHelper
 
 buildscript {
     repositories {
-        maven("https://repo.spongepowered.org/repository/maven-public") {
+        maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
-        maven("https://maven.minecraftforge.net/")
+        maven("https://maven.minecraftforge.net/") {
+            name = "forge"
+        }
     }
 }
 

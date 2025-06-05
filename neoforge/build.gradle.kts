@@ -5,7 +5,7 @@ import org.spongepowered.gradle.impl.AWToAT
 
 buildscript {
     repositories {
-        maven("https://repo.spongepowered.org/repository/maven-public") {
+        maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
         maven("https://maven.neoforged.net/releases/") {
@@ -38,9 +38,6 @@ version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVer
 repositories {
     maven("https://repo.spongepowered.org/repository/maven-public/") {
         name = "sponge"
-    }
-    maven("https://maven.neoforged.net/releases/") {
-        name = "neoforge"
     }
 }
 
