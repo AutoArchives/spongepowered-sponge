@@ -129,7 +129,7 @@ public final class SpongeBiomeBuilder implements Biome.Builder {
         ambientSound.ifPresent(s -> effectsBuilder.ambientLoopSound(Holder.direct((SoundEvent) (Object) s)));
         ambientMood.ifPresent(m -> effectsBuilder.ambientMoodSound((net.minecraft.world.level.biome.AmbientMoodSettings) m));
         additionalSound.ifPresent(s -> effectsBuilder.ambientAdditionsSound((AmbientAdditionsSettings) s));
-        backgroundMusic.ifPresent(m -> effectsBuilder.backgroundMusic((Music) m));
+        backgroundMusic.ifPresent(m -> effectsBuilder.backgroundMusic((Music) (Object) m));
 
         final MobSpawnSettings.Builder spawnerBuilder = new MobSpawnSettings.Builder()
             .creatureGenerationProbability(spawnChance.floatValue());

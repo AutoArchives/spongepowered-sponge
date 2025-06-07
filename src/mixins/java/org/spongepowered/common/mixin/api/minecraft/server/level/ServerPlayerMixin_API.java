@@ -289,7 +289,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             this.connection.send(new ClientboundInitializeBorderPacket(mutableWorldBorder));
         } else { // unset the border if null
             ((ServerPlayerBridge) this).bridge$replaceWorldBorder(null);
-            this.connection.send(new ClientboundInitializeBorderPacket(this.shadow$getCommandSenderWorld().getWorldBorder()));
+            this.connection.send(new ClientboundInitializeBorderPacket(this.shadow$level().getWorldBorder()));
         }
         return toSet;
 

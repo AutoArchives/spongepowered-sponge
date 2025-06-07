@@ -146,7 +146,7 @@ public abstract class TeleportCommandMixin {
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                     frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
 
-                    final ServerLevel fromWorld = (ServerLevel) entityIn.getCommandSenderWorld();
+                    final ServerLevel fromWorld = (ServerLevel) entityIn.level();
 
                     final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(entityIn,
                             worldIn);
@@ -157,7 +157,7 @@ public abstract class TeleportCommandMixin {
                     final ChangeEntityWorldEvent.Reposition posEvent =
                             SpongeEventFactory.createChangeEntityWorldEventReposition(frame.currentCause(),
                                     (org.spongepowered.api.entity.Entity) entityIn,
-                                    (org.spongepowered.api.world.server.ServerWorld) entityIn.getCommandSenderWorld(),
+                                    (org.spongepowered.api.world.server.ServerWorld) entityIn.level(),
                                     VecHelper.toVector3d(entityIn.position()), new Vector3d(x, y, z), preEvent.originalDestinationWorld(),
                                     new Vector3d(x, y, z), preEvent.destinationWorld());
 

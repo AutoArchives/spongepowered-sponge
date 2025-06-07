@@ -30,7 +30,6 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
@@ -98,8 +97,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract double shadow$getX();
     @Shadow public abstract double shadow$getY();
     @Shadow public abstract double shadow$getZ();
-    @Shadow public abstract Level shadow$getCommandSenderWorld();
-    @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract boolean shadow$isRemoved();
     @Shadow public abstract UUID shadow$getUUID();
     @Shadow public abstract boolean shadow$hurtOrSimulate(DamageSource source, float amount);
@@ -135,7 +132,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public ServerLocation location() {
-        return ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.shadow$getCommandSenderWorld(), this.position());
+        return ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.shadow$level(), this.position());
     }
 
     @Override
@@ -310,7 +307,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             output.putString("id", entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()).toString());
             this.shadow$saveWithoutId(output);
             final var input = TagValueInput.create(ProblemReporter.DISCARDING, this.level.registryAccess(), output.buildResult());
-            final @Nullable Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(input, this.shadow$getCommandSenderWorld(), EntitySpawnReason.COMMAND,
+            final @Nullable Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(input, this.shadow$level(), EntitySpawnReason.COMMAND,
                 (createdEntity) -> {
                     createdEntity.setUUID(UUID.randomUUID());
                     return createdEntity;

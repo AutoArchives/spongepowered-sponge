@@ -46,6 +46,6 @@ public class SpongeSoundConfigFactory implements SoundConfig.Factory {
 
     @Override
     public SoundConfig.BackgroundMusic ofBackroundMusic(final SoundType sound, final int minDelay, final int maxDelay, final boolean replacesCurrent) {
-        return (SoundConfig.BackgroundMusic) new Music(Holder.direct((SoundEvent) (Object) sound), minDelay, maxDelay, replacesCurrent);
+        return (SoundConfig.BackgroundMusic) (Object) new Music(Holder.direct((SoundEvent) (Object) sound), minDelay, maxDelay, replacesCurrent);
     }
 }

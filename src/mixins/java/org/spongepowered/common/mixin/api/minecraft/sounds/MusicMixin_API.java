@@ -30,10 +30,14 @@ import net.minecraft.sounds.SoundEvent;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.world.biome.ambient.SoundConfig;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Music.class)
+@Implements(@Interface(iface = SoundConfig.BackgroundMusic.class, prefix = "api$", remap = Interface.Remap.NONE))
 public abstract class MusicMixin_API implements SoundConfig.BackgroundMusic {
 
     // @formatter:off
@@ -48,18 +52,17 @@ public abstract class MusicMixin_API implements SoundConfig.BackgroundMusic {
         return (SoundType) (Object) this.event.value();
     }
 
-    @Override
-    public int minDelay() {
+    @Intrinsic
+    public int api$minDelay() {
         return this.minDelay;
     }
 
-    @Override
-    public int maxDelay() {
+    @Intrinsic
+    public int api$maxDelay() {
         return this.maxDelay;
     }
 
-    @Override
-    public boolean replacesCurrent() {
+    public boolean api$replacesCurrent() {
         return this.replaceCurrentMusic;
     }
 }

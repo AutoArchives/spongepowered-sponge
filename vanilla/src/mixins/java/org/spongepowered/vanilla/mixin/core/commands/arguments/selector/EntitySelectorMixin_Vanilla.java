@@ -24,22 +24,18 @@
  */
 package org.spongepowered.vanilla.mixin.core.commands.arguments.selector;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
-import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(EntitySelector.class)
 public abstract class EntitySelectorMixin_Vanilla {
 
-    @WrapOperation(method = "checkPermissions", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/CommandSourceStack;hasPermission(I)Z"))
-    private boolean vanilla$onCheckSelectorPermission(final CommandSourceStack instance, final int $$0, final Operation<Boolean> original) {
-        if (EntitySelectorParser.allowSelectors(instance)) {
-            return true;
-        }
-        return original.call(instance, $$0);
-    }
+    // TODO - 25w20a changes
+//    @WrapOperation(method = "checkPermissions", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/CommandSourceStack;hasPermission(I)Z"))
+//    private boolean vanilla$onCheckSelectorPermission(final CommandSourceStack instance, final int $$0, final Operation<Boolean> original) {
+//        if (EntitySelectorParser.allowSelectors(instance)) {
+//            return true;
+//        }
+//        return original.call(instance, $$0);
+//    }
 }

@@ -45,7 +45,7 @@ public final class WitherData {
                 .asMutable(WitherBoss.class)
                     .create(Keys.WITHER_TARGETS)
                         .get(h -> Stream.of(h.getAlternativeTarget(0), h.getAlternativeTarget(1), h.getAlternativeTarget(2))
-                                .map(id -> h.getCommandSenderWorld().getEntity(id))
+                                .map(id -> h.level().getEntity(id))
                                 // TODO filter null?                .filter(Objects::nonNull)
                                 .map(org.spongepowered.api.entity.Entity.class::cast)
                                 .collect(Collectors.toList())

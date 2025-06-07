@@ -292,7 +292,7 @@ public final class PhaseTracker implements CauseStackManager {
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpongeSpawnTypes.FORCED);
                         for (final Entity entity : entities) {
                             // At this point, we don't care what the causes are...
-                            entity.getCommandSenderWorld().addFreshEntity(entity);
+                            entity.level().addFreshEntity(entity);
                         }
                     }
 
