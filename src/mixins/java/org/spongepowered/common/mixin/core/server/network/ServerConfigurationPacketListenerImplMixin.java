@@ -183,7 +183,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
     }
 
     @Inject(method = "handleConfigurationFinished", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/players/PlayerList;getPlayerForLogin(Lcom/mojang/authlib/GameProfile;Lnet/minecraft/server/level/ClientInformation;)Lnet/minecraft/server/level/ServerPlayer;"))
+            target = "Lnet/minecraft/server/players/PlayerList;getPlayer(Ljava/util/UUID;)Lnet/minecraft/server/level/ServerPlayer;"))
     private void impl$sendChannels(final CallbackInfo ci) {
         ((SpongeChannelManager) SpongeCommon.game().channelManager()).sendChannelRegistrations(
                 ((ConnectionBridge) this.connection).bridge$getEngineConnection());

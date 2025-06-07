@@ -87,7 +87,7 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
     private Map<UUID, ResourcePackCallback> impl$resourcePackCallbacks = new ConcurrentHashMap<>();
 
     @ModifyVariable(
-            method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V",
+            method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;)V",
             at = @At("HEAD"),
             argsOnly = true
     )

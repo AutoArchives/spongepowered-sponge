@@ -128,7 +128,7 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
     @SuppressWarnings("MixinAnnotationTarget")
     @Inject(method = "applyItemBlocking", at = {
         @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"), // Vanilla and Forge
-        @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;FI)V") // Neo
+        @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V") // Neo
     })
     private void damage$onHurtShield(final CallbackInfoReturnable<Boolean> cir) {
         this.damage$inventoryChanged = true;

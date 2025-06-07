@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.network.channel;
 
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import net.minecraft.network.Connection;
-import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.util.thread.BlockableEventLoop;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -59,7 +60,7 @@ public final class PacketSender {
         });
     }
 
-    public static final class SpongePacketSendListener implements PacketSendListener {
+    public static final class SpongePacketSendListener implements ChannelFutureListener {
         private final BlockableEventLoop<?> executor;
         private final Consumer<@Nullable  Throwable> listener;
 
@@ -70,6 +71,15 @@ public final class PacketSender {
 
         public void accept(final @Nullable Throwable throwable) {
             this.executor.execute(() -> this.listener.accept(throwable));
+        }
+
+        @Override
+        public void operationComplete(ChannelFuture future) {
+            this.executor.execute(() -> {
+                if (!future.isSuccess()) {
+                    this.listener.accept(future.cause());
+                }
+            });
         }
     }
 

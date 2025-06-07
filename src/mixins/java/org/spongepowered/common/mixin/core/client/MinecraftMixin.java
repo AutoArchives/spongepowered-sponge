@@ -112,8 +112,8 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         this.singleplayerServer = null;
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("TAIL"))
-    private void impl$nullServerRefAndPhaseTracker(Screen screenIn, CallbackInfo ci) {
+    @Inject(method = "disconnect", at = @At("TAIL"))
+    private void impl$nullServerRefAndPhaseTracker(Screen screenIn, boolean keepResourcePacks, CallbackInfo ci) {
         ((MinecraftBridge) this).bridge$setTemporaryIntegratedServer(null);
         try {
             PhaseTracker.getServerInstanceExplicitly().setThread(null);

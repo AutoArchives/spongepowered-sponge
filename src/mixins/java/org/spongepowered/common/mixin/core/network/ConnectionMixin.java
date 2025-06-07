@@ -27,12 +27,12 @@ package org.spongepowered.common.mixin.core.network;
 import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketListener;
-import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
@@ -163,10 +163,11 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         this.impl$version = new SpongeMinecraftVersion(String.valueOf(version), version);
     }
 
-    @Redirect(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)V",
+    @SuppressWarnings("unchecked")
+    @Redirect(method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V",
         at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
-    private boolean impl$onQueue(final Queue instance, final Object consumer,
-                                 final Packet<?> $$0, final @Nullable PacketSendListener $$1, final boolean $$2) {
+    private <E> boolean impl$onQueue(final Queue<Consumer<Connection>> instance, final E consumer,
+                                 final Packet<?> $$0, final @Nullable ChannelFutureListener $$1, final boolean $$2) {
         if (this.impl$disconnected) {
             if ($$1 instanceof final PacketSender.SpongePacketSendListener spongeListener) {
                 spongeListener.accept(new IOException("Connection has been closed."));
@@ -188,7 +189,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
                 }
             });
         } else {
-            result = instance.add(consumer);
+            result = instance.add((Consumer<Connection>) consumer);
         }
 
         if (this.impl$disconnected) {
