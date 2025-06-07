@@ -823,6 +823,8 @@ public final class SpongeAdventure {
             case PLAYERS -> Sound.Source.PLAYER;
             case AMBIENT -> Sound.Source.AMBIENT;
             case VOICE -> Sound.Source.VOICE;
+            // TODO - for now just use master
+            case UI -> Sound.Source.MASTER;
         };
     }
 
