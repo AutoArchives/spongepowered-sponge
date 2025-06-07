@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
@@ -54,8 +56,10 @@ import java.util.stream.Stream;
 @Mixin(ServerEntity.class)
 public abstract class ServerEntityMixin {
 
+    // @formatter:off
     @Shadow @Final private Entity entity;
     @Shadow @Final @Mutable private Consumer<Packet<?>> broadcast;
+    // @formatter:on
 
     /**
      * @author gabizou
@@ -133,4 +137,15 @@ public abstract class ServerEntityMixin {
         return packed;
     }
 
+    @WrapOperation(method = "sendChanges", at = @At(value = "INVOKE", target = "Ljava/util/function/BiConsumer;accept(Ljava/lang/Object;Ljava/lang/Object;)V"))
+    private void impl$sendSetPassengersToSelf(final BiConsumer<?, ?> instance, final Object packet, final Object ignored, final Operation<Void> original) {
+        // When passengers are removed from a player entity, the target
+        // is the player itself, and we need to synchronize it to them.
+        // In vanilla, it is not possible to ride player entities
+        // so we never end up hitting this code path.
+        original.call(instance, packet, ignored);
+        if (this.entity instanceof final ServerPlayer player) {
+            player.connection.send((Packet<?>) packet);
+        }
+    }
 }

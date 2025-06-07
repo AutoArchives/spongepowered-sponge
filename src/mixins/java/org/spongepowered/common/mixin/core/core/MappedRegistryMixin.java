@@ -166,10 +166,8 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     @Inject(method = "freeze", at = @At(value = "FIELD", target = "Lnet/minecraft/core/MappedRegistry;frozen:Z", opcode = Opcodes.PUTFIELD))
     private void impl$onFreeze(final CallbackInfoReturnable<Registry<T>> cir) {
         this.impl$dependencies.forEach(t -> {
-            final Optional<? extends org.spongepowered.api.registry.Registry<?>> registry = this.impl$registryHolder.findRegistry(t);
-            final var accessor = registry.map(r -> ((MappedRegistryAccessor<?>) r));
-            final var isFrozen = accessor.map(MappedRegistryAccessor::accessor$frozen);
-            if (!isFrozen
+            if (!this.impl$registryHolder.findRegistry(t)
+                .map(r -> ((MappedRegistryAccessor<?>) r).accessor$frozen())
                 .orElse(false)) {
                 throw new ValueNotFoundException(String.format("Dependency %s was not found!", t));
             }
@@ -186,7 +184,7 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     @Override
     public void bridge$addDependencies(final Supplier<InitialRegistryData<T>> supplier, final RegistryType<?>... dependencies) {
         if (Arrays.stream(dependencies).allMatch(d -> this.impl$registryHolder.findRegistry(d)
-            .map(r -> ((MappedRegistryMixin<?>) r).frozen)
+            .map(r -> ((MappedRegistryAccessor<?>) r).accessor$frozen())
             .orElse(false))) {
             this.impl$appendRegister(supplier);
             return;

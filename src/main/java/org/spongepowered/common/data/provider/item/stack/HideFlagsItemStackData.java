@@ -32,7 +32,6 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.Map;
 
-
 public final class HideFlagsItemStackData {
 
     private HideFlagsItemStackData() {
@@ -70,12 +69,8 @@ public final class HideFlagsItemStackData {
     // @formatter:on
 //
 //    @NotNull
-//    private static AdventureModePredicate newAdventureModePredicate(final ItemStack h, final boolean showInTooltip) {
-//        if (h.has(DataComponents.CAN_BREAK)) {
-//            final List<BlockPredicate> $$0 = ((AdventureModePredicateAccessor) h.get(DataComponents.CAN_BREAK)).accessor$predicates();
-//            return new AdventureModePredicate($$0, showInTooltip);
-//        }
-//        return new AdventureModePredicate(Collections.emptyList(), showInTooltip);
+//    private static AdventureModePredicate newAdventureModePredicate(final ItemStack h, final DataComponentType<AdventureModePredicate> old, final boolean showInTooltip) {
+//        return new AdventureModePredicate(((AdventureModePredicateAccessor) h.get(old)).accessor$predicates(), showInTooltip);
 //    }
 //
 //    @NotNull

@@ -34,7 +34,7 @@ import org.spongepowered.common.accessor.core.MappedRegistryAccessor;
  * original accessor to be useless. To fix registry issues, we therefore re-implement
  * our accessor interface explicitly for registry purposes.
  *
- * @author gabizou - Minecraft 1.21.5 MinecraftForge 55.0.6
+ * @author gabizou
  * @param <T>
  */
 @Mixin(targets = "net/minecraftforge/registries/NamespacedWrapper")
