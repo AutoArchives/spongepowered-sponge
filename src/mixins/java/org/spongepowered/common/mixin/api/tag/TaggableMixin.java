@@ -22,22 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
+package org.spongepowered.common.mixin.api.tag;
 
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.world.biome.Biome;
+import net.minecraft.core.MappedRegistry;
+import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.tag.Tag;
+import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.holder.SpongeDataHolder;
-import org.spongepowered.common.util.DataPackUtil;
 
-import java.util.Optional;
+import java.util.stream.Stream;
 
-@Mixin(net.minecraft.world.level.biome.Biome.class)
-public abstract class BiomeMixin_API implements Biome, SpongeDataHolder {
+@Mixin(value = Taggable.class, remap = false)
+public interface TaggableMixin<T extends Taggable<T>> {
 
-    @Override
-    public Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
-        return DataPackUtil.toDataContainer(registryHolder, net.minecraft.world.level.biome.Biome.DIRECT_CODEC, (net.minecraft.world.level.biome.Biome) (Object) this);
+    @SuppressWarnings("unchecked")
+    default Stream<Tag<T>> tags(final DefaultedRegistryType<T> registryType) {
+        return (Stream<Tag<T>>) (Object) ((MappedRegistry<T>) registryType.get()).wrapAsHolder((T) this).tags();
     }
 }
