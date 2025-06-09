@@ -93,8 +93,6 @@ public final class SpongeNeoMod {
     private void onClientSetup(final FMLClientSetupEvent event) {
         final Client minecraft = (Client) Minecraft.getInstance();
         final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishDataProviders();
-        lifecycle.callRegisterDataEvent();
         lifecycle.establishClientRegistries(minecraft);
         lifecycle.callStartingEngineEvent(minecraft);
     }
