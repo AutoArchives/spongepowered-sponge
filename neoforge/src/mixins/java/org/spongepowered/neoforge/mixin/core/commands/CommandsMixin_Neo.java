@@ -33,7 +33,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.server.command.CommandHelper;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -43,21 +42,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.command.resolver.SpongeSuggestionTreeResolver;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.IdentityHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.function.Function;
 
 @Mixin(Commands.class)
 public abstract class CommandsMixin_Neo {
 
-    private WeakHashMap<ServerPlayer, Map<CommandNode<CommandSourceStack>, List<CommandNode<SharedSuggestionProvider>>>> impl$playerNodeCache;
     private SpongeCommandManager impl$commandManager;
 
-    // The event fired by Forge is fired in ForgeCommandManager at the appropriate time.
+    // The event fired by Neo is fired in NeoCommandManager at the appropriate time.
     @Redirect(method = "performCommand",
         at = @At(value = "INVOKE", target = "Lnet/neoforged/bus/api/IEventBus;post(Lnet/neoforged/bus/api/Event;)Lnet/neoforged/bus/api/Event;"))
     private Event neo$redirectToSpongeCommandManager(IEventBus instance, Event event) {
@@ -65,36 +62,29 @@ public abstract class CommandsMixin_Neo {
     }
 
     @SuppressWarnings("unchecked")
-    @Redirect(method = "sendCommands", at = @At(
-        value = "INVOKE",
-        target = "Lnet/neoforged/neoforge/server/command/CommandHelper;mergeCommandNode(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Ljava/util/Map;Ljava/lang/Object;Lcom/mojang/brigadier/Command;Ljava/util/function/Function;)V",
-        remap = false
-    ))
+    @Redirect(method = "sendCommands", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/server/command/CommandHelper;mergeCommandNode(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Ljava/util/Map;Ljava/lang/Object;Lcom/mojang/brigadier/Command;Ljava/util/function/Function;)V"))
     private <S, T> void impl$addNonBrigSuggestions(
-        final CommandNode<S> sourceChild,
-        final CommandNode<T> sourceNode,
-        final Map<CommandNode<S>, CommandNode<T>> resultNode,
-        final S sourceToResult,
-        final Command<T> canUse,
-        final Function<SuggestionProvider<S>, SuggestionProvider<T>> execute,
+        final CommandNode<S> rootCommandNode,
+        final CommandNode<T> rootSuggestion,
+        final Map<CommandNode<S>, CommandNode<T>> commandToSuggestion,
+        final S source,
+        final Command<T> execute,
+        final Function<SuggestionProvider<S>, SuggestionProvider<T>> commandToSuggestionFunction,
         final ServerPlayer player
     ) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SUBJECT, (Subject) player);
-            final CommandCause sourceToUse = ((CommandSourceStackBridge) sourceToResult).bridge$withCurrentCause();
-            try {
-                this.impl$playerNodeCache.put(player, new IdentityHashMap<>());
-                // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
-                final IdentityHashMap<CommandNode<S>, CommandNode<T>> idMap = new IdentityHashMap<>(resultNode);
-                CommandHelper.<S, T>mergeCommandNode(sourceChild, sourceNode, idMap, sourceToResult, canUse, execute);
-            } finally {
-                this.impl$playerNodeCache.remove(player);
-            }
+            final CommandCause sourceToUse = ((CommandSourceStackBridge) source).bridge$withCurrentCause();
+
+            // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
+            final IdentityHashMap<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> idMap = new IdentityHashMap(commandToSuggestion);
+            new SpongeSuggestionTreeResolver((CommandSourceStack) sourceToUse, idMap, new IdentityHashMap<>(), this.impl$commandManager)
+                .fillSuggestions((CommandNode<CommandSourceStack>) rootCommandNode, (CommandNode<SharedSuggestionProvider>) rootSuggestion);
+
             for (final CommandNode<SharedSuggestionProvider> node : this.impl$commandManager.getNonBrigadierSuggestions(sourceToUse)) {
-                sourceNode.addChild((CommandNode<T>) node);
+                rootSuggestion.addChild((CommandNode<T>) node);
             }
         }
     }
-
 }
