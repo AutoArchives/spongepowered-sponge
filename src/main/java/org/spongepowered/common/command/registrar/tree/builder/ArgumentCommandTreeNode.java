@@ -26,13 +26,13 @@ package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.CommandSourceStack;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.common.command.brigadier.tree.ForcedRedirectArgumentSuggestionNode;
 
 public abstract class ArgumentCommandTreeNode<T extends CommandTreeNode<T>>
-        extends AbstractCommandTreeNode<T, CommandNode<SharedSuggestionProvider>> {
+        extends AbstractCommandTreeNode<T, CommandNode<CommandSourceStack>> {
 
     private final CommandTreeNodeType<T> parameterType;
 
@@ -41,7 +41,7 @@ public abstract class ArgumentCommandTreeNode<T extends CommandTreeNode<T>>
     }
 
     @Override
-    protected CommandNode<SharedSuggestionProvider> createElement(final String nodeKey) {
+    protected CommandNode<CommandSourceStack> createElement(final String nodeKey) {
         return new ForcedRedirectArgumentSuggestionNode<>(
                 nodeKey,
                 this.getArgumentType(),

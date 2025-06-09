@@ -26,11 +26,11 @@ package org.spongepowered.common.command.resolver;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeNodePermissionCache;
@@ -44,8 +44,8 @@ import java.util.*;
 
 public record SpongeSuggestionTreeResolver(
     CommandSourceStack source,
-    Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> commandToSuggestion,
-    Map<CommandNode<CommandSourceStack>, List<CommandNode<SharedSuggestionProvider>>> playerNodes,
+    Map<CommandNode<CommandSourceStack>, CommandNode<CommandSourceStack>> commandToSuggestion,
+    Map<CommandNode<CommandSourceStack>, List<CommandNode<CommandSourceStack>>> playerNodes,
     SpongeCommandManager commandManager
 ) {
 
@@ -54,13 +54,13 @@ public record SpongeSuggestionTreeResolver(
      * There is no need to split this into injections to be compatible with mods because modded platforms never call fillUsableCommands.
      * Instead, they redirect fillUsableCommands to their own method, like we do.
      */
-    public void fillSuggestions(final CommandNode<CommandSourceStack> rootCommandNode, final CommandNode<SharedSuggestionProvider> rootSuggestion) {
+    public void fillSuggestions(final CommandNode<CommandSourceStack> rootCommandNode, final CommandNode<CommandSourceStack> rootSuggestion) {
         for (final CommandNode<CommandSourceStack> commandNode : SpongeSuggestionTreeResolver.getChildren(rootCommandNode)) {
-            final List<CommandNode<SharedSuggestionProvider>> existingNodes = this.playerNodes.get(commandNode);
+            final List<CommandNode<CommandSourceStack>> existingNodes = this.playerNodes.get(commandNode);
             if (existingNodes != null) {
                 if (!existingNodes.isEmpty()) {
                     boolean hasCustomSuggestionsAlready = CommandUtil.checkForCustomSuggestions(rootSuggestion);
-                    for (final CommandNode<SharedSuggestionProvider> node : existingNodes) {
+                    for (final CommandNode<CommandSourceStack> node : existingNodes) {
                         // If we have custom suggestions, we need to limit it to one node, otherwise we trigger a bug
                         // in the client where it'll send more than one custom suggestion request - which is fine, except
                         // the client will then ignore all but one of them. This is a problem because we then end up with
@@ -68,7 +68,7 @@ public record SpongeSuggestionTreeResolver(
                         // meaning thenRun(...) does not run, which is how displaying the suggestions works...
                         //
                         // Because we don't control the client, we have to work around it here.
-                        if (hasCustomSuggestionsAlready && node instanceof ArgumentCommandNode<SharedSuggestionProvider, ?> argNode) {
+                        if (hasCustomSuggestionsAlready && node instanceof ArgumentCommandNode<CommandSourceStack, ?> argNode) {
                             if (argNode.getCustomSuggestions() != null) {
                                 // Rebuild the node without the custom suggestions.
                                 rootSuggestion.addChild(SpongeSuggestionTreeResolver.cloneArgumentWithoutSuggestions(argNode));
@@ -94,68 +94,59 @@ public record SpongeSuggestionTreeResolver(
 
             if (commandNode instanceof SpongeArgumentCommandNode<?> spongeCommandNode && spongeCommandNode.isComplex()) {
                 final boolean hasCustomSuggestionsAlready = CommandUtil.checkForCustomSuggestions(rootSuggestion);
-                final CommandNode<SharedSuggestionProvider> finalCommandNode = spongeCommandNode.getComplexSuggestions(rootSuggestion, this.commandToSuggestion, this.playerNodes, !hasCustomSuggestionsAlready);
+                final CommandNode<CommandSourceStack> finalCommandNode = spongeCommandNode.getComplexSuggestions(rootSuggestion, this.commandToSuggestion, this.playerNodes, !hasCustomSuggestionsAlready);
                 if (!SpongeSuggestionTreeResolver.getChildren(commandNode).isEmpty()) {
                     this.fillSuggestions(commandNode, finalCommandNode);
                 }
                 continue;
             }
 
-            ArgumentBuilder<SharedSuggestionProvider, ?> builder;
+            ArgumentBuilder<CommandSourceStack, ?> builder;
             if (commandNode instanceof SpongeArgumentCommandNode<?> node) {
                 builder = node.createBuilderForSuggestions(rootSuggestion, this.commandToSuggestion);
-            } else if (commandNode instanceof ArgumentCommandNode argNode && argNode.getType() instanceof CompletionsArgumentTypeBridge<?> argType) {
-                final RequiredArgumentBuilder<SharedSuggestionProvider, ?> r = RequiredArgumentBuilder.argument(argNode.getName(), argType.bridge$clientSideCompletionType());
+            } else if (commandNode instanceof ArgumentCommandNode<CommandSourceStack, ?> argNode && argNode.getType() instanceof CompletionsArgumentTypeBridge<?> argType) {
+                final RequiredArgumentBuilder<CommandSourceStack, ?> r = RequiredArgumentBuilder.argument(argNode.getName(), argType.bridge$clientSideCompletionType());
                 r.executes(argNode.getCommand())
                     .forward(argNode.getRedirect(), argNode.getRedirectModifier(), argNode.isFork())
                     .requires(argNode.getRequirement());
                 if (!CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
-                    r.suggests(SuggestionProviders.ASK_SERVER);
+                    r.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
                 }
                 builder = r;
             } else {
-                builder = (ArgumentBuilder) commandNode.createBuilder();
+                builder = commandNode.createBuilder();
             }
 
-            builder.requires(src -> true);
-            if (builder.getCommand() != null) {
-                builder.executes(src -> 0);
-            }
-
-            if (builder instanceof RequiredArgumentBuilder r && r.getSuggestionsProvider() != null) {
-                r.suggests(SuggestionProviders.safelySwap(r.getSuggestionsProvider()));
-
-                // From above.
-                //
-                // If we have custom suggestions, we need to limit it to one node, otherwise we trigger a bug
-                // in the client where it'll send more than one custom suggestion request - which is fine, except
-                // the client will then ignore all but one of them. This is a problem because we then end up with
-                // no suggestions - CompletableFuture.allOf(...) will contain an exception if a future is cancelled,
-                // meaning thenRun(...) does not run, which is how displaying the suggestions works...
-                //
-                // Because we don't control the client, we have to work around it here.
-                if (r.getSuggestionsProvider() == SuggestionProviders.ASK_SERVER && CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
-                    r.suggests(null);
-                }
+            // From above.
+            //
+            // If we have custom suggestions, we need to limit it to one node, otherwise we trigger a bug
+            // in the client where it'll send more than one custom suggestion request - which is fine, except
+            // the client will then ignore all but one of them. This is a problem because we then end up with
+            // no suggestions - CompletableFuture.allOf(...) will contain an exception if a future is cancelled,
+            // meaning thenRun(...) does not run, which is how displaying the suggestions works...
+            //
+            // Because we don't control the client, we have to work around it here.
+            if (builder instanceof RequiredArgumentBuilder r && r.getSuggestionsProvider() == SuggestionProviders.ASK_SERVER && CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
+                r.suggests(null);
             }
 
             if (builder.getRedirect() != null) {
                 builder.redirect(this.commandToSuggestion.get(builder.getRedirect()));
             }
 
-            final CommandNode<SharedSuggestionProvider> suggestion = builder instanceof RequiredArgumentBuilder r ? new SuggestionArgumentNode(r) : builder.build();
+            final CommandNode<CommandSourceStack> suggestion = builder instanceof RequiredArgumentBuilder r ? new SuggestionArgumentNode(r) : builder.build();
 
             if (!this.commandToSuggestion.containsKey(commandNode)) {
                 // done here because this check is applicable
                 if (!this.playerNodes.containsKey(commandNode)) {
-                    final List<CommandNode<SharedSuggestionProvider>> children = new ArrayList<>();
+                    final List<CommandNode<CommandSourceStack>> children = new ArrayList<>();
                     children.add(suggestion);
                     this.playerNodes.put(commandNode, children);
                 }
 
                 // If the current root suggestion has already got a custom suggestion and this node has a custom suggestion,
                 // we need to swap it out.
-                if (commandNode instanceof ArgumentCommandNode argNode && CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
+                if (commandNode instanceof ArgumentCommandNode<CommandSourceStack, ?> argNode && CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
                     rootSuggestion.addChild(SpongeSuggestionTreeResolver.cloneArgumentWithoutSuggestions(argNode));
                 } else {
                     rootSuggestion.addChild(suggestion);
@@ -176,10 +167,10 @@ public record SpongeSuggestionTreeResolver(
         return node.getChildren();
     }
 
-    private static <S> ArgumentCommandNode<SharedSuggestionProvider, S> cloneArgumentWithoutSuggestions(final ArgumentCommandNode<SharedSuggestionProvider, S> toClone) {
-        final RequiredArgumentBuilder<SharedSuggestionProvider, S> builder = toClone.createBuilder();
+    private static <S> ArgumentCommandNode<CommandSourceStack, S> cloneArgumentWithoutSuggestions(final ArgumentCommandNode<CommandSourceStack, S> toClone) {
+        final RequiredArgumentBuilder<CommandSourceStack, S> builder = toClone.createBuilder();
         builder.suggests(null);
-        for (final CommandNode<SharedSuggestionProvider> node : toClone.getChildren()) {
+        for (final CommandNode<CommandSourceStack> node : toClone.getChildren()) {
             builder.then(node);
         }
         return new SuggestionArgumentNode<>(builder);

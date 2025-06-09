@@ -46,7 +46,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.util.ComponentMessageThrowable;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -497,22 +496,22 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
                 CallbackCommand.NAME);
     }
 
-    public Collection<CommandNode<SharedSuggestionProvider>> getNonBrigadierSuggestions(final CommandCause cause) {
-        final List<CommandNode<SharedSuggestionProvider>> suggestions = new ArrayList<>();
+    public Collection<CommandNode<CommandSourceStack>> getNonBrigadierSuggestions(final CommandCause cause) {
+        final List<CommandNode<CommandSourceStack>> suggestions = new ArrayList<>();
 
         for (final Map.Entry<SpongeCommandMapping, RootCommandTreeNode> entry : this.mappingToSuggestionNodes.entrySet()) {
             final SpongeCommandMapping mapping = entry.getKey();
 
             // create tree from primary mapping
-            final CommandNode<SharedSuggestionProvider> node = entry.getValue()
+            final CommandNode<CommandSourceStack> node = entry.getValue()
                     .createArgumentTree(cause, LiteralArgumentBuilder.literal(mapping.primaryAlias()));
             if (node != null) {
-                final Command<SharedSuggestionProvider> executableCommand = node.getCommand();
-                final CommandNode<SharedSuggestionProvider> toRedirectTo = node.getRedirect() == null ? node : node.getRedirect();
+                final Command<CommandSourceStack> executableCommand = node.getCommand();
+                final CommandNode<CommandSourceStack> toRedirectTo = node.getRedirect() == null ? node : node.getRedirect();
                 suggestions.add(node);
                 for (final String alias : mapping.allAliases()) {
                     if (!alias.equals(mapping.primaryAlias())) {
-                        suggestions.add(LiteralArgumentBuilder.<SharedSuggestionProvider>literal(alias)
+                        suggestions.add(LiteralArgumentBuilder.<CommandSourceStack>literal(alias)
                                 .executes(executableCommand).redirect(toRedirectTo).build());
                     }
                 }

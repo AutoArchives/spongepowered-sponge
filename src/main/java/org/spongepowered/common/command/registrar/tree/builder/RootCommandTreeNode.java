@@ -28,7 +28,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
@@ -38,12 +38,12 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class RootCommandTreeNode extends AbstractCommandTreeNode<CommandTreeNode.Root, RootCommandNode<SharedSuggestionProvider>>
+public final class RootCommandTreeNode extends AbstractCommandTreeNode<CommandTreeNode.Root, RootCommandNode<CommandSourceStack>>
         implements CommandTreeNode.Root {
 
-    public @Nullable CommandNode<SharedSuggestionProvider> createArgumentTree(final CommandCause cause, final LiteralArgumentBuilder<SharedSuggestionProvider> rootBuilder) {
+    public @Nullable CommandNode<CommandSourceStack> createArgumentTree(final CommandCause cause, final LiteralArgumentBuilder<CommandSourceStack> rootBuilder) {
         if (this.getRequirement().test(cause)) {
-            final Map<AbstractCommandTreeNode<?, ?>, CommandNode<SharedSuggestionProvider>> nodeToSuggestionProvider = new IdentityHashMap<>();
+            final Map<AbstractCommandTreeNode<?, ?>, CommandNode<CommandSourceStack>> nodeToSuggestionProvider = new IdentityHashMap<>();
             // this is going to be iterated only.
             final Map<ForcedRedirectNode, AbstractCommandTreeNode<?, ?>> redirectsToApply = new LinkedHashMap<>();
 
@@ -51,7 +51,7 @@ public final class RootCommandTreeNode extends AbstractCommandTreeNode<CommandTr
                 rootBuilder.executes(c -> 1);
             }
 
-            final LiteralCommandNode<SharedSuggestionProvider> rootNode = rootBuilder.build();
+            final LiteralCommandNode<CommandSourceStack> rootNode = rootBuilder.build();
             this.addChildNodesToTree(
                     cause,
                     rootNode,
@@ -67,7 +67,7 @@ public final class RootCommandTreeNode extends AbstractCommandTreeNode<CommandTr
     }
 
     @Override
-    protected RootCommandNode<SharedSuggestionProvider> createElement(final String nodeKey) {
+    protected RootCommandNode<CommandSourceStack> createElement(final String nodeKey) {
         // node key is ignored.
         return new RootCommandNode<>();
     }

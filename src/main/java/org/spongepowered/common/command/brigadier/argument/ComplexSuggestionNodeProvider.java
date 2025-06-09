@@ -25,7 +25,7 @@
 package org.spongepowered.common.command.brigadier.argument;
 
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -39,8 +39,8 @@ public interface ComplexSuggestionNodeProvider {
     /**
      * Creates the nodes.
      */
-    CommandNode<SharedSuggestionProvider> createSuggestions(final CommandNode<SharedSuggestionProvider> rootNode, final String key, final boolean isTerminal,
-            final Consumer<List<CommandNode<SharedSuggestionProvider>>> commandNodeListConsumer,
-            final Consumer<CommandNode<SharedSuggestionProvider>> mapInsertionConsumer, boolean allowCustomSuggestionsOnTheFirstElement);
+    CommandNode<CommandSourceStack> createSuggestions(final CommandNode<CommandSourceStack> rootNode, final String key, final boolean isTerminal,
+            final Consumer<List<CommandNode<CommandSourceStack>>> commandNodeListConsumer,
+            final Consumer<CommandNode<CommandSourceStack>> mapInsertionConsumer, boolean allowCustomSuggestionsOnTheFirstElement);
 
 }

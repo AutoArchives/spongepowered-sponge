@@ -27,7 +27,6 @@ package org.spongepowered.vanilla.mixin.core.commands;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -49,27 +48,25 @@ public abstract class CommandsMixin_Vanilla {
 
     private SpongeCommandManager impl$commandManager;
 
-    @Redirect(method = "sendCommands", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;fillUsableCommands(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Lnet/minecraft/commands/CommandSourceStack;Ljava/util/Map;)V"))
-    private void impl$addNonBrigSuggestions(
-        final Commands self,
-        final CommandNode<CommandSourceStack> rootCommandNode,
-        final CommandNode<SharedSuggestionProvider> rootSuggestion,
-        final CommandSourceStack source,
-        final Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> commandToSuggestion,
-        final ServerPlayer playerEntity
-    ) {
+    @Redirect(method = "sendCommands", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;fillUsableCommands(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Ljava/lang/Object;Ljava/util/Map;)V"))
+    private <S> void impl$addNonBrigSuggestions(
+        final CommandNode<S> rootCommandNode,
+        final CommandNode<S> rootSuggestion,
+        final S source,
+        final Map<CommandNode<S>, CommandNode<S>> commandToSuggestion,
+        final ServerPlayer playerEntity) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(playerEntity);
             frame.addContext(EventContextKeys.SUBJECT, (Subject) playerEntity);
             final CommandCause sourceToUse = ((CommandSourceStackBridge) source).bridge$withCurrentCause();
 
             // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
-            final IdentityHashMap<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> idMap = new IdentityHashMap<>(commandToSuggestion);
+            final IdentityHashMap<CommandNode<CommandSourceStack>, CommandNode<CommandSourceStack>> idMap = new IdentityHashMap(commandToSuggestion);
             new SpongeSuggestionTreeResolver((CommandSourceStack) sourceToUse, idMap, new IdentityHashMap<>(), this.impl$commandManager)
-                .fillSuggestions(rootCommandNode, rootSuggestion);
+                .fillSuggestions((CommandNode<CommandSourceStack>) rootCommandNode, (CommandNode<CommandSourceStack>) rootSuggestion);
 
-            for (final CommandNode<SharedSuggestionProvider> node : this.impl$commandManager.getNonBrigadierSuggestions(sourceToUse)) {
-                rootSuggestion.addChild(node);
+            for (final CommandNode<CommandSourceStack> node : this.impl$commandManager.getNonBrigadierSuggestions(sourceToUse)) {
+                rootSuggestion.addChild((CommandNode<S>) node);
             }
         }
     }

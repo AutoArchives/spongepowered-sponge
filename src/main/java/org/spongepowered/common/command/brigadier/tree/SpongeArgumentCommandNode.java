@@ -42,7 +42,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCompletion;
@@ -144,10 +143,10 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         return this.isComplexSuggestions;
     }
 
-    public final CommandNode<SharedSuggestionProvider> getComplexSuggestions(
-            final CommandNode<SharedSuggestionProvider> rootSuggestionNode,
-            final Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> commandNodeToSuggestionNode,
-            final Map<CommandNode<CommandSourceStack>, List<CommandNode<SharedSuggestionProvider>>> commandNodeListMap,
+    public final CommandNode<CommandSourceStack> getComplexSuggestions(
+            final CommandNode<CommandSourceStack> rootSuggestionNode,
+            final Map<CommandNode<CommandSourceStack>, CommandNode<CommandSourceStack>> commandNodeToSuggestionNode,
+            final Map<CommandNode<CommandSourceStack>, List<CommandNode<CommandSourceStack>>> commandNodeListMap,
             final boolean allowCustomSuggestionsOnTheFirstElement) {
         if (!this.isComplexSuggestions) {
             throw new IllegalStateException("The parser is not a ComplexSuggestionNodeParser");
@@ -176,17 +175,17 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public final ArgumentBuilder<SharedSuggestionProvider, ?> createBuilderForSuggestions(
-            final CommandNode<SharedSuggestionProvider> rootSuggestionNode,
-            final Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> commandNodeToSuggestionNode
+    public final ArgumentBuilder<CommandSourceStack, ?> createBuilderForSuggestions(
+            final CommandNode<CommandSourceStack> rootSuggestionNode,
+            final Map<CommandNode<CommandSourceStack>, CommandNode<CommandSourceStack>> commandNodeToSuggestionNode
     ) {
         ArgumentType<?> type = this.switchTypeIfRequired(this.getType());
-        CommandNode<SharedSuggestionProvider> previousNode = rootSuggestionNode;
+        CommandNode<CommandSourceStack> previousNode = rootSuggestionNode;
         if (!this.parser.getClientCompletionArgumentType().isEmpty()) {
             // create multiple entries, return the last one
             final boolean forceCustomSuggestions;
             final Collection<ArgumentType<?>> types = this.parser.getClientCompletionArgumentType().stream()
-                    .filter(Objects::nonNull).collect(Collectors.toList());
+                    .filter(Objects::nonNull).toList();
             if (types.size() > 1) {
                 forceCustomSuggestions = false; // handled in here
                 final Iterator<ArgumentType<?>> clientCompletionTypeIterator = this.parser.getClientCompletionArgumentType().iterator();
@@ -197,13 +196,13 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                     final boolean forceCustomSuggestionsInner = type != this.getType() && !CommandUtil.checkForCustomSuggestions(previousNode);
                     if (clientCompletionTypeIterator.hasNext()) {
                         // create node
-                        final RequiredArgumentBuilder<SharedSuggestionProvider, ?> arg = RequiredArgumentBuilder.argument(this.getName(), type);
+                        final RequiredArgumentBuilder<CommandSourceStack, ?> arg = RequiredArgumentBuilder.argument(this.getName(), type);
                         arg.requires(x -> true);
                         // if the first node is forced to be custom suggestions or is a string argument type, send the completions.
                         if (forceCustomSuggestionsInner || isFirst && type instanceof StringArgumentType) {
-                            arg.suggests(SuggestionProviders.ASK_SERVER);
+                            arg.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
                         }
-                        final CommandNode<SharedSuggestionProvider> built = arg.build();
+                        final CommandNode<CommandSourceStack> built = arg.build();
                         previousNode.addChild(built);
                         previousNode = built;
                         if (isFirst) {
@@ -218,17 +217,17 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                 forceCustomSuggestions = type != originalType;
             }
 
-            final RequiredArgumentBuilder<SharedSuggestionProvider, ?> toReturn = RequiredArgumentBuilder.argument(this.getUsageTextForClient(), type);
+            final RequiredArgumentBuilder<CommandSourceStack, ?> toReturn = RequiredArgumentBuilder.argument(this.getUsageTextForClient(), type);
             if (this.getCommand() != null) {
                 toReturn.executes(x -> 0);
             }
             if (this.modifier != null || forceCustomSuggestions && !CommandUtil.checkForCustomSuggestions(previousNode)) {
-                toReturn.suggests(SuggestionProviders.ASK_SERVER);
+                toReturn.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
             } else if (this.getCustomSuggestions() != null) {
-                toReturn.suggests((SuggestionProvider) this.getCustomSuggestions());
+                toReturn.suggests(this.getCustomSuggestions());
             }
             if (this.getRedirect() != null) {
-                toReturn.forward((CommandNode) this.getRedirect(), (RedirectModifier) this.getRedirectModifier(), this.isFork());
+                toReturn.forward(this.getRedirect(), this.getRedirectModifier(), this.isFork());
             }
             return toReturn;
         }
@@ -249,7 +248,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         if (this.getCommand() != null) {
             builder.executes(this.getCommand());
         }
-        return (ArgumentBuilder) builder;
+        return builder;
     }
 
     public final ArgumentParser<? extends T> getParser() {

@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -42,10 +42,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull T>, O extends CommandNode<SharedSuggestionProvider>>
+public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull T>, O extends CommandNode<CommandSourceStack>>
         implements CommandTreeNode<@NonNull T> {
 
-    public final static Command<SharedSuggestionProvider> EXECUTABLE = isp -> 1;
+    public final static Command<CommandSourceStack> EXECUTABLE = isp -> 1;
 
     private @Nullable CommandTreeNode<?> redirect = null;
     private @Nullable Map<String, AbstractCommandTreeNode<?, ?>> children = null;
@@ -125,8 +125,8 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     }
 
     @SuppressWarnings("unchecked")
-    public SuggestionProvider<SharedSuggestionProvider> suggestionProvider() {
-        return (SuggestionProvider<SharedSuggestionProvider>) this.completionProvider;
+    public SuggestionProvider<CommandSourceStack> suggestionProvider() {
+        return (SuggestionProvider<CommandSourceStack>) this.completionProvider;
     }
 
     public @Nullable CommandTreeNode<@NonNull ?> getRedirect() {
@@ -137,14 +137,14 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
 
     protected final void addChildNodesToTree(
             final CommandCause cause,
-            final CommandNode<SharedSuggestionProvider> node,
-            final Map<AbstractCommandTreeNode<?, ?>, CommandNode<SharedSuggestionProvider>> nodeToSuggestionProvider,
+            final CommandNode<CommandSourceStack> node,
+            final Map<AbstractCommandTreeNode<?, ?>, CommandNode<CommandSourceStack>> nodeToSuggestionProvider,
             final Map<ForcedRedirectNode, AbstractCommandTreeNode<?, ?>> redirectsToApply) {
         this.getChildren().forEach((key, value) -> {
             if (value.requirement.test(cause)) {
-                final CommandNode<SharedSuggestionProvider> providerCommandNode =
+                final CommandNode<CommandSourceStack> providerCommandNode =
                         nodeToSuggestionProvider.computeIfAbsent(value, k -> {
-                            final CommandNode<SharedSuggestionProvider> ret = k.createElement(key);
+                            final CommandNode<CommandSourceStack> ret = k.createElement(key);
                             if (k.redirect instanceof AbstractCommandTreeNode<?, ?> && ret instanceof ForcedRedirectNode) {
                                 redirectsToApply.put((ForcedRedirectNode) ret, (AbstractCommandTreeNode<?, ?>) k.redirect);
                             } else {

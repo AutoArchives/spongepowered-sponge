@@ -32,7 +32,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.resources.ResourceLocation;
@@ -92,7 +91,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
             serverWorld = SpongeCommon.game().server().worldManager()
                     .world(resourceLocation)
                     .orElseThrow(() -> reader.createException(
-                            Component.text("Could not get world with key \"" + resourceLocation.toString() + "\"")));
+                            Component.text("Could not get world with key \"" + resourceLocation + "\"")));
         } catch (final ArgumentParseException e) {
             final Optional<ServerLocation> location = cause.location();
             if (location.isPresent()) {
@@ -122,13 +121,13 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     @Override
-    public CommandNode<SharedSuggestionProvider> createSuggestions(final CommandNode<SharedSuggestionProvider> rootNode, final String key,
+    public CommandNode<CommandSourceStack> createSuggestions(final CommandNode<CommandSourceStack> rootNode, final String key,
             final boolean isTerminal,
-            final Consumer<List<CommandNode<SharedSuggestionProvider>>> firstNodes,
-            final Consumer<CommandNode<SharedSuggestionProvider>> redirectionNodes,
+            final Consumer<List<CommandNode<CommandSourceStack>>> firstNodes,
+            final Consumer<CommandNode<CommandSourceStack>> redirectionNodes,
             final boolean allowCustomSuggestionsOnTheFirstElement) {
 
-        final RequiredArgumentBuilder<SharedSuggestionProvider, ResourceLocation> firstNode =
+        final RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> firstNode =
                 RequiredArgumentBuilder.argument(key, Constants.Command.RESOURCE_LOCATION_TYPE);
         if (allowCustomSuggestionsOnTheFirstElement) {
             firstNode.suggests((context, builder) -> {
@@ -136,18 +135,18 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
                 return builder.buildFuture();
             });
         }
-        final RequiredArgumentBuilder<SharedSuggestionProvider, Coordinates> secondNode =
+        final RequiredArgumentBuilder<CommandSourceStack, Coordinates> secondNode =
                 RequiredArgumentBuilder.argument(key + "_pos", Vec3Argument.vec3());
         if (isTerminal) {
             secondNode.executes(x -> 1);
         }
-        final CommandNode<SharedSuggestionProvider> second = secondNode.build();
+        final CommandNode<CommandSourceStack> second = secondNode.build();
         firstNode.then(second);
-        final CommandNode<SharedSuggestionProvider> first = firstNode.build();
+        final CommandNode<CommandSourceStack> first = firstNode.build();
         redirectionNodes.accept(second);
         rootNode.addChild(first);
         rootNode.addChild(second);
-        final List<CommandNode<SharedSuggestionProvider>> nodesToAttach = new ArrayList<>();
+        final List<CommandNode<CommandSourceStack>> nodesToAttach = new ArrayList<>();
         nodesToAttach.add(first);
         nodesToAttach.add(second);
         firstNodes.accept(nodesToAttach);
