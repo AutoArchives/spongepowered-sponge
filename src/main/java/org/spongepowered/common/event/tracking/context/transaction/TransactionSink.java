@@ -158,7 +158,7 @@ interface TransactionSink {
     }
 
     @SuppressWarnings("ConstantConditions")
-    default EffectTransactor logBlockDrops(
+    default @Nullable EffectTransactor logBlockDrops(
         final Level serverWorld, final BlockPos pos, final BlockState state,
         final @Nullable BlockEntity tileEntity
     ) {
@@ -176,7 +176,10 @@ interface TransactionSink {
         original.blockChange = BlockChange.MODIFY;
         final PrepareBlockDropsTransaction transaction = new PrepareBlockDropsTransaction(pos, state, original);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
+        if (transaction.recorded()) {
+            return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
+        }
+        return null;
     }
 
     @SuppressWarnings({"ConstantConditions", "unchecked"})
