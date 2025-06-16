@@ -59,7 +59,6 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.storage.IOWorker;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
@@ -616,14 +615,19 @@ public class SpongeWorldManager implements WorldManager {
 
         final ServerLevel loadedWorld = this.worlds.get(registryKey);
         if (loadedWorld != null) {
+            if (!loadedWorld.getPlayers(p -> true).isEmpty()) {
+                return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location())));
+            }
+
             final boolean disableLevelSaving = loadedWorld.noSave;
             loadedWorld.noSave = true;
-            ((IOWorkerBridge) loadedWorld.getChunkSource().chunkMap.chunkScanner()).bridge$forciblyClear();
+            ((IOWorkerBridge) loadedWorld.getChunkSource().chunkMap.chunkScanner()).bridge$haltStore(true);
             return this.unloadWorld0(loadedWorld)
                 .thenCompose($ -> this.deleteWorld0(key))
                 .whenComplete(($, e) -> {
                     if (e != null) {
                         loadedWorld.noSave = disableLevelSaving;
+                        ((IOWorkerBridge) loadedWorld.getChunkSource().chunkMap.chunkScanner()).bridge$haltStore(false);
                     }
                 });
         }
@@ -689,7 +693,7 @@ public class SpongeWorldManager implements WorldManager {
         // and wait for the callback when I/O queue is empty.
         level.save(null, false, level.noSave);
 
-        return ((IOWorker) level.getChunkSource().chunkMap.chunkScanner()).synchronize(true).thenComposeAsync($ -> {
+        return ((IOWorkerBridge) level.getChunkSource().chunkMap.chunkScanner()).bridge$onIdle().thenComposeAsync($ -> {
             if (!level.getPlayers(p -> true).isEmpty()) {
                 return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location())));
             }
