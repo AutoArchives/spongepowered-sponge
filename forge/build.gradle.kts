@@ -40,6 +40,9 @@ description = "The SpongeAPI implementation for MinecraftForge"
 version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion, forgeVersion)
 
 repositories {
+    maven("https://libraries.minecraft.net/") {
+        name = "Mojang"
+    }
     maven("https://repo.spongepowered.org/repository/maven-public/") {
         name = "sponge"
     }
@@ -223,7 +226,7 @@ AWToAT.convert(awFiles, atFile)
 val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
 
 extensions.configure(UserDevExtension::class) {
-    mappings("official", "1.21.5")
+    mappings("official", "1.21.6")
     accessTransformers.from(atFile)
     reobf = false
 

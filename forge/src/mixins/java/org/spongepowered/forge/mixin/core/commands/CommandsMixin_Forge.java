@@ -29,10 +29,9 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.bus.CancellableEventBus;
+import net.minecraftforge.eventbus.internal.Event;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -56,8 +55,8 @@ public abstract class CommandsMixin_Forge {
 
     // The event fired by Forge is fired in ForgeCommandManager at the appropriate time.
     @Redirect(method = "performCommand",
-        at = @At(value = "INVOKE", target = "Lnet/minecraftforge/eventbus/api/IEventBus;post(Lnet/minecraftforge/eventbus/api/Event;)Z"))
-    private boolean forge$redirectToSpongeCommandManager(IEventBus instance, Event event) {
+        at = @At(value = "INVOKE", target = "Lnet/minecraftforge/eventbus/api/bus/CancellableEventBus;post(Lnet/minecraftforge/eventbus/internal/Event;)Z"))
+    private boolean forge$redirectToSpongeCommandManager(CancellableEventBus instance, Event event) {
         return false;
     }
 
@@ -78,11 +77,11 @@ public abstract class CommandsMixin_Forge {
             final CommandCause sourceToUse = ((CommandSourceStackBridge) source).bridge$withCurrentCause();
 
             // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
-            final IdentityHashMap<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> idMap = new IdentityHashMap(commandToSuggestion);
+            final IdentityHashMap<CommandNode<CommandSourceStack>, CommandNode<CommandSourceStack>> idMap = new IdentityHashMap(commandToSuggestion);
             new SpongeSuggestionTreeResolver((CommandSourceStack) sourceToUse, idMap, new IdentityHashMap<>(), this.impl$commandManager)
-                .fillSuggestions((CommandNode<CommandSourceStack>) rootCommandNode, (CommandNode<SharedSuggestionProvider>) rootSuggestion);
+                .fillSuggestions((CommandNode<CommandSourceStack>) rootCommandNode, (CommandNode<CommandSourceStack>) rootSuggestion);
 
-            for (final CommandNode<SharedSuggestionProvider> node : this.impl$commandManager.getNonBrigadierSuggestions(sourceToUse)) {
+            for (final CommandNode<CommandSourceStack> node : this.impl$commandManager.getNonBrigadierSuggestions(sourceToUse)) {
                 rootSuggestion.addChild((CommandNode<T>) node);
             }
         }

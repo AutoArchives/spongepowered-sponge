@@ -33,7 +33,6 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandCause;
@@ -82,7 +81,7 @@ public final class ForgeCommandManager extends SpongeCommandManager {
 
         // Relocated from Commands (injection short circuits it there)
         final CommandEvent event = new CommandEvent(parseResults);
-        if (MinecraftForge.EVENT_BUS.post(event)) {
+        if (CommandEvent.BUS.post(event)) {
             if (event.getException() != null) {
                 Throwables.throwIfUnchecked(event.getException());
             }

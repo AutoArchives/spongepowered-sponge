@@ -39,12 +39,12 @@ import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin_Forge extends LivingEntityMixin_Forge {
 
-    @Shadow public abstract ServerLevel shadow$serverLevel();
+    @Shadow public abstract ServerLevel shadow$level();
 
     // override from LivingEntityMixin_Forge
     @Override
     protected void forge$onElytraUse(final CallbackInfo ci) {
-        final ServerLevel level = this.shadow$serverLevel();
+        final ServerLevel level = this.shadow$level();
         final PhaseContext<?> context = PhaseTracker.getWorldInstance(level).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;

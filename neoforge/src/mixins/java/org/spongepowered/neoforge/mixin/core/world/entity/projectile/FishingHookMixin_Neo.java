@@ -45,7 +45,7 @@ public abstract class FishingHookMixin_Neo extends ProjectileMixin {
         if (SpongeCommonEventFactory.handleCollideImpactEvent(self, this.impl$getProjectileSource(), hitResult)) {
             this.shadow$discard();
         } else {
-            this.onHit(hitResult);
+            this.shadow$onHit(hitResult);
         }
     }
 }

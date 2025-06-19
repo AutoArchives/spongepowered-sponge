@@ -24,23 +24,38 @@
  */
 package org.spongepowered.forge.mixin.core.network;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.network.Connection;
-import net.minecraft.network.PacketSendListener;
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.network.channel.PacketSender;
 
 @Mixin(Connection.class)
 public abstract class ConnectionMixin_Forge {
 
-    @Inject(method = "lambda$doSendPacket$15", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
-    public void impl$onPacketSent(final PacketSendListener listener, final Future future, final CallbackInfo ci) {
-        if (listener instanceof final PacketSender.SpongePacketSendListener spongeListener) {
-            spongeListener.accept(future.cause());
+    @WrapOperation(method = "doSendPacket", at = @At(
+        value = "INVOKE",
+        target = "Lio/netty/channel/ChannelFuture;addListener(Lio/netty/util/concurrent/GenericFutureListener;)Lio/netty/channel/ChannelFuture;",
+        remap = false
+    ))
+    public ChannelFuture impl$onPacketSent(
+        final ChannelFuture instance, final GenericFutureListener<? extends Future<? super Void>> genericFutureListener,
+        final Operation<ChannelFuture> original, final Packet<?> packet,
+        final ChannelFutureListener listener, final boolean abool
+    ) {
+        if (listener instanceof PacketSender.SpongePacketSendListener spsl) {
+            original.call(instance, (ChannelFutureListener) (future) -> {
+                if (!future.isSuccess()) {
+                    spsl.accept(future.cause());
+                }
+            });
         }
+        return original.call(instance, listener);
     }
-
 }

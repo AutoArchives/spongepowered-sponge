@@ -29,7 +29,6 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
@@ -78,11 +77,11 @@ public abstract class CommandsMixin_Neo {
             final CommandCause sourceToUse = ((CommandSourceStackBridge) source).bridge$withCurrentCause();
 
             // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
-            final IdentityHashMap<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> idMap = new IdentityHashMap(commandToSuggestion);
+            final IdentityHashMap<CommandNode<CommandSourceStack>, CommandNode<CommandSourceStack>> idMap = new IdentityHashMap(commandToSuggestion);
             new SpongeSuggestionTreeResolver((CommandSourceStack) sourceToUse, idMap, new IdentityHashMap<>(), this.impl$commandManager)
-                .fillSuggestions((CommandNode<CommandSourceStack>) rootCommandNode, (CommandNode<SharedSuggestionProvider>) rootSuggestion);
+                .fillSuggestions((CommandNode<CommandSourceStack>) rootCommandNode, (CommandNode<CommandSourceStack>) rootSuggestion);
 
-            for (final CommandNode<SharedSuggestionProvider> node : this.impl$commandManager.getNonBrigadierSuggestions(sourceToUse)) {
+            for (final CommandNode<CommandSourceStack> node : this.impl$commandManager.getNonBrigadierSuggestions(sourceToUse)) {
                 rootSuggestion.addChild((CommandNode<T>) node);
             }
         }

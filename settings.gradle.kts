@@ -31,6 +31,19 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.PREFER_PROJECT // needed for ForgeGradle, unfortunately
     repositories {
+        mavenCentral() {
+            content {
+                excludeGroup("org.lwjgl")
+            }
+        }
+        maven("https://libraries.minecraft.net/") {
+            name = "mojang"
+            content {
+                includeGroup("org.lwjgl")
+            }
+        }
+    }
+    repositories {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }

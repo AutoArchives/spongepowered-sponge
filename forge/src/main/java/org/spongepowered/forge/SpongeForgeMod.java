@@ -30,8 +30,7 @@ import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -63,12 +62,12 @@ public final class SpongeForgeMod {
     public SpongeForgeMod(FMLJavaModLoadingContext ctx) {
         // WorldPersistenceHooks.addHook(SpongeLevelDataPersistence.INSTANCE); // TODO SF 1.19.4
 
-        final IEventBus modBus = ctx.getModEventBus();
+        final var group = ctx.getModBusGroup();
 
         // modBus: add all FML events with it
-        modBus.addListener(this::onCommonSetup);
-        modBus.addListener(this::onClientSetup);
-        modBus.addListener(this::onEntityAttributeCreationEvent);
+        FMLCommonSetupEvent.getBus(group).addListener(this::onCommonSetup);
+        FMLClientSetupEvent.getBus(group).addListener(this::onClientSetup);
+        EntityAttributeCreationEvent.getBus(group).addListener(this::onEntityAttributeCreationEvent);
 
         // annotation events, for non-FML things
         MinecraftForge.EVENT_BUS.register(this);

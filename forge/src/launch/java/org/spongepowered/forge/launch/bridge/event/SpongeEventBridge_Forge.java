@@ -24,9 +24,7 @@
  */
 package org.spongepowered.forge.launch.bridge.event;
 
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.IEventBusInvokeDispatcher;
-import net.minecraftforge.eventbus.api.IEventListener;
+import net.minecraftforge.eventbus.internal.Event;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -44,16 +42,6 @@ public interface SpongeEventBridge_Forge {
      */
     default @Nullable Collection<? extends Event> bridge$createForgeEvents() {
         return null;
-    }
-
-    /**
-     * If there is a specialist dispatcher that we need to use for
-     * this given event, it can be defined here.
-     *
-     * @return The dispatcher to use.
-     */
-    default IEventBusInvokeDispatcher bridge$eventDispatcher() {
-        return IEventListener::invoke;
     }
 
 }

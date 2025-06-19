@@ -40,7 +40,7 @@ import org.spongepowered.common.launch.Launch;
 @Mixin(GameData.class)
 public class GameDataMixin_Forge {
 
-    @Inject(method = "postRegisterEvents", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/ModLoader;postEventWrapContainerInModOrder(Lnet/minecraftforge/eventbus/api/Event;)V", shift = At.Shift.AFTER))
+    @Inject(method = "postRegisterEvents", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/ModLoader;postEventWrapContainerInModOrder(Lnet/minecraftforge/fml/event/IModBusEvent;)V", shift = At.Shift.AFTER))
     private static void forge$registerSpongeTypesLast(final CallbackInfo ci, @Nullable @Local final Registry<?> vanillaRegistry) {
         if (vanillaRegistry != null && Registries.ENTITY_TYPE.equals(vanillaRegistry.key())) {
             SpongeEntityTypes.register((Registry<EntityType<?>>) vanillaRegistry);

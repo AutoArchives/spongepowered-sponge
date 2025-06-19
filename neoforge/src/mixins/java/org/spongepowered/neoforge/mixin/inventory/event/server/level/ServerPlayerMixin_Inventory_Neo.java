@@ -54,7 +54,7 @@ import java.util.function.Consumer;
 public abstract class ServerPlayerMixin_Inventory_Neo  extends PlayerMixin_Inventory_Neo {
 
     // @formatter:off
-    @Shadow public abstract ServerLevel shadow$serverLevel();
+    @Shadow public abstract ServerLevel shadow$level();
     // @formatter:on
 
     @Nullable private Object inventory$menuProvider;
@@ -69,7 +69,7 @@ public abstract class ServerPlayerMixin_Inventory_Neo  extends PlayerMixin_Inven
         )
     )
     private void impl$afterOpenMenu(final CallbackInfoReturnable<OptionalInt> cir) {
-        PhaseTracker.getWorldInstance(this.shadow$serverLevel()).getPhaseContext().getTransactor().logContainerSet((ServerPlayer) (Object) this);
+        PhaseTracker.getWorldInstance(this.shadow$level()).getPhaseContext().getTransactor().logContainerSet((ServerPlayer) (Object) this);
     }
 
     @Inject(method = "openMenu(Lnet/minecraft/world/MenuProvider;Ljava/util/function/Consumer;)Ljava/util/OptionalInt;", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
@@ -95,7 +95,7 @@ public abstract class ServerPlayerMixin_Inventory_Neo  extends PlayerMixin_Inven
         final MenuProvider menuProvider, final int containerCounter, final net.minecraft.world.entity.player.Inventory inventory,
         final Player player, final Operation<AbstractContainerMenu> original, final @Cancellable CallbackInfoReturnable<OptionalInt> cir
     ) {
-        final PhaseContext<?> context = PhaseTracker.getWorldInstance(this.shadow$serverLevel()).getPhaseContext();
+        final PhaseContext<?> context = PhaseTracker.getWorldInstance(this.shadow$level()).getPhaseContext();
         try (final EffectTransactor ignored = context.getTransactor().logOpenInventory((ServerPlayer) (Object) this)) {
             final AbstractContainerMenu menu = original.call(menuProvider, containerCounter, inventory, player);
             context.containerLocation().ifPresent(((ContainerBridge) menu)::bridge$setOpenLocation);
