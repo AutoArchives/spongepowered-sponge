@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.server.level;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.server.level.GenerationChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -34,7 +35,6 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
@@ -47,15 +47,11 @@ import org.spongepowered.common.util.PrettyPrinter;
 @Mixin(ChunkStatusTasks.class)
 public abstract class ChunkStatusTasksMixin_Tracker {
 
-    @Redirect(method = "lambda$full$2",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"),
-            slice = @Slice(
-                    from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setFullStatus(Ljava/util/function/Supplier;)V"),
-                    to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V")
-            )
-    )
-    private static void tracker$startLoad(final LevelChunk chunk) {
-        chunk.runPostLoad();
+    @Inject(method = "lambda$full$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"), slice = @Slice(
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setFullStatus(Ljava/util/function/Supplier;)V"),
+        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V")
+    ))
+    private static void tracker$startLoad(final CallbackInfoReturnable<ChunkAccess> cir, @Local() final LevelChunk chunk) {
         final boolean isFake = ((LevelBridge) chunk.getLevel()).bridge$isFake();
         if (isFake) {
             return;
@@ -84,15 +80,12 @@ public abstract class ChunkStatusTasksMixin_Tracker {
     }
 
     @Inject(method = "lambda$full$2",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V", shift = At.Shift.BY, by = 2),
-            slice = @Slice(
-                    from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V")
-            ),
-            require = 1
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V", shift = At.Shift.BY, by = 2),
+        slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"))
     )
-    private static void tracker$endLoad(final ChunkAccess $$0x, final WorldGenContext $$1x, final GenerationChunkHolder $$2x,
+    private static void tracker$endLoad(final ChunkAccess chunk, final WorldGenContext context, final GenerationChunkHolder holder,
             final CallbackInfoReturnable<ChunkAccess> cir) {
-        if (!((LevelBridge) $$1x.level()).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
+        if (!((LevelBridge) context.level()).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }
@@ -100,5 +93,4 @@ public abstract class ChunkStatusTasksMixin_Tracker {
             PhaseTracker.getInstance().getPhaseContext().close();
         }
     }
-
 }
