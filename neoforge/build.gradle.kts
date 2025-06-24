@@ -140,13 +140,6 @@ val main by sourceSets.named("main") {
     }
 }
 
-configurations.configureEach {
-    exclude(group = "net.minecraft", module = "joined")
-    if (name != "minecraft") { // awful terrible hack sssh
-        exclude(group = "com.mojang", module = "minecraft")
-    }
-}
-
 val awFiles: Set<File> = files(commonMain.get().resources, main.resources).filter { it.name.endsWith(".accesswidener") }.files
 val atFile = project.layout.buildDirectory.file("generated/resources/at.cfg").get().asFile
 AWToAT.convert(awFiles, atFile)

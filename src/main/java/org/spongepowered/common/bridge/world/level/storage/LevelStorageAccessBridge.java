@@ -22,14 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.storage;
+package org.spongepowered.common.bridge.world.level.storage;
 
-import net.minecraft.world.level.storage.LevelStorageSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+public interface LevelStorageAccessBridge {
 
-@Mixin(LevelStorageSource.LevelStorageAccess.class)
-public interface LevelStorageSource_LevelStorageAccessAccessor {
-
-    @Accessor("levelDirectory") LevelStorageSource.LevelDirectory accessor$levelDirectory();
+    void bridge$setDedicated(boolean dedicated);
 }
