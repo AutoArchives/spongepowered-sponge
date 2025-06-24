@@ -206,7 +206,6 @@
     "world.level.levelgen.structure.pools.StructureTemplatePoolAccessor",
     "world.level.portal.DimensionTransitionAccessor",
     "world.level.saveddata.maps.MapItemSavedDataAccessor",
-    "world.level.storage.LevelStorageSource_LevelStorageAccessAccessor",
     "world.level.storage.PlayerDataStorageAccessor",
     "world.phys.AABBAccessor",
     "world.scores.PlayerTeamAccessor",
