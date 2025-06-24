@@ -59,7 +59,6 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.storage.IOWorker;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
@@ -94,11 +93,11 @@ import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
-import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_LevelStorageAccessAccessor;
 import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
+import org.spongepowered.common.bridge.world.level.storage.LevelStorageAccessBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -140,7 +139,7 @@ public class SpongeWorldManager implements WorldManager {
 
     public SpongeWorldManager(final MinecraftServer server) {
         this.server = server;
-        this.defaultWorldDirectory = ((LevelStorageSource_LevelStorageAccessAccessor) ((MinecraftServerAccessor) this.server).accessor$storageSource()).accessor$levelDirectory().path();
+        this.defaultWorldDirectory = ((MinecraftServerAccessor) this.server).accessor$storageSource().getLevelDirectory().path();
         this.customWorldsDirectory = this.defaultWorldDirectory.resolve("dimensions");
         try {
             Files.createDirectories(this.customWorldsDirectory);
@@ -311,13 +310,17 @@ public class SpongeWorldManager implements WorldManager {
                   .thenApply(w -> (ServerWorld) w);
     }
 
-    private LevelStorageSource.LevelStorageAccess getLevelStorageAccess(final ResourceKey worldKey) throws IOException {
+    private LevelStorageSource.LevelStorageAccess createLevelStorageAccess(final ResourceKey worldKey) throws IOException {
+        LevelStorageSource.LevelStorageAccess storageAccess;
         if (this.isVanillaWorld(worldKey)) {
             final String directoryName = this.getDirectoryName(worldKey);
-            return LevelStorageSource.createDefault(this.defaultWorldDirectory).createAccess(directoryName);
+            storageAccess = LevelStorageSource.createDefault(this.defaultWorldDirectory).createAccess(directoryName);
+        } else {
+            final String name = worldKey.namespace() + File.separator + worldKey.value();
+            storageAccess = LevelStorageSource.createDefault(this.customWorldsDirectory).createAccess(name);
         }
-        final String name = worldKey.namespace() + File.separator + worldKey.value();
-        return LevelStorageSource.createDefault(this.customWorldsDirectory).createAccess(name);
+        ((LevelStorageAccessBridge) storageAccess).bridge$setDedicated(true);
+        return storageAccess;
     }
 
     private LevelSettings createLevelSettings(final PrimaryLevelData defaultLevelData, final LevelStem levelStem, final String directoryName) {
@@ -380,7 +383,7 @@ public class SpongeWorldManager implements WorldManager {
         }
 
         final PrimaryLevelData levelData;
-        try (var storageSource = this.getLevelStorageAccess(key)) {
+        try (var storageSource = this.createLevelStorageAccess(key)) {
             final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
             levelData = this.loadLevelData(defaultLevelData.getDataConfiguration(), storageSource.getDataTag());
         } catch (final Exception e) {
@@ -430,7 +433,7 @@ public class SpongeWorldManager implements WorldManager {
 
 
     private void saveLevelDat(final WorldData worldData, final ResourceKey key) throws IOException {
-        try (var storageSource = this.getLevelStorageAccess(key)) {
+        try (var storageSource = this.createLevelStorageAccess(key)) {
             storageSource.saveDataTag(this.server.registryAccess(), worldData, null);
         }
     }
@@ -610,14 +613,19 @@ public class SpongeWorldManager implements WorldManager {
 
         final ServerLevel loadedWorld = this.worlds.get(registryKey);
         if (loadedWorld != null) {
+            if (!loadedWorld.getPlayers(p -> true).isEmpty()) {
+                return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location())));
+            }
+
             final boolean disableLevelSaving = loadedWorld.noSave;
             loadedWorld.noSave = true;
-            ((IOWorkerBridge) loadedWorld.getChunkSource().chunkMap.chunkScanner()).bridge$forciblyClear();
+            ((IOWorkerBridge) loadedWorld.getChunkSource().chunkMap.chunkScanner()).bridge$haltStore(true);
             return this.unloadWorld0(loadedWorld)
                 .thenCompose($ -> this.deleteWorld0(key))
                 .whenComplete(($, e) -> {
                     if (e != null) {
                         loadedWorld.noSave = disableLevelSaving;
+                        ((IOWorkerBridge) loadedWorld.getChunkSource().chunkMap.chunkScanner()).bridge$haltStore(false);
                     }
                 });
         }
@@ -683,7 +691,7 @@ public class SpongeWorldManager implements WorldManager {
         // and wait for the callback when I/O queue is empty.
         level.save(null, false, level.noSave);
 
-        return ((IOWorker) level.getChunkSource().chunkMap.chunkScanner()).synchronize(true).thenComposeAsync($ -> {
+        return ((IOWorkerBridge) level.getChunkSource().chunkMap.chunkScanner()).bridge$onIdle().thenComposeAsync($ -> {
             if (!level.getPlayers(p -> true).isEmpty()) {
                 return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location())));
             }
@@ -789,7 +797,7 @@ public class SpongeWorldManager implements WorldManager {
         }
 
         final String directoryName = this.getDirectoryName(worldKey);
-        final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(worldKey);
+        final LevelStorageSource.LevelStorageAccess storageSource = this.createLevelStorageAccess(worldKey);
 
         @Nullable Dynamic<?> dataTag;
         try {
