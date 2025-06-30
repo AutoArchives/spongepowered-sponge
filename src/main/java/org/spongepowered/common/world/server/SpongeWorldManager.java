@@ -100,6 +100,7 @@ import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.LevelStorageAccessBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
+import org.spongepowered.common.config.core.SpongeConfigs;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Launch;
@@ -1021,8 +1022,7 @@ public class SpongeWorldManager implements WorldManager {
     }
 
     private Path getConfigFile(final ResourceKey key) {
-        return SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds").resolve(key.namespace())
-                .resolve(key.value() + ".conf");
+        return SpongeConfigs.getDirectory().resolve("worlds").resolve(key.namespace()).resolve(key.value() + ".conf");
     }
 
     private static PrimaryLevelData.SpecialWorldProperty specialWorldProperty(final LevelStem stem) {
