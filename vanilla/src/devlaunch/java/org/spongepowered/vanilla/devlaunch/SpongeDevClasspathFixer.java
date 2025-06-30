@@ -100,6 +100,7 @@ public class SpongeDevClasspathFixer implements BootstrapClasspathModifier {
                                 case "devlaunch":
                                     // ignore
                                     break;
+                                case "applaunchConfig":
                                 case "applaunch":
                                     bootSourceSets.computeIfAbsent("applaunch", k -> new LinkedList<>()).add(path);
                                     break;

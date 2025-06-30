@@ -56,7 +56,13 @@ val mixinsConfig by configurations.register("mixins") {
 // SpongeCommon source sets
 val main by sourceSets
 
+// applaunchConfig is also used by vanilla installer, hence the separate sourceset
+val applaunchConfigSourceSet = sourceSets.register("applaunchConfig") {
+    spongeImpl.addDependencyToImplementation(this, main)
+}
+
 val applaunch by sourceSets.registering {
+    spongeImpl.addDependencyToImplementation(applaunchConfigSourceSet.get(), this)
     spongeImpl.addDependencyToImplementation(this, main)
 
     configurations.named(implementationConfigurationName) {
@@ -141,14 +147,6 @@ dependencies {
     applaunchConfig(libs.guava) {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
-    }
-    applaunchConfig(platform(apiLibs.configurate.bom))
-    applaunchConfig(apiLibs.configurate.core) {
-        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
-    }
-    applaunchConfig(apiLibs.configurate.hocon) {
-        exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
     applaunchConfig(libs.log4j.core)
     applaunchConfig(libs.log4j.jpl)

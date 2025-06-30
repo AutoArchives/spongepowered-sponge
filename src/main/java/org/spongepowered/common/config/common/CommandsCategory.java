@@ -22,21 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.installer;
-
+package org.spongepowered.common.config.common;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-@ConfigSerializable
-public final class LauncherConfig {
+import java.util.HashMap;
+import java.util.Map;
 
-    @Setting("args")
-    public String args = "--nogui";
-    @Setting("libraries-directory")
-    public String librariesDirectory = "${BASE_DIRECTORY}/libraries";
-    @Setting("auto-download-libraries")
-    public boolean autoDownloadLibraries = true;
-    @Setting("check-library-hashes")
-    public boolean checkLibraryHashes = true;
+@ConfigSerializable
+public final class CommandsCategory {
+
+    @Setting
+    @Comment("Command aliases will resolve conflicts when multiple plugins request a specific command, \n"
+                     + "Correct syntax is <unqualified command>=<plugin name> e.g. \"sethome=homeplugin\"")
+    public final Map<String, String> aliases = new HashMap<>();
 }

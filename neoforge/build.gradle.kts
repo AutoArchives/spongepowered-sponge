@@ -72,7 +72,7 @@ val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.r
 }
 
 // SpongeCommon source sets
-val launchConfig: NamedDomainObjectProvider<Configuration> = commonProject.configurations.named("launch")
+val applaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val accessors: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("accessors")
 val launch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("launch")
 val applaunch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("applaunch")
@@ -82,6 +82,7 @@ val main: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named(
 // SpongeNeo source sets
 // Service layer
 val forgeAppLaunch by sourceSets.register("applaunch") {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
 
     configurations.named(implementationConfigurationName) {
@@ -98,6 +99,7 @@ val forgeLang by sourceSets.register("lang") {
 
 // Game layer
 val forgeLaunch by sourceSets.register("launch") {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
     spongeImpl.addDependencyToImplementation(launch.get(), this)
     spongeImpl.addDependencyToImplementation(main.get(), this)
@@ -115,6 +117,7 @@ val forgeAccessors by sourceSets.register("accessors") {
     }
 }
 val forgeMixins by sourceSets.register("mixins") {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
     spongeImpl.addDependencyToImplementation(launch.get(), this)
     spongeImpl.addDependencyToImplementation(accessors.get(), this)
@@ -129,6 +132,7 @@ val forgeMixins by sourceSets.register("mixins") {
     }
 }
 val forgeMain by sourceSets.named("main") {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
     spongeImpl.addDependencyToImplementation(launch.get(), this)
     spongeImpl.addDependencyToImplementation(accessors.get(), this)
@@ -191,14 +195,6 @@ dependencies {
         exclude(group = "cpw.mods", module = "modlauncher")
     }
     service(project(libraryManagerProject.path))
-    service(platform(apiLibs.configurate.bom))
-    service(apiLibs.configurate.core) {
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
-    service(apiLibs.configurate.hocon) {
-        exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
 
     val game = gameLibrariesConfig.name
     game("org.spongepowered:spongeapi:$apiVersion")
@@ -281,7 +277,8 @@ tasks {
             attributes("Automatic-Module-Name" to "spongeneo.services")
         }
 
-        from(commonProject.sourceSets.named("applaunch").map { it.output })
+        from(applaunchConf.map { it.output })
+        from(applaunch.map { it.output })
         from(forgeAppLaunch.output)
 
         duplicatesStrategy = DuplicatesStrategy.WARN
@@ -346,7 +343,8 @@ tasks {
             )
         }
 
-        from(commonProject.sourceSets.named("applaunch").map { it.output })
+        from(applaunchConf.map { it.output })
+        from(applaunch.map { it.output })
         from(forgeAppLaunch.output)
 
         // Make sure to relocate access widener so that we don't conflict with other coremods

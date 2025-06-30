@@ -47,6 +47,7 @@ val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.r
 }
 
 // SpongeCommon source sets
+val applaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val accessors: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("accessors")
 val launch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("launch")
 val applaunch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("applaunch")
@@ -63,6 +64,8 @@ val vanillaDevLaunch by sourceSets.register("devlaunch") {
 
 // Prod launch
 val vanillaInstaller by sourceSets.register("installer") {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
+
     configurations.named(implementationConfigurationName) {
         extendsFrom(installerLibrariesConfig.get())
     }
@@ -70,6 +73,7 @@ val vanillaInstaller by sourceSets.register("installer") {
 
 // Boot layer
 val vanillaAppLaunch by sourceSets.register("applaunch") {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
 
     configurations.named(implementationConfigurationName) {
@@ -79,6 +83,7 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
 
 // Game layer
 val vanillaLaunch by sourceSets.register("launch") {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
     spongeImpl.addDependencyToImplementation(launch.get(), this)
     spongeImpl.addDependencyToImplementation(main.get(), this)
@@ -96,6 +101,7 @@ val vanillaAccessors by sourceSets.register("accessors") {
     }
 }
 val vanillaMixins by sourceSets.register("mixins") {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
     spongeImpl.addDependencyToImplementation(launch.get(), this)
     spongeImpl.addDependencyToImplementation(accessors.get(), this)
@@ -110,6 +116,7 @@ val vanillaMixins by sourceSets.register("mixins") {
     }
 }
 val vanillaMain by sourceSets.named("main") {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
     spongeImpl.addDependencyToImplementation(launch.get(), this)
     spongeImpl.addDependencyToImplementation(accessors.get(), this)
@@ -162,9 +169,7 @@ dependencies {
 
     val installer = installerLibrariesConfig.name
     installer(apiLibs.gson)
-    installer(platform(apiLibs.configurate.bom))
-    installer(apiLibs.configurate.hocon)
-    installer(apiLibs.configurate.core)
+    installer(apiLibs.checkerQual)
     installer(libs.joptSimple)
     installer(libs.tinylog.api)
     installer(libs.tinylog.impl)
@@ -212,15 +217,6 @@ dependencies {
     boot(libs.log4j.api)
     boot(libs.log4j.core)
     boot(libs.log4j.slf4j2)
-
-    boot(platform(apiLibs.configurate.bom))
-    boot(apiLibs.configurate.core) {
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
-    boot(apiLibs.configurate.hocon) {
-        exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
 
     boot(libs.mixin)
     boot(libs.mixinextras.common)
@@ -435,7 +431,8 @@ tasks {
             attributes("Automatic-Module-Name" to "spongevanilla.boot")
         }
 
-        from(commonProject.sourceSets.named("applaunch").map { it.output })
+        from(applaunchConf.map { it.output })
+        from(applaunch.map { it.output })
         from(vanillaAppLaunch.output)
     }
 
@@ -459,7 +456,10 @@ tasks {
             attributes(mapOf("Implementation-Version" to libs.versions.asm.get()), "org/objectweb/asm/")
         }
 
+        from(applaunchConf.map { it.output })
         from(vanillaInstaller.output)
+
+        // relocate("org.spongepowered.common.applaunch.config", "org.spongepowered.vanilla.installer.config")
     }
 
     shadowJar {
