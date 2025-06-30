@@ -57,12 +57,12 @@ val mixinsConfig by configurations.register("mixins") {
 val main by sourceSets
 
 // applaunchConfig is also used by vanilla installer, hence the separate sourceset
-val applaunchConfigSourceSet = sourceSets.register("applaunchConfig") {
+val applaunchConf = sourceSets.register("applaunchConfig") {
     spongeImpl.addDependencyToImplementation(this, main)
 }
 
 val applaunch by sourceSets.registering {
-    spongeImpl.addDependencyToImplementation(applaunchConfigSourceSet.get(), this)
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(this, main)
 
     configurations.named(implementationConfigurationName) {
@@ -70,6 +70,7 @@ val applaunch by sourceSets.registering {
     }
 }
 val launch by sourceSets.registering {
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
     spongeImpl.addDependencyToImplementation(this, main)
 
@@ -86,8 +87,9 @@ val accessors by sourceSets.registering {
     }
 }
 val mixins by sourceSets.registering {
-    spongeImpl.addDependencyToImplementation(launch.get(), this)
+    spongeImpl.addDependencyToImplementation(applaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(applaunch.get(), this)
+    spongeImpl.addDependencyToImplementation(launch.get(), this)
     spongeImpl.addDependencyToImplementation(accessors.get(), this)
     spongeImpl.addDependencyToImplementation(main, this)
 
