@@ -85,12 +85,14 @@ val gameLayerConfig = configurations.register("gameLayer") {
 val commonAccessors = commonProject.sourceSets.named("accessors")
 val commonLaunch = commonProject.sourceSets.named("launch")
 val commonAppLaunch = commonProject.sourceSets.named("applaunch")
+val commonAppLaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val commonMixins = commonProject.sourceSets.named("mixins")
 val commonMain = commonProject.sourceSets.named("main")
 
 // SpongeForge source sets
 // Service layer
 val appLaunch by sourceSets.register("applaunch") {
+    spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
 
     configurations.named(implementationConfigurationName) {
@@ -107,6 +109,7 @@ val lang by sourceSets.register("lang") {
 
 // Game layer
 val launch by sourceSets.register("launch") {
+    spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
     spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
     spongeImpl.addDependencyToImplementation(commonMain.get(), this)
@@ -124,6 +127,7 @@ val accessors by sourceSets.register("accessors") {
     }
 }
 val mixins by sourceSets.register("mixins") {
+    spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
     spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
     spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
@@ -138,6 +142,7 @@ val mixins by sourceSets.register("mixins") {
     }
 }
 val main by sourceSets.named("main") {
+    spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
     spongeImpl.addDependencyToImplementation(commonAppLaunch.get(), this)
     spongeImpl.addDependencyToImplementation(commonLaunch.get(), this)
     spongeImpl.addDependencyToImplementation(commonAccessors.get(), this)
@@ -159,11 +164,6 @@ val main by sourceSets.named("main") {
 }
 
 configurations.configureEach {
-    exclude(group = "net.minecraft", module = "joined")
-    if (name != "minecraft") { // awful terrible hack sssh
-        exclude(group = "com.mojang", module = "minecraft")
-    }
-
     // Fix that can be found in Forge MDK too
     resolutionStrategy {
         force("net.sf.jopt-simple:jopt-simple:5.0.4")
@@ -179,14 +179,6 @@ dependencies {
         exclude(group = "cpw.mods", module = "modlauncher")
     }
     service(project(libraryManagerProject.path))
-    service(platform(apiLibs.configurate.bom))
-    service(apiLibs.configurate.core) {
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
-    service(apiLibs.configurate.hocon) {
-        exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
 
     val game = gameLibrariesConfig.name
     game("org.spongepowered:spongeapi:$apiVersion")
@@ -349,6 +341,7 @@ tasks {
             )
         }
 
+        from(commonAppLaunchConf.map { it.output })
         from(commonAppLaunch.map { it.output })
         from(appLaunch.output)
 

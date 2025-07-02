@@ -30,12 +30,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
 
 @Mixin(BuiltInRegistries.class)
 public abstract class BuiltInRegistriesMixin {
 
     @Inject(method = "bootStrap", at = @At(value = "HEAD"))
     private static void impl$beforeCreateContents(final CallbackInfo ci) {
-        Launch.instance().lifecycle().establishEarlyGlobalRegistries();
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.establishDataProviders();
+        lifecycle.callRegisterDataEvent();
+        lifecycle.establishEarlyGlobalRegistries();
     }
 }
