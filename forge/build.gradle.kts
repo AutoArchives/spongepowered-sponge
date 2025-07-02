@@ -226,7 +226,7 @@ AWToAT.convert(awFiles, atFile)
 val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
 
 extensions.configure(UserDevExtension::class) {
-    mappings("official", "1.21.6")
+    mappings("official", minecraftVersion)
     accessTransformers.from(atFile)
     reobf = false
 
