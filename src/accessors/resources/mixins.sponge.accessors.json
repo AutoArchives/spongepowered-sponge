@@ -211,6 +211,7 @@
     "world.level.portal.TeleportTransitionAccessor",
     "world.level.saveddata.maps.MapItemSavedDataAccessor",
     "world.level.storage.PlayerDataStorageAccessor",
+    "world.level.storage.PrimaryLevelDataAccessor",
     "world.phys.AABBAccessor",
     "world.scores.PlayerTeamAccessor",
     "world.scores.ScoreboardAccessor",
