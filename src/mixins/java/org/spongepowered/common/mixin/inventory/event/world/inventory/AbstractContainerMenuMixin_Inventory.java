@@ -93,6 +93,11 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     private boolean impl$dirty;
 
     @Override
+    public void bridge$setIsClicking(final boolean isClicking) {
+        this.impl$isClicking = isClicking;
+    }
+
+    @Override
     public boolean bridge$capturePossible() {
         return this.impl$captureSuccess;
     }
@@ -210,11 +215,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logClickContainer(menu, slotId, dragType, clickType, player)) {
-            this.impl$isClicking = true;
             this.shadow$doClick(slotId, dragType, clickType, player);
-            this.bridge$detectAndSendChanges(true, false);
-        } finally {
-            this.impl$isClicking = false;
         }
         if (this.impl$dirty) {
             this.shadow$sendAllDataToRemote();
