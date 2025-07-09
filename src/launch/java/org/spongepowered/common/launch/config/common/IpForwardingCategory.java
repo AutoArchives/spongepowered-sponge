@@ -22,35 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.inventory.container;
+package org.spongepowered.common.launch.config.common;
 
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
-import net.minecraft.world.entity.player.Player;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import java.util.LinkedHashMap;
-import java.util.Set;
-import java.util.function.Predicate;
+@ConfigSerializable
+public class IpForwardingCategory {
 
-public interface ContainerBridge {
+    @Setting
+    @Comment(
+        "The IP forwarding mode to use with a proxy. Supported values:\n"
+             + "  - NONE: Do not forward IP addresses\n"
+             + "  - LEGACY: Use the BungeeCord/pre-1.13 protocol for IP forwarding (CAUTION: This protocol is insecure)\n"
+             + "  - MODERN: Use the Velocity protocol for IP forwarding\n"
+            + "When any forwarding mode but NONE is selected, the server will be "
+            + "put into offline mode and will only accept connections from proxies."
+    )
+    public Mode mode = Mode.NONE;
 
-    LinkedHashMap<Container, Set<net.minecraft.world.inventory.Slot>> bridge$getInventories();
+    @Setting
+    @Comment("The player info forwarding secret from your Velocity configuration.\n"
+                 + "Only used with 'MODERN' forwarding mode.")
+    public String secret = "";
 
-    void bridge$setCanInteractWith(@Nullable Predicate<Player> predicate);
+    public enum Mode {
+        NONE,
+        LEGACY,
+        MODERN
+    }
 
-    @Nullable Predicate<Player> bridge$getCanInteractWith();
-
-    @Nullable ServerLocation bridge$getOpenLocation();
-
-    void bridge$setOpenLocation(@Nullable ServerLocation loc);
-
-    void bridge$setInUse(boolean inUse);
-
-    boolean bridge$isInUse();
-
-    void bridge$setViewer(@Nullable ServerPlayer player);
-
-    @Nullable ServerPlayer bridge$getViewer();
 }
