@@ -22,35 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.common;
+package org.spongepowered.common.launch.config.common;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @ConfigSerializable
-public class IpForwardingCategory {
+public final class TeleportHelperCategory {
 
-    @Setting
-    @Comment(
-        "The IP forwarding mode to use with a proxy. Supported values:\n"
-             + "  - NONE: Do not forward IP addresses\n"
-             + "  - LEGACY: Use the BungeeCord/pre-1.13 protocol for IP forwarding (CAUTION: This protocol is insecure)\n"
-             + "  - MODERN: Use the Velocity protocol for IP forwarding\n"
-            + "When any forwarding mode but NONE is selected, the server will be "
-            + "put into offline mode and will only accept connections from proxies."
-    )
-    public Mode mode = Mode.NONE;
+    @Setting("force-blacklist")
+    @Comment("If 'true', this blacklist will always be respected, otherwise, plugins can choose whether \n"
+             + "or not to respect it.")
+    public boolean forceBlacklist = false;
 
-    @Setting
-    @Comment("The player info forwarding secret from your Velocity configuration.\n"
-                 + "Only used with 'MODERN' forwarding mode.")
-    public String secret = "";
+    @Setting("unsafe-floor-blocks")
+    @Comment("Blocks that are listed here will not be selected by Sponge's safe \n"
+             + "teleport routine as a safe floor block.")
+    public final List<String> unsafeFloorBlocks = new ArrayList<>();
 
-    public enum Mode {
-        NONE,
-        LEGACY,
-        MODERN
-    }
-
+    @Setting("unsafe-body-blocks")
+    @Comment("Blocks that are listed here will not be selected by Sponge's safe teleport routine as \n"
+              + "a safe block for players to warp into. \n"
+              + "You should only list blocks here that are incorrectly selected, solid blocks that prevent \n"
+              + "movement are automatically excluded.")
+    public final List<String> unsafeBlockBlocks = new ArrayList<>();
 }

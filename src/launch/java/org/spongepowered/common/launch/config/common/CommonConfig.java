@@ -22,11 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.common;
+package org.spongepowered.common.launch.config.common;
 
 import org.spongepowered.common.applaunch.config.LaunchConfig;
-import org.spongepowered.common.config.core.Config;
-import org.spongepowered.common.config.core.IpSet;
+import org.spongepowered.common.launch.config.core.Config;
+import org.spongepowered.common.launch.config.core.IpSet;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
