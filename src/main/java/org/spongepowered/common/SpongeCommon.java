@@ -38,8 +38,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.config.core.SpongeConfigs;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 

@@ -95,12 +95,12 @@ import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.common.config.core.SpongeConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
 import java.io.IOException;

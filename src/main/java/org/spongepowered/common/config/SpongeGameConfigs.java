@@ -34,13 +34,13 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
-import org.spongepowered.common.config.core.ConfigHandle;
-import org.spongepowered.common.config.core.SpongeConfigs;
 import org.spongepowered.common.config.inheritable.BaseConfig;
 import org.spongepowered.common.config.inheritable.GlobalConfig;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.config.tracker.TrackerConfig;
+import org.spongepowered.common.launch.config.core.ConfigHandle;
+import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.world.server.SpongeServerLevelData;
 
 import java.io.IOException;
