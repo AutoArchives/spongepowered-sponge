@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.core;
+package org.spongepowered.common.launch.config.core;
 
 import com.google.common.collect.ImmutableSet;
 import io.leangen.geantyref.GenericTypeReflector;
@@ -30,7 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.config.common.CommonConfig;
+import org.spongepowered.common.launch.config.common.CommonConfig;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.NodePath;

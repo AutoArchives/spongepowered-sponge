@@ -22,34 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.common;
+package org.spongepowered.common.launch.config.common;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @ConfigSerializable
-public final class ModuleCategory {
+public final class CommandsCategory {
 
     @Setting
-    @Comment("Enables support for BungeeCord and Velocity IP forwarding.\n" +
-        "Additional options must be configured in the 'ip-forwarding' configuration section.")
-    public boolean ipForwarding = false;
-
-    @Setting("entity-activation-range")
-    public boolean entityActivationRange = true;
-
-    @Setting
-    @Comment("Controls whether any exploit patches are applied.\n"
-             + "If there are issues with any specific exploits, please\n"
-             + "test in the exploit category first, before disabling all\n"
-             + "exploits with this toggle.")
-    public boolean exploits = true;
-
-    @Setting
-    public boolean optimizations = true;
-
-    @Setting("movement-checks")
-    @Comment("Allows configuring Vanilla movement and speed checks")
-    public boolean movementChecks = false;
+    @Comment("Command aliases will resolve conflicts when multiple plugins request a specific command, \n"
+                     + "Correct syntax is <unqualified command>=<plugin name> e.g. \"sethome=homeplugin\"")
+    public final Map<String, String> aliases = new HashMap<>();
 }

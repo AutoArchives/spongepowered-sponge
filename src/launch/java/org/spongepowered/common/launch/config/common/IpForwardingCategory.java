@@ -22,20 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.common;
+package org.spongepowered.common.launch.config.common;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
-public final class ExploitCategory {
+public class IpForwardingCategory {
 
-    @Setting("max-book-page-size")
-    @Comment("Controls the maximum size of a book page. (Default: 32767)")
-    public int maxBookPageSize = 32767;
+    @Setting
+    @Comment(
+        "The IP forwarding mode to use with a proxy. Supported values:\n"
+             + "  - NONE: Do not forward IP addresses\n"
+             + "  - LEGACY: Use the BungeeCord/pre-1.13 protocol for IP forwarding (CAUTION: This protocol is insecure)\n"
+             + "  - MODERN: Use the Velocity protocol for IP forwarding\n"
+            + "When any forwarding mode but NONE is selected, the server will be "
+            + "put into offline mode and will only accept connections from proxies."
+    )
+    public Mode mode = Mode.NONE;
 
-    @Setting("max-book-size")
-    @Comment("Controls the maximum size of a book")
-    public int maxBookSize = this.maxBookPageSize * 1000;
+    @Setting
+    @Comment("The player info forwarding secret from your Velocity configuration.\n"
+                 + "Only used with 'MODERN' forwarding mode.")
+    public String secret = "";
+
+    public enum Mode {
+        NONE,
+        LEGACY,
+        MODERN
+    }
+
 }

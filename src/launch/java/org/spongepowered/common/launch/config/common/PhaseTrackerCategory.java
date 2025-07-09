@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.common;
+package org.spongepowered.common.launch.config.common;
 
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;

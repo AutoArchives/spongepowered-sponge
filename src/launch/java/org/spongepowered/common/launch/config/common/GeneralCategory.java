@@ -22,20 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.common;
+package org.spongepowered.common.launch.config.common;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @ConfigSerializable
-public final class CommandsCategory {
+public final class GeneralCategory {
 
-    @Setting
-    @Comment("Command aliases will resolve conflicts when multiple plugins request a specific command, \n"
-                     + "Correct syntax is <unqualified command>=<plugin name> e.g. \"sethome=homeplugin\"")
-    public final Map<String, String> aliases = new HashMap<>();
+    @Setting("plugin-config-dir")
+    @Comment(override = true, value = """
+        The directory for Sponge plugin configurations, relative to the
+        execution root or specified as an absolute path.
+        Note that the default: "${CONFIG_DIR}"
+        is going to use the "config" directory in the root game directory.
+        If you wish for plugin configs to reside within a child of the configuration
+        directory, change the value to, for example, "${CONFIG_DIR}/sponge/plugins".
+        Note: It is not recommended to set this to "${CONFIG_DIR}/sponge", as there is
+        a possibility that plugin configurations can conflict the Sponge core configurations.""")
+    public String pluginConfigDir = "${CONFIG_DIR}";
 }
