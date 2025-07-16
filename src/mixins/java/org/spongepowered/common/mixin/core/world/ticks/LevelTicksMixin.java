@@ -42,7 +42,9 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.ticks.LevelChunkTicksBridge;
 import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 @Mixin(LevelTicks.class)
@@ -96,6 +98,10 @@ public abstract class LevelTicksMixin<T> implements LevelTicksBridge<T> {
 
     @Override
     public ServerLevel bridge$level() {
+        if (this.impl$level == null) {
+            final Optional<ServerLevel> trackedLevel = PhaseTracker.getInstance().currentCause().first(ServerLevel.class);
+            this.impl$level = trackedLevel.orElseThrow(() -> new IllegalStateException("Cannot find level of LevelTicks"));
+        }
         return this.impl$level;
     }
 }
