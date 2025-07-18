@@ -22,6 +22,7 @@ plugins {
 }
 
 val commonProject = parent!!
+val bootstrapProject = commonProject.project(":bootstrap")
 val transformersProject = commonProject.project(":modlauncher-transformers")
 val libraryManagerProject = commonProject.project(":library-manager")
 val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
@@ -67,6 +68,10 @@ val gameLayerConfig = configurations.register("gameLayer") {
     extendsFrom(langLayerConfig.get())
     extendsFrom(gameLibrariesConfig.get())
 }
+
+// Bootstrap source sets
+val bootstrapMain = bootstrapProject.sourceSets.named("main")
+val bootstrapNeoForge = bootstrapProject.sourceSets.named("neoforge")
 
 // SpongeCommon source sets
 val commonAccessors = commonProject.sourceSets.named("accessors")
@@ -143,6 +148,15 @@ val main by sourceSets.named("main") {
     configurations.named(implementationConfigurationName) {
         extendsFrom(gameLayerConfig.get())
     }
+
+    // The rest of the project because we want everything in the initial classpath
+    spongeImpl.addDependencyToRuntimeOnly(commonMixins.get(), this)
+    spongeImpl.addDependencyToRuntimeOnly(mixins, this)
+    spongeImpl.addDependencyToRuntimeOnly(lang, this)
+
+    // The bootstrap
+    spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToRuntimeOnly(bootstrapNeoForge.get(), this)
 }
 
 val awFiles: Set<File> = files(commonMain.get().resources, main.resources).filter { it.name.endsWith(".accesswidener") }.files
@@ -157,11 +171,10 @@ extensions.configure(NeoForgeExtension::class) {
 
     runs {
         configureEach {
-            // jvmArgument("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
+            // jvmArgument("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
+            mainClass = "org.spongepowered.bootstrap.neoforge.NeoForgeBootstrap"
 
             programArguments.addAll(mixinConfigs.flatMap { sequenceOf("--mixin.config", it) })
-
-            disableIdeRun() // Source sets are broken
         }
 
         create("client") {
@@ -171,36 +184,6 @@ extensions.configure(NeoForgeExtension::class) {
         create("server") {
             server()
             programArgument("--nogui")
-        }
-    }
-
-    mods {
-        create("applaunch") {
-            sourceSet(appLaunch)
-            sourceSet(commonAppLaunch.get())
-            sourceSet(commonAppLaunchConf.get())
-        }
-
-        create("lang") {
-            sourceSet(lang)
-        }
-
-        create("main") {
-            sourceSet(main)
-            sourceSet(mixins)
-            sourceSet(accessors)
-            sourceSet(launch)
-
-            sourceSet(commonMain.get())
-            sourceSet(commonMixins.get())
-            sourceSet(commonAccessors.get())
-            sourceSet(commonLaunch.get())
-        }
-
-        testPluginsProject?.also {
-            create("testplugins") {
-                sourceSet(it.sourceSets.getByName("main"))
-            }
         }
     }
 }
@@ -230,21 +213,24 @@ dependencies {
 
     spongeImpl.copyModulesExcludingProvided(serviceLibrariesConfig.get(), bootLayerConfig.get(), serviceShadedLibrariesConfig.get())
     spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), serviceLayerConfig.get(), gameManagedLibrariesConfig.get())
-}
 
-// Put libs in game layer
-extensions.configure(NeoForgeExtension::class) {
-    val gameLibs: MutableList<File> = mutableListOf()
-    gameLibs.addAll(gameManagedLibrariesConfig.get())
-    gameLibs.addAll(gameShadedLibrariesConfig.get())
-    val resourcesEnv = gameLibs.joinToString(File.pathSeparator)
-    runs.configureEach {
-        jvmArgument("-Dsponge.resources=" + resourcesEnv)
+    testPluginsProject?.also {
+        runtimeOnly(project(it.path))
     }
 }
 
-// Put libs in boot layer
-configurations.getByName("additionalRuntimeClasspath").extendsFrom(serviceShadedLibrariesConfig.get())
+afterEvaluate {
+    extensions.configure(NeoForgeExtension::class) {
+        // Configure bootstrap dev
+        val bootFileNames = spongeImpl.buildRuntimeFileNames(serviceLayerConfig.get()) // service in boot during dev
+        val gameShadedFileNames = spongeImpl.buildRuntimeFileNames(gameShadedLibrariesConfig.get())
+        runs.configureEach {
+            jvmArgument("-Dsponge.dev.root=" + project.rootDir)
+            jvmArgument("-Dsponge.dev.boot=$bootFileNames")
+            jvmArgument("-Dsponge.dev.gameShaded=$gameShadedFileNames")
+        }
+    }
+}
 
 val neoManifest = java.manifest {
     attributes(

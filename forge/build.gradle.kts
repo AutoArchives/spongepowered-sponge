@@ -25,7 +25,7 @@ plugins {
 }
 
 val commonProject = parent!!
-val bootstrapDevProject = commonProject.project(":bootstrap-dev")
+val bootstrapProject = commonProject.project(":bootstrap")
 val transformersProject = commonProject.project(":modlauncher-transformers")
 val libraryManagerProject = commonProject.project(":library-manager")
 val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
@@ -77,6 +77,10 @@ val gameLayerConfig = configurations.register("gameLayer") {
     extendsFrom(langLayerConfig.get())
     extendsFrom(gameLibrariesConfig.get())
 }
+
+// Bootstrap source sets
+val bootstrapMain = bootstrapProject.sourceSets.named("main")
+val bootstrapForge = bootstrapProject.sourceSets.named("forge")
 
 // SpongeCommon source sets
 val commonAccessors = commonProject.sourceSets.named("accessors")
@@ -158,6 +162,10 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(commonMixins.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(mixins, this)
     spongeImpl.addDependencyToRuntimeOnly(lang, this)
+
+    // The bootstrap
+    spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
 }
 
 configurations.configureEach {
@@ -202,7 +210,6 @@ dependencies {
         spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), serviceLayerConfig.get(), gameManagedLibrariesConfig.get())
     }
 
-    runtimeOnly(project(bootstrapDevProject.path))
     testPluginsProject?.also {
         runtimeOnly(project(it.path))
     }
@@ -223,8 +230,8 @@ extensions.configure(UserDevExtension::class) {
         configureEach {
             ideaModule("Sponge.SpongeForge.main")
 
-            // property("forge.logging.console.level", "debug")
-            // jvmArgs("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
+            // jvmArgs("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
+            main("org.spongepowered.bootstrap.forge.ForgeBootstrap")
 
             args(mixinConfigs.flatMap { sequenceOf("--mixin.config", it) })
             environment("MOD_CLASSES", "nop")
@@ -240,7 +247,7 @@ extensions.configure(UserDevExtension::class) {
 
 afterEvaluate {
     extensions.configure(UserDevExtension::class) {
-        // Configure bootstrap-dev
+        // Configure bootstrap dev
         val bootFileNames = spongeImpl.buildRuntimeFileNames(serviceLayerConfig.get()) // service in boot during dev
         val gameShadedFileNames = spongeImpl.buildRuntimeFileNames(gameShadedLibrariesConfig.get())
         runs.configureEach {

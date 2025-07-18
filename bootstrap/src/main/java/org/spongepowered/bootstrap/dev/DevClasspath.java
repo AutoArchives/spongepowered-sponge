@@ -24,7 +24,7 @@
  */
 package org.spongepowered.bootstrap.dev;
 
-import net.minecraftforge.bootstrap.api.BootstrapClasspathModifier;
+import org.spongepowered.bootstrap.Bootstrap;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -35,28 +35,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SpongeDevClasspathFixer implements BootstrapClasspathModifier {
-    private static final boolean DEBUG = Boolean.getBoolean("bsl.debug");
-
-    @Override
-    public String name() {
-        return "sponge-dev";
-    }
+public class DevClasspath {
 
     /**
      * IntelliJ only builds source sets that are explicitly on the classpath.
      * So we declare everything into the initial classpath then we sort things and put them back in the right classloaders.
      * Since different IDEs might want to put things in different locations, we sadly have to identify the resources by their filenames.
      */
-    @Override
-    public boolean process(final List<Path[]> classpath) {
+    public static List<Path[]> resolve() {
+        final String[] cp = System.getProperty("java.class.path").split(File.pathSeparator);
         final Path spongeRoot = Paths.get(System.getProperty("sponge.dev.root")).toAbsolutePath();
-        final Set<String> ignoredLibs = Set.of("bootstrap-dev.jar");
-        final Set<String> bootLibs = Set.of(System.getProperty("sponge.dev.boot").split(File.pathSeparator));
-        final Set<String> gameShadedLibs = Set.of(System.getProperty("sponge.dev.gameShaded").split(File.pathSeparator));
+        final Set<String> bootNames = Set.of(System.getProperty("sponge.dev.boot").split(File.pathSeparator));
+        final Set<String> gameShadedNames = Set.of(System.getProperty("sponge.dev.gameShaded").split(File.pathSeparator));
 
         // boot layer
         final Multimap<String, Path> bootUnions = new Multimap<>();
+        final List<Path> bootLibs = new ArrayList<>();
 
         // game or plugin layer
         final Multimap<String, Path> unions = new Multimap<>();
@@ -64,22 +58,25 @@ public class SpongeDevClasspathFixer implements BootstrapClasspathModifier {
 
         final AtomicBoolean hasAPISourceSet = new AtomicBoolean(false);
 
-        final boolean modified = classpath.removeIf((paths) -> {
-            if (paths.length != 1) { // empty or already merged by another service
-                return false;
+        for (final String str : cp) {
+            final Path path = Paths.get(str);
+            if (!Files.exists(path)) {
+                if (Bootstrap.DEBUG) {
+                    System.out.println("Non-existent: " + path);
+                }
+                continue;
             }
 
-            final Path path = paths[0];
             final SourceSet sourceSet = SourceSet.identify(path);
             if (sourceSet != null) {
                 if (sourceSet.project().startsWith(spongeRoot)) {
-                    if (DEBUG) {
+                    if (Bootstrap.DEBUG) {
                         System.out.println("Sponge SourceSet (" + sourceSet + "): " + path);
                     }
 
                     final String projectName = spongeRoot.relativize(sourceSet.project()).toString();
                     switch (projectName) {
-                        case "bootstrap-dev":
+                        case "bootstrap":
                             // ignore
                             break;
                         case "modlauncher-transformers", "library-manager":
@@ -98,7 +95,7 @@ public class SpongeDevClasspathFixer implements BootstrapClasspathModifier {
                                     break;
                             }
                             break;
-                        case "", "vanilla", "forge":
+                        case "", "vanilla", "forge", "neoforge":
                             switch (sourceSet.name()) {
                                 case "applaunchConfig":
                                 case "applaunch":
@@ -117,48 +114,50 @@ public class SpongeDevClasspathFixer implements BootstrapClasspathModifier {
                             break;
                     }
                 } else {
-                    if (DEBUG) {
+                    if (Bootstrap.DEBUG) {
                         System.out.println("External SourceSet (" + sourceSet + "): " + path);
                     }
 
                     unions.add(sourceSet.project().toString(), path);
                 }
-                return true;
+                continue;
             }
 
             final String fileName = path.getFileName().toString();
 
-            if (ignoredLibs.contains(fileName)) {
-                if (DEBUG) {
+            if (false) {
+                if (Bootstrap.DEBUG) {
                     System.out.println("Ignored: " + path);
                 }
-                return true;
+                continue;
             }
 
-            if (bootLibs.contains(fileName)) {
-                if (DEBUG) {
+            if (bootNames.contains(fileName)) {
+                if (Bootstrap.DEBUG) {
                     System.out.println("Boot: " + path);
                 }
-                return false;
+                bootLibs.add(path);
+                continue;
             }
 
-            if (gameShadedLibs.contains(fileName)) {
-                if (DEBUG) {
+            if (gameShadedNames.contains(fileName)) {
+                if (Bootstrap.DEBUG) {
                     System.out.println("Sponge: " + path);
                 }
                 unions.add("sponge", path);
-                return true;
+                continue;
             }
 
-            if (DEBUG) {
+            if (Bootstrap.DEBUG) {
                 System.out.println("Game: " + path);
             }
             libs.add(path);
-            return true;
-        });
+        }
 
-        if (!modified) {
-            return false;
+        final List<Path[]> classpath = new ArrayList<>();
+
+        for (final Path lib : bootLibs) {
+            classpath.add(new Path[] { lib });
         }
 
         for (final List<Path> sourceSets : bootUnions.values()) {
@@ -170,7 +169,7 @@ public class SpongeDevClasspathFixer implements BootstrapClasspathModifier {
                 if (Files.isRegularFile(path)) {
                     final String fileName = path.getFileName().toString();
                     if (fileName.startsWith("spongeapi") && fileName.endsWith(".jar")) {
-                        if (DEBUG) {
+                        if (Bootstrap.DEBUG) {
                             System.out.println("Removing spongeapi jar in favor of sourceset: " + path);
                         }
                         return true;
@@ -193,10 +192,11 @@ public class SpongeDevClasspathFixer implements BootstrapClasspathModifier {
         resourcesEnvBuilder.setLength(resourcesEnvBuilder.length() - 1);
         final String resourcesEnv = resourcesEnvBuilder.toString();
 
-        if (DEBUG) {
+        if (Bootstrap.DEBUG) {
             System.out.println("Resources env: " + resourcesEnv);
         }
         System.setProperty("sponge.resources", resourcesEnv);
-        return true;
+
+        return classpath;
     }
 }

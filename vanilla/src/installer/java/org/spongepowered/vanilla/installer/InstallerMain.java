@@ -31,6 +31,7 @@ import net.minecraftforge.fart.api.SignatureStripperConfig;
 import net.minecraftforge.fart.api.SourceFixerConfig;
 import net.minecraftforge.fart.api.Transformer;
 import net.minecraftforge.srgutils.IMappingFile;
+import org.spongepowered.bootstrap.forge.VanillaBootstrap;
 import org.spongepowered.libs.LibraryManager;
 import org.spongepowered.libs.LibraryUtils;
 import org.spongepowered.vanilla.installer.library.TinyLogger;
@@ -47,11 +48,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileSystem;
@@ -217,32 +215,17 @@ public final class InstallerMain {
     }
 
     private static void bootstrap(final Path[] bootLibs, final Path spongeBoot, final String[] args) throws Exception {
-        final URL[] urls = new URL[bootLibs.length];
-        for (int i = 0; i < bootLibs.length; i++) {
-            urls[i] = bootLibs[i].toAbsolutePath().toUri().toURL();
-        }
-
         final List<Path[]> classpath = new ArrayList<>();
         for (final Path lib : bootLibs) {
             classpath.add(new Path[] { lib });
         }
         classpath.add(new Path[] { spongeBoot });
 
-        URLClassLoader loader = new URLClassLoader(urls, ClassLoader.getPlatformClassLoader());
-        ClassLoader previousLoader = Thread.currentThread().getContextClassLoader();
         try {
-            Thread.currentThread().setContextClassLoader(loader);
-            final Class<?> cl = Class.forName("net.minecraftforge.bootstrap.Bootstrap", false, loader);
-            final Object instance = cl.getDeclaredConstructor().newInstance();
-            final Method m = cl.getDeclaredMethod("bootstrapMain", String[].class, List.class);
-            m.setAccessible(true);
-            m.invoke(instance, args, classpath);
+            new VanillaBootstrap(args).boot(classpath, true);
         } catch (final Exception ex) {
-            final Throwable cause = ex instanceof InvocationTargetException ? ex.getCause() : ex;
-            Logger.error(cause, "Failed to invoke bootstrap main due to an error");
+            Logger.error(ex, "Failed to invoke bootstrap due to an error");
             System.exit(1);
-        } finally {
-            Thread.currentThread().setContextClassLoader(previousLoader);
         }
     }
 

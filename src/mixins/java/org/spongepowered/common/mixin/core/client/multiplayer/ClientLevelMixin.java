@@ -36,15 +36,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 
-import java.util.function.Supplier;
-
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin extends LevelMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$onInit(final ClientPacketListener $$0, final ClientLevel.ClientLevelData $$1, final ResourceKey<?> $$2, final Holder<DimensionType> $$3,
-            final int $$4, final int $$5, final Supplier<?> $$6, final LevelRenderer $$7, final boolean $$8, final long $$9, final CallbackInfo ci) {
-        this.bridge$adjustDimensionLogic($$3.value());
+    private void impl$onInit(final ClientPacketListener listener, final ClientLevel.ClientLevelData data, final ResourceKey<?> key, final Holder<DimensionType> holder,
+            final int storageRange, final int serverSimulationDistance, final LevelRenderer renderer, final boolean isDebug, final long biomeZoomSeed, final int seaLevel, final CallbackInfo ci) {
+        this.bridge$adjustDimensionLogic(holder.value());
     }
 
     @Override
