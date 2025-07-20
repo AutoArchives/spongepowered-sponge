@@ -121,9 +121,11 @@ import java.util.function.Supplier;
 interface TransactionSink {
 
     @Deprecated
-    void logTransaction(StatefulTransaction transaction);
+    @Nullable EffectTransactor logTransaction(StatefulTransaction transaction);
 
     EffectTransactor pushEffect(final ResultingTransactionBySideEffect effect);
+
+    EffectTransactor pushEffect(final ResultingTransactionBySideEffect effect, final GameTransaction<?> parentTransaction);
 
     default ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
         final BlockChangeFlag flags
@@ -175,11 +177,11 @@ interface TransactionSink {
         );
         original.blockChange = BlockChange.MODIFY;
         final PrepareBlockDropsTransaction transaction = new PrepareBlockDropsTransaction(pos, state, original);
-        this.logTransaction(transaction);
-        if (transaction.recorded()) {
+        final @Nullable EffectTransactor effect = this.logTransaction(transaction);
+        if (effect == null) {
             return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
         }
-        return null;
+        return effect;
     }
 
     @SuppressWarnings({"ConstantConditions", "unchecked"})
