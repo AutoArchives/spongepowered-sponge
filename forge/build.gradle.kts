@@ -1,6 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.minecraftforge.gradle.common.util.RunConfig
-import net.minecraftforge.gradle.userdev.UserDevExtension
 import org.gradle.api.tasks.JavaExec
 import org.gradle.internal.DefaultTaskExecutionRequest
 import org.spongepowered.gradle.impl.AWToAT
@@ -167,12 +166,20 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
 }
+sourceSets.named("test") {
+    spongeImpl.addDependencyToImplementation(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
+}
 
 configurations.configureEach {
     // Fix that can be found in Forge MDK too
     resolutionStrategy {
         force("net.sf.jopt-simple:jopt-simple:5.0.4")
     }
+}
+
+configurations.testRuntimeOnly {
+    exclude(module = "testplugins")
 }
 
 dependencies {
@@ -213,6 +220,12 @@ dependencies {
     testPluginsProject?.also {
         runtimeOnly(project(it.path))
     }
+
+    testImplementation(platform(apiLibs.junit.bom))
+    testImplementation(apiLibs.junit.api)
+    testImplementation(apiLibs.junit.params)
+    testImplementation(apiLibs.junit.launcher)
+    testRuntimeOnly(apiLibs.junit.engine)
 }
 
 val awFiles: Set<File> = files(commonMain.get().resources, main.resources).filter { it.name.endsWith(".accesswidener") }.files
@@ -221,7 +234,7 @@ AWToAT.convert(awFiles, atFile)
 
 val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
 
-extensions.configure(UserDevExtension::class) {
+minecraft {
     mappings("official", "1.21.4")
     accessTransformers.from(atFile)
     reobf = false
@@ -246,7 +259,7 @@ extensions.configure(UserDevExtension::class) {
 }
 
 afterEvaluate {
-    extensions.configure(UserDevExtension::class) {
+    minecraft {
         // Configure bootstrap dev
         val bootFileNames = spongeImpl.buildRuntimeFileNames(serviceLayerConfig.get()) // service in boot during dev
         val gameShadedFileNames = spongeImpl.buildRuntimeFileNames(gameShadedLibrariesConfig.get())
@@ -398,6 +411,22 @@ tasks {
 
     assemble {
         dependsOn(universalJar)
+    }
+
+    test {
+        useJUnitPlatform()
+
+        val runServer = minecraft.runs.getByName("server")
+        jvmArgs(runServer.jvmArgs)
+        jvmArgs("-Dsponge.test.args=" + runServer.args.joinToString(" "))
+        workingDir = layout.buildDirectory.dir("test-run").get().asFile
+
+        doFirst {
+            // reset test directory
+            workingDir.deleteRecursively()
+            workingDir.mkdirs()
+            workingDir.resolve("eula.txt").writeText("eula=true")
+        }
     }
 }
 

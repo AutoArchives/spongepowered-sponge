@@ -1,6 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import net.neoforged.moddevgradle.dsl.NeoForgeExtension
 import net.neoforged.moddevgradle.internal.RunGameTask
+import org.gradle.api.tasks.JavaExec
 import org.spongepowered.gradle.impl.AWToAT
 
 buildscript {
@@ -158,6 +158,14 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapNeoForge.get(), this)
 }
+sourceSets.named("test") {
+    spongeImpl.addDependencyToImplementation(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToImplementation(bootstrapNeoForge.get(), this)
+}
+
+configurations.testRuntimeOnly {
+    exclude(module = "testplugins")
+}
 
 val awFiles: Set<File> = files(commonMain.get().resources, main.resources).filter { it.name.endsWith(".accesswidener") }.files
 val atFile = project.layout.buildDirectory.file("generated/resources/at.cfg").get().asFile
@@ -165,7 +173,7 @@ AWToAT.convert(awFiles, atFile)
 
 val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
 
-extensions.configure(NeoForgeExtension::class) {
+neoForge {
     version = neoForgeVersion
     accessTransformers.from(atFile)
 
@@ -189,6 +197,7 @@ extensions.configure(NeoForgeExtension::class) {
 }
 
 bootLibrariesConfig.get().extendsFrom(configurations.getByName("modDevCompileDependencies"))
+configurations.testRuntimeOnly.get().extendsFrom(configurations.getByName("modDevRuntimeDependencies"))
 
 dependencies {
     val service = serviceLibrariesConfig.name
@@ -217,10 +226,16 @@ dependencies {
     testPluginsProject?.also {
         runtimeOnly(project(it.path))
     }
+
+    testImplementation(platform(apiLibs.junit.bom))
+    testImplementation(apiLibs.junit.api)
+    testImplementation(apiLibs.junit.params)
+    testImplementation(apiLibs.junit.launcher)
+    testRuntimeOnly(apiLibs.junit.engine)
 }
 
 afterEvaluate {
-    extensions.configure(NeoForgeExtension::class) {
+    neoForge {
         // Configure bootstrap dev
         val bootFileNames = spongeImpl.buildRuntimeFileNames(serviceLayerConfig.get()) // service in boot during dev
         val gameShadedFileNames = spongeImpl.buildRuntimeFileNames(gameShadedLibrariesConfig.get())
@@ -369,6 +384,26 @@ tasks {
 
     assemble {
         dependsOn(universalJar)
+    }
+
+    val runServer = named("runServer", JavaExec::class)
+    val prepareServerRun = named("prepareServerRun")
+
+    test {
+        useJUnitPlatform()
+
+        jvmArgs(runServer.get().jvmArgs)
+        jvmArgs("-Dsponge.test.args=" + runServer.get().args!!.joinToString(" "))
+        workingDir = layout.buildDirectory.dir("test-run").get().asFile
+
+        doFirst {
+            // reset test directory
+            workingDir.deleteRecursively()
+            workingDir.mkdirs()
+            workingDir.resolve("eula.txt").writeText("eula=true")
+        }
+
+        dependsOn(prepareServerRun)
     }
 }
 

@@ -125,7 +125,7 @@ public class DevClasspath {
 
             final String fileName = path.getFileName().toString();
 
-            if (false) {
+            if (fileName.startsWith("junit-")) {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Ignored: " + path);
                 }

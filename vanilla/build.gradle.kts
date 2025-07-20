@@ -138,6 +138,10 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
 }
+sourceSets.named("test") {
+    spongeImpl.addDependencyToImplementation(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
+}
 
 val superclassConfigs = spongeImpl.getNamedConfigurations("superClassChanges")
 val mixinConfigs = spongeImpl.mixinConfigurations
@@ -152,6 +156,10 @@ configurations.configureEach {
     resolutionStrategy {
         force("net.sf.jopt-simple:jopt-simple:5.0.4")
     }
+}
+
+configurations.testRuntimeOnly {
+    exclude(module = "testplugins")
 }
 
 dependencies {
@@ -242,15 +250,21 @@ dependencies {
     testPluginsProject?.also {
         runtimeOnly(project(it.path))
     }
+
+    testImplementation(platform(apiLibs.junit.bom))
+    testImplementation(apiLibs.junit.api)
+    testImplementation(apiLibs.junit.params)
+    testImplementation(apiLibs.junit.launcher)
+    testRuntimeOnly(apiLibs.junit.engine)
 }
 
 minecraft {
     runs {
         // Full development environment
-        server("runServer") {
+        server() {
             args("--nogui", "--launchTarget", "sponge_server_dev")
         }
-        client("runClient") {
+        client() {
             args("--launchTarget", "sponge_client_dev")
         }
 
@@ -475,6 +489,22 @@ tasks {
 
     assemble {
         dependsOn(universalJar)
+    }
+
+    test {
+        useJUnitPlatform()
+
+        val runServer = minecraft.runs.server().get()
+        jvmArgs(runServer.allJvmArguments())
+        jvmArgs("-Dsponge.test.args=" + runServer.allArguments().joinToString(" "))
+        workingDir = layout.buildDirectory.dir("test-run").get().asFile
+
+        doFirst {
+            // reset test directory
+            workingDir.deleteRecursively()
+            workingDir.mkdirs()
+            workingDir.resolve("eula.txt").writeText("eula=true")
+        }
     }
 }
 
