@@ -25,18 +25,26 @@
 package org.spongepowered.common.mixin.test.server;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.applaunch.test.TestGameAccess;
 
 import java.io.IOException;
 import java.util.function.Function;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Test {
+public abstract class MinecraftServerMixin_Test extends ReentrantBlockableEventLoop<TickTask> {
+
+    public MinecraftServerMixin_Test(String name) {
+        super(name);
+    }
 
     @Shadow
     protected abstract boolean initServer() throws IOException;
@@ -49,6 +57,11 @@ public abstract class MinecraftServerMixin_Test {
 
     @Shadow
     public abstract void stopServer();
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onInit(final CallbackInfo ci) {
+        TestGameAccess.setup(this::impl$stop);
+    }
 
     /**
      * @author Yeregorix
@@ -65,14 +78,29 @@ public abstract class MinecraftServerMixin_Test {
         cir.setReturnValue(server);
     }
 
+    private void impl$stop() {
+        if (this.running) {
+            this.running = false;
+            this.stopped = true;
+            this.stopServer();
+        }
+    }
+
     /**
      * @author Yeregorix
      * @reason Stops the server instead of the loop.
      */
     @Overwrite
     public void halt(final boolean join) {
-        this.running = false;
-        this.stopped = true;
-        this.stopServer();
+        this.impl$stop();
+    }
+
+    /**
+     * @author Yeregorix
+     * @reason The server is not ticking.
+     */
+    @Overwrite
+    public void waitUntilNextTick() {
+        this.runAllTasks();
     }
 }

@@ -25,16 +25,16 @@
 package org.spongepowered.vanilla.boot;
 
 import org.spongepowered.bootstrap.forge.VanillaBootstrap;
-import org.spongepowered.common.applaunch.test.GameClassLoaderHolder;
+import org.spongepowered.common.applaunch.test.TestGameAccess;
 
 public class SpongeTestBoot {
 
     public static ClassLoader getGameClassLoader() throws Exception {
-        if (GameClassLoaderHolder.loader == null) {
+        if (TestGameAccess.getGameClassLoader() == null) {
             final String[] args = System.getProperty("sponge.test.args").split(" ");
             System.setProperty("sponge.test.active", "true");
             new VanillaBootstrap(args).devBoot(false);
         }
-        return GameClassLoaderHolder.loader;
+        return TestGameAccess.getGameClassLoader();
     }
 }

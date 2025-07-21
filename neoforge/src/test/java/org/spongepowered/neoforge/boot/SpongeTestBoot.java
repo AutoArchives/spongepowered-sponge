@@ -25,7 +25,7 @@
 package org.spongepowered.neoforge.boot;
 
 import org.spongepowered.bootstrap.neoforge.NeoForgeBootstrap;
-import org.spongepowered.common.applaunch.test.GameClassLoaderHolder;
+import org.spongepowered.common.applaunch.test.TestGameAccess;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,7 +33,7 @@ import java.nio.file.Path;
 public class SpongeTestBoot {
 
     public static ClassLoader getGameClassLoader() throws Exception {
-        if (GameClassLoaderHolder.loader == null) {
+        if (TestGameAccess.getGameClassLoader() == null) {
             final Path argsFile = Path.of(System.getProperty("sponge.test.args").substring(1));
             final String[] args = Files.lines(argsFile).map(String::trim).filter(line -> !line.startsWith("#") && !line.isEmpty())
                 .skip(1) // main class
@@ -41,6 +41,6 @@ public class SpongeTestBoot {
             System.setProperty("sponge.test.active", "true");
             new NeoForgeBootstrap(args).devBoot(false);
         }
-        return GameClassLoaderHolder.loader;
+        return TestGameAccess.getGameClassLoader();
     }
 }

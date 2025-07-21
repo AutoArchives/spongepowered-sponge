@@ -24,14 +24,46 @@
  */
 package org.spongepowered.common.applaunch.test;
 
-public class GameClassLoaderHolder {
-    public static ClassLoader loader;
+import java.lang.reflect.Field;
 
-    public static void set(final ClassLoader loader) {
+/**
+ * Caution: this class exists in multiple classloaders
+ */
+@SuppressWarnings("unused")
+public class TestGameAccess {
+    private static Runnable shutdownGame;
+
+    public static ClassLoader getGameClassLoader() {
+        return TestGameAccess.shutdownGame == null ? null : TestGameAccess.shutdownGame.getClass().getClassLoader();
+    }
+
+    public static void shutdownGame() {
         try {
-            ClassLoader.getSystemClassLoader().loadClass(GameClassLoaderHolder.class.getName()).getField("loader").set(null, loader);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
+            if (TestGameAccess.shutdownGame != null) {
+                TestGameAccess.shutdownGame.run();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    private static void set(final String name, final Object value) {
+        final Class<?> cl;
+        try {
+            cl = ClassLoader.getSystemClassLoader().loadClass(TestGameAccess.class.getName());
+        } catch (final ClassNotFoundException e) {
+            return;
+        }
+        try {
+            final Field field = cl.getDeclaredField(name);
+            field.setAccessible(true);
+            field.set(null, value);
+        } catch (final ReflectiveOperationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void setup(final Runnable shutdownGame) {
+        TestGameAccess.set("shutdownGame", shutdownGame);
     }
 }

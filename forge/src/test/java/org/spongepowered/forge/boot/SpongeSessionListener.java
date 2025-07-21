@@ -26,6 +26,7 @@ package org.spongepowered.forge.boot;
 
 import org.junit.platform.launcher.LauncherSession;
 import org.junit.platform.launcher.LauncherSessionListener;
+import org.spongepowered.common.applaunch.test.TestGameAccess;
 
 public class SpongeSessionListener implements LauncherSessionListener {
     private ClassLoader previousLoader;
@@ -43,6 +44,7 @@ public class SpongeSessionListener implements LauncherSessionListener {
 
     @Override
     public void launcherSessionClosed(final LauncherSession session) {
+        TestGameAccess.shutdownGame();
         Thread.currentThread().setContextClassLoader(this.previousLoader);
     }
 }

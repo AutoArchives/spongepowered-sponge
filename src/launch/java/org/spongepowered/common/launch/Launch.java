@@ -32,7 +32,6 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
-import org.spongepowered.common.applaunch.test.GameClassLoaderHolder;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -68,7 +67,6 @@ public abstract class Launch {
         }
 
         Launch.INSTANCE = Objects.requireNonNull(instance);
-        GameClassLoaderHolder.set(instance.getClass().getClassLoader());
     }
 
     public final String id() {
