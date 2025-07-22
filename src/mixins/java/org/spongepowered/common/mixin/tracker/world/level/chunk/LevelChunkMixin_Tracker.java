@@ -204,14 +204,14 @@ public abstract class LevelChunkMixin_Tracker extends ChunkAccessMixin_Tracker i
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "unpackTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ticks/LevelChunkTicks;unpack(J)V"))
-    private void tracker$wrapRescheduledTicks(final LevelChunkTicks instance, final long $$0) {
+    private void tracker$wrapRescheduledTicks(final LevelChunkTicks instance, final long gameTime) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
             return;
         }
         try (final ChunkLoadContext context = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)) {
             context.chunk((LevelChunk) (Object) this);
             context.buildAndSwitch();
-            instance.unpack($$0);
+            instance.unpack(gameTime);
         }
     }
 }

@@ -29,10 +29,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.LevelTicks;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -96,10 +98,13 @@ public abstract class LevelTicksMixin<T> implements LevelTicksBridge<T> {
         this.impl$level = level;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ServerLevel bridge$level() {
         if (this.impl$level == null) {
-            final Optional<ServerLevel> trackedLevel = PhaseTracker.getInstance().currentCause().first(ServerLevel.class);
+            final Cause cause = PhaseTracker.getInstance().currentCause();
+            final Optional<ServerLevel> trackedLevel = cause.first(ServerLevel.class)
+                .or(() -> (Optional) cause.first(LevelChunk.class).map(LevelChunk::getLevel).filter(ServerLevel.class::isInstance));
             this.impl$level = trackedLevel.orElseThrow(() -> new IllegalStateException("Cannot find level of LevelTicks"));
         }
         return this.impl$level;
