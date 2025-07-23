@@ -5,6 +5,6 @@
   "mixins": [
     "server.MinecraftServerMixin_Test",
     "server.dedicated.DedicatedServerMixin_Test",
-    "server.dedicated.SettingsMixin_Test"
+    "server.dedicated.DedicatedServerSettingsMixin_Test"
   ]
 }

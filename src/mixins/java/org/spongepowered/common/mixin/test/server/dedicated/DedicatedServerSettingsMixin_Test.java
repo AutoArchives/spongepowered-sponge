@@ -24,21 +24,25 @@
  */
 package org.spongepowered.common.mixin.test.server.dedicated;
 
-import net.minecraft.server.dedicated.Settings;
-import org.slf4j.Logger;
+import net.minecraft.server.dedicated.DedicatedServerProperties;
+import net.minecraft.server.dedicated.DedicatedServerSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.Properties;
 
-@Mixin(Settings.class)
-public class SettingsMixin_Test {
+@Mixin(DedicatedServerSettings.class)
+public class DedicatedServerSettingsMixin_Test {
 
-    @Redirect(method = "loadFromFile", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
-    private static void onLoadFromFileError(final Logger logger, final String message, final Object path, final Object exception) {
-        if (!(exception instanceof NoSuchFileException)) {
-            logger.error(message, path, exception);
-        }
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServerProperties;fromFile(Ljava/nio/file/Path;)Lnet/minecraft/server/dedicated/DedicatedServerProperties;"))
+    public DedicatedServerProperties forceTestProperties(final Path path) {
+        final Properties props = new Properties();
+        props.setProperty("spawn-protection", "0");
+        props.setProperty("level-seed", "0");
+        props.setProperty("level-type", "flat");
+        props.setProperty("enable-command-block", "true");
+        return new DedicatedServerProperties(props);
     }
 }
