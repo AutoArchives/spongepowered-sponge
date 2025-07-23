@@ -28,7 +28,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -36,14 +35,11 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.StubPhaseState;
 import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
-import org.spongepowered.common.test.UnitTestExtension;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
 
 @Disabled
-@SuppressWarnings("deprecation")
-@ExtendWith(UnitTestExtension.class)
 public class GameTransactionIteratorTest {
 
     @Test
@@ -56,7 +52,7 @@ public class GameTransactionIteratorTest {
     @Test
     public void verifyNestedIterator() {
         final StubTransaction stubTransaction = new StubTransaction();
-        final ResultingTransactionBySideEffect effect = new ResultingTransactionBySideEffect(
+        final ResultingTransactionBySideEffect effect = new ResultingTransactionBySideEffect<>(
             InventoryEffect.getInstance());
         stubTransaction.addLast(effect);
         final StubTransaction child1 = new StubTransaction();
@@ -83,7 +79,7 @@ public class GameTransactionIteratorTest {
         final PhaseContext<@NonNull ?> phaseContext = StubPhaseState.getInstance().createPhaseContext(PhaseTracker.getInstance());
         phaseContext.buildAndSwitch();
         for (int i = 0; i < effectCount; i++) {
-            final ResultingTransactionBySideEffect effect = new ResultingTransactionBySideEffect(
+            final ResultingTransactionBySideEffect effect = new ResultingTransactionBySideEffect<>(
                 InventoryEffect.getInstance());
             parent.addLast(effect);
             for (int j = 0; j < childCount; j++) {
@@ -120,6 +116,8 @@ public class GameTransactionIteratorTest {
             Arguments.of(293, 87, 112)
         );
     }
+
+    @SuppressWarnings("deprecation")
     @ParameterizedTest
     @MethodSource(value = "validateTransactionalIterator")
     public void validateTransactionalIterator(final int transactionCount, final int effectCount, final int childCount) {
@@ -134,7 +132,7 @@ public class GameTransactionIteratorTest {
             transactions[t] = transaction;
             transactor.logTransaction(transaction);
             for (int i = 0; i < effectCount; i++) {
-                final ResultingTransactionBySideEffect effect = new ResultingTransactionBySideEffect(
+                final ResultingTransactionBySideEffect effect = new ResultingTransactionBySideEffect<>(
                     InventoryEffect.getInstance());
                 try (final EffectTransactor ignored = transactor.pushEffect(effect)) {
                     for (int j = 0; j < childCount; j++) {
