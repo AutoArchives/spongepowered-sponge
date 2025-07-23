@@ -437,7 +437,8 @@ tasks {
     }
 
     test {
-        useJUnitPlatform()
+        // tests can only be run in subprojects
+        enabled = false
     }
 
     check {

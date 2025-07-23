@@ -80,6 +80,7 @@ val commonAppLaunch = commonProject.sourceSets.named("applaunch")
 val commonAppLaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val commonMixins = commonProject.sourceSets.named("mixins")
 val commonMain = commonProject.sourceSets.named("main")
+val commonTest = commonProject.sourceSets.named("test")
 
 // SpongeNeo source sets
 // Service layer
@@ -158,7 +159,9 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(bootstrapNeoForge.get(), this)
 }
-sourceSets.named("test") {
+val testSources = sourceSets.named("test") {
+    spongeImpl.addDependencyToImplementation(commonTest.get(), this)
+
     spongeImpl.addDependencyToImplementation(bootstrapMain.get(), this)
     spongeImpl.addDependencyToImplementation(bootstrapNeoForge.get(), this)
 }
@@ -232,6 +235,11 @@ dependencies {
     testImplementation(apiLibs.junit.params)
     testImplementation(apiLibs.junit.launcher)
     testRuntimeOnly(apiLibs.junit.engine)
+
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junitJupiter) {
+        exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
+    }
 }
 
 afterEvaluate {
@@ -391,6 +399,8 @@ tasks {
 
     test {
         useJUnitPlatform()
+
+        testClassesDirs = commonTest.get().output.classesDirs + testSources.get().output.classesDirs
 
         jvmArgs(runServer.get().jvmArgs)
         jvmArgs("-Dsponge.test.args=" + runServer.get().args!!.joinToString(" "))
