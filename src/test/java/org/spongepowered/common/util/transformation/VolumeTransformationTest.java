@@ -166,7 +166,7 @@ public final class VolumeTransformationTest {
         return volume;
     }
 
-    @MethodSource("testTransformationsOfPositions")
+    @MethodSource
     @ParameterizedTest
     void testTransformationsOfPositions(
         final Vector3i min, final Vector3i max, final Vector3i origin, final Vector3i testForRoundTrip,

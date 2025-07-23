@@ -170,6 +170,8 @@ dependencies {
     testImplementation(libs.mockito.junitJupiter) {
         exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
     }
+
+    testImplementation(libs.mixin)
 }
 
 minecraft {
