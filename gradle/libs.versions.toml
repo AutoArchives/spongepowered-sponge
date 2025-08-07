@@ -19,6 +19,7 @@ mockito = "5.11.0"
 jline = "3.25.1"
 tinylog = "2.7.0"
 vineflower = "1.11.1"
+jacoco = "0.8.13"
 
 [libraries]
 # common
@@ -57,6 +58,7 @@ mixinextras-common = { module = "io.github.llamalad7:mixinextras-common", versio
 mixinextras-forge = { module = "io.github.llamalad7:mixinextras-forge", version.ref = "mixinextras" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-junitJupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+jacoco-core = { module = "org.jacoco:org.jacoco.core", version.ref = "jacoco" }
 
 # vanilla
 forgeAutoRenamingTool = { module = "net.minecraftforge:ForgeAutoRenamingTool", version.ref = "forgeAutoRenamingTool" }

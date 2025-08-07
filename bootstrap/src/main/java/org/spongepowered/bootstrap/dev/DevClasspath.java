@@ -132,7 +132,7 @@ public class DevClasspath {
                 continue;
             }
 
-            if (bootNames.contains(fileName)) {
+            if (bootNames.contains(fileName) || fileName.startsWith("org.jacoco.core-")) {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Boot: " + path);
                 }

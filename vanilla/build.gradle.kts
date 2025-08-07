@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.shadow)
     id("implementation-structure")
     alias(libs.plugins.blossom)
-    eclipse
+    jacoco
 }
 
 val commonProject = parent!!
@@ -264,6 +264,10 @@ dependencies {
     testImplementation(libs.mockito.junitJupiter) {
         exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
     }
+
+    testRuntimeOnly(libs.jacoco.core) {
+        exclude(group = "org.ow2.asm")
+    }
 }
 
 minecraft {
@@ -515,6 +519,18 @@ tasks {
             workingDir.mkdirs()
             workingDir.resolve("eula.txt").writeText("eula=true")
         }
+
+        extensions.configure(JacocoTaskExtension::class) {
+            excludeClassLoaders = listOf("cpw.mods.modlauncher.TransformingClassLoader")
+        }
+
+        finalizedBy(jacocoTestReport)
+    }
+
+    jacocoTestReport {
+        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
+        sourceSets(appLaunch, launch, accessors, mixins, main)
+        dependsOn(test)
     }
 }
 
