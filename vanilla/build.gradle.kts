@@ -185,6 +185,10 @@ dependencies {
 
     installer(project(libraryManagerProject.path))
 
+    // optional at runtime
+    "installerCompileOnly"(platform(apiLibs.junit.bom))
+    "installerCompileOnly"(apiLibs.junit.launcher)
+
     val boot = bootLibrariesConfig.name
     boot(libs.securemodules)
     boot(libs.asm.commons)

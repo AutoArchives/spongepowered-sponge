@@ -81,28 +81,30 @@ public final class InstallerMain {
     private static final int MAX_TRIES = 2;
 
     private final Installer installer;
+    private final boolean isolated;
 
-    public InstallerMain(final String[] args) throws Exception {
+    public InstallerMain(final String[] args, final boolean isolated) throws Exception {
         LauncherCommandLine.configure(args);
         this.installer = new Installer(LauncherCommandLine.installerDirectory);
+        this.isolated = isolated;
     }
 
     public static void main(final String[] args) throws Exception {
-        new InstallerMain(args).run();
+        new InstallerMain(args, true).run();
     }
 
-    public void run() {
+    public void run() throws Exception {
         try  {
             this.downloadAndRun();
         } catch (final Exception ex) {
             Logger.error(ex, "Failed to download Sponge libraries and/or Minecraft");
-            System.exit(2);
+            throw ex;
         } finally {
             this.installer.getLibraryManager().finishedProcessing();
         }
     }
 
-    public void downloadAndRun() throws Exception {
+    private void downloadAndRun() throws Exception {
         ServerAndLibraries remappedMinecraftJar = null;
         Version mcVersion = null;
         try {
@@ -188,7 +190,7 @@ public final class InstallerMain {
         gameArgs.add(launchTarget);
         Collections.addAll(gameArgs, this.installer.getConfig().args().split(" "));
 
-        InstallerMain.bootstrap(bootLibs, spongeBoot, gameArgs.toArray(new String[0]));
+        this.bootstrap(bootLibs, spongeBoot, gameArgs.toArray(new String[0]));
     }
 
     private static Path newJarInJar(final Path jar) {
@@ -214,7 +216,7 @@ public final class InstallerMain {
         }
     }
 
-    private static void bootstrap(final Path[] bootLibs, final Path spongeBoot, final String[] args) throws Exception {
+    private void bootstrap(final Path[] bootLibs, final Path spongeBoot, final String[] args) throws Exception {
         final List<Path[]> classpath = new ArrayList<>();
         for (final Path lib : bootLibs) {
             classpath.add(new Path[] { lib });
@@ -222,10 +224,10 @@ public final class InstallerMain {
         classpath.add(new Path[] { spongeBoot });
 
         try {
-            new VanillaBootstrap(args).boot(classpath, true);
+            new VanillaBootstrap(args).boot(classpath, this.isolated);
         } catch (final Exception ex) {
             Logger.error(ex, "Failed to invoke bootstrap due to an error");
-            System.exit(1);
+            throw ex;
         }
     }
 
