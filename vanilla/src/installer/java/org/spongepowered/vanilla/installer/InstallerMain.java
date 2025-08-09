@@ -111,7 +111,6 @@ public final class InstallerMain {
             mcVersion = this.downloadMinecraftManifest();
         } catch (final IOException ex) {
             remappedMinecraftJar = this.recoverFromMinecraftDownloadError(ex);
-            this.installer.getLibraryManager().validate();
         }
 
         final LibraryManager libraryManager = this.installer.getLibraryManager();
@@ -128,7 +127,6 @@ public final class InstallerMain {
                         throw new UncheckedIOException(ex);
                     }
                 }, libraryManager.preparationWorker());
-                libraryManager.validate();
                 remappedMinecraftJar = remappedMinecraftJarFuture.get();
             }
         } catch (final ExecutionException ex) {
@@ -136,6 +134,8 @@ public final class InstallerMain {
             remappedMinecraftJar = this.recoverFromMinecraftDownloadError(cause instanceof Exception ? (Exception) cause : ex);
         }
         assert remappedMinecraftJar != null; // always assigned or thrown
+
+        libraryManager.validate();
 
         // Minecraft itself is on the main layer
         libraryManager.addLibrary(InstallerMain.COLLECTION_MAIN, new LibraryManager.Library("minecraft", remappedMinecraftJar.server()));
@@ -148,17 +148,31 @@ public final class InstallerMain {
             libraryManager.addLibrary(InstallerMain.COLLECTION_BOOTSTRAP, new LibraryManager.Library(artifact.toString(), path));
         }
 
-        this.installer.getLibraryManager().finishedProcessing();
+        if (!this.isolated) {
+            // JaCoCo core is provided by the user because its version must match the version of the JaCoCo agent
+            Path jacocoJar = null;
+            try {
+                final Class<?> jacocoClass = getClass().getClassLoader().loadClass("org.jacoco.core.JaCoCo");
+                jacocoJar = Path.of(jacocoClass.getProtectionDomain().getCodeSource().getLocation().toURI());
+            } catch (final Exception ignored) {}
+
+            if (jacocoJar != null && jacocoJar.getFileName().toString().endsWith(".jar")) {
+                Logger.info("JaCoCo core has been detected. Custom instrumentation will be enabled.");
+                libraryManager.addLibrary(InstallerMain.COLLECTION_BOOTSTRAP, new LibraryManager.Library("jacoco-core", jacocoJar));
+            }
+        }
+
+        libraryManager.finishedProcessing();
 
         Logger.info("Environment has been verified.");
 
         final Set<String> seenLibs = new HashSet<>();
-        final Path[] bootLibs = this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_BOOTSTRAP).stream()
+        final Path[] bootLibs = libraryManager.getAll(InstallerMain.COLLECTION_BOOTSTRAP).stream()
             .peek(lib -> seenLibs.add(lib.name()))
             .map(LibraryManager.Library::file)
             .toArray(Path[]::new);
 
-        final Path[] gameLibs = this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_MAIN).stream()
+        final Path[] gameLibs = libraryManager.getAll(InstallerMain.COLLECTION_MAIN).stream()
             .filter(lib -> !seenLibs.contains(lib.name()))
             .map(LibraryManager.Library::file)
             .toArray(Path[]::new);

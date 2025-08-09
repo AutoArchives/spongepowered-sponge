@@ -434,6 +434,7 @@ tasks {
         val runServer = minecraft.runs.getByName("server")
         jvmArgs(runServer.jvmArgs)
         jvmArgs("-Dsponge.test.args=" + runServer.args.joinToString(" "))
+        jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
         workingDir = layout.buildDirectory.dir("test-run").get().asFile
 
         doFirst {

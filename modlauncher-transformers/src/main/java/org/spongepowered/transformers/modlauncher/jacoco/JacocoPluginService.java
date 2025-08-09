@@ -51,6 +51,7 @@ public class JacocoPluginService implements ILaunchPluginService {
     private static final EnumSet<Phase> NAY = EnumSet.noneOf(Phase.class);
 
     private boolean disabled;
+    private String[] packages;
     private ClassLoader loader;
 
     public JacocoPluginService() {
@@ -58,6 +59,15 @@ public class JacocoPluginService implements ILaunchPluginService {
             getClass().getClassLoader().loadClass("org.jacoco.core.JaCoCo");
         } catch (final ClassNotFoundException e) {
             this.disabled = true;
+            return;
+        }
+
+        this.packages = System.getProperty("sponge.jacoco.packages", "").split(",");
+        for (int i = 0; i < this.packages.length; i++) {
+            final String pkg = this.packages[i].replace('.', '/');
+            if (!pkg.endsWith("/")) {
+                this.packages[i] = pkg + "/";
+            }
         }
     }
 
@@ -69,6 +79,15 @@ public class JacocoPluginService implements ILaunchPluginService {
     @Override
     public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
         return this.disabled || isEmpty ? NAY : YAY;
+    }
+
+    private boolean testClassName(final String name) {
+        for (final String pkg : this.packages) {
+            if (name.startsWith(pkg)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -88,8 +107,10 @@ public class JacocoPluginService implements ILaunchPluginService {
             this.loader = contextLoader;
         }
 
-        // Only apply JaCoCo to our sources
-        if (!classNode.name.startsWith("org/spongepowered/")) {
+        // Do not instrument every class for two reasons:
+        // - Performance
+        // - JaCoCo changes the LVT which can cause mixins targeting the current class to fail
+        if (!this.testClassName(classNode.name)) {
             return ComputeFlags.NO_REWRITE;
         }
 
