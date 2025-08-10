@@ -43,6 +43,7 @@ public class DedicatedServerSettingsMixin_Test {
         props.setProperty("level-seed", "0");
         props.setProperty("level-type", "flat");
         props.setProperty("enable-command-block", "true");
+        props.setProperty("pause-when-empty-seconds", "0");
         return new DedicatedServerProperties(props);
     }
 }

@@ -125,7 +125,7 @@ public class DevClasspath {
 
             final String fileName = path.getFileName().toString();
 
-            if (fileName.startsWith("junit-")) {
+            if (fileName.startsWith("junit-") || fileName.startsWith("mockito-")) {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Ignored: " + path);
                 }

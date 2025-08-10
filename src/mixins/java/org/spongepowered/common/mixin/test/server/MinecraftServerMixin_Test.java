@@ -35,28 +35,27 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.applaunch.test.TestGameAccess;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 
 import java.io.IOException;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Test extends ReentrantBlockableEventLoop<TickTask> {
+public abstract class MinecraftServerMixin_Test extends ReentrantBlockableEventLoop<TickTask> implements MinecraftServerBridge {
 
-    public MinecraftServerMixin_Test(String name) {
+    // @formatter:off
+    @Shadow private volatile boolean running;
+    @Shadow private boolean stopped;
+
+    @Shadow protected abstract boolean shadow$initServer() throws IOException;
+    @Shadow public abstract void shadow$stopServer();
+    @Shadow public abstract void shadow$tickServer(BooleanSupplier haveTime);
+    // @formatter:on
+
+    public MinecraftServerMixin_Test(final String name) {
         super(name);
     }
-
-    @Shadow
-    protected abstract boolean initServer() throws IOException;
-
-    @Shadow
-    private volatile boolean running;
-
-    @Shadow
-    private boolean stopped;
-
-    @Shadow
-    public abstract void stopServer();
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(final CallbackInfo ci) {
@@ -71,7 +70,7 @@ public abstract class MinecraftServerMixin_Test extends ReentrantBlockableEventL
     private static void spin(final Function<Thread, ? extends MinecraftServer> supplier, CallbackInfoReturnable<MinecraftServer> cir) {
         final MinecraftServer server = supplier.apply(Thread.currentThread());
         try {
-            ((MinecraftServerMixin_Test) (Object) server).initServer();
+            ((MinecraftServerMixin_Test) (Object) server).shadow$initServer();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -82,7 +81,7 @@ public abstract class MinecraftServerMixin_Test extends ReentrantBlockableEventL
         if (this.running) {
             this.running = false;
             this.stopped = true;
-            this.stopServer();
+            this.shadow$stopServer();
         }
     }
 
@@ -102,5 +101,22 @@ public abstract class MinecraftServerMixin_Test extends ReentrantBlockableEventL
     @Overwrite
     public void waitUntilNextTick() {
         this.runAllTasks();
+    }
+
+    /**
+     * @author Yeregorix
+     * @reason We have time to run all optional tasks.
+     */
+    @Overwrite
+    private boolean haveTime() {
+        return true;
+    }
+
+    @Override
+    public void bridge$tickServer(final int ticks) {
+        for (int i = 0; i < ticks; i++) {
+            this.shadow$tickServer(this::haveTime);
+            this.waitUntilNextTick();
+        }
     }
 }
