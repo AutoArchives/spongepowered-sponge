@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.players;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.netty.channel.local.LocalAddress;
 import net.kyori.adventure.audience.Audience;
@@ -131,6 +132,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -680,5 +682,13 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         //not for the TRANSIENT key. This ensures that arbitrary
         //entities are removed with the player but players are ignored.
         return instance.hasExactlyOnePlayerPassenger() && instance.getType().canSerialize();
+    }
+
+    @ModifyExpressionValue(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;levelKeys()Ljava/util/Set;"))
+    private Set<ResourceKey<Level>> impl$onLoginPacketLevelKeys(final Set<ResourceKey<Level>> original)
+    {
+        //Levels can be dynamically added or removed while
+        //the packet is in-flight in the I/O thread.
+        return Set.copyOf(original);
     }
 }
