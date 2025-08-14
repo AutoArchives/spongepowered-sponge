@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.server;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.SystemReport;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
@@ -35,7 +36,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
@@ -54,10 +54,9 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
 
     // @formatter:off
     @Shadow public abstract boolean shadow$isStopped();
-    @Shadow public abstract void shadow$tickChildren(BooleanSupplier hasTimeLeft);
     // @formatter:on
 
-    @Inject(method = "fillSystemReport", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "fillSystemReport", at = @At("RETURN"))
     private void tracker$addPhaseTrackerToCrashReport(final SystemReport category, final CallbackInfoReturnable<SystemReport> cir) {
         category.setDetail("Sponge PhaseTracker", CauseTrackerCrashHandler.INSTANCE::call);
     }
@@ -67,44 +66,45 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
         PhaseTracker.SERVER.ensureEmpty();
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "tickServer",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/server/MinecraftServer;tickChildren(Ljava/util/function/BooleanSupplier;)V"
         )
     )
-    private void tracker$wrapUpdateTimeLightAndEntities(final MinecraftServer minecraftServer, final BooleanSupplier hasTimeLeft) {
+    private void tracker$wrapServerTick(final MinecraftServer minecraftServer, final BooleanSupplier hasTimeLeft, final Operation<Void> original) {
         try (
             final PhaseContext<@NonNull ?> context = TickPhase.Tick.SERVER_TICK
                 .createPhaseContext(PhaseTracker.SERVER)
                 .server(minecraftServer)
         ) {
             context.buildAndSwitch();
-            this.shadow$tickChildren(hasTimeLeft);
+            original.call(minecraftServer, hasTimeLeft);
         }
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "tickChildren",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/server/level/ServerLevel;tick(Ljava/util/function/BooleanSupplier;)V"
         )
     )
-    private void tracker$wrapWorldTick(final ServerLevel serverWorld, final BooleanSupplier hasTimeLeft) {
+    private void tracker$wrapWorldTick(final ServerLevel level, final BooleanSupplier hasTimeLeft, final Operation<Void> original) {
         try (
             final PhaseContext<@NonNull ?> context = TickPhase.Tick.WORLD_TICK
                 .createPhaseContext(PhaseTracker.SERVER)
-                .world(serverWorld)
+                .world(level)
         ) {
             context.buildAndSwitch();
-            serverWorld.tick(hasTimeLeft);
+            original.call(level, hasTimeLeft);
         }
     }
 
     @Inject(method = "wrapRunnable(Ljava/lang/Runnable;)Lnet/minecraft/server/TickTask;", at = @At("RETURN"))
-    private void tracker$associatePhaseContextWithWrappedTask(final Runnable runnable, final CallbackInfoReturnable<TickTask> cir) {        final TickTask returnValue = cir.getReturnValue();
+    private void tracker$associatePhaseContextWithWrappedTask(final Runnable runnable, final CallbackInfoReturnable<TickTask> cir) {
+        final TickTask returnValue = cir.getReturnValue();
         if (!PhaseTracker.SERVER.onSidedThread()) {
             final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             if (phaseContext.isEmpty()) {
