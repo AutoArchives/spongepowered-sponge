@@ -34,7 +34,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class Bootstrap<Jar> {
@@ -72,7 +74,8 @@ public abstract class Bootstrap<Jar> {
         }
 
         // Collect the jars
-        final List<Jar> filteredJars = new ArrayList<>();
+        final Set<String> moduleNames = new HashSet<>();
+        final List<Jar> resourceJars = new ArrayList<>();
         final List<Jar> appJars = new ArrayList<>();
 
         for (final Path[] paths : classpath) {
@@ -91,7 +94,15 @@ public abstract class Bootstrap<Jar> {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Filtered: " + name + " " + Bootstrap.formatUnion(paths));
                 }
-                filteredJars.add(jar);
+                resourceJars.add(jar);
+                continue;
+            }
+
+            if (!moduleNames.add(name)) {
+                if (Bootstrap.DEBUG) {
+                    System.out.println("Duplicate: " + name + " " + Bootstrap.formatUnion(paths));
+                }
+                resourceJars.add(jar);
                 continue;
             }
 
@@ -103,8 +114,7 @@ public abstract class Bootstrap<Jar> {
 
         // Create the layer configuration
         final ModuleFinder finder = this.createModuleFinder(appJars);
-        final List<String> targets = appJars.stream().map(this::getModuleName).toList();
-        final Configuration config = ModuleLayer.boot().configuration().resolveAndBind(finder, ModuleFinder.ofSystem(), targets);
+        final Configuration config = ModuleLayer.boot().configuration().resolveAndBind(finder, ModuleFinder.ofSystem(), moduleNames);
         final List<ModuleLayer> parentLayers = List.of(ModuleLayer.boot());
 
         // Isolation
@@ -112,10 +122,10 @@ public abstract class Bootstrap<Jar> {
         ClassLoader parentLoader = isolated ? ClassLoader.getPlatformClassLoader() : contextLoader;
 
         // Intermediate classloader to include resources but not modules
-        if (!filteredJars.isEmpty()) {
-            final URL[] urls = new URL[filteredJars.size()];
+        if (!resourceJars.isEmpty()) {
+            final URL[] urls = new URL[resourceJars.size()];
             for (int i = 0; i < urls.length; i++) {
-                urls[i] = this.getJarURL(filteredJars.get(i));
+                urls[i] = this.getJarURL(resourceJars.get(i));
             }
             parentLoader = new URLClassLoader("BOOTSTRAP-RESOURCES", urls, parentLoader);
         }
