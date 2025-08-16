@@ -118,6 +118,7 @@ import org.spongepowered.common.server.PerWorldBorderListener;
 import org.spongepowered.common.service.server.ban.SpongeIPBanList;
 import org.spongepowered.common.service.server.ban.SpongeUserBanList;
 import org.spongepowered.common.service.server.whitelist.SpongeUserWhiteList;
+import org.spongepowered.common.util.AutoSaveQueue;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.math.vector.Vector3d;
@@ -159,10 +160,12 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow protected abstract boolean shadow$verifyChatTrusted(final PlayerChatMessage $$0);
     @Shadow protected abstract void shadow$broadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
         final net.minecraft.server.level.@Nullable ServerPlayer $$2, final ChatType.Bound $$4);
+    @Shadow protected abstract void shadow$save(net.minecraft.server.level.ServerPlayer $$0);
     // @formatter:on
 
     private boolean impl$isRespawnWithPosition = false;
     private boolean impl$isDuringSystemMessageEvent = false;
+    private @Nullable AutoSaveQueue<UUID> impl$autoSaveQueue;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setSpongeLists(final CallbackInfo callbackInfo) {
@@ -674,6 +677,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         if (((TransientBridge) player).bridge$isTransient()) {
             ci.cancel();
         }
+        if (this.impl$autoSaveQueue != null) {
+            this.impl$autoSaveQueue.remove(player.getUUID());
+        }
     }
 
     @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hasExactlyOnePlayerPassenger()Z"))
@@ -685,10 +691,37 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @ModifyExpressionValue(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;levelKeys()Ljava/util/Set;"))
-    private Set<ResourceKey<Level>> impl$onLoginPacketLevelKeys(final Set<ResourceKey<Level>> original)
-    {
+    private Set<ResourceKey<Level>> impl$onLoginPacketLevelKeys(final Set<ResourceKey<Level>> original) {
         //Levels can be dynamically added or removed while
         //the packet is in-flight in the I/O thread.
         return Set.copyOf(original);
+    }
+
+    @Override
+    public void bridge$saveAll(final int batchInterval, final int batchAmount, final boolean log) {
+        if (this.impl$autoSaveQueue != null || this.players.isEmpty()) {
+            return;
+        }
+        if (log) {
+            PlayerListMixin.LOGGER.info("Starting to save {} player(s) data every {} tick(s)", batchAmount, batchInterval);
+        }
+        this.impl$autoSaveQueue = new AutoSaveQueue<>(k -> {
+            final net.minecraft.server.level.@Nullable ServerPlayer player = this.playersByUUID.get(k);
+            if (player != null) {
+                this.shadow$save(player);
+                return true;
+            }
+            return false;
+        }, this.playersByUUID.keySet(), batchInterval, batchAmount, log);
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void impl$onTick(final CallbackInfo ci) {
+        if (this.impl$autoSaveQueue != null && this.impl$autoSaveQueue.drain()) {
+            if (this.impl$autoSaveQueue.log()) {
+                PlayerListMixin.LOGGER.info("All player data has been saved");
+            }
+            this.impl$autoSaveQueue = null;
+        }
     }
 }

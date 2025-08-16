@@ -22,31 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.inheritable;
+package org.spongepowered.common.launch.config.common;
 
-import org.spongepowered.common.launch.config.common.AutoSaveOptions;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
-public final class WorldCategory {
+public final class AutoSaveOptions {
 
-    @Setting("item-merge-radius")
-    @Comment("The defined merge radius for Item entities such that when two items are \n"
-        + "within the defined radius of each other, they will attempt to merge. Usually, \n"
-        + "the default radius is set to 0.5 in Vanilla, however, for performance reasons \n"
-        + "2.5 is generally acceptable. \n"
-        + "Note: Increasing the radius higher will likely cause performance degradation \n"
-        + "with larger amount of items as they attempt to merge and search nearby \n"
-        + "areas for more items. Setting to a negative value is not supported!")
-    public final double itemMergeRadius = 2.5D;
+    @Setting("interval")
+    @Comment("The tick interval used to execute the auto save. \n"
+        + "Set to 0 to disable. (Default: 6000) \n"
+        + "Note: 20 ticks is equivalent to 1 second.")
+    public int interval = 6000;
 
-    @Setting("auto-save")
-    @Comment("The auto-save options used to save all loaded chunks in a world.")
-    public AutoSaveOptions autoSave = new AutoSaveOptions();
+    @Setting("batch-interval")
+    @Comment("The tick interval used to process the items in \n"
+        + "the auto save queue once the auto save has been triggered. \n"
+        + "Setting this to 0 will execute all of the tasks in the same tick. (Default: 0) \n"
+        + "Note: 20 ticks is equivalent to 1 second.")
+    public int batchInterval = 0;
 
-    @Setting("config-auto-save")
-    @Comment("The auto-save options used to save the world configuration files.")
-    public AutoSaveOptions configAutoSave = new AutoSaveOptions();
+    @Setting("batch-amount")
+    @Comment("The amount of items to process per batch. (Default: 1) \n"
+        + "Note: Has no effect if batch-interval is disabled.")
+    public int batchAmount = 1;
+
+    @Comment("Log when a auto-saves is triggered. \n"
+        + "Note: This may be spammy depending on the interval configured.")
+    public boolean log = false;
 }
