@@ -35,10 +35,9 @@ import java.util.UUID;
 @ConfigSerializable
 public final class WorldCategory {
 
-    @Setting(value = "player-auto-save-interval")
-    @Comment("The auto-save tick interval used when saving global player data. (Default: 6000) \n"
-                                                          + "Note: 20 ticks is equivalent to 1 second. Set to 0 to disable.")
-    public int playerAutoSaveInterval = 6000;
+    @Setting(value = "player-auto-save")
+    @Comment("The auto-save options used when saving global player data.")
+    public AutoSaveOptions playerAutoSave = new AutoSaveOptions();
 
     @Setting(value = "leaf-decay")
     @Comment("If 'true', natural leaf decay is allowed.")
