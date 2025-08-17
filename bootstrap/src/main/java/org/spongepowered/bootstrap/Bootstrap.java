@@ -75,7 +75,7 @@ public abstract class Bootstrap<Jar> {
 
         // Collect the jars
         final Set<String> moduleNames = new HashSet<>();
-        final List<Jar> resourceJars = new ArrayList<>();
+        final List<Path> resourceJars = new ArrayList<>();
         final List<Jar> appJars = new ArrayList<>();
 
         for (final Path[] paths : classpath) {
@@ -94,7 +94,7 @@ public abstract class Bootstrap<Jar> {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Filtered: " + name + " " + Bootstrap.formatUnion(paths));
                 }
-                resourceJars.add(jar);
+                resourceJars.addAll(Arrays.asList(paths));
                 continue;
             }
 
@@ -102,7 +102,7 @@ public abstract class Bootstrap<Jar> {
                 if (Bootstrap.DEBUG) {
                     System.out.println("Duplicate: " + name + " " + Bootstrap.formatUnion(paths));
                 }
-                resourceJars.add(jar);
+                resourceJars.addAll(Arrays.asList(paths));
                 continue;
             }
 
@@ -125,7 +125,7 @@ public abstract class Bootstrap<Jar> {
         if (!resourceJars.isEmpty()) {
             final URL[] urls = new URL[resourceJars.size()];
             for (int i = 0; i < urls.length; i++) {
-                urls[i] = this.getJarURL(resourceJars.get(i));
+                urls[i] = resourceJars.get(i).toUri().toURL();
             }
             parentLoader = new URLClassLoader("BOOTSTRAP-RESOURCES", urls, parentLoader);
         }
