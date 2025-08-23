@@ -62,6 +62,10 @@ public class GameDataMixin_Neo {
 
         SpongePacketHandler.init((SpongeChannelManager) Sponge.channelManager());
 
+        lifecycle.establishDataProviders();
+        lifecycle.callRegisterDataEvent();
+        lifecycle.establishEarlyGlobalRegistries();
+
         Launch.instance().lifecycle().establishGlobalRegistries();
     }
 

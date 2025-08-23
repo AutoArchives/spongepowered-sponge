@@ -63,6 +63,10 @@ public class GameDataMixin_Forge {
 
         SpongePacketHandler.init((SpongeChannelManager) Sponge.channelManager());
 
+        lifecycle.establishDataProviders();
+        lifecycle.callRegisterDataEvent();
+        lifecycle.establishEarlyGlobalRegistries();
+
         Launch.instance().lifecycle().establishGlobalRegistries();
     }
 
