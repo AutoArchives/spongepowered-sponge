@@ -36,7 +36,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
@@ -61,27 +60,17 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
         category.setDetail("Sponge PhaseTracker", CauseTrackerCrashHandler.INSTANCE::call);
     }
 
-    @Inject(method = "tickServer", at = @At("RETURN"))
-    private void tracker$ensurePhaseTrackerEmpty(final BooleanSupplier hasTimeLeft, final CallbackInfo ci) {
-        PhaseTracker.SERVER.ensureEmpty();
-    }
-
-    @WrapOperation(
-        method = "tickServer",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/MinecraftServer;tickChildren(Ljava/util/function/BooleanSupplier;)V"
-        )
-    )
-    private void tracker$wrapServerTick(final MinecraftServer minecraftServer, final BooleanSupplier hasTimeLeft, final Operation<Void> original) {
+    @WrapMethod(method = "tickServer")
+    private void tracker$wrapServerTick(final BooleanSupplier hasTimeLeft, final Operation<Void> original) {
         try (
             final PhaseContext<@NonNull ?> context = TickPhase.Tick.SERVER_TICK
                 .createPhaseContext(PhaseTracker.SERVER)
-                .server(minecraftServer)
+                .server((MinecraftServer) (Object) this)
         ) {
             context.buildAndSwitch();
-            original.call(minecraftServer, hasTimeLeft);
+            original.call(hasTimeLeft);
         }
+        PhaseTracker.SERVER.ensureEmpty();
     }
 
     @WrapOperation(
