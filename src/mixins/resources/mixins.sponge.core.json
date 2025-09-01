@@ -95,6 +95,7 @@
     "server.network.ServerHandshakePacketListenerImplMixin",
     "server.network.ServerLoginPacketListenerImplMixin",
     "server.network.ServerStatusPacketListenerImplMixin",
+    "server.network.config.PrepareSpawnTask_ReadyMixin",
     "server.packs.resoruces.MultiPackResourceManagerMixin",
     "server.players.BanListEntryMixin",
     "server.players.GameProfileCache_GameProfileInfoMixin",

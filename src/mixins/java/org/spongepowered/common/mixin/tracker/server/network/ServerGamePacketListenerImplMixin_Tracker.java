@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.server.network;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
@@ -54,17 +56,17 @@ public abstract class ServerGamePacketListenerImplMixin_Tracker {
 
     @Shadow public ServerPlayer player;
 
-    @Redirect(method = "tick",
+    @WrapOperation(method = "tickPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;doTick()V"))
-    private void tracker$wrapPlayerTickWithPhase(final ServerPlayer player) {
+    private void tracker$wrapPlayerTickWithPhase(ServerPlayer instance, Operation<Void> original) {
         if (((PlatformEntityBridge) player).bridge$isFakePlayer() || ((LevelBridge) player.level()).bridge$isFake()) {
-            player.doTick();
+            original.call(instance);
             return;
         }
         try (final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.getWorldInstance(this.player.level())).source(player)) {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.PLAYER_TICK, () -> "Wrapping Player Tick: " + player.toString());
-            player.doTick();
+            original.call(instance);
         }
     }
 

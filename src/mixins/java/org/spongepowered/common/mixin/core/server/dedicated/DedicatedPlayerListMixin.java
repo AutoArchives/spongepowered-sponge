@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.dedicated;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;

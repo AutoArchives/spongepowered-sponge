@@ -28,7 +28,6 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.server.ServerFunctionLibrary;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -39,10 +38,11 @@ import java.util.concurrent.Executor;
 public abstract class ServerFunctionLibraryMixin {
 
     @WrapMethod(method = "reload")
-    private CompletableFuture<Void> impl$onReload(final PreparableReloadListener.PreparationBarrier barrier, final ResourceManager manager,
-                                                  final Executor executor1, final Executor executor2, final Operation<CompletableFuture<Void>> original) {
+    private CompletableFuture<Void> impl$onReload(
+        final PreparableReloadListener.SharedState state, final Executor executor1,
+        final PreparableReloadListener.PreparationBarrier barrier, Executor executor2, Operation<CompletableFuture<Void>> original) {
         if (Sponge.isServerAvailable()) {
-            return original.call(barrier, manager, executor1, executor2);
+            return original.call(state, executor1, barrier, executor2);
         }
         return barrier.wait(null);
     }

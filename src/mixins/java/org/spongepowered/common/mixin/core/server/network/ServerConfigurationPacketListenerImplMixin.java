@@ -32,6 +32,7 @@ import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -137,8 +138,8 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
     }
 
     @Redirect(method = "handleConfigurationFinished",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;"))
-    private Component impl$onCanPlayerLogin(final PlayerList instance, final SocketAddress $$0, final GameProfile $$1) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lnet/minecraft/server/players/NameAndId;)Lnet/minecraft/network/chat/Component;"))
+    private Component impl$onCanPlayerLogin(final PlayerList instance, final SocketAddress $$0, final NameAndId $$1) {
         //Skip as we check it at the start.
         return null;
     }

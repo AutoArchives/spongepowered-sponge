@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.client.server;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.client.server.IntegratedPlayerList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.NameAndId;
@@ -48,9 +47,10 @@ public abstract class IntegratedPlayerListMixin extends PlayerListMixin implemen
 
     @Override
     public CompletableFuture<Component> bridge$canPlayerLoginClient(final SocketAddress param0, final com.mojang.authlib.GameProfile param1) {
-        final Component component = this.shadow$canPlayerLogin(param0, new NameAndId(param1));
+        final var name = new NameAndId(param1);
+        final Component component = this.shadow$canPlayerLogin(param0, name);
         if (component == null) {
-            return this.impl$canPlayerLoginServer(param0, param1);
+            return this.impl$canPlayerLoginServer(param0, name);
         }
         return CompletableFuture.completedFuture(component);
     }
