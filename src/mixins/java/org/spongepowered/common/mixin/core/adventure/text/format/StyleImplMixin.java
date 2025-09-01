@@ -60,7 +60,7 @@ public abstract class StyleImplMixin implements StyleBridge {
                 // insertion
                 $this.insertion(),
                 // font
-                SpongeAdventure.asVanillaNullable($this.font())
+                SpongeAdventure.asVanillaFontDescription($this.font())
             );
         }
         // Style is immutable, no need to copy

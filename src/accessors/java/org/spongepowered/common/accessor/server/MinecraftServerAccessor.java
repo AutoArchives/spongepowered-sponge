@@ -27,7 +27,7 @@ package org.spongepowered.common.accessor.server;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.level.progress.LevelLoadListener;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -49,7 +49,7 @@ public interface MinecraftServerAccessor {
         throw new UntransformedAccessorError();
     }
 
-    @Invoker("setInitialSpawn") static void invoker$setInitialSpawn(final ServerLevel serverWorld, final ServerLevelData levelData, final boolean generateBonusChest, final boolean debugWorld) {
+    @Invoker("setInitialSpawn") static void invoker$setInitialSpawn(final ServerLevel serverWorld, final ServerLevelData levelData, final boolean generateBonusChest, final boolean debugWorld, LevelLoadListener listener) {
         throw new UntransformedInvokerError();
     }
 
@@ -58,8 +58,6 @@ public interface MinecraftServerAccessor {
     @Accessor("levels") Map<ResourceKey<Level>, ServerLevel> accessor$levels();
 
     @Accessor("executor") Executor accessor$executor();
-
-    @Accessor("progressListenerFactory") ChunkProgressListenerFactory accessor$progressListenerFactory();
 
     @Accessor("nextTickTimeNanos") void accessor$nextTickTimeNanos(final long nextTickTime);
 

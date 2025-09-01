@@ -69,6 +69,7 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CHISELED_BOOKSHELF_SLOT_4_OCCUPIED, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_4_OCCUPIED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CHISELED_BOOKSHELF_SLOT_5_OCCUPIED, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_5_OCCUPIED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CONDITIONAL, BlockStateProperties.CONDITIONAL);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.COPPER_GOLEM_POSE, BlockStateProperties.COPPER_GOLEM_POSE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CRACKED, BlockStateProperties.CRACKED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CRAFTING, BlockStateProperties.CRAFTING);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CREAKING_HEART_STATE, BlockStateProperties.CREAKING_HEART_STATE);
@@ -139,6 +140,7 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SEGMENT_AMOUNT, BlockStateProperties.SEGMENT_AMOUNT);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SHORT, BlockStateProperties.SHORT);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SHRIEKING, BlockStateProperties.SHRIEKING);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SIDE_CHAIN_PART, BlockStateProperties.SIDE_CHAIN_PART);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SIGNAL_FIRE, BlockStateProperties.SIGNAL_FIRE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SLAB_TYPE, BlockStateProperties.SLAB_TYPE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SNOWY, BlockStateProperties.SNOWY);

@@ -135,7 +135,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin implements Abst
                 this.shadow$setYRot(this.shadow$getYRot() + 180.0F);
                 this.yRotO += 180.0F;
                 this.life = 0;
-                if (!this.shadow$level().isClientSide && this.shadow$getDeltaMovement().lengthSqr() < 1.0E-7D) {
+                if (!this.shadow$level().isClientSide() && this.shadow$getDeltaMovement().lengthSqr() < 1.0E-7D) {
                     if (this.pickup == AbstractArrow.Pickup.ALLOWED) {
                         this.shadow$spawnAtLocation((ServerLevel) this.shadow$level(), this.shadow$getPickupItem(), 0.1F);
                     }

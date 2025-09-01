@@ -46,6 +46,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -310,22 +311,22 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     public boolean getOrLoadSkin(final UUID minecraftAccount) {
-        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount).orElse(null);
-        if (gameProfile == null) {
-            ProfileResult result =
-                    SpongeCommon.server().getSessionService().fetchProfile(minecraftAccount, true);
+        final var server = SpongeCommon.server();
+        final @Nullable GameProfile profile = server.nameToIdCache().get(minecraftAccount).flatMap(name ->
+            server.getProfileRepository().findProfileByName(name.name())
+        ).orElseGet(() -> {
+            final @Nullable ProfileResult result = server.getSessionService().fetchProfile(minecraftAccount, true);
             if (result == null) {
-                return false;
+                return null;
             }
-
-            gameProfile = result.profile();
-
-            // TODO Should we put profile cache entries with UUIDs that don't have their names?
-
-            SpongeCommon.server().getProfileCache().add(gameProfile);
+            server.nameToIdCache().add(new NameAndId(result.profile()));
+            return result.profile();
+        });
+        if (profile == null) {
+            return false;
         }
 
-        this.fakeProfile.properties().replaceValues(ProfileProperty.TEXTURES, gameProfile.getProperties().get(ProfileProperty.TEXTURES));
+        this.fakeProfile.properties().replaceValues(ProfileProperty.TEXTURES, profile.getProperties().get(ProfileProperty.TEXTURES));
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
@@ -335,22 +336,16 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     public boolean getOrLoadSkin(final String minecraftAccount) {
         Objects.requireNonNull(minecraftAccount);
-        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount).orElse(null);
-        if (gameProfile == null) {
+        final var server = SpongeCommon.server();
+        final @Nullable GameProfile profile = server.nameToIdCache().get(minecraftAccount).flatMap(name ->
+            server.getProfileRepository().findProfileByName(name.name())
+        ).orElse(null);
+        if (profile == null) {
             return false;
         }
 
-        if (gameProfile.getProperties().isEmpty()) {
-            ProfileResult result = SpongeCommon.server().getSessionService().fetchProfile(gameProfile.getId(), true);
-            if (result == null) {
-                return false;
-            }
-            gameProfile = result.profile();
-            SpongeCommon.server().getProfileCache().add(gameProfile);
-        }
-
         this.fakeProfile.properties().clear();
-        this.fakeProfile.properties().putAll(gameProfile.getProperties());
+        this.fakeProfile.properties().putAll(profile.getProperties());
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }

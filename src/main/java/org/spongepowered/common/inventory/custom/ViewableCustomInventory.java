@@ -77,16 +77,6 @@ public class ViewableCustomInventory extends CustomInventory implements MenuProv
     }
 
     @Override
-    public void startOpen(final Player player) {
-        this.viewers.add(player); // TODO check if this is always called
-    }
-
-    @Override
-    public void stopOpen(final Player player) {
-        this.viewers.remove(player);  // TODO check if this is always called
-    }
-
-    @Override
     public @Nullable AbstractContainerMenu createMenu(int id, net.minecraft.world.entity.player.Inventory playerInv, Player player) {
         if (this.vanilla) {
             return this.info.containerProvider.createMenu(id, playerInv, player, this);

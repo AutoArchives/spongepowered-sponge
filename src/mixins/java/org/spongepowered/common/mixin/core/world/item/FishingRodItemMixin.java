@@ -71,7 +71,7 @@ public abstract class FishingRodItemMixin {
         ),
         cancellable = true)
     private void onThrowEvent(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             // Only fire event on server-side to avoid crash on client
             return;
         }

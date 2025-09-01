@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.players;
 
+import net.minecraft.server.players.NameAndId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Final;
@@ -32,10 +33,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.server.players.GameProfileCache_GameProfileInfoBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
-@Mixin(targets = "net.minecraft.server.players.GameProfileCache$GameProfileInfo")
+@Mixin(targets = "net/minecraft/server/players/CachedUserNameToIdResolver$GameProfileInfo")
 public abstract class GameProfileCache_GameProfileInfoMixin implements GameProfileCache_GameProfileInfoBridge {
 
-    @Shadow @Final private com.mojang.authlib.GameProfile profile;
+    @Shadow @Final private NameAndId nameAndId;
 
     private boolean impl$isFull;
     private boolean impl$isSigned;
@@ -75,7 +76,7 @@ public abstract class GameProfileCache_GameProfileInfoMixin implements GameProfi
         if (basic != null) {
             return basic;
         }
-        basic = this.impl$basic = SpongeGameProfile.basicOf(this.profile);
+        basic = this.impl$basic = SpongeGameProfile.basicOf(this.nameAndId);
         return basic;
     }
 
@@ -92,11 +93,11 @@ public abstract class GameProfileCache_GameProfileInfoMixin implements GameProfi
             if (!this.impl$isSigned) {
                 return null;
             }
-            full = this.impl$fullSigned = SpongeGameProfile.of(this.profile);
+            full = this.impl$fullSigned = SpongeGameProfile.of(this.nameAndId);
         } else {
             final GameProfile fullSigned = this.impl$fullSigned;
             full = this.impl$fullUnsigned = SpongeGameProfile.unsignedOf(
-                    fullSigned == null ? SpongeGameProfile.of(this.profile) : fullSigned);
+                    fullSigned == null ? SpongeGameProfile.of(this.nameAndId) : fullSigned);
         }
         return full;
     }

@@ -276,7 +276,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
     }
 
     @Override
-    public boolean mouseClicked(final double mouseX, final double mouseY, final int button) {
+    public boolean mouseClicked(final double mouseX, final double mouseY, final int button, final boolean repeated) {
         // Find an entry match for where we clicked
         final Entry entry =
             this.getAllEntries().stream()
@@ -292,7 +292,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
             this.screen.handleComponentClicked(component.getStyle());
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mouseX, mouseY, button, repeated);
     }
 
     @Override

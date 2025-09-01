@@ -94,7 +94,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
     public int retrieve(final ItemStack stack) {
         final Player playerEntity = this.shadow$getPlayerOwner();
 
-        if (!this.shadow$level().isClientSide && playerEntity != null) {
+        if (!this.shadow$level().isClientSide() && playerEntity != null) {
             int i = 0;
 
             // Sponge start

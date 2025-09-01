@@ -33,6 +33,8 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
+import net.minecraft.world.level.block.CopperGolemStatueBlock;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
 import net.minecraft.world.level.block.entity.vault.VaultState;
 import net.minecraft.world.level.block.state.BlockState;
@@ -57,6 +59,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.block.state.properties.RedstoneSide;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
+import net.minecraft.world.level.block.state.properties.SideChainPart;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraft.world.level.block.state.properties.StructureMode;
@@ -150,6 +153,9 @@ public class BlockStatePropertyKeysGenerator implements Generator {
         vanillaEnumTypeMapping.put(VaultState.class, BlockStatePropertyKeysGenerator.inDataTypePkg("VaultState"));
         vanillaEnumTypeMapping.put(CreakingHeartState.class, BlockStatePropertyKeysGenerator.inDataTypePkg("CreakingHeartState"));
         vanillaEnumTypeMapping.put(TestBlockMode.class, BlockStatePropertyKeysGenerator.inDataTypePkg("TestBlockMode"));
+        vanillaEnumTypeMapping.put(SideChainPart.class, BlockStatePropertyKeysGenerator.inDataTypePkg("SideChain"));
+        vanillaEnumTypeMapping.put(CopperGolemStatueBlock.Pose.class, BlockStatePropertyKeysGenerator.inDataTypePkg("CopperGolemPose"));
+        vanillaEnumTypeMapping.put(WeatheringCopper.WeatherState.class, BlockStatePropertyKeysGenerator.inDataTypePkg("CopperOxidation"));
 
         // Custom Mapping required see StateHolderMixin_API
         final ClassName portionTypeClass = BlockStatePropertyKeysGenerator.inDataTypePkg("PortionType");

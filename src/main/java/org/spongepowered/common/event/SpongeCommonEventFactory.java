@@ -518,10 +518,6 @@ public final class SpongeCommonEventFactory {
     public static boolean handleCollideBlockEvent(final Block block, final Level world, final BlockPos pos,
             final net.minecraft.world.level.block.state.BlockState state,
             final net.minecraft.world.entity.Entity entity, final Direction direction, final CollisionType type) {
-        if (world.isClientSide) {
-            return false;
-        }
-
         if (world.isClientSide() || pos.getY() < world.getMinY()) {
             return false;
         }
@@ -529,30 +525,23 @@ public final class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(entity);
 
-            if (entity instanceof CreatorTrackedBridge) {
-                final CreatorTrackedBridge spongeEntity = (CreatorTrackedBridge) entity;
+            if (entity instanceof CreatorTrackedBridge spongeEntity) {
                 spongeEntity.tracker$getCreatorUUID().ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
             }
 
             // TODO: Add target side support
             final ServerLocation loc = ServerLocation.of((ServerWorld) world, VecHelper.toVector3d(pos));
-            final CollideBlockEvent event;
-            switch (type) {
-                case MOVE:
-                    event = SpongeEventFactory.createCollideBlockEventMove(frame.currentCause(), (BlockState) state, loc, direction);
-                    break;
-                case FALL:
-                    event = SpongeEventFactory.createCollideBlockEventFall(frame.currentCause(), (BlockState) state, loc, direction);
-                    break;
-                case STEP_ON:
-                    event = SpongeEventFactory.createCollideBlockEventStepOn(frame.currentCause(), (BlockState) state, loc, direction);
-                    break;
-                case INSIDE:
-                    event = SpongeEventFactory.createCollideBlockEventInside(frame.currentCause(), (BlockState) state, loc, direction);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown type " + type);
-            }
+            final CollideBlockEvent event = switch (type) {
+                case MOVE ->
+                    SpongeEventFactory.createCollideBlockEventMove(frame.currentCause(), (BlockState) state, loc, direction);
+                case FALL ->
+                    SpongeEventFactory.createCollideBlockEventFall(frame.currentCause(), (BlockState) state, loc, direction);
+                case STEP_ON ->
+                    SpongeEventFactory.createCollideBlockEventStepOn(frame.currentCause(), (BlockState) state, loc, direction);
+                case INSIDE ->
+                    SpongeEventFactory.createCollideBlockEventInside(frame.currentCause(), (BlockState) state, loc, direction);
+                default -> throw new IllegalArgumentException("Unknown type " + type);
+            };
             final boolean cancelled = SpongeCommon.post(event);
             if (!cancelled) {
                 final EntityBridge spongeEntity = (EntityBridge) entity;

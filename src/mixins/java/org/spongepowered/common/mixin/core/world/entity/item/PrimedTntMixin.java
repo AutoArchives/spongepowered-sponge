@@ -104,7 +104,7 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$updateTNTPushPrime(final CallbackInfo ci) {
-        if (!this.impl$postPrimeTriggered && !this.shadow$level().isClientSide) {
+        if (!this.impl$postPrimeTriggered && !this.shadow$level().isClientSide()) {
             this.impl$postPrimeTriggered = true;
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 if (this.impl$detonator != null) {

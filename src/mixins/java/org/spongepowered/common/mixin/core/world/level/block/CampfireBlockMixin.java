@@ -47,7 +47,7 @@ public abstract class CampfireBlockMixin extends BlockMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;campfire()Lnet/minecraft/world/damagesource/DamageSource;"))
     private DamageSource impl$spongeRedirectForFireDamage(final DamageSources instance, final BlockState blockState, final Level world, final BlockPos blockPos, final Entity entity) {
         final DamageSource source = instance.inFire();
-        if (world.isClientSide) { // Short Circuit
+        if (world.isClientSide()) { // Short Circuit
             return source;
         }
         final ServerLocation location = ServerLocation.of((ServerWorld) world, blockPos.getX(), blockPos.getY(), blockPos.getZ());

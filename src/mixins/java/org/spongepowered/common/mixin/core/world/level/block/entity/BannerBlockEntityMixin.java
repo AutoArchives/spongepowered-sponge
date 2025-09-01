@@ -50,7 +50,7 @@ public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements
     @Unique
     private void impl$markDirtyAndUpdate() {
         this.shadow$setChanged();
-        if (this.level != null && !this.level.isClientSide) {
+        if (this.level != null && !this.level.isClientSide()) {
             ((ServerLevel) this.level).getChunkSource().blockChanged(this.shadow$getBlockPos());
         }
     }

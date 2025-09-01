@@ -26,12 +26,15 @@ package org.spongepowered.vanilla.generator.world.level.block;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.block.CopperGolemStatueBlock;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.CreakingHeartState;
 import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
+import net.minecraft.world.level.block.state.properties.SideChainPart;
 import net.minecraft.world.level.block.state.properties.TestBlockMode;
 import net.minecraft.world.level.block.state.properties.Tilt;
 import org.spongepowered.vanilla.generator.BlockStateDataProviderGenerator;
@@ -88,6 +91,27 @@ public class BlockRegistries {
                 "data.type",
                 "TrialSpawnerStates",
                 TrialSpawnerState.class,
+                "getSerializedName",
+                "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                "data.type",
+                "CopperGolemPoses",
+                CopperGolemStatueBlock.Pose.class,
+                "getSerializedName",
+                "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                "data.type",
+                "SideChains",
+                SideChainPart.class,
+                "getSerializedName",
+                "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                "data.type",
+                "CopperOxidization",
+                WeatheringCopper.WeatherState.class,
                 "getSerializedName",
                 "sponge"
             )

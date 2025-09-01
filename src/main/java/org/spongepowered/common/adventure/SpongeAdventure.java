@@ -72,6 +72,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.HoverEvent.Action;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.BlockDataSource;
@@ -226,6 +227,15 @@ public final class SpongeAdventure {
         return (Key) (Object) key;
     }
 
+    public static Key asAdventure(final FontDescription description) {
+        return switch (description) {
+            case null -> null;
+            case FontDescription.Resource fr -> Key.key(fr.id().toString());
+            case FontDescription.AtlasSprite as -> Key.key(as.spriteId().toString());
+            default -> throw new IllegalStateException("Unexpected value: " + description);
+        };
+    }
+
     // ------------------------
     // ---- ChatType.Bound ----
     // ------------------------
@@ -322,7 +332,7 @@ public final class SpongeAdventure {
             builder.append(SpongeAdventure.asAdventure(child));
         }
 
-        builder.style(((org.spongepowered.common.bridge.network.chat.StyleBridge) component.getStyle()).bridge$asAdventure());
+        builder.style(((org.spongepowered.common.bridge.network.chat.StyleBridge) (Object) component.getStyle()).bridge$asAdventure());
 
         return builder.build();
     }
@@ -372,7 +382,7 @@ public final class SpongeAdventure {
     // no caching
     public static Style asAdventure(final net.minecraft.network.chat.Style mcStyle) {
         final Style.Builder builder = Style.style();
-        final StyleAccessor $access = (StyleAccessor) mcStyle;
+        final StyleAccessor $access = (StyleAccessor) (Object) mcStyle;
 
         builder.font(SpongeAdventure.asAdventure($access.accessor$font())); // font
         builder.color(SpongeAdventure.asAdventure(mcStyle.getColor())); // color
@@ -802,11 +812,18 @@ public final class SpongeAdventure {
         return ResourceLocation.fromNamespaceAndPath(key.namespace(), key.value());
     }
 
-    public static @Nullable ResourceLocation asVanillaNullable(final @Nullable Key key) {
+    public static @Nullable ResourceLocation asVanillaLocation(final @Nullable Key key) {
         if (key == null) {
             return null;
         }
-        return SpongeAdventure.asVanilla(key);
+        return ResourceLocation.fromNamespaceAndPath(key.namespace(), key.value());
+    }
+
+    public static @Nullable FontDescription asVanillaFontDescription(final @Nullable Key key) {
+        if (key == null) {
+            return null;
+        }
+        return new FontDescription.Resource(SpongeAdventure.asVanilla(key));
     }
 
     // Sound

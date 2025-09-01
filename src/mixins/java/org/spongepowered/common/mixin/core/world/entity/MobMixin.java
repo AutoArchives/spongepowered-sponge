@@ -89,7 +89,7 @@ public abstract class MobMixin extends LivingEntityMixin {
      */
     @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
     private void onSetAttackTarget(@Nullable final LivingEntity entitylivingbaseIn, final CallbackInfo ci) {
-        if (this.shadow$level().isClientSide || entitylivingbaseIn == null) {
+        if (this.shadow$level().isClientSide() || entitylivingbaseIn == null) {
             return;
         }
         //noinspection ConstantConditions

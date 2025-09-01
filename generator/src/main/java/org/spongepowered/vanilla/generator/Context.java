@@ -85,9 +85,13 @@ public final class Context {
 
     public CompilationUnit compilationUnit(final String relativePackage, final String simpleName) {
         final String pkg = relativePackage.isBlank() ? Context.BASE_PACKAGE : String.join(".", Context.BASE_PACKAGE, relativePackage);
-        final CompilationUnit unit = this.sourceRoot.parse(pkg, simpleName + ".java");
-        LexicalPreservingPrinter.setup(unit);
-        return unit;
+        try {
+            final CompilationUnit unit = this.sourceRoot.parse(pkg, simpleName + ".java");
+            LexicalPreservingPrinter.setup(unit);
+            return unit;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse " + simpleName + ".java", e);
+        }
     }
 
   /**

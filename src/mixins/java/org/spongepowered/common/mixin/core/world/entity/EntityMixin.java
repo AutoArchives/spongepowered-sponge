@@ -316,7 +316,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public boolean bridge$dismountRidingEntity(final DismountType type) {
-        if (!this.shadow$level().isClientSide && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
+        if (!this.shadow$level().isClientSide() && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
@@ -532,7 +532,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
 
             for (Entity recreatedPassenger : recreatedPassengers) {
-                recreatedPassenger.startRiding(newEntity, true);
+                recreatedPassenger.startRiding(newEntity, true, true);
             }
 
             oldLevel.resetEmptyTime();
@@ -608,7 +608,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return event.destinationPosition();
     }
 
-    @Inject(method = "startRiding(Lnet/minecraft/world/entity/Entity;Z)Z",
+    @Inject(method = "startRiding(Lnet/minecraft/world/entity/Entity;ZZ)Z",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/world/entity/Entity;vehicle:Lnet/minecraft/world/entity/Entity;",
@@ -616,9 +616,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         ),
         cancellable = true
     )
-    private void impl$onStartRiding(final Entity vehicle, final boolean force,
+    private void impl$onStartRiding(final Entity vehicle, final boolean force, final boolean createPortal,
         final CallbackInfoReturnable<Boolean> ci) {
-        if (!this.shadow$level().isClientSide && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
+        if (!this.shadow$level().isClientSide() && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
             PhaseTracker.getInstance().pushCause(this);
             if (SpongeCommon.post(SpongeEventFactory.createRideEntityEventMount(PhaseTracker.getInstance().currentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
                 ci.cancel();
@@ -707,7 +707,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/Block;fallOn(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;D)V"))
     private void impl$onFallOnCollide(final Block block, final Level world, final BlockState state, final BlockPos pos, final Entity entity, final double fallDistance) {
-        if (!ShouldFire.COLLIDE_BLOCK_EVENT_FALL || world.isClientSide) {
+        if (!ShouldFire.COLLIDE_BLOCK_EVENT_FALL || world.isClientSide()) {
             block.fallOn(world, state, pos, entity, fallDistance);
             return;
         }
@@ -727,7 +727,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     )
     private void impl$onStepOnCollide(final Block block, final Level world, final BlockPos pos, final BlockState state,
                                       final Entity entity, Operation<Void> original) {
-        if (!ShouldFire.COLLIDE_BLOCK_EVENT_STEP_ON || world.isClientSide) {
+        if (!ShouldFire.COLLIDE_BLOCK_EVENT_STEP_ON || world.isClientSide()) {
             original.call(block, world, pos, state, entity);
             return;
         }
@@ -748,7 +748,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private void impl$onCheckInsideBlocksCollide(
         final BlockState blockState, final Level worldIn, final BlockPos pos, final Entity entityIn,
         final InsideBlockEffectApplier insideBlockEffectApplier, final Operation<Void> original) {
-        if (!ShouldFire.COLLIDE_BLOCK_EVENT_INSIDE || worldIn.isClientSide || blockState.isAir()) {
+        if (!ShouldFire.COLLIDE_BLOCK_EVENT_INSIDE || worldIn.isClientSide() || blockState.isAir()) {
             original.call(blockState, worldIn, pos, entityIn, insideBlockEffectApplier);
             return;
         }
@@ -1000,7 +1000,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     }*/
 
-    @Redirect(method = "startRiding(Lnet/minecraft/world/entity/Entity;Z)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityType;canSerialize()Z"))
+    @Redirect(method = "startRiding(Lnet/minecraft/world/entity/Entity;ZZ)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityType;canSerialize()Z"))
     private boolean impl$allowRidingAnything(final EntityType<?> instance) {
         //Vanilla has started to prevent riding non-serializable entities.
         //This results in players being unable to ride other players.

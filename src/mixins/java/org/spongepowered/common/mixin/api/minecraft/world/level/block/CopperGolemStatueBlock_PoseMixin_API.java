@@ -22,31 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server.level;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block;
 
-import net.minecraft.network.protocol.game.ClientboundExplodePacket;
-import net.minecraft.server.bossevents.CustomBossEvents;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.world.explosion.Explosion;
+import net.minecraft.world.level.block.CopperGolemStatueBlock;
+import org.spongepowered.api.data.type.CopperGolemPose;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface ServerLevelBridge {
-
-    LevelStorageSource.LevelStorageAccess bridge$getLevelSave();
-
-    boolean bridge$isLoaded();
-
-    CustomBossEvents bridge$getBossBarManager();
-
-    void bridge$triggerExplosion(Explosion explosion);
-
-    void bridge$handleExplosionPacket(final ServerGamePacketListenerImpl instance, Explosion apiExplosion,
-        final ClientboundExplodePacket packet);
-
-    void bridge$setManualSave(boolean state);
-
-    BlockSnapshot bridge$createSnapshot(int x, int y, int z);
-
-    long[] bridge$recentTickTimes();
+@Mixin(CopperGolemStatueBlock.Pose.class)
+public abstract class CopperGolemStatueBlock_PoseMixin_API implements CopperGolemPose {
 }

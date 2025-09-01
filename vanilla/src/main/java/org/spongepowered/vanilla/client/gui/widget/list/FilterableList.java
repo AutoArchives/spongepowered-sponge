@@ -132,21 +132,21 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    public boolean mouseClicked(final double p_mouseClicked_1_, final double p_mouseClicked_3_, final int p_mouseClicked_5_) {
-        this.updateScrolling(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_);
-        if (!this.isMouseOver(p_mouseClicked_1_, p_mouseClicked_3_)) {
+    public boolean mouseClicked(final double mouseX, final double mouseY, final int button, final boolean repeatedClick) {
+        this.updateScrolling(mouseX, mouseY, button);
+        if (!this.isMouseOver(mouseX, mouseY)) {
             return false;
         } else {
-            final E e = this.getEntryAtPosition(p_mouseClicked_1_, p_mouseClicked_3_);
+            final E e = this.getEntryAtPosition(mouseX, mouseY);
             if (e != null) {
-                if (e.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_)) {
+                if (e.mouseClicked(mouseX, mouseY, button, repeatedClick)) {
                     this.setFocused(e);
                     this.setDragging(true);
                     return true;
                 }
-            } else if (p_mouseClicked_5_ == 0) {
-                this.onClick((int) (p_mouseClicked_1_ - (double) (this.getX() + this.width / 2 - this.getRowWidth() / 2)),
-                    (int) (p_mouseClicked_3_ - (double) this.getY()) + (int) this.scrollAmount() - 4);
+            } else if (button == 0) {
+                this.onClick((int) (mouseX - (double) (this.getX() + this.width / 2 - this.getRowWidth() / 2)),
+                    (int) (mouseY - (double) this.getY()) + (int) this.scrollAmount() - 4, repeatedClick);
                 return true;
             }
 

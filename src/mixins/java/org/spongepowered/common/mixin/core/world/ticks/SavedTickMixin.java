@@ -40,6 +40,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.accessor.world.item.component.CustomDataAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.DataUtil;
@@ -90,7 +91,7 @@ public abstract class SavedTickMixin<T> implements SpongeMutableDataHolder, Data
                 .apply(instance, (t, blockPos, integer, tickPriority, customData) -> {
                     final var tick = function.apply(t, blockPos, integer, tickPriority);
                     customData.ifPresent(data -> {
-                        ((DataCompoundHolder) (Object) tick).data$setCompound(data.getUnsafe());
+                        ((DataCompoundHolder) (Object) tick).data$setCompound(((CustomDataAccessor) (Object) data).accessor$tag());
                         DataUtil.syncTagToData(tick);
                         ((DataCompoundHolder) (Object) tick).data$setCompound(null);
                     });

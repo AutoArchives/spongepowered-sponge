@@ -122,8 +122,8 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
     }
 
     @Override
-    public boolean mouseClicked(final double mouseX, final double mouseY, final int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(final double mouseX, final double mouseY, final int button, final boolean repeated) {
+        if (super.mouseClicked(mouseX, mouseY, button, repeated)) {
             return true;
         }
 

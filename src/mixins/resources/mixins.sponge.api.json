@@ -379,6 +379,8 @@
     "minecraft.world.level.block.MirrorMixin_API",
     "minecraft.world.level.block.PortalMixin_API",
     "minecraft.world.level.block.RotationMixin_API",
+    "minecraft.world.level.block.CopperGolemStatueBlock_PoseMixin_API",
+    "minecraft.world.level.block.WeatheringCopper_WeatherStateMixin_API",
     "minecraft.world.level.block.entity.AbstractFurnaceBlockEntityMixin_API",
     "minecraft.world.level.block.entity.BannerBlockEntityMixin_API",
     "minecraft.world.level.block.entity.BannerPatternLayers_LayerMixin_API",

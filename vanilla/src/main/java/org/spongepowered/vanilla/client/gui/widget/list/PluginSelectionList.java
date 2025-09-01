@@ -66,7 +66,7 @@ public final class PluginSelectionList extends FilterableList<PluginSelectionLis
         }
 
         @Override
-        public boolean mouseClicked(final double p_mouseClicked_1_, final double p_mouseClicked_3_, final int p_mouseClicked_5_) {
+        public boolean mouseClicked(final double p_mouseClicked_1_, final double p_mouseClicked_3_, final int p_mouseClicked_5_, final boolean repeated) {
             this.getParentList().setSelected(this);
             return true;
         }

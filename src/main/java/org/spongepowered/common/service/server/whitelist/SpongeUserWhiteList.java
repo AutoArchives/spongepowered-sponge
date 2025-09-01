@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.server.whitelist;
 
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.server.players.UserWhiteListEntry;
 import org.spongepowered.api.Sponge;
@@ -46,7 +47,7 @@ public class SpongeUserWhiteList extends UserWhiteList {
     }
 
     @Override
-    protected boolean contains(final com.mojang.authlib.GameProfile entry) {
+    protected boolean contains(final NameAndId entry) {
         return Sponge.server().serviceProvider().whitelistService().isWhitelisted(SpongeGameProfile.of(entry)).join();
     }
 
@@ -66,7 +67,7 @@ public class SpongeUserWhiteList extends UserWhiteList {
     }
 
     @Override
-    public void remove(final com.mojang.authlib.GameProfile entry) {
+    public void remove(final NameAndId entry) {
         Sponge.server().serviceProvider().whitelistService().removeProfile(SpongeGameProfile.of(entry)).join();
     }
 

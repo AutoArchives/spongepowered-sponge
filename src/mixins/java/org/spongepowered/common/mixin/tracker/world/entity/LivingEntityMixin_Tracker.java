@@ -180,7 +180,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;pushEntities()V")
     )
     private void tracker$switchIntoCollisions(final LivingEntity livingEntity) {
-        if (this.shadow$level().isClientSide) {
+        if (this.shadow$level().isClientSide()) {
             this.shadow$pushEntities();
             return;
         }

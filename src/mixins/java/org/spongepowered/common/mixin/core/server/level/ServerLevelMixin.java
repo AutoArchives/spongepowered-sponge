@@ -44,7 +44,6 @@ import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
@@ -55,7 +54,6 @@ import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.CustomSpawner;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.Block;
@@ -159,16 +157,16 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
     private CustomBossEvents impl$bossBarManager;
-    private ChunkProgressListener impl$chunkProgressListener;
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$onInit(
-        final MinecraftServer server, final Executor executor, final LevelStorageSource.LevelStorageAccess storage, final ServerLevelData levelData,
-        final net.minecraft.resources.ResourceKey<Level> key, final LevelStem levelStem, final ChunkProgressListener listener, final boolean debug, final long biomeSeed,
-        final List<CustomSpawner> spawners, final boolean tick, final RandomSequences randomSequences, final CallbackInfo ci
+        final MinecraftServer server, final Executor executor, final LevelStorageSource.LevelStorageAccess storage,
+        final ServerLevelData levelData, final net.minecraft.resources.ResourceKey<Level> key, final LevelStem levelStem,
+        final boolean debug, final long biomeSeed, final List<CustomSpawner> spawners, final boolean tick,
+        final RandomSequences randomSequences, final CallbackInfo ci
     ) {
         final SpongeServerLevelData spongeData = ((ServerLevelDataBridge) levelData).bridge$spongeData();
 
@@ -186,7 +184,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
 
         this.impl$levelSave = storage;
-        this.impl$chunkProgressListener = listener;
         this.impl$prevWeather = ((ServerWorld) this).weather();
         ((LevelTicksBridge<?>) this.blockTicks).bridge$level((ServerLevel) (Object) this);
         ((LevelTicksBridge<?>) this.fluidTicks).bridge$level((ServerLevel) (Object) this);
@@ -207,11 +204,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Override
     public LevelStorageSource.LevelStorageAccess bridge$getLevelSave() {
         return this.impl$levelSave;
-    }
-
-    @Override
-    public ChunkProgressListener bridge$getChunkProgressListener() {
-        return this.impl$chunkProgressListener;
     }
 
     @Override
@@ -353,18 +345,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             return worldData;
         }
         return server.getWorldData();
-    }
-
-    @Redirect(method = "setDefaultSpawnPos",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/GameRules;getInt(Lnet/minecraft/world/level/GameRules$Key;)I"
-        ))
-    private int impl$respectKeepSpawnLoaded(GameRules gameRules, GameRules.Key<GameRules.IntegerValue> key) {
-        if ((((ServerLevelDataBridge) this.shadow$getLevelData()).bridge$performsSpawnLogic())) {
-            return gameRules.getInt(key);
-        }
-        return 0;
     }
 
     @Inject(method = "save", at = @At("HEAD"), cancellable = true)

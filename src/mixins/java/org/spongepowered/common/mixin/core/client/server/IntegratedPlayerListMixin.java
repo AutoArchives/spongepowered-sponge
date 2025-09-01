@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.client.server;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.server.IntegratedPlayerList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,11 +43,12 @@ import java.util.concurrent.CompletableFuture;
 public abstract class IntegratedPlayerListMixin extends PlayerListMixin implements IntegratedPlayerListBridge {
 
     // @formatter:off
-    @Shadow public abstract Component shadow$canPlayerLogin(SocketAddress param0, GameProfile param1);
+    @Shadow public abstract Component shadow$canPlayerLogin(SocketAddress param0, NameAndId param1);
     // @formatter:on
 
+    @Override
     public CompletableFuture<Component> bridge$canPlayerLoginClient(final SocketAddress param0, final com.mojang.authlib.GameProfile param1) {
-        final Component component = this.shadow$canPlayerLogin(param0, param1);
+        final Component component = this.shadow$canPlayerLogin(param0, new NameAndId(param1));
         if (component == null) {
             return this.impl$canPlayerLoginServer(param0, param1);
         }
@@ -54,9 +56,8 @@ public abstract class IntegratedPlayerListMixin extends PlayerListMixin implemen
     }
 
     @Redirect(method = "canPlayerLogin", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)"
-                    + "Lnet/minecraft/network/chat/Component;"))
-    private Component impl$redirectCanPlayerLoginSuperCall(final PlayerList playerList, final SocketAddress param0, final GameProfile param1) {
+            target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lnet/minecraft/server/players/NameAndId;)Lnet/minecraft/network/chat/Component;"))
+    private Component impl$redirectCanPlayerLoginSuperCall(final PlayerList playerList, final SocketAddress param0, final NameAndId param1) {
         return null; // we'll handle it above which we'll indicate by returning null.
     }
 

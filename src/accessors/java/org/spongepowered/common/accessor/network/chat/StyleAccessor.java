@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.network.chat;
 
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
@@ -40,23 +41,38 @@ import javax.annotation.Nullable;
 public interface StyleAccessor {
 
     @Invoker("<init>")
-    static Style invoker$new(final @Nullable TextColor color, final @Nullable Integer shadowColor, final @Nullable Boolean bold, final @Nullable Boolean italic,
-         final @Nullable Boolean underlined, final @Nullable Boolean strikethrough, final @Nullable Boolean obfuscated,
-         final @Nullable ClickEvent clickEvent, final @Nullable HoverEvent hoverEvent, final @Nullable String insertion,
-         final @Nullable ResourceLocation font) {
+    static Style invoker$new(
+        final @Nullable TextColor color,
+        final @Nullable Integer shadowColor,
+        final @Nullable Boolean bold,
+        final @Nullable Boolean italic,
+        final @Nullable Boolean underlined,
+        final @Nullable Boolean strikethrough,
+        final @Nullable Boolean obfuscated,
+        final @Nullable ClickEvent clickEvent,
+        final @Nullable HoverEvent hoverEvent,
+        final @Nullable String insertion,
+        final @Nullable FontDescription fontDescription
+    ) {
         throw new UntransformedInvokerError();
     }
 
-    @Accessor("bold") Boolean accessor$bold();
+    @Accessor("bold")
+    Boolean accessor$bold();
 
-    @Accessor("italic") Boolean accessor$italic();
+    @Accessor("italic")
+    Boolean accessor$italic();
 
-    @Accessor("underlined") Boolean accessor$underlined();
+    @Accessor("underlined")
+    Boolean accessor$underlined();
 
-    @Accessor("strikethrough") Boolean accessor$strikethrough();
+    @Accessor("strikethrough")
+    Boolean accessor$strikethrough();
 
-    @Accessor("obfuscated") Boolean accessor$obfuscated();
+    @Accessor("obfuscated")
+    Boolean accessor$obfuscated();
 
-    @Accessor("font") ResourceLocation accessor$font();
+    @Accessor("font")
+    FontDescription accessor$font();
 
 }

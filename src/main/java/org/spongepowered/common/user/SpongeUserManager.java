@@ -112,7 +112,8 @@ public final class SpongeUserManager implements UserManager {
             return CompletableFuture.completedFuture(null);
         }
         return CompletableFuture.supplyAsync(() -> {
-            final com.mojang.authlib.GameProfile profile = this.server.getProfileCache().get(uuidToUse)
+            final com.mojang.authlib.GameProfile profile = this.server.nameToIdCache().get(uuidToUse)
+                .map(nameAndId -> new com.mojang.authlib.GameProfile(nameAndId.id(), nameAndId.name()))
                 .orElseGet(() -> new com.mojang.authlib.GameProfile(uuidToUse, ""));
             try {
                 this.createUser(profile);

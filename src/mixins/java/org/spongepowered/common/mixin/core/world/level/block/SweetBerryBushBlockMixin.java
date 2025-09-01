@@ -48,7 +48,7 @@ public abstract class SweetBerryBushBlockMixin extends BlockMixin {
         final Level level, final BlockPos pos, final Entity ignored
     ) {
         final DamageSource source = instance.sweetBerryBush();
-        if (level.isClientSide) { // Short Circuit
+        if (level.isClientSide()) { // Short Circuit
             return source;
         }
         return SpongeDamageSources.createBlockBasedDamageSource((ServerWorld) level, pos, source);

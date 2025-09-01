@@ -105,16 +105,6 @@ public class CarriedWrapperInventory implements Container, CarriedBridge {
     }
 
     @Override
-    public void startOpen(Player player) {
-       this.wrapped.startOpen(player);
-    }
-
-    @Override
-    public void stopOpen(Player player) {
-        this.wrapped.stopOpen(player);
-    }
-
-    @Override
     public boolean canPlaceItem(int index, ItemStack stack) {
         return this.wrapped.canPlaceItem(index, stack);
     }
@@ -133,4 +123,5 @@ public class CarriedWrapperInventory implements Container, CarriedBridge {
     public void clearContent() {
         this.wrapped.clearContent();
     }
+
 }

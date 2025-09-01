@@ -123,7 +123,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
             if (this.profile == null) {
                 throw new IllegalStateException("User cannot be null");
             }
-            return (Ban) new UserBanListEntry(SpongeGameProfile.toMcProfile(this.profile.withoutProperties()),
+            return (Ban) new UserBanListEntry(SpongeGameProfile.toNameAndId(this.profile.withoutProperties()),
                     Date.from(this.start), sourceName, this.toDate(this.end), reason);
         }
         if (this.address == null) {

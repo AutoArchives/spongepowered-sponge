@@ -41,12 +41,12 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionManager;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.server.level.progress.LevelLoadListener;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleReloadInstance;
-import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.players.UserNameToIdResolver;
 import net.minecraft.util.Unit;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
@@ -138,13 +138,14 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow public abstract RegistryAccess.Frozen shadow$registryAccess();
-    @Shadow public abstract GameProfileCache shadow$getProfileCache();
+    @Shadow public abstract UserNameToIdResolver shadow$nameToIdCache();
     @Shadow public abstract CompletableFuture<Void> shadow$reloadResources(final Collection<String> $$0);
     @Shadow public abstract WorldData shadow$getWorldData();
     @Shadow public abstract boolean shadow$haveTime();
     @Shadow private volatile boolean isSaving;
     @Shadow public abstract ResourceManager shadow$getResourceManager();
     // @formatter:on
+
 
     private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
@@ -213,8 +214,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         frame.pushCause(Sponge.systemSubject());
     }
 
-    @Inject(method = "createLevels", at = @At(value = "INVOKE", ordinal = 0,
-        target = "Lnet/minecraft/server/level/ServerLevel;<init>(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;Lnet/minecraft/server/level/progress/ChunkProgressListener;ZJLjava/util/List;ZLnet/minecraft/world/RandomSequences;)V"))
+    @Inject(method = "createLevels", at = @At(value = "NEW",
+        target = "(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;ZJLjava/util/List;ZLnet/minecraft/world/RandomSequences;)Lnet/minecraft/server/level/ServerLevel;"
+    ), slice = @Slice(
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;getValue(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"),
+        to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;readScoreboard(Lnet/minecraft/world/level/storage/DimensionDataStorage;)V")
+    ))
     private void impl$onCreateDefaultLevel(final CallbackInfo ci, @Local final ServerLevelData levelData, @Local final LevelStem levelStem) {
         ((PrimaryLevelDataBridge) levelData).bridge$populateFromLevelStem(levelStem);
         ((ServerLevelDataBridge) levelData).bridge$spongeData().setKey(DefaultWorldKeys.DEFAULT);
@@ -234,10 +239,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @WrapMethod(method = "setInitialSpawn")
-    private static void impl$wrapSetInitialSpawn(final ServerLevel level, final ServerLevelData levelData, final boolean generateBonusChest, final boolean debugWorld, final Operation<Void> original) {
+    private static void impl$wrapSetInitialSpawn(
+        final ServerLevel level, final ServerLevelData levelData, final boolean generateBonusChest,
+        final boolean debugWorld, final LevelLoadListener listener, Operation<Void> original) {
         try (final var state = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext(PhaseTracker.getInstance())) {
             state.buildAndSwitch();
-            original.call(level, levelData, generateBonusChest, debugWorld);
+            original.call(level, levelData, generateBonusChest, debugWorld, listener);
         }
     }
 
@@ -246,7 +253,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      * @reason Multi world.
      */
     @Overwrite
-    private void prepareLevels(final ChunkProgressListener progressListener) {
+    private void prepareLevels() {
         this.worldManager().prepareLevels();
     }
 
@@ -262,7 +269,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveAllChunks(ZZZ)Z"))
     private void impl$callUnloadWorldEvents(final CallbackInfo ci) {
-        for(final ServerLevel level : this.shadow$getAllLevels()) {
+        for (final ServerLevel level : this.shadow$getAllLevels()) {
             final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getInstance().currentCause(), (ServerWorld) level);
             SpongeCommon.post(unloadWorldEvent);
         }
@@ -387,7 +394,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         // Save the usercache.json file every 10 minutes or if forced to
         if (isForced || this.tickCount % 6000 == 0) {
             // We want to save the username cache json, as we normally bypass it.
-            final GameProfileCache profileCache = this.shadow$getProfileCache();
+            final var profileCache = this.shadow$nameToIdCache();
             ((GameProfileCacheBridge) profileCache).bridge$setCanSave(true);
             profileCache.save();
             ((GameProfileCacheBridge) profileCache).bridge$setCanSave(false);

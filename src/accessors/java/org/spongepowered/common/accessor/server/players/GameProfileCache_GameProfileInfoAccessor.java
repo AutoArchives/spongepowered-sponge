@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.accessor.server.players;
 
-import com.mojang.authlib.GameProfile;
+import net.minecraft.server.players.NameAndId;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Date;
 
-@Mixin(targets = "net.minecraft.server.players.GameProfileCache$GameProfileInfo")
+@Mixin(targets = "net.minecraft.server.players.CachedUserNameToIdResolver$GameProfileInfo")
 public interface GameProfileCache_GameProfileInfoAccessor {
 
-    @Invoker("getProfile") GameProfile invoker$getProfile();
+    @Invoker("nameAndId") NameAndId invoker$nameAndId();
 
-    @Invoker("getExpirationDate") Date invoker$getExpirationDate();
+    @Invoker("expirationDate") Date invoker$getExpirationDate();
 
     @Invoker("setLastAccess") void invoker$setLastAccess(final long lastAccessMs);
 
