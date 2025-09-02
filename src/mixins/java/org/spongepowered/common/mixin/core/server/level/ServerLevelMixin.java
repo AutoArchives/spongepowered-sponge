@@ -48,6 +48,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -275,7 +276,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             for (ServerPlayer player : this.players) {
                 if (player.distanceToSqr(mcExplosion.center()) < 4096.0) {
                     Optional<Vec3> kb = Optional.ofNullable(mcExplosion.getHitPlayers().get(player));
-                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), kb, particle, sound);
+                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), explosion.radius(), 1, kb, particle, sound, WeightedList.of());
                     this.bridge$handleExplosionPacket(player.connection, explosion, packet);
                     player.connection.send(packet);
                 }
@@ -292,7 +293,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         var soundEvent = Holder.direct(new SoundEvent(ResourceLocation.parse("sponge:none"), Optional.of(0f))); // "no" sound
         soundEvent = packet.explosionSound();
         // TODO apiExplosion.shouldPlaySmoke() is not initialized correctly
-        var newPacket = new ClientboundExplodePacket(packet.center(), packet.playerKnockback(), particleData, soundEvent);
+        var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), packet.playerKnockback(), particleData, soundEvent, packet.blockParticles());
         instance.send(newPacket);
     }
     @Override

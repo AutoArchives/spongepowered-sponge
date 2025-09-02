@@ -49,6 +49,7 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.AGE_4, BlockStateProperties.AGE_4);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.AGE_5, BlockStateProperties.AGE_5);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.AGE_7, BlockStateProperties.AGE_7);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.ALIGN_ITEMS_TO_BOTTOM, BlockStateProperties.ALIGN_ITEMS_TO_BOTTOM);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.ATTACHED, BlockStateProperties.ATTACHED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.ATTACH_FACE, BlockStateProperties.ATTACH_FACE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.AXIS, BlockStateProperties.AXIS);
@@ -62,12 +63,6 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CANDLES, BlockStateProperties.CANDLES);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CAN_SUMMON, BlockStateProperties.CAN_SUMMON);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CHEST_TYPE, BlockStateProperties.CHEST_TYPE);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CHISELED_BOOKSHELF_SLOT_0_OCCUPIED, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_0_OCCUPIED);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CHISELED_BOOKSHELF_SLOT_1_OCCUPIED, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_1_OCCUPIED);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CHISELED_BOOKSHELF_SLOT_2_OCCUPIED, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_2_OCCUPIED);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CHISELED_BOOKSHELF_SLOT_3_OCCUPIED, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_3_OCCUPIED);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CHISELED_BOOKSHELF_SLOT_4_OCCUPIED, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_4_OCCUPIED);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CHISELED_BOOKSHELF_SLOT_5_OCCUPIED, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_5_OCCUPIED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CONDITIONAL, BlockStateProperties.CONDITIONAL);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.COPPER_GOLEM_POSE, BlockStateProperties.COPPER_GOLEM_POSE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CRACKED, BlockStateProperties.CRACKED);
@@ -143,6 +138,12 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SIDE_CHAIN_PART, BlockStateProperties.SIDE_CHAIN_PART);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SIGNAL_FIRE, BlockStateProperties.SIGNAL_FIRE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SLAB_TYPE, BlockStateProperties.SLAB_TYPE);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SLOT_0_OCCUPIED, BlockStateProperties.SLOT_0_OCCUPIED);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SLOT_1_OCCUPIED, BlockStateProperties.SLOT_1_OCCUPIED);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SLOT_2_OCCUPIED, BlockStateProperties.SLOT_2_OCCUPIED);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SLOT_3_OCCUPIED, BlockStateProperties.SLOT_3_OCCUPIED);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SLOT_4_OCCUPIED, BlockStateProperties.SLOT_4_OCCUPIED);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SLOT_5_OCCUPIED, BlockStateProperties.SLOT_5_OCCUPIED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SNOWY, BlockStateProperties.SNOWY);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SOUTH, BlockStateProperties.SOUTH);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SOUTH_REDSTONE, BlockStateProperties.SOUTH_REDSTONE);

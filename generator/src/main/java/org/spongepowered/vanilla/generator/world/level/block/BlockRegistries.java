@@ -110,7 +110,7 @@ public class BlockRegistries {
             ),
             new EnumEntriesValidator<>(
                 "data.type",
-                "CopperOxidization",
+                "CopperOxidations",
                 WeatheringCopper.WeatherState.class,
                 "getSerializedName",
                 "sponge"
