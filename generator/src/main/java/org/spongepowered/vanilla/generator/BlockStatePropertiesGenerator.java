@@ -155,7 +155,7 @@ public class BlockStatePropertiesGenerator implements Generator {
         vanillaEnumTypeMapping.put(VaultState.class, BlockStatePropertiesGenerator.inDataTypePkg("VaultState"));
         vanillaEnumTypeMapping.put(CreakingHeartState.class, BlockStatePropertiesGenerator.inDataTypePkg("CreakingHeartState"));
         vanillaEnumTypeMapping.put(TestBlockMode.class, BlockStatePropertiesGenerator.inDataTypePkg("TestBlockMode"));
-        vanillaEnumTypeMapping.put(SideChainPart.class,  BlockStatePropertiesGenerator.inDataTypePkg("SideChainPart"));
+        vanillaEnumTypeMapping.put(SideChainPart.class,  BlockStatePropertiesGenerator.inDataTypePkg("SideChain"));
         vanillaEnumTypeMapping.put(CopperGolemStatueBlock.Pose.class, BlockStatePropertiesGenerator.inDataTypePkg("CopperGolemPose"));
         vanillaEnumTypeMapping.put(WeatheringCopper.WeatherState.class, BlockStatePropertiesGenerator.inDataTypePkg("CopperOxidation"));
 
