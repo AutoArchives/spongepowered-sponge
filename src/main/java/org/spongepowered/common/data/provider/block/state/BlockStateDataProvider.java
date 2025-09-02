@@ -49,7 +49,6 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.AGE_4, BlockStateProperties.AGE_4);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.AGE_5, BlockStateProperties.AGE_5);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.AGE_7, BlockStateProperties.AGE_7);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.ALIGN_ITEMS_TO_BOTTOM, BlockStateProperties.ALIGN_ITEMS_TO_BOTTOM);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.ATTACHED, BlockStateProperties.ATTACHED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.ATTACH_FACE, BlockStateProperties.ATTACH_FACE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.AXIS, BlockStateProperties.AXIS);
