@@ -31,7 +31,6 @@ import org.spongepowered.bootstrap.Bootstrap;
 
 import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
