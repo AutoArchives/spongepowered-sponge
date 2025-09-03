@@ -48,8 +48,6 @@ public abstract class Bootstrap<Jar> {
 
     protected abstract String getModuleName(Jar jar);
 
-    protected abstract URL getJarURL(Jar jar) throws Exception;
-
     protected abstract ModuleFinder createModuleFinder(Collection<Jar> jars);
 
     /**

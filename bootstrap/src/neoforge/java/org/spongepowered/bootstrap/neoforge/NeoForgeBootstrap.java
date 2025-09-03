@@ -59,11 +59,6 @@ public class NeoForgeBootstrap extends Bootstrap<SecureJar> {
     }
 
     @Override
-    protected URL getJarURL(final SecureJar jar) throws Exception {
-        return jar.getRootPath().toUri().toURL();
-    }
-
-    @Override
     protected ModuleFinder createModuleFinder(final Collection<SecureJar> jars) {
         return JarModuleFinder.of(jars.toArray(SecureJar[]::new));
     }

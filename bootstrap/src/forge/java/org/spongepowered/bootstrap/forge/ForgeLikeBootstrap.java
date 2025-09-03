@@ -54,11 +54,6 @@ public abstract class ForgeLikeBootstrap extends Bootstrap<SecureJar> {
     }
 
     @Override
-    protected URL getJarURL(final SecureJar jar) throws Exception {
-        return jar.getRootPath().toUri().toURL();
-    }
-
-    @Override
     protected ModuleFinder createModuleFinder(final Collection<SecureJar> jars) {
         return SecureModuleFinder.of(jars);
     }
