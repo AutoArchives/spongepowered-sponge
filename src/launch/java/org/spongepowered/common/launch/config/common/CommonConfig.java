@@ -93,10 +93,18 @@ public final class CommonConfig implements Config {
 
     public static ConfigurationTransformation transformation() {
         return ConfigurationTransformation.versionedBuilder()
+                .addVersion(4, CommonConfig.buildThreeToFour())
                 .addVersion(3, CommonConfig.buildTwoToThree())
                 .addVersion(2, CommonConfig.buildOneToTwo())
                 .addVersion(1, CommonConfig.buildZeroToOne())
                 .build();
+    }
+
+    static ConfigurationTransformation buildThreeToFour() {
+        return ConfigurationTransformation.builder()
+            .addAction(NodePath.path("world", "player-auto-save-interval"), (path, node) ->
+                new Object[] { "world", "player-auto-save", "interval" })
+            .build();
     }
 
     static ConfigurationTransformation buildTwoToThree() {

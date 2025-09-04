@@ -1,3 +1,6 @@
+import org.jetbrains.gradle.ext.compiler
+import org.jetbrains.gradle.ext.delegateActions
+import org.jetbrains.gradle.ext.settings
 import org.spongepowered.gradle.vanilla.task.DecompileJarTask
 import java.util.Locale
 
@@ -170,10 +173,26 @@ dependencies {
     testImplementation(libs.mockito.junitJupiter) {
         exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
     }
+
+    testImplementation(libs.mixin)
 }
 
 minecraft {
     accessWideners(main.resources.filter { it.name.endsWith(".accesswidener") })
+}
+
+idea {
+    project.settings {
+        delegateActions {
+            delegateBuildRunToGradle = false
+            testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.GRADLE
+        }
+        compiler {
+            addNotNullAssertions = false
+            useReleaseOption = true
+            parallelCompilation = true
+        }
+    }
 }
 
 allprojects {
@@ -186,7 +205,6 @@ allprojects {
         }
     }
 
-    apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
     apply(plugin = "net.kyori.indra.licenser.spotless")
@@ -207,22 +225,6 @@ allprojects {
 
         tasks.named("decompile", DecompileJarTask::class) {
             extraFernFlowerArgs.put("win", "0")
-        }
-    }
-
-    idea {
-        if (project != null) {
-            (project as ExtensionAware).extensions["settings"].run {
-                (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.ActionDelegationConfig::class).run {
-                    delegateBuildRunToGradle = false
-                    testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.PLATFORM
-                }
-                extensions.getByType(org.jetbrains.gradle.ext.IdeaCompilerConfiguration::class).run {
-                    addNotNullAssertions = false
-                    useReleaseOption = JavaVersion.current().isJava10Compatible
-                    parallelCompilation = true
-                }
-            }
         }
     }
 
@@ -270,14 +272,10 @@ allprojects {
     val spongeSnapshotRepo: String? by project
     val spongeReleaseRepo: String? by project
     tasks {
-        val emptyAnnotationProcessors = objects.fileCollection()
         withType(JavaCompile::class).configureEach {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
             options.release.set(apiJavaTarget.toInt())
-            if (project.name != "testplugins" && System.getProperty("idea.sync.active") != null) {
-                options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
-            }
         }
 
         withType(PublishToMavenRepository::class).configureEach {
@@ -437,7 +435,8 @@ tasks {
     }
 
     test {
-        useJUnitPlatform()
+        // tests can only be run in subprojects
+        enabled = false
     }
 
     check {

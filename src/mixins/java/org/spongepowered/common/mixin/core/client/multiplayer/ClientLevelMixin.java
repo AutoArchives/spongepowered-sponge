@@ -42,10 +42,10 @@ public abstract class ClientLevelMixin extends LevelMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$onInit(
-        final ClientPacketListener $$0, final ClientLevel.ClientLevelData $$1, final ResourceKey<Level> $$2,
-        final Holder<DimensionType> $$3, final int $$4, final int $$5, final LevelRenderer $$6, final boolean $$7,
-        final long $$8, final int $$9, final CallbackInfo ci) {
-        this.bridge$adjustDimensionLogic($$3.value());
+        final ClientPacketListener listener, final ClientLevel.ClientLevelData data, final ResourceKey<Level> key,
+        final Holder<DimensionType> holder, final int storageRange, final int serverSimulationDistance, final LevelRenderer renderer, final boolean isDebug,
+        final long biomeZoomSeed, final int seaLevel, final CallbackInfo ci) {
+        this.bridge$adjustDimensionLogic(holder.value());
     }
 
     @Override
