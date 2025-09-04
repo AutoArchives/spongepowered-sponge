@@ -23,7 +23,6 @@
     "server.BootstrapMixin_Neo",
     "server.MinecraftServerMixin_Neo",
     "server.commands.SpreadPlayersCommandMixin_Neo",
-    "server.level.ServerEntityMixin_Neo",
     "server.level.ServerPlayerMixin_Neo",
     "server.network.ServerGamePacketListenerImplMixin_Neo",
     "tags.TagLoaderMixin_NeoForge",
