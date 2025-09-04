@@ -10,9 +10,8 @@ forgeAutoRenamingTool = "1.0.6"
 mixin = "0.8.7"
 mixinextras = "0.4.1"
 modlauncher = "10.2.2"
-neo-modlauncher = "11.0.3"
 securemodules = "2.2.22"
-securejarhandler = "3.0.8"
+fancymodloader = "9.0.16"
 jarjar = "0.3.26"
 guava = "32.1.2-jre"
 mockito = "5.11.0"
@@ -34,9 +33,9 @@ log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "lo
 log4j-jpl = { module = "org.apache.logging.log4j:log4j-jpl", version.ref = "log4j" }
 log4j-slf4j2 = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 modlauncher = { module = "net.minecraftforge:modlauncher", version.ref = "modlauncher" }
-neo-modlauncher = { module = "cpw.mods:modlauncher", version.ref = "neo-modlauncher" }
 securemodules = { module = "net.minecraftforge:securemodules", version.ref = "securemodules" }
-securejarhandler = { module = "cpw.mods:securejarhandler", version.ref = "securejarhandler" }
+fancymodloader-loader = { module = "net.neoforged.fancymodloader:loader", version.ref = "fancymodloader" }
+fancymodloader-securejarhandler = { module = "net.neoforged.fancymodloader:securejarhandler", version.ref = "fancymodloader" }
 tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
 tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
 tinylog-slf4j = { module = "org.tinylog:slf4j-tinylog", version.ref = "tinylog" }
@@ -79,4 +78,4 @@ indra-licenserSpotless = { id = "net.kyori.indra.licenser.spotless", version = "
 shadow = { id = "com.gradleup.shadow", version = "8.3.8" }
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
 forgeGradle = { id = "net.minecraftforge.gradle", version = "6.0.35" }
-modDevGradle = { id = "net.neoforged.moddev", version = "2.0.78" }
+modDevGradle = { id = "net.neoforged.moddev", version = "2.0.107" }

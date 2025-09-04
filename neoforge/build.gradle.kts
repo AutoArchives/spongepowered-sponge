@@ -207,7 +207,7 @@ dependencies {
     val service = serviceLibrariesConfig.name
     service(apiLibs.pluginSpi)
     service(project(transformersProject.path)) {
-        exclude(group = "cpw.mods", module = "modlauncher")
+        exclude(group = "net.neoforged.fancymodloader", module = "loader")
     }
     service(project(libraryManagerProject.path))
 

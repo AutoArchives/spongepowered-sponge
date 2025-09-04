@@ -229,7 +229,7 @@ dependencies {
     spongeImpl.copyModulesExcludingPrefix(configurations.minecraft.get(), "net.minecraft", "joined", bootLibrariesConfig.get())
 
     boot(project(transformersProject.path)) {
-        exclude(group = "cpw.mods", module = "modlauncher")
+        exclude(group = "net.neoforged.fancymodloader", module = "loader")
     }
 
     val game = gameLibrariesConfig.name

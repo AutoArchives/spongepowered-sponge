@@ -4,7 +4,7 @@ dependencies {
     }
 
     compileOnly(libs.log4j.api)
-    compileOnly(libs.neo.modlauncher) {
+    compileOnly(libs.fancymodloader.loader) {
         exclude(group = "org.ow2.asm")
         exclude(group = "org.apache.logging.log4j")
     }

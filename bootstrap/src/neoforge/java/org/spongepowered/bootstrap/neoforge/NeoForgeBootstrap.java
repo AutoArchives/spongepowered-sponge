@@ -69,7 +69,7 @@ public class NeoForgeBootstrap extends Bootstrap<SecureJar> {
 
     @Override
     protected void runApplication(final ModuleLayer layer) throws Exception {
-        final Class<?> appClass = layer.findModule("cpw.mods.modlauncher").get().getClassLoader().loadClass("cpw.mods.modlauncher.Launcher");
+        final Class<?> appClass = layer.findModule("fml_loader").get().getClassLoader().loadClass("cpw.mods.modlauncher.Launcher");
         appClass.getDeclaredMethod("main", String[].class).invoke(null, (Object) this.args);
     }
 
