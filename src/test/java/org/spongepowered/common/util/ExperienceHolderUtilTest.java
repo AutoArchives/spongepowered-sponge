@@ -25,17 +25,18 @@
 package org.spongepowered.common.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.PrimaryLevelData;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.world.DefaultWorldKeys;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +45,14 @@ import java.util.UUID;
 public final class ExperienceHolderUtilTest {
 
     public static List<Arguments> testExp() {
-        final Level world = mock(Level.class);
-        when(world.getLevelData()).thenReturn(mock(PrimaryLevelData.class));
+        final Level world = (Level) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
 
         final Player player = new Player(world, BlockPos.ZERO, 0, new GameProfile(UUID.randomUUID(), "Player")) {
+            @Override
+            public @Nullable GameType gameMode() {
+                return null;
+            }
+
             @Override
             public boolean isSpectator() {
                 return false;
