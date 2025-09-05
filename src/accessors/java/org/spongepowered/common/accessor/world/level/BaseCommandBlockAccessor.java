@@ -28,6 +28,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.BaseCommandBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(BaseCommandBlock.class)
 public interface BaseCommandBlockAccessor {
@@ -39,5 +40,7 @@ public interface BaseCommandBlockAccessor {
     @Accessor("lastOutput") Component accessor$lastOutput();
 
     @Accessor("command") void accessor$command(final String command);
+
+    @Invoker("createSource") BaseCommandBlock.CloseableCommandBlockSource invoker$createSource();
 
 }

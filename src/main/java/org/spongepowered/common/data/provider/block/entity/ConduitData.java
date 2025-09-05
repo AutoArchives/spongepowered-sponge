@@ -66,7 +66,7 @@ public final class ConduitData {
                     if (!(e instanceof LivingEntity le)) {
                         return false;
                     }
-                    c.accessor$setDestroyTarget(new EntityReference<>(le));
+                    c.accessor$setDestroyTarget(EntityReference.of(le));
                     return true;
                 });
         //@formatter:on

@@ -174,7 +174,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                 if (throwable != null) {
                     // An error occurred during login checks so we ask to abort.
                     ((ConnectionBridge) this.connection).bridge$setKickReason(Component.literal("An error occurred checking ban/whitelist status."));
-                    SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.authenticatedProfile.getId().toString());
+                    SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.authenticatedProfile.id().toString());
                     SpongeCommon.logger().error(throwable);
                 } else if (componentOpt != null) {
                     // We handle this later
@@ -193,7 +193,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                 this.impl$fireAuthEvent();
                 return null;
             }, ServerLoginPacketListenerImplMixin.impl$EXECUTOR).exceptionally(throwable -> {
-                SpongeCommon.logger().error("Forcibly disconnecting user {}({}) due to an error during login.", this.authenticatedProfile.getName(), this.authenticatedProfile.getId(), throwable);
+                SpongeCommon.logger().error("Forcibly disconnecting user {}({}) due to an error during login.", this.authenticatedProfile.name(), this.authenticatedProfile.id(), throwable);
                 this.shadow$disconnect(Component.literal("Internal Server Error: unable to complete login."));
                 return null;
             });
@@ -256,10 +256,10 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             final String username = Objects.requireNonNull(this.requestedUsername, "Player name not initialized");
 
             try {
-                final ProfileResult $$1 = ServerLoginPacketListenerImplMixin.this.server.getSessionService().hasJoinedServer(username, $$5, this.impl$getAddress());
+                final ProfileResult $$1 = ServerLoginPacketListenerImplMixin.this.server.services().sessionService().hasJoinedServer(username, $$5, this.impl$getAddress());
                 if ($$1 != null) {
                     final GameProfile $$2 = $$1.profile();
-                    ServerLoginPacketListenerImplMixin.LOGGER.info("UUID of player {} is {}", $$2.getName(), $$2.getId());
+                    ServerLoginPacketListenerImplMixin.LOGGER.info("UUID of player {} is {}", $$2.name(), $$2.id());
                     ServerLoginPacketListenerImplMixin.this.shadow$startClientVerification($$2);
                 } else if (ServerLoginPacketListenerImplMixin.this.server.isSingleplayer()) {
                     ServerLoginPacketListenerImplMixin.LOGGER.warn("Failed to verify username but will let them in anyway!");

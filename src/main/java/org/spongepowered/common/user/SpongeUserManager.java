@@ -112,7 +112,7 @@ public final class SpongeUserManager implements UserManager {
             return CompletableFuture.completedFuture(null);
         }
         return CompletableFuture.supplyAsync(() -> {
-            final com.mojang.authlib.GameProfile profile = this.server.nameToIdCache().get(uuidToUse)
+            final com.mojang.authlib.GameProfile profile = this.server.services().nameToIdCache().get(uuidToUse)
                 .map(nameAndId -> new com.mojang.authlib.GameProfile(nameAndId.id(), nameAndId.name()))
                 .orElseGet(() -> new com.mojang.authlib.GameProfile(uuidToUse, ""));
             try {
@@ -135,7 +135,7 @@ public final class SpongeUserManager implements UserManager {
                         .map(SpongeGameProfile::toMcProfile)
                         .orElse(null);
         if (mcProfile != null) {
-            return this.load(mcProfile.getId());
+            return this.load(mcProfile.id());
         }
         return CompletableFuture.completedFuture(Optional.empty());
     }
@@ -234,7 +234,7 @@ public final class SpongeUserManager implements UserManager {
     //
 
     public void handlePlayerLogin(final com.mojang.authlib.GameProfile mcProfile) throws IOException {
-        final @Nullable SpongeUserData currentUser = this.userCache.getIfPresent(mcProfile.getId());
+        final @Nullable SpongeUserData currentUser = this.userCache.getIfPresent(mcProfile.id());
         if (currentUser != null) {
             // If currentUser have this then we know that the user has changed.
             if (this.dirtyUsers.contains(currentUser)) {
@@ -247,8 +247,8 @@ public final class SpongeUserManager implements UserManager {
 
     private void createUser(final com.mojang.authlib.GameProfile profile) throws IOException {
         final @Nullable SpongeUserData user = SpongeUserData.create(profile);
-        this.userCache.put(profile.getId(), user);
-        this.userFileCache.userCreated(profile.getId());
+        this.userCache.put(profile.id(), user);
+        this.userFileCache.userCreated(profile.id());
     }
 
     public void markDirty(final SpongeUserData user) {

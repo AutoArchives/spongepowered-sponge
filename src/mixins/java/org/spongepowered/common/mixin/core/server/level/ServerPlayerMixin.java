@@ -986,7 +986,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         var playerRespawnDestination = this.server.getLevel(defaulted);
         if (playerRespawnDestination == null) {
             SpongeCommon.logger().warn("The player '{}' respawn location was located in a world that isn't loaded or doesn't exist. This is not safe so "
-                                       + "the player will be moved to the spawn of the default world.", player.getGameProfile().getName());
+                                       + "the player will be moved to the spawn of the default world.", player.getGameProfile().name());
             playerRespawnDestination = player.getServer().overworld();
         }
 

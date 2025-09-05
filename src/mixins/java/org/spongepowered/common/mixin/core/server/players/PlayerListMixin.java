@@ -145,13 +145,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Final @Mutable private IpBanList ipBans;
     @Shadow @Final @Mutable private UserWhiteList whitelist;
     @Shadow @Final private List<net.minecraft.server.level.ServerPlayer> players;
-    @Shadow @Final protected int maxPlayers;
 
     @Shadow public abstract boolean shadow$canBypassPlayerLimit(NameAndId $$0);
     @Shadow protected abstract boolean shadow$verifyChatTrusted(final PlayerChatMessage $$0);
     @Shadow protected abstract void shadow$broadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
         final net.minecraft.server.level.@Nullable ServerPlayer $$2, final ChatType.Bound $$4);
+    @Shadow public abstract int shadow$getMaxPlayers();
     // @formatter:on
+
 
 
     private boolean impl$isRespawnWithPosition = false;
@@ -235,7 +236,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             if (component != null) {
                 return component;
             }
-            if (this.players.size() >= this.maxPlayers && !this.shadow$canBypassPlayerLimit(param1)) {
+            if (this.players.size() >= this.shadow$getMaxPlayers() && !this.shadow$canBypassPlayerLimit(param1)) {
                 return net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.server_full");
             }
             return null;
@@ -265,7 +266,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         if (mcWorld == null) {
             SpongeCommon.logger().warn("The player '{}' was located in a world that isn't loaded or doesn't exist. This is not safe so "
-                                       + "the player will be moved to the spawn of the default world.", mcPlayer.getGameProfile().getName());
+                                       + "the player will be moved to the spawn of the default world.", mcPlayer.getGameProfile().name());
             mcWorld = this.server.overworld();
             final BlockPos spawnPoint = mcWorld.getSharedSpawnPos();
             mcPlayer.setPos(spawnPoint.getX() + 0.5, spawnPoint.getY() + 0.5, spawnPoint.getZ() + 0.5);
@@ -365,7 +366,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerPlayerBridge) playerIn).bridge$setConnectionMessageToSend(message);
     }
 
-    @Redirect(method = "placeNewPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/server/players/PlayerList;viewDistance:I"))
+    @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;getViewDistance()I"))
     private int impl$usePerWorldViewDistance(final PlayerList self, final Connection co, final net.minecraft.server.level.ServerPlayer player, final CommonListenerCookie cookie) {
         return ((ServerLevelDataBridge) player.level().getLevelData()).bridge$viewDistance().orElse(self.getViewDistance());
     }

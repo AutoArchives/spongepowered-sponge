@@ -326,7 +326,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             synchronized (this) {
                 if (this.api$pointers == null) {
                     this.api$pointers = pointers = Pointers.builder()
-                        .withDynamic(Identity.NAME, () -> ((net.minecraft.server.level.ServerPlayer) (Object) this).getGameProfile().getName())
+                        .withDynamic(Identity.NAME, () -> ((net.minecraft.server.level.ServerPlayer) (Object) this).getGameProfile().name())
                         .withDynamic(Identity.DISPLAY_NAME, () -> this.displayName().get())
                         .withDynamic(Identity.UUID, ((Entity) (Object) this)::getUUID)
                         .withDynamic(Identity.LOCALE, this::locale)
@@ -342,6 +342,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     @Deprecated
+    @SuppressWarnings("deprecation")
     public void sendMessage(final Identity identity, final Component message, final MessageType type) {
         if (this.impl$isFake) {
             return;

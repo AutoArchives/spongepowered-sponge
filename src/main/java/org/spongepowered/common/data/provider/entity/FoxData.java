@@ -44,7 +44,7 @@ public final class FoxData {
                 .asMutable(Fox.class)
                     .create(Keys.FIRST_TRUSTED)
                         .get(h -> h.getEntityData().get(FoxAccessor.accessor$DATA_TRUSTED_ID_0()).map(EntityReference::getUUID).orElse(null))
-                        .set((h, v) -> h.getEntityData().set(FoxAccessor.accessor$DATA_TRUSTED_ID_0(), Optional.ofNullable(v).map(EntityReference::new)))
+                        .set((h, v) -> h.getEntityData().set(FoxAccessor.accessor$DATA_TRUSTED_ID_0(), Optional.ofNullable(v).map(EntityReference::of)))
                     .create(Keys.FOX_TYPE)
                         .get(h -> (FoxType) (Object) h.getVariant())
                         .set((h, v) -> ((FoxAccessor) h ).invoker$setVariant((Fox.Variant) (Object) v))
@@ -68,7 +68,7 @@ public final class FoxData {
                         .set((h, v) -> ((FoxAccessor) h).invoker$setSleeping(v))
                     .create(Keys.SECOND_TRUSTED)
                         .get(h -> h.getEntityData().get(FoxAccessor.accessor$DATA_TRUSTED_ID_1()).map(EntityReference::getUUID).orElse(null))
-                        .set((h, v) -> h.getEntityData().set(FoxAccessor.accessor$DATA_TRUSTED_ID_1(), Optional.ofNullable(v).map(EntityReference::new)));
+                        .set((h, v) -> h.getEntityData().set(FoxAccessor.accessor$DATA_TRUSTED_ID_1(), Optional.ofNullable(v).map(EntityReference::of)));
     }
     // @formatter:on
 }

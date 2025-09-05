@@ -46,11 +46,11 @@ public final class SkullItemStackData {
                     .create(Keys.GAME_PROFILE)
                         .get(h -> {
                             final ResolvableProfile resolvableProfile = h.get(DataComponents.PROFILE);
-                            return resolvableProfile == null ? null : SpongeGameProfile.of(resolvableProfile.gameProfile());
+                            return resolvableProfile == null ? null : SpongeGameProfile.of(resolvableProfile.partialProfile());
                         })
                         .set((h, v) -> {
                             final com.mojang.authlib.GameProfile mcProfile = SpongeGameProfile.toMcProfile(v);
-                            h.set(DataComponents.PROFILE, new ResolvableProfile(mcProfile));
+                            h.set(DataComponents.PROFILE, ResolvableProfile.createResolved(mcProfile));
                         })
                         .delete(h -> h.remove(DataComponents.PROFILE))
                         .supports(h -> h.getItem() instanceof PlayerHeadItem)

@@ -92,18 +92,18 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
 
     @Override
     public void bridge$add(final com.mojang.authlib.GameProfile profile, final boolean full, final boolean signed) {
-        GameProfileCache_GameProfileInfoAccessor accessor = this.profilesByUUID.get(Objects.requireNonNull(profile, "profile").getId());
+        GameProfileCache_GameProfileInfoAccessor accessor = this.profilesByUUID.get(Objects.requireNonNull(profile, "profile").id());
         final NameAndId current = accessor == null ? null : accessor.invoker$nameAndId();
         // Don't allow basic game profiles to overwrite the contents if already
         // an entry exists that is full.
-        if (current != null && Objects.equals(current.id(), profile.getId()) &&
-                Objects.equals(current.name(), profile.getName()) && !full) {
+        if (current != null && Objects.equals(current.id(), profile.id()) &&
+                Objects.equals(current.name(), profile.name()) && !full) {
             return;
         }
 
         final var nameAndIDToAdd = new NameAndId(profile);
         this.shadow$add(nameAndIDToAdd);
-        accessor = this.profilesByUUID.get(profile.getId());
+        accessor = this.profilesByUUID.get(profile.id());
         if (accessor == null || accessor.invoker$nameAndId() != nameAndIDToAdd) {
             return;
         }

@@ -41,6 +41,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
@@ -122,12 +123,11 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Shadow public abstract String shadow$getMotd();
     @Shadow public abstract int shadow$getTickCount();
     @Shadow public abstract void shadow$halt(boolean p_71263_1_);
-    @Shadow public abstract int shadow$getPlayerIdleTimeout();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
     @Shadow public abstract boolean shadow$isHardcore();
     @Shadow public abstract boolean shadow$isPvpAllowed();
     @Shadow public abstract boolean shadow$isCommandBlockEnabled();
-    @Shadow public abstract boolean shadow$isSpawningMonsters();
+    @Shadow protected abstract boolean shadow$isSpawningMonsters();
     @Shadow public abstract Commands shadow$getCommands();
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow public abstract net.minecraft.server.packs.resources.ResourceManager shadow$getResourceManager();
@@ -142,6 +142,10 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Shadow public abstract boolean repliesToStatus();
 
     @Shadow public abstract boolean isSingleplayer();
+
+    @Shadow public abstract void shadow$setUsingWhitelist(boolean $$0);
+
+    @Shadow public abstract int shadow$playerIdleTimeout();
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
@@ -217,7 +221,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public void setHasWhitelist(final boolean enabled) {
-        this.shadow$getPlayerList().setUsingWhiteList(enabled);
+        this.shadow$setUsingWhitelist(enabled);
     }
 
     @Override
@@ -270,7 +274,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
      */
     @Override
     public boolean isMultiWorldEnabled() {
-        return this.isSingleplayer() || ((Object) this instanceof DedicatedServer ds) && ds.getProperties().allowNether;
+        return this.isSingleplayer() || ((Object) this instanceof DedicatedServer ds) && ds.getGameRules().getBoolean(GameRules.RULE_ALLOW_NETHER);
     }
 
     @Override
@@ -419,7 +423,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Intrinsic
     public int server$playerIdleTimeout() {
-        return this.shadow$getPlayerIdleTimeout();
+        return this.shadow$playerIdleTimeout();
     }
 
     @Intrinsic

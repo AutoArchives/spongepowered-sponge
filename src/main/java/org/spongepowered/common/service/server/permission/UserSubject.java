@@ -81,12 +81,12 @@ public class UserSubject extends SpongeSubject {
 
     @Override
     public String identifier() {
-        return this.player.getId().toString();
+        return this.player.id().toString();
     }
 
     @Override
     public Optional<String> friendlyIdentifier() {
-        final String name = this.player.getName();
+        final String name = this.player.name();
         return name.isEmpty() ? Optional.empty() : Optional.of(name);
     }
 
@@ -96,7 +96,7 @@ public class UserSubject extends SpongeSubject {
             return Optional.empty();
         }
 
-        return Sponge.server().player(this.player.getId());
+        return Sponge.server().player(this.player.id());
     }
 
     int getOpLevel() {
@@ -106,7 +106,7 @@ public class UserSubject extends SpongeSubject {
         final ServerOpListEntry entry = SpongePermissionService.getOps().get(this.nameAndId);
         if (entry == null) {
             // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
-            return SpongeCommon.server().getPlayerList().isOp(this.nameAndId) ? SpongeCommon.server().getOperatorUserPermissionLevel() : 0;
+            return SpongeCommon.server().getPlayerList().isOp(this.nameAndId) ? SpongeCommon.server().operatorUserPermissionLevel() : 0;
         } else {
             return entry.getLevel();
         }

@@ -74,14 +74,14 @@ public final class ServerPlayerData {
                         .get(h -> (GameMode) (Object) h.gameMode.getPreviousGameModeForPlayer())
                     .create(Keys.SKIN_PROFILE_PROPERTY)
                         .get(h -> {
-                            final Collection<Property> properties = h.getGameProfile().getProperties().get(ProfileProperty.TEXTURES);
+                            final Collection<Property> properties = h.getGameProfile().properties().get(ProfileProperty.TEXTURES);
                             if (properties.isEmpty()) {
                                 return null;
                             }
                             return new SpongeProfileProperty(properties.iterator().next());
                         })
                         .set((h ,v) -> {
-                            h.getGameProfile().getProperties().replaceValues(ProfileProperty.TEXTURES, Collections.singletonList(((SpongeProfileProperty)v).asProperty()));
+                            h.getGameProfile().properties().replaceValues(ProfileProperty.TEXTURES, Collections.singletonList(((SpongeProfileProperty)v).asProperty()));
                             ServerPlayerData.resendProfile(h);
                         })
                     .create(Keys.SPECTATOR_TARGET)

@@ -86,14 +86,14 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
             if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID() != null) {
                 uuid = ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID();
             } else {
-                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + $$0.getName()).getBytes(StandardCharsets.UTF_8));
+                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + $$0.name()).getBytes(StandardCharsets.UTF_8));
             }
 
-            $$0 = new GameProfile(uuid, $$0.getName());
+            $$0 = new GameProfile(uuid, $$0.name());
 
             if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile() != null) {
                 for (final Property property : ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile()) {
-                    $$0.getProperties().put(property.name(), property);
+                    $$0.properties().put(property.name(), property);
                 }
             }
         }

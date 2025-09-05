@@ -123,7 +123,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     public HumanEntity(final EntityType<? extends HumanEntity> type, final Level world) {
         super(type, world);
-        this.fakeProfile = new ResolvableProfile(new GameProfile(this.uuid, ""));
+        this.fakeProfile = ResolvableProfile.createUnresolved(this.uuid);
         this.setCanPickUpLoot(true);
         this.entityData.set(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
     }
@@ -196,7 +196,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         tag.read("profile", ResolvableProfile.CODEC)
             .ifPresent(profile -> {
                 this.fakeProfile = profile;
-                this.setUUID(this.fakeProfile.id().get());
+                this.setUUID(this.fakeProfile.partialProfile().id());
             });
     }
 
@@ -307,26 +307,27 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     private void setProfileName(final net.minecraft.network.chat.@Nullable Component newName) {
         final Optional<String> optName = Optional.ofNullable(newName).map(net.minecraft.network.chat.Component::getString);
-        this.fakeProfile = new ResolvableProfile(optName, this.fakeProfile.id(), this.fakeProfile.properties());
+        final var profile = new GameProfile(this.fakeProfile.partialProfile().id(), optName.orElse(this.fakeProfile.name().orElse("")), this.fakeProfile.partialProfile().properties());
+        this.fakeProfile = ResolvableProfile.createResolved(profile);
     }
 
     public boolean getOrLoadSkin(final UUID minecraftAccount) {
         final var server = SpongeCommon.server();
-        final @Nullable GameProfile profile = server.nameToIdCache().get(minecraftAccount).flatMap(name ->
-            server.getProfileRepository().findProfileByName(name.name())
+        final @Nullable GameProfile profile = server.services().nameToIdCache().get(minecraftAccount).flatMap(name ->
+            server.services().profileResolver().fetchByName(name.name())
         ).orElseGet(() -> {
-            final @Nullable ProfileResult result = server.getSessionService().fetchProfile(minecraftAccount, true);
+            final @Nullable ProfileResult result = server.services().sessionService().fetchProfile(minecraftAccount, true);
             if (result == null) {
                 return null;
             }
-            server.nameToIdCache().add(new NameAndId(result.profile()));
+            server.services().nameToIdCache().add(new NameAndId(result.profile()));
             return result.profile();
         });
         if (profile == null) {
             return false;
         }
 
-        this.fakeProfile.properties().replaceValues(ProfileProperty.TEXTURES, profile.getProperties().get(ProfileProperty.TEXTURES));
+        this.fakeProfile.partialProfile().properties().replaceValues(ProfileProperty.TEXTURES, profile.properties().get(ProfileProperty.TEXTURES));
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
@@ -337,15 +338,15 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     public boolean getOrLoadSkin(final String minecraftAccount) {
         Objects.requireNonNull(minecraftAccount);
         final var server = SpongeCommon.server();
-        final @Nullable GameProfile profile = server.nameToIdCache().get(minecraftAccount).flatMap(name ->
-            server.getProfileRepository().findProfileByName(name.name())
+        final @Nullable GameProfile profile = server.services().nameToIdCache().get(minecraftAccount).flatMap(name ->
+            server.services().profileResolver().fetchByName(name.name())
         ).orElse(null);
         if (profile == null) {
             return false;
         }
 
-        this.fakeProfile.properties().clear();
-        this.fakeProfile.properties().putAll(profile.getProperties());
+        this.fakeProfile.partialProfile().properties().clear();
+        this.fakeProfile.partialProfile().properties().putAll(profile.properties());
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
@@ -368,7 +369,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     public SpongeProfileProperty getSkinProperty() {
-        final Collection<Property> properties = this.fakeProfile.properties().get(ProfileProperty.TEXTURES);
+        final Collection<Property> properties = this.fakeProfile.partialProfile().properties().get(ProfileProperty.TEXTURES);
         if (properties.isEmpty()) {
             return null;
         }
@@ -376,7 +377,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     public void setSkinProperty(final ProfileProperty property) {
-        this.fakeProfile.properties()
+        this.fakeProfile.partialProfile().properties()
                 .replaceValues(
                         ProfileProperty.TEXTURES,
                         Collections.singletonList(((SpongeProfileProperty) property).asProperty()));
@@ -406,7 +407,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      * @return Whether it can be removed with 0 ticks delay
      */
     public boolean canRemoveFromListImmediately() {
-        return !this.fakeProfile.properties().containsKey(ProfileProperty.TEXTURES);
+        return !this.fakeProfile.partialProfile().properties().containsKey(ProfileProperty.TEXTURES);
     }
 
     /**
@@ -432,7 +433,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         final ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(actions, List.of());
 
         ((ClientboundPlayerInfoUpdatePacketAccessor) packet).accessor$entries(List.of(
-            new ClientboundPlayerInfoUpdatePacket.Entry(this.uuid, this.fakeProfile.gameProfile(), false, 0, GameType.DEFAULT_MODE, this.getDisplayName(), false, 0, null)));
+            new ClientboundPlayerInfoUpdatePacket.Entry(this.uuid, this.fakeProfile.partialProfile(), false, 0, GameType.DEFAULT_MODE, this.getDisplayName(), false, 0, null)));
         return packet;
     }
 

@@ -52,7 +52,7 @@ public final class TameableData {
                             return t.getOwnerReference().getUUID();
                         })
                         .set((h, v) -> {
-                            h.setOwnerReference(new EntityReference<>(v));
+                            h.setOwnerReference(EntityReference.of(v));
                             h.setTame(v != null, true);
                         });
     }

@@ -95,7 +95,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
                     if (throwable != null) {
                         // An error occurred during login checks so we ask to abort.
                         ((ConnectionBridge) this.connection).bridge$setKickReason(Component.literal("An error occurred checking ban/whitelist status."));
-                        SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.gameProfile.getId().toString());
+                        SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.gameProfile.id().toString());
                         SpongeCommon.logger().error(throwable);
                     } else if (componentOpt != null) {
                         // We handle this later
@@ -122,7 +122,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
                         this.impl$skipBanService = true;
                         this.shadow$handleConfigurationFinished($$0);
                         // invalidate just to be sure there is no user cached for the online player anymore
-                        ((SpongeServer) SpongeCommon.server()).userManager().removeFromCache(this.gameProfile.getId());
+                        ((SpongeServer) SpongeCommon.server()).userManager().removeFromCache(this.gameProfile.id());
                     } catch (final Exception e) {
                         throw new RuntimeException(e);
                     } finally {
@@ -131,7 +131,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
 
                     return null;
                 }, SpongeCommon.server()).exceptionally(throwable -> {
-                    SpongeCommon.logger().error("Forcibly disconnecting user {}({}) due to an error during login.", this.gameProfile.getName(), this.gameProfile.getId(), throwable);
+                    SpongeCommon.logger().error("Forcibly disconnecting user {}({}) due to an error during login.", this.gameProfile.name(), this.gameProfile.id(), throwable);
                     this.shadow$disconnect(Component.literal("Internal Server Error: unable to complete login."));
                     return null;
                 });

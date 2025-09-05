@@ -33,6 +33,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
@@ -55,6 +56,6 @@ public abstract class MinecartCommandBlockMixin extends AbstractMinecartMixin im
 
     @Override
     public CommandSourceStack bridge$getCommandSource(final Cause cause) {
-        return this.commandBlock.createCommandSourceStack();
+        return this.commandBlock.createCommandSourceStack(SpongeCommon.server());
     }
 }

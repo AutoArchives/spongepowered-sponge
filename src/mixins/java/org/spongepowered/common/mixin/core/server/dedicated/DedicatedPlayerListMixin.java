@@ -28,6 +28,7 @@ import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
+import net.minecraft.server.notifications.EmptyNotificationService;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.storage.PlayerDataStorage;
@@ -46,8 +47,8 @@ import org.spongepowered.common.service.server.permission.SpongePermissionServic
 public abstract class DedicatedPlayerListMixin extends PlayerList {
 
     public DedicatedPlayerListMixin(final MinecraftServer server, final LayeredRegistryAccess<RegistryLayer> registryAccess,
-                                    final PlayerDataStorage playerIo, final int maxPlayers) {
-        super(server, registryAccess, playerIo, maxPlayers);
+                                    final PlayerDataStorage playerIo) {
+        super(server, registryAccess, playerIo, new EmptyNotificationService());
     }
 
     @Inject(method = "isWhiteListed", at = @At("HEAD"), cancellable = true)

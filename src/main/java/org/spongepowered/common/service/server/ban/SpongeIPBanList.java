@@ -27,6 +27,7 @@ package org.spongepowered.common.service.server.ban;
 import static org.spongepowered.common.util.NetworkUtil.LOCAL_ADDRESS;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.server.notifications.EmptyNotificationService;
 import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.IpBanListEntry;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -44,6 +45,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Redirects all calls to the {@link BanService}.
@@ -51,7 +53,7 @@ import java.util.List;
 public final class SpongeIPBanList extends IpBanList {
 
     public SpongeIPBanList(final File file) {
-        super(file);
+        super(file, new EmptyNotificationService());
     }
 
     @Override
@@ -75,31 +77,31 @@ public final class SpongeIPBanList extends IpBanList {
 
         try {
             return Sponge.server().serviceProvider().banService().find(InetAddress.getByName(obj)).join()
-                    .map(ban -> {
-                        if (ban instanceof IpBanListEntry) {
-                            return (IpBanListEntry) ban;
-                        }
-                        final LegacyComponentSerializer lcs = LegacyComponentSerializer.legacySection();
-                        return new IpBanListEntry(BanUtil.addressToBanCompatibleString(ban.address()),
-                                Date.from(ban.creationDate()),
-                                ban.banSource().map(lcs::serialize).orElse(null),
-                                ban.expirationDate().map(Date::from).orElse(null),
-                                ban.reason().map(lcs::serialize).orElse(null));
-                    })
-                    .orElse(null);
+                .map(ban -> {
+                    if (ban instanceof IpBanListEntry) {
+                        return (IpBanListEntry) ban;
+                    }
+                    final LegacyComponentSerializer lcs = LegacyComponentSerializer.legacySection();
+                    return new IpBanListEntry(BanUtil.addressToBanCompatibleString(ban.address()),
+                        Date.from(ban.creationDate()),
+                        ban.banSource().map(lcs::serialize).orElse(null),
+                        ban.expirationDate().map(Date::from).orElse(null),
+                        ban.reason().map(lcs::serialize).orElse(null));
+                })
+                .orElse(null);
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
     }
 
     @Override
-    public void remove(final String entry) {
+    public boolean remove(final String entry) {
         if (entry.equals(LOCAL_ADDRESS)) { // Check for single player
-            return;
+            return false;
         }
 
         try {
-            Sponge.server().serviceProvider().banService().pardon(InetAddress.getByName(entry)).join();
+            return Sponge.server().serviceProvider().banService().pardon(InetAddress.getByName(entry)).join();
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -115,8 +117,8 @@ public final class SpongeIPBanList extends IpBanList {
     }
 
     @Override
-    public void add(final IpBanListEntry entry) {
-        Sponge.server().serviceProvider().banService().add((Ban) entry).join();
+    public boolean add(final IpBanListEntry entry) {
+        return Sponge.server().serviceProvider().banService().add((Ban) entry).thenApply(Optional::isPresent).join();
     }
 
     @Override
@@ -127,7 +129,7 @@ public final class SpongeIPBanList extends IpBanList {
     /**
      * @author Minecrell - August 22nd, 2016
      * @reason Use InetSocketAddress#getHostString() where possible (instead of
-     *     inspecting SocketAddress#toString()) to support IPv6 addresses
+     * inspecting SocketAddress#toString()) to support IPv6 addresses
      */
     @Override
     public String getIpFromAddress(final SocketAddress address) {

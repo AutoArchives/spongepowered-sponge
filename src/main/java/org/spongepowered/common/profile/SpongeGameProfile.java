@@ -62,9 +62,9 @@ public final class SpongeGameProfile implements GameProfile {
     }
 
     public static SpongeGameProfile of(final com.mojang.authlib.GameProfile mcProfile) {
-        final UUID uniqueId = mcProfile.getId();
-        final String name = mcProfile.getName().isEmpty() ? null : mcProfile.getName();
-        final List<SpongeProfileProperty> properties = mcProfile.getProperties().values().stream()
+        final UUID uniqueId = mcProfile.id();
+        final String name = mcProfile.name().isEmpty() ? null : mcProfile.name();
+        final List<SpongeProfileProperty> properties = mcProfile.properties().values().stream()
                 .map(SpongeProfileProperty::new)
                 .collect(Collectors.toList());
         return new SpongeGameProfile(uniqueId, name, properties);
@@ -76,8 +76,8 @@ public final class SpongeGameProfile implements GameProfile {
     }
 
     public static SpongeGameProfile basicOf(final com.mojang.authlib.GameProfile mcProfile) {
-        final UUID uniqueId = mcProfile.getId();
-        final String name = mcProfile.getName().isEmpty() ? null : mcProfile.getName();
+        final UUID uniqueId = mcProfile.id();
+        final String name = mcProfile.name().isEmpty() ? null : mcProfile.name();
         return new SpongeGameProfile(uniqueId, name);
     }
 
@@ -150,7 +150,7 @@ public final class SpongeGameProfile implements GameProfile {
         final String name = (this.name == null) ? "" : this.name;
         final com.mojang.authlib.GameProfile mcProfile = new com.mojang.authlib.GameProfile(uniqueId, name);
         for (final SpongeProfileProperty property : this.properties) {
-            mcProfile.getProperties().put(property.name(), property.asProperty());
+            mcProfile.properties().put(property.name(), property.asProperty());
         }
         return mcProfile;
     }

@@ -39,14 +39,13 @@ import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionManager;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.LevelLoadListener;
-import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleReloadInstance;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.server.players.UserNameToIdResolver;
 import net.minecraft.util.Unit;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
@@ -55,7 +54,6 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
-import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -111,7 +109,6 @@ import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -130,22 +127,18 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow private int tickCount;
     @Shadow @Final private Thread serverThread;
     @Shadow @Final private ServerFunctionManager functionManager;
+    @Shadow private volatile boolean isSaving;
 
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
     @Shadow public abstract Iterable<ServerLevel> shadow$getAllLevels();
     @Shadow public abstract boolean shadow$isDedicatedServer();
     @Shadow public abstract boolean shadow$isRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
-    @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow public abstract RegistryAccess.Frozen shadow$registryAccess();
-    @Shadow public abstract UserNameToIdResolver shadow$nameToIdCache();
-    @Shadow public abstract CompletableFuture<Void> shadow$reloadResources(final Collection<String> $$0);
-    @Shadow public abstract WorldData shadow$getWorldData();
-    @Shadow public abstract boolean shadow$haveTime();
-    @Shadow private volatile boolean isSaving;
+    @Shadow protected abstract boolean shadow$haveTime();
     @Shadow public abstract ResourceManager shadow$getResourceManager();
+    @Shadow public abstract Services shadow$services();
     // @formatter:on
-
 
     private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
@@ -394,7 +387,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         // Save the usercache.json file every 10 minutes or if forced to
         if (isForced || this.tickCount % 6000 == 0) {
             // We want to save the username cache json, as we normally bypass it.
-            final var profileCache = this.shadow$nameToIdCache();
+            final var profileCache = this.shadow$services().nameToIdCache();
             ((GameProfileCacheBridge) profileCache).bridge$setCanSave(true);
             profileCache.save();
             ((GameProfileCacheBridge) profileCache).bridge$setCanSave(false);

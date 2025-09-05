@@ -110,10 +110,10 @@ public final class SpongePacketHandler {
             final Optional<UUID> owner,
             final Optional<UUID> notifier
     ) {
-        final String ownerName = owner.flatMap(SpongeCommon.server().nameToIdCache()::get)
+        final String ownerName = owner.flatMap(SpongeCommon.server().services().nameToIdCache()::get)
                 .map(NameAndId::name)
                 .orElse("");
-        final String notifierName = notifier.flatMap(SpongeCommon.server().nameToIdCache()::get)
+        final String notifierName = notifier.flatMap(SpongeCommon.server().services().nameToIdCache()::get)
                 .map(NameAndId::name)
                 .orElse("");
         return new TrackerDataResponsePacket(ownerName, notifierName);

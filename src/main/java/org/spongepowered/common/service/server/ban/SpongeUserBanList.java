@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.server.ban;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.server.notifications.EmptyNotificationService;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
@@ -48,7 +49,7 @@ import java.util.concurrent.CompletableFuture;
 public class SpongeUserBanList extends UserBanList {
 
     public SpongeUserBanList(final File file) {
-        super(file);
+        super(file, new EmptyNotificationService());
     }
 
     @Override
@@ -84,9 +85,10 @@ public class SpongeUserBanList extends UserBanList {
     }
 
     @Override
-    public void add(final UserBanListEntry entry) {
+    public boolean add(final UserBanListEntry entry) {
         final CompletableFuture<Optional<? extends Ban>> completableFuture = Sponge.server().serviceProvider().banService().add((Ban) entry);
         ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor().managedBlock(completableFuture::isDone);
+        return true;
     }
 
     @Override
@@ -95,9 +97,10 @@ public class SpongeUserBanList extends UserBanList {
     }
 
     @Override
-    public void remove(final NameAndId entry) {
+    public boolean remove(final NameAndId entry) {
         final CompletableFuture<Boolean> completableFuture = Sponge.server().serviceProvider().banService().pardon(SpongeGameProfile.of(entry));
         ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor().managedBlock(completableFuture::isDone);
+        return true;
     }
 
 }
