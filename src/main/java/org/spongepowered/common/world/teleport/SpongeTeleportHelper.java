@@ -73,12 +73,12 @@ public final class SpongeTeleportHelper implements TeleportHelper {
 
     private Stream<Vector3i> getBlockLocations(ServerLocation worldLocation, int height, int width) {
         // We don't want to warp outside of the world border, so we want to check that we're within it.
-        final WorldBorder.Settings worldBorder = (WorldBorder.Settings) worldLocation.world().properties().worldBorder();
-        final double radius = worldBorder.getSize() / 2.0D;
-        int worldBorderMinX = GenericMath.floor(worldBorder.getCenterX() - radius);
-        int worldBorderMinZ = GenericMath.floor(worldBorder.getCenterZ() - radius);
-        int worldBorderMaxX = GenericMath.floor(worldBorder.getCenterX() + radius);
-        int worldBorderMaxZ = GenericMath.floor(worldBorder.getCenterZ() + radius);
+        final WorldBorder.Settings worldBorder = (WorldBorder.Settings) (Object) worldLocation.world().properties().worldBorder();
+        final double radius = worldBorder.size() / 2.0D;
+        int worldBorderMinX = GenericMath.floor(worldBorder.centerX() - radius);
+        int worldBorderMinZ = GenericMath.floor(worldBorder.centerZ() - radius);
+        int worldBorderMaxX = GenericMath.floor(worldBorder.centerX() + radius);
+        int worldBorderMaxZ = GenericMath.floor(worldBorder.centerZ() + radius);
 
         // Get the World and get the maximum Y value.
         int worldMaxY = worldLocation.world().max().y();

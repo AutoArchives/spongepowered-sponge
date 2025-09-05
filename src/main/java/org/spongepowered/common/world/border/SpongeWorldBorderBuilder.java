@@ -61,7 +61,7 @@ public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
 
     @Override
     public WorldBorder.Builder overworldDefaults() {
-        return this.from((WorldBorder) net.minecraft.world.level.border.WorldBorder.DEFAULT_SETTINGS);
+        return this.from((WorldBorder) (Object) net.minecraft.world.level.border.WorldBorder.Settings.DEFAULT);
     }
 
     @Override
@@ -145,7 +145,7 @@ public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
         if (this.diameter == -1) {
             throw new IllegalStateException("The diameter or initial diameter has not been set!");
         }
-        return (WorldBorder) WorldBorder_SettingsAccessor.invoker$new(
+        return (WorldBorder) (Object) WorldBorder_SettingsAccessor.invoker$new(
                 this.center.x(),
                 this.center.y(),
                 this.damagePerBlock,

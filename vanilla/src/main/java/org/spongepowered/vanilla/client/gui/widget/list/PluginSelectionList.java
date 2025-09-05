@@ -28,6 +28,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.util.Bounds;
 
@@ -71,7 +72,7 @@ public final class PluginSelectionList extends FilterableList<PluginSelectionLis
 //        }
 
         @Override
-        public boolean mouseClicked(final double p_mouseClicked_1_, final double p_mouseClicked_3_, final int p_mouseClicked_5_, final boolean repeated) {
+        public boolean mouseClicked(final MouseButtonEvent event, final boolean repeated) {
             this.getParentList().setSelected(this);
             return true;
         }

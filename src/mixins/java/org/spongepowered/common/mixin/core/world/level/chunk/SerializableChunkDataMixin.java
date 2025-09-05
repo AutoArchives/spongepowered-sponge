@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.PalettedContainerFactory;
 import net.minecraft.world.level.chunk.storage.SerializableChunkData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -103,7 +103,10 @@ public abstract class SerializableChunkDataMixin implements SerializableChunkDat
     }
 
     @Inject(method = "parse", at = @At(value = "TAIL"))
-    private static void tracker$parseSpongeData(final LevelHeightAccessor $$0, final RegistryAccess $$1, final CompoundTag tag, final CallbackInfoReturnable<SerializableChunkData> cir) {
+    private static void tracker$parseSpongeData(
+        final LevelHeightAccessor ha, final PalettedContainerFactory pcf, final CompoundTag tag,
+        final CallbackInfoReturnable<SerializableChunkData> cir
+    ) {
         final var bridge = (SerializableChunkDataBridge) (Object) cir.getReturnValue();
         bridge.bridge$parseTrackerData(tag);
         bridge.bridge$parseDataHolderData(tag);

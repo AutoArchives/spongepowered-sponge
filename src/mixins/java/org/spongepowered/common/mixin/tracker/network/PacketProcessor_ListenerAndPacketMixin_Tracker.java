@@ -22,37 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.network.protocol;
+package org.spongepowered.common.mixin.tracker.network;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.PacketUtils;
-import net.minecraft.util.thread.BlockableEventLoop;
-import org.slf4j.Logger;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
-@Mixin(PacketUtils.class)
-public abstract class PacketUtilsMixin_Tracker {
+@Mixin(targets = "net.minecraft.network.PacketProcessor$ListenerAndPacket")
+public abstract class PacketProcessor_ListenerAndPacketMixin_Tracker {
 
-    // @formatter:off
-    @Shadow @Final private static Logger LOGGER;
-    // @formatter:on
-
-    @Redirect(method = "ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/thread/BlockableEventLoop;executeIfPossible(Ljava/lang/Runnable;)V"))
-    private static <T extends PacketListener> void tracker$redirectProcessPacket(BlockableEventLoop threadTaskExecutor, Runnable runnable,
-            Packet<T> packet, T packetListener, BlockableEventLoop<?> blockableEventLoop) {
-        threadTaskExecutor.executeIfPossible(() -> {
-            if (packetListener.isAcceptingMessages()) {
-                PacketPhaseUtil.onProcessPacket(packet, packetListener);
-            } else {
-                LOGGER.debug("Ignoring packet due to disconnection: " + packet);
-            }
-        });
+    @WrapOperation(method = "handle",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/Packet;handle(Lnet/minecraft/network/PacketListener;)V"))
+    private <T extends PacketListener> void tracker$redirectProcessPacket(Packet<T> packet, T listener, Operation<Void> original) {
+        PacketPhaseUtil.onProcessPacket(packet, listener, () -> original.call(packet, listener));
     }
 }

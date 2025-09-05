@@ -33,6 +33,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarrationSupplier;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.vanilla.util.Bounds;
@@ -130,22 +131,29 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
         super.setSelected(entry);
     }
 
+
     @Override
-    public boolean mouseClicked(final double mouseX, final double mouseY, final int button, final boolean repeatedClick) {
-        this.updateScrolling(mouseX, mouseY, button);
+    public boolean mouseClicked(final MouseButtonEvent event, final boolean repeatedClick) {
+        final var mouseX = event.x();
+        final var mouseY = event.y();
+        final var button = event.button();
+        this.updateScrolling(event);
         if (!this.isMouseOver(mouseX, mouseY)) {
             return false;
         } else {
             final E e = this.getEntryAtPosition(mouseX, mouseY);
             if (e != null) {
-                if (e.mouseClicked(mouseX, mouseY, button, repeatedClick)) {
+                if (e.mouseClicked(event, repeatedClick)) {
                     this.setFocused(e);
                     this.setDragging(true);
                     return true;
                 }
             } else if (button == 0) {
-                this.onClick((int) (mouseX - (double) (this.getX() + this.width / 2 - this.getRowWidth() / 2)),
-                    (int) (mouseY - (double) this.getY()) + (int) this.scrollAmount() - 4, repeatedClick);
+                final var newEvent = new MouseButtonEvent(
+                    (mouseX - (double) (this.getX() + this.width / 2 - this.getRowWidth() / 2)),
+                    (mouseY - (double) this.getY()) + (int) this.scrollAmount() - 4,
+                    event.buttonInfo());
+                this.onClick(newEvent, repeatedClick);
                 return true;
             }
 

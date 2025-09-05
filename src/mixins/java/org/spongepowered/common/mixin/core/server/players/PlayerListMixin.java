@@ -540,12 +540,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         SpongeCommon.post(event);
     }
 
-    @Redirect(method = "sendLevelInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;"))
-    private ServerLevel impl$usePerWorldWorldBorder(final MinecraftServer minecraftServer, final net.minecraft.server.level.ServerPlayer playerIn,
-                                                    final ServerLevel worldIn) {
-        return worldIn;
-    }
-
     private void impl$disconnectClient(final Connection netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {
         final net.minecraft.network.chat.Component reason = SpongeAdventure.asVanilla(disconnectMessage);
 

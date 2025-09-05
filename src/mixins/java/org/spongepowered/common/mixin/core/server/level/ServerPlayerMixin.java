@@ -47,6 +47,7 @@ import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayerGameMode;
@@ -127,6 +128,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
+import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
 import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
 import org.spongepowered.common.accessor.world.level.portal.TeleportTransitionAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -167,7 +169,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     // @formatter:off
     @Shadow public ServerGamePacketListenerImpl connection;
     @Shadow @Final public ServerPlayerGameMode gameMode;
-    @Shadow @Final public MinecraftServer server;
+    @Shadow @Final private MinecraftServer server;
     @Shadow private int lastRecordedExperience;
     @Shadow private boolean isChangingDimension;
     @Shadow private net.minecraft.world.phys.Vec3 enteredNetherPosition;
@@ -222,6 +224,23 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public Tristate bridge$permDefault(final String permission) {
         return Tristate.FALSE;
+    }
+
+
+    @WrapOperation(
+        method = "handleShoulderEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/level/ServerPlayer;playShoulderEntityAmbientSound(Lnet/minecraft/nbt/CompoundTag;)V"
+        )
+    )
+    private void impl$ignoreShoulderSoundsWhileVanished(
+        final net.minecraft.server.level.ServerPlayer thisPlayer, final CompoundTag tag, final Operation<Void> original
+    ) {
+        if (!this.bridge$vanishState().createsSounds()) {
+            return;
+        }
+        original.call(thisPlayer, tag);
     }
 
     @Override
@@ -295,7 +314,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     public void bridge$initScoreboard() {
-        ((ServerScoreboardBridge) this.shadow$getScoreboard()).bridge$addPlayer((net.minecraft.server.level.ServerPlayer) (Object) this, true);
+        ((ServerScoreboardBridge) this.shadow$level().getScoreboard()).bridge$addPlayer((net.minecraft.server.level.ServerPlayer) (Object) this, true);
     }
 
     @Override
@@ -836,9 +855,18 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
     }
 
-    @Override
-    public net.minecraft.world.scores.Scoreboard shadow$getScoreboard() {
-        return (net.minecraft.world.scores.Scoreboard) this.impl$scoreboard;
+    @WrapOperation(method = {
+        "updateScoreForCriteria",
+        "die",
+        "awardKillScore",
+        "handleTeamKill",
+        "awardStat",
+        "resetStat",
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;getScoreboard()Lnet/minecraft/server/ServerScoreboard;"))
+    private ServerScoreboard impl$usePerPlayerScoreboard(
+        final ServerLevel instance, final Operation<ServerScoreboard> original
+    ) {
+        return (ServerScoreboard) this.impl$scoreboard;
     }
 
     @Override
@@ -987,7 +1015,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         if (playerRespawnDestination == null) {
             SpongeCommon.logger().warn("The player '{}' respawn location was located in a world that isn't loaded or doesn't exist. This is not safe so "
                                        + "the player will be moved to the spawn of the default world.", player.getGameProfile().name());
-            playerRespawnDestination = player.getServer().overworld();
+            playerRespawnDestination = ((ServerPlayerAccessor) player).accessor$server().overworld();
         }
 
         final RespawnPlayerEvent.SelectWorld event = SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getInstance().currentCause(),

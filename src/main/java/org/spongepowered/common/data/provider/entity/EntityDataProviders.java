@@ -154,6 +154,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         LivingData.register(this.registrator);
         LlamaData.register(this.registrator);
         LocationTargetingData.register(this.registrator);
+        MannequinData.register(this.registrator);
         MobData.register(this.registrator);
         MooshroomData.register(this.registrator);
         OcelotData.register(this.registrator);

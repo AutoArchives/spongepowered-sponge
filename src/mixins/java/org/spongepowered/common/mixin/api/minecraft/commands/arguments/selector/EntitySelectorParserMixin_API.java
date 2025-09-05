@@ -30,7 +30,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.core.registries.Registries;
@@ -58,8 +57,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_DoublesAccessor;
-import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_IntsAccessor;
 import org.spongepowered.common.bridge.commands.arguments.selector.EntitySelectorParserBridge;
 import org.spongepowered.common.command.selector.SpongeSelectorSortAlgorithm;
 import org.spongepowered.common.util.Preconditions;
@@ -69,7 +66,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -96,8 +92,8 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Shadow @Nullable private Double deltaX;
     @Shadow @Nullable private Double deltaY;
     @Shadow @Nullable private Double deltaZ;
-    @Shadow private WrappedMinMaxBounds rotX = WrappedMinMaxBounds.ANY;
-    @Shadow private WrappedMinMaxBounds rotY = WrappedMinMaxBounds.ANY;
+    @Shadow private MinMaxBounds.FloatDegrees rotX = MinMaxBounds.FloatDegrees.ANY;
+    @Shadow private MinMaxBounds.FloatDegrees rotY = MinMaxBounds.FloatDegrees.ANY;
     @Shadow @Final private List<Predicate<Entity>> predicates;
     @Shadow private boolean currentEntity;
     @Shadow @Nullable private String playerName;
@@ -131,9 +127,12 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Shadow public abstract void shadow$addPredicate(Predicate<Entity> p_197401_1_);
     // @formatter:on
 
-    @Nullable private Map<String, Range<@NonNull Integer>> api$scores;
-    @Nullable private Object2BooleanOpenHashMap<String> api$advancement;
-    @Nullable private Map<String, Object2BooleanOpenHashMap<String>> api$criterion;
+    @Nullable
+    private Map<String, Range<@NonNull Integer>> api$scores;
+    @Nullable
+    private Object2BooleanOpenHashMap<String> api$advancement;
+    @Nullable
+    private Map<String, Object2BooleanOpenHashMap<String>> api$criterion;
     private boolean api$forceSelf;
 
     @Override
@@ -172,13 +171,26 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         if (range.max() != null && range.max() < 0) {
             throw new IllegalArgumentException("max must be non-negative");
         }
-        this.distance = MinMaxBounds_DoublesAccessor.invoker$new(Optional.ofNullable(range.min()), Optional.ofNullable(range.max()));
+
+        final Double min = range.min();
+        final Double max = range.max();
+        if (min == null && max == null) {
+            this.distance = MinMaxBounds.Doubles.ANY;
+        } else if (min == null) {
+            this.distance = MinMaxBounds.Doubles.atMost(max);
+        } else if (max == null) {
+            this.distance = MinMaxBounds.Doubles.atLeast(min);
+        } else if (min <= max) {
+            this.distance = MinMaxBounds.Doubles.between(min, max);
+        } else {
+            this.distance = MinMaxBounds.Doubles.between(max, min);
+        }
         return this;
     }
 
     @Override
     public Selector.@NonNull Builder volume(final org.spongepowered.math.vector.@NonNull Vector3d corner1,
-            final org.spongepowered.math.vector.@NonNull Vector3d corner2) {
+                                            final org.spongepowered.math.vector.@NonNull Vector3d corner2) {
         final org.spongepowered.math.vector.Vector3d minPoint = corner1.min(corner2);
         final org.spongepowered.math.vector.Vector3d distance = corner1.max(corner2).sub(minPoint);
         this.shadow$setX(minPoint.x());
@@ -220,7 +232,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder addNotAdvancementCriterion(final @NonNull ResourceKey advancement,
-            final @NonNull AdvancementCriterion criterion) {
+                                                                final @NonNull AdvancementCriterion criterion) {
         return this.api$advancementCriterion(advancement, criterion, true);
     }
 
@@ -265,7 +277,19 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     public Selector.@NonNull Builder experienceLevel(final @NonNull Range<@NonNull Integer> range) {
         Preconditions.checkArgument(range.min() == null || range.min() >= 0, "min must be non-negative");
         Preconditions.checkArgument(range.max() == null || range.max() >= 0, "max must be non-negative");
-        this.level = MinMaxBounds_IntsAccessor.invoker$new(Optional.of(range.min()), Optional.of(range.max()));
+        final Integer min = range.min();
+        final Integer max = range.max();
+        if (min == null && max == null) {
+            this.level = MinMaxBounds.Ints.ANY;
+        } else if (min == null) {
+            this.level = MinMaxBounds.Ints.atMost(max);
+        } else if (max == null) {
+            this.level = MinMaxBounds.Ints.atLeast(min);
+        } else if (min <= max) {
+            this.level = MinMaxBounds.Ints.between(min, max);
+        } else {
+            this.level = MinMaxBounds.Ints.between(max, min);
+        }
         this.shadow$setIncludesEntities(false);
         return this;
     }
@@ -379,7 +403,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
             }
             if (this.api$criterion != null) {
                 this.api$criterion.forEach((key, value) ->
-                        value.object2BooleanEntrySet().fastForEach(x -> entries.add(key + "={" + x.getKey() + "=" + x.getBooleanValue() + "}")));
+                    value.object2BooleanEntrySet().fastForEach(x -> entries.add(key + "={" + x.getKey() + "=" + x.getBooleanValue() + "}")));
             }
             this.api$handle("advancements", "{" + String.join(",", entries) + "}");
             this.api$advancement = null;
@@ -413,8 +437,8 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         this.deltaX = null;
         this.deltaY = null;
         this.deltaZ = null;
-        this.rotX = WrappedMinMaxBounds.ANY;
-        this.rotY = WrappedMinMaxBounds.ANY;
+        this.rotX = MinMaxBounds.FloatDegrees.ANY;
+        this.rotY = MinMaxBounds.FloatDegrees.ANY;
         this.predicates.clear();
         this.currentEntity = false;
         this.playerName = null;
@@ -448,7 +472,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     private Selector.@NonNull Builder api$advancementCriterion(final @NonNull ResourceKey advancement, final @NonNull AdvancementCriterion criterion,
-            final boolean inverted) {
+                                                               final boolean inverted) {
         if (this.api$criterion == null) {
             this.api$criterion = new HashMap<>();
         }
@@ -465,9 +489,9 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
             ((EntitySelectorParserBridge) this).bridge$handleValue(name, value, invert);
         } catch (final CommandSyntaxException ex) {
             throw new IllegalArgumentException(
-                    String.format("Could not create selector criteria based on input (name = '%s', value = '%s', invert = %s)", name, value,
-                            invert.name()),
-                    ex);
+                String.format("Could not create selector criteria based on input (name = '%s', value = '%s', invert = %s)", name, value,
+                    invert.name()),
+                ex);
         }
     }
 
@@ -480,19 +504,19 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
 
-    private WrappedMinMaxBounds api$getWrappedBounds(final Range<@NonNull Double> range) {
+    private MinMaxBounds.FloatDegrees api$getWrappedBounds(final Range<@NonNull Double> range) {
         final Float a = this.api$floatFromDouble(range.min(), Mth::wrapDegrees);
         final Float b = this.api$floatFromDouble(range.max(), Mth::wrapDegrees);
         if (a == null) {
-            return new WrappedMinMaxBounds(null, b);
+            return new MinMaxBounds.FloatDegrees(MinMaxBounds.Bounds.atMost(b));
         }
         if (b == null) {
-            return new WrappedMinMaxBounds(a, null);
+            return new MinMaxBounds.FloatDegrees(MinMaxBounds.Bounds.atLeast(a));
         }
         if (a <= b) {
-            return new WrappedMinMaxBounds(a, b);
+            return new MinMaxBounds.FloatDegrees(MinMaxBounds.Bounds.between(a, b));
         }
-        return new WrappedMinMaxBounds(b, a);
+        return new MinMaxBounds.FloatDegrees(MinMaxBounds.Bounds.between(b, a));
     }
 
     private String api$intRangeToStringRepresentation(final @NonNull Range<@NonNull Integer> range) {
@@ -501,8 +525,8 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         }
 
         return String.format("%s..%s",
-                range.min() == null ? "" : String.valueOf(range.min().intValue()),
-                range.max() == null ? "" : String.valueOf(range.max().intValue()));
+            range.min() == null ? "" : String.valueOf(range.min().intValue()),
+            range.max() == null ? "" : String.valueOf(range.max().intValue()));
     }
 
 }

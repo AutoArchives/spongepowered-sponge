@@ -33,6 +33,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 
 import java.util.Collections;
 import java.util.List;
@@ -122,11 +123,14 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
     }
 
     @Override
-    public boolean mouseClicked(final double mouseX, final double mouseY, final int button, final boolean repeated) {
-        if (super.mouseClicked(mouseX, mouseY, button, repeated)) {
+    public boolean mouseClicked(final MouseButtonEvent event, final boolean repeated) {
+        if (super.mouseClicked(event, repeated)) {
             return true;
         }
 
+        final var button = event.button();
+        final var mouseX = event.x();
+        final var mouseY = event.y();
         this.scrolling = button == 0 && mouseX >= this.barLeft && mouseX < this.barLeft + this.barWidth;
         if (this.scrolling) {
             return true;
@@ -139,8 +143,8 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
     }
 
     @Override
-    public boolean mouseReleased(final double p_mouseReleased_1_, final double p_mouseReleased_3_, final int p_mouseReleased_5_) {
-        if (super.mouseReleased(p_mouseReleased_1_, p_mouseReleased_3_, p_mouseReleased_5_)) {
+    public boolean mouseReleased(final MouseButtonEvent event) {
+        if (super.mouseReleased(event)) {
             return true;
         }
         final boolean ret = this.scrolling;
@@ -163,7 +167,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
     }
 
     @Override
-    public boolean mouseDragged(final double mouseX, final double mouseY, final int button, final double deltaX, final double deltaY) {
+    public boolean mouseDragged(final MouseButtonEvent event, final double deltaX, final double deltaY) {
         if (this.scrolling) {
             final int maxScroll = this.height - this.getBarHeight();
             final double moved = deltaY / maxScroll;

@@ -44,36 +44,36 @@ public final class PerWorldBorderListener implements BorderChangeListener {
     }
 
     @Override
-    public void onBorderSizeSet(final WorldBorder border, final double newSize) {
+    public void onSetSize(final WorldBorder border, final double newSize) {
         this.sendWorldBorderActionPacket(new ClientboundSetBorderSizePacket(border));
     }
 
     @Override
-    public void onBorderSizeLerping(final WorldBorder border, final double oldSize, final double newSize, final long time) {
+    public void onLerpSize(final WorldBorder border, final double oldSize, final double newSize, final long time) {
         this.sendWorldBorderActionPacket(new ClientboundSetBorderLerpSizePacket(border));
     }
 
     @Override
-    public void onBorderCenterSet(final WorldBorder border, final double x, final double z) {
+    public void onSetCenter(final WorldBorder border, final double x, final double z) {
         this.sendWorldBorderActionPacket(new ClientboundSetBorderCenterPacket(border));
     }
 
     @Override
-    public void onBorderSetWarningTime(final WorldBorder border, final int newTime) {
+    public void onSetWarningTime(final WorldBorder border, final int newTime) {
         this.sendWorldBorderActionPacket(new ClientboundSetBorderWarningDelayPacket(border));
     }
 
     @Override
-    public void onBorderSetWarningBlocks(final WorldBorder border, final int newDistance) {
+    public void onSetWarningBlocks(final WorldBorder border, final int newDistance) {
         this.sendWorldBorderActionPacket(new ClientboundSetBorderWarningDistancePacket(border));
     }
 
     @Override
-    public void onBorderSetDamagePerBlock(final WorldBorder border, final double newAmount) {
+    public void onSetDamagePerBlock(final WorldBorder border, final double newAmount) {
     }
 
     @Override
-    public void onBorderSetDamageSafeZOne(final WorldBorder border, final double newSize) {
+    public void onSetSafeZone(final WorldBorder border, final double newSize) {
     }
 
     private void sendWorldBorderActionPacket(final Packet<ClientGamePacketListener> packet) {

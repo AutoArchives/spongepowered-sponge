@@ -38,6 +38,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.PalettedContainerFactory;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.entity.EntitySection;
 import net.minecraft.world.level.entity.EntitySectionStorage;
@@ -121,8 +122,8 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     private @Nullable SpongeChunkLayout api$chunkLayout;
 
     public LevelChunkMixin_API(
-        final ChunkPos $$0, final UpgradeData $$1, final LevelHeightAccessor $$2, final Registry<net.minecraft.world.level.biome.Biome> $$3, final long $$4,
-        final LevelChunkSection[] $$5, final BlendingData $$6
+        final ChunkPos $$0, final UpgradeData $$1, final LevelHeightAccessor $$2, final PalettedContainerFactory $$3, final long $$4,
+        final @Nullable LevelChunkSection[] $$5, final @Nullable BlendingData $$6
     ) {
         super($$0, $$1, $$2, $$3, $$4, $$5, $$6);
     }

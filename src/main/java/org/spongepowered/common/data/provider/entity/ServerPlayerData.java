@@ -135,9 +135,9 @@ public final class ServerPlayerData {
             // Remove Entity
             h.level().getChunkSource().removeEntity(h);
             // Remove from TabList
-            h.getServer().getPlayerList().broadcastAll(new ClientboundPlayerInfoRemovePacket(List.of(h.getUUID())));
+            ((ServerPlayerAccessor) h).accessor$server().getPlayerList().broadcastAll(new ClientboundPlayerInfoRemovePacket(List.of(h.getUUID())));
             // Add back to TabList
-            h.getServer().getPlayerList().broadcastAll(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(h)));
+            ((ServerPlayerAccessor) h).accessor$server().getPlayerList().broadcastAll(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(h)));
             // Add Entity
             h.level().getChunkSource().addEntity(h);
             // Reconnect local player
@@ -148,10 +148,10 @@ public final class ServerPlayerData {
             // resend remaining player data... (see ServerPlayer#changeDimension)
             h.connection.send(new ClientboundChangeDifficultyPacket(h.level().getLevelData().getDifficulty(), h.level().getLevelData().isDifficultyLocked()));
             h.connection.send(new ClientboundPlayerAbilitiesPacket(h.getAbilities()));
-            final PlayerList playerList = h.getServer().getPlayerList();
+            final PlayerList playerList = ((ServerPlayerAccessor) h).accessor$server().getPlayerList();
             playerList.sendAllPlayerInfo(h);
             playerList.sendPlayerPermissionLevel(h);
-            for(MobEffectInstance $$6 : h.getActiveEffects()) {
+            for (MobEffectInstance $$6 : h.getActiveEffects()) {
                 h.connection.send(new ClientboundUpdateMobEffectPacket(h.getId(), $$6, false));
             }
             h.connection.send(new ClientboundSetExperiencePacket(h.experienceProgress, h.totalExperience, h.experienceLevel));

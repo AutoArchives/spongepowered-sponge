@@ -110,7 +110,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     default WorldBorder setBorder(final WorldBorder border) {
         final WorldBorder worldBorder = ((WorldBorderBridge) ((CollisionGetter) this).getWorldBorder()).bridge$applyFrom(border);
         if (worldBorder == null) {
-            return (WorldBorder) net.minecraft.world.level.border.WorldBorder.DEFAULT_SETTINGS;
+            return (WorldBorder) (Object) net.minecraft.world.level.border.WorldBorder.Settings.DEFAULT;
         }
         return worldBorder;
     }

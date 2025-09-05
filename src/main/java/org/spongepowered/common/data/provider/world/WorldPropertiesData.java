@@ -74,7 +74,7 @@ public final class WorldPropertiesData {
                     .create(Keys.INITIALIZED)
                         .get(ServerLevelData::isInitialized)
                     .create(Keys.WORLD_BORDER)
-                        .get(h -> (WorldBorder) h.getWorldBorder())
+                        .get(h -> (WorldBorder) (Object) h.getLegacyWorldBorderSettings().orElse(null))
                     .create(Keys.WEATHER)
                         .get(SpongeWeather::of)
                         .set(SpongeWeather::apply)

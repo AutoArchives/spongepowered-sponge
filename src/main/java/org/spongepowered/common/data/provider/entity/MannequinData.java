@@ -22,20 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.advancements.critereon;
+package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.advancements.critereon.MinMaxBounds;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.decoration.Mannequin;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-import java.util.Optional;
-
-@Mixin(MinMaxBounds.Doubles.class)
-public interface MinMaxBounds_DoublesAccessor {
-
-    @Invoker("<init>") static MinMaxBounds.Doubles invoker$new(final Optional<Double> min, final Optional<Double> max) {
-        throw new UntransformedInvokerError();
+public final class MannequinData {
+    private MannequinData() {
     }
 
+    public static void register(DataProviderRegistrator registrator) {
+        registrator
+            .asMutable(Mannequin.class)
+            .create(Keys.DOMINANT_HAND)
+            .get(h -> (HandPreference) (Object) h.getMainArm())
+            .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
+        ;
+    }
 }

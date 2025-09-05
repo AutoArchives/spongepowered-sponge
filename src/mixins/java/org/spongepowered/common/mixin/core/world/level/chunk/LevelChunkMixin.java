@@ -25,19 +25,18 @@
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.PalettedContainerFactory;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.ticks.LevelChunkTicks;
@@ -86,7 +85,7 @@ import java.util.function.Function;
 public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkBridge, CacheKeyBridge, SpongeMutableDataHolder, SpongeDataHolderBridge, DataCompoundHolder, BlockChunk {
 
     // @formatter:off
-    @Shadow @Final private Level level;
+    @Shadow @Final Level level;
     @Shadow private boolean loaded;
 
     @Shadow @Nullable public abstract BlockEntity shadow$getBlockEntity(BlockPos pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType p_177424_2_);
@@ -105,15 +104,7 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
     private Map<Short, PlayerTracker> impl$trackedShortBlockPositions = new HashMap<>();
     private @Nullable CompoundTag impl$compound;
 
-    public LevelChunkMixin(
-        final ChunkPos $$0,
-        final UpgradeData $$1,
-        final LevelHeightAccessor $$2,
-        final Registry<Biome> $$3,
-        final long $$4,
-        final LevelChunkSection[] $$5,
-        final BlendingData $$6
-    ) {
+    public LevelChunkMixin(ChunkPos $$0, UpgradeData $$1, LevelHeightAccessor $$2, PalettedContainerFactory $$3, long $$4, @org.jetbrains.annotations.Nullable LevelChunkSection[] $$5, @org.jetbrains.annotations.Nullable BlendingData $$6, Level level) {
         super($$0, $$1, $$2, $$3, $$4, $$5, $$6);
     }
 

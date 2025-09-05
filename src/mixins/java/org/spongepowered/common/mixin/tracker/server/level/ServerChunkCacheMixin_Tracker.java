@@ -62,24 +62,16 @@ public abstract class ServerChunkCacheMixin_Tracker {
         }
     }
 
-    @WrapOperation(
-        method = "tickChunks(Lnet/minecraft/util/profiling/ProfilerFiller;J)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerLevel;tickCustomSpawners(ZZ)V"
-        )
-    )
+   @WrapOperation(method = "tickChunks(Lnet/minecraft/util/profiling/ProfilerFiller;J)V",
+   at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;tickCustomSpawners(Z)V"))
     private void tracker$wrapGeneratorEntitySpawner(
-        final ServerLevel serverWorld,
-        final boolean spawnHostileMobs,
-        final boolean spawnPeacefulMobs,
-        final Operation<Void> wrapped
+       final ServerLevel serverWorld, final boolean spawnEnemies, final Operation<Void> wrapped
     ) {
         try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING
             .createPhaseContext(PhaseTracker.getWorldInstance(serverWorld))
             .world(serverWorld)) {
             context.buildAndSwitch();
-            wrapped.call(serverWorld, spawnHostileMobs, spawnPeacefulMobs);
+            wrapped.call(serverWorld, spawnEnemies);
         }
     }
 }

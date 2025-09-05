@@ -82,7 +82,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
     private boolean impl$skipBanService;
 
     @Inject(method = "handleConfigurationFinished", cancellable = true, at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V"))
+            target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V"))
     private void impl$onHandleConfigurationFinished(final ServerboundFinishConfigurationPacket $$0, final CallbackInfo ci) {
         if (this.impl$skipBanService) {
             return;

@@ -22,20 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.advancements.critereon;
+package org.spongepowered.common.mixin.core.world.entity.decoration;
 
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import org.spongepowered.api.entity.Mannequin;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.common.mixin.core.world.entity.AvatarMixin;
 
-import java.util.Optional;
-
-@Mixin(MinMaxBounds.Ints.class)
-public interface MinMaxBounds_IntsAccessor {
-
-    @Invoker("<init>") static MinMaxBounds.Ints invoker$new(final Optional<Integer> min, final Optional<Integer> max) {
-        throw new UntransformedInvokerError();
-    }
+@Mixin(net.minecraft.world.entity.decoration.Mannequin.class)
+public abstract class MannequinMixin extends AvatarMixin implements Mannequin {
 
 }

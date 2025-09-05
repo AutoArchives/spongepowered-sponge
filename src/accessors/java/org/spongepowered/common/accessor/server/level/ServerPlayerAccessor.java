@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.server.level;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,4 +49,6 @@ public interface ServerPlayerAccessor {
     @Invoker("triggerDimensionChangeTriggers") void invoker$triggerDimensionChangeTriggers(final ServerLevel world);
 
     @Accessor("containerCounter") int accessor$containerCounter();
+
+    @Accessor("server") MinecraftServer accessor$server();
 }

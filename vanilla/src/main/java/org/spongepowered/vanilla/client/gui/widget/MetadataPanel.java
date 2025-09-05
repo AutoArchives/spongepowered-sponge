@@ -34,6 +34,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -276,11 +277,11 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
     }
 
     @Override
-    public boolean mouseClicked(final double mouseX, final double mouseY, final int button, final boolean repeated) {
+    public boolean mouseClicked(final MouseButtonEvent event, final boolean repeated) {
         // Find an entry match for where we clicked
         final Entry entry =
             this.getAllEntries().stream()
-                .filter(e -> e.valueBounds != null && e.valueBounds.isInBounds((int) mouseX, (int) mouseY))
+                .filter(e -> e.valueBounds != null && e.valueBounds.isInBounds((int) event.x(), (int) event.y()))
                 .findFirst().orElse(null);
 
         if (entry == null) {
@@ -292,7 +293,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
             this.screen.handleComponentClicked(component.getStyle());
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button, repeated);
+        return super.mouseClicked(event, repeated);
     }
 
     @Override

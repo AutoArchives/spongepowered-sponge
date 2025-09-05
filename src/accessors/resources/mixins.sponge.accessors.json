@@ -10,8 +10,6 @@
   "mixins": [
     "ChatFormattingAccessor",
     "advancements.CriteriaTriggersAccessor",
-    "advancements.critereon.MinMaxBounds_DoublesAccessor",
-    "advancements.critereon.MinMaxBounds_IntsAccessor",
     "commands.CommandSourceStackAccessor",
     "commands.arguments.DimensionArgumentAccessor",
     "commands.arguments.OperationArgumentAccessor",
@@ -63,6 +61,7 @@
     "world.damagesource.CombatTrackerAccessor",
     "world.entity.AgableMobAccessor",
     "world.entity.AreaEffectCloudAccessor",
+    "world.entity.AvatarAccessor",
     "world.entity.Display_BlockDisplayAccessor",
     "world.entity.Display_ItemDisplayAccessor",
     "world.entity.Display_TextDisplayAccessor",

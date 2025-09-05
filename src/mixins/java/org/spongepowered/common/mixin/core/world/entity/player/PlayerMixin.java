@@ -28,9 +28,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -48,7 +46,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Living;
@@ -77,7 +74,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin;
+import org.spongepowered.common.mixin.core.world.entity.AvatarMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.ExperienceHolderUtil;
 
@@ -87,10 +84,9 @@ import java.util.List;
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
-public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBridge, GameProfileHolderBridge, ViewerBridge {
+public abstract class PlayerMixin extends AvatarMixin implements PlayerBridge, GameProfileHolderBridge, ViewerBridge {
 
     // @formatter: off
-    @Shadow @Final protected static EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION;
     @Shadow public int experienceLevel;
     @Shadow public int totalExperience;
     @Shadow public float experienceProgress;
@@ -101,7 +97,6 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     @Shadow protected abstract int shadow$getPermissionLevel();
     @Shadow public abstract int shadow$getXpNeededForNextLevel();
     @Shadow public abstract FoodData shadow$getFoodData();
-    @Shadow public abstract Scoreboard shadow$getScoreboard();
     @Shadow public abstract boolean shadow$isCreative();
     @Shadow public abstract String shadow$getScoreboardName();
     @Shadow public abstract void shadow$awardStat(ResourceLocation stat);
@@ -109,7 +104,6 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     @Shadow public Either<BedSleepingProblem, Unit> shadow$startSleepInBed(final BlockPos param0) {
         return null; // Shadowed
     }
-    @Shadow protected abstract void shadow$playShoulderEntityAmbientSound(CompoundTag p_192028_1_);
     // @formatter: on
 
     private boolean impl$affectsSpawning = true;
@@ -200,20 +194,6 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         }
 
         return playerEntity.getName();
-    }
-
-    @Redirect(
-        method = "aiStep",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/player/Player;playShoulderEntityAmbientSound(Lnet/minecraft/nbt/CompoundTag;)V"
-        )
-    )
-    private void impl$ignoreShoulderSoundsWhileVanished(final net.minecraft.world.entity.player.Player thisPlayer, final CompoundTag tag) {
-        if (!this.bridge$vanishState().createsSounds()) {
-            return;
-        }
-        this.shadow$playShoulderEntityAmbientSound(tag);
     }
 
     @Redirect(

@@ -30,7 +30,6 @@ import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.serialization.DataResult;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.HoverEvent;
@@ -83,6 +82,7 @@ import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundAddEntityPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor;
+import org.spongepowered.common.accessor.world.entity.AvatarAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
@@ -100,6 +100,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -125,7 +126,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         super(type, world);
         this.fakeProfile = ResolvableProfile.createUnresolved(this.uuid);
         this.setCanPickUpLoot(true);
-        this.entityData.set(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
+        this.entityData.set(AvatarAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
     }
 
     @Override
@@ -139,13 +140,15 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         $$0.define(LivingEntityAccessor.accessor$DATA_STINGER_COUNT_ID(), 0);
         $$0.define(LivingEntityAccessor.accessor$SLEEPING_POS_ID(), Optional.empty());
 
+        // Avatar
+        $$0.define(AvatarAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), (byte) 0);
+        $$0.define(AvatarAccessor.accessor$DATA_PLAYER_MAIN_HAND(), (byte) 1);
+
         // Player
         $$0.define(PlayerAccessor.accessor$DATA_PLAYER_ABSORPTION_ID(), 0.0F);
         $$0.define(PlayerAccessor.accessor$DATA_SCORE_ID(), 0);
-        $$0.define(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), (byte) 0);
-        $$0.define(PlayerAccessor.accessor$DATA_PLAYER_MAIN_HAND(), (byte) 1);
-        $$0.define(PlayerAccessor.accessor$DATA_SHOULDER_LEFT(), new CompoundTag());
-        $$0.define(PlayerAccessor.accessor$DATA_SHOULDER_RIGHT(), new CompoundTag());
+        $$0.define(PlayerAccessor.accessor$DATA_SHOULDER_LEFT(), OptionalInt.empty());
+        $$0.define(PlayerAccessor.accessor$DATA_SHOULDER_RIGHT(), OptionalInt.empty());
     }
 
     @Override

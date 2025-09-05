@@ -22,29 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.commands;
+package org.spongepowered.common.mixin.core.world.entity;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.commands.WorldBorderCommand;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.Avatar;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(WorldBorderCommand.class)
-public abstract class WorldBorderCommandMixin {
+@Mixin(Avatar.class)
+public abstract class AvatarMixin extends LivingEntityMixin {
 
-    @Redirect(method = {
-        "setDamageBuffer",
-        "setDamageAmount",
-        "setWarningTime",
-        "setWarningDistance",
-        "getSize",
-        "setCenter",
-        "setSize"
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;"))
-    private static ServerLevel impl$useCurrentWorld(final MinecraftServer instance, final CommandSourceStack $$0) {
-        return $$0.getLevel();
-    }
+    //@formatter:off
+    @Shadow @Final protected static EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION;
+    //@formatter:on
+
 }
