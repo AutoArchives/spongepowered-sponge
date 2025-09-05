@@ -1,6 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.minecraftforge.gradle.common.util.RunConfig
-import net.minecraftforge.gradle.userdev.UserDevExtension
 import org.gradle.api.tasks.JavaExec
 import org.gradle.internal.DefaultTaskExecutionRequest
 import org.spongepowered.gradle.impl.AWToAT
@@ -22,10 +21,11 @@ plugins {
     id("implementation-structure")
     alias(libs.plugins.blossom)
     alias(libs.plugins.forgeGradle)
+    jacoco
 }
 
 val commonProject = parent!!
-val bootstrapDevProject = commonProject.project(":bootstrap-dev")
+val bootstrapProject = commonProject.project(":bootstrap")
 val transformersProject = commonProject.project(":modlauncher-transformers")
 val libraryManagerProject = commonProject.project(":library-manager")
 val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
@@ -81,6 +81,10 @@ val gameLayerConfig = configurations.register("gameLayer") {
     extendsFrom(gameLibrariesConfig.get())
 }
 
+// Bootstrap source sets
+val bootstrapMain = bootstrapProject.sourceSets.named("main")
+val bootstrapForge = bootstrapProject.sourceSets.named("forge")
+
 // SpongeCommon source sets
 val commonAccessors = commonProject.sourceSets.named("accessors")
 val commonLaunch = commonProject.sourceSets.named("launch")
@@ -88,6 +92,7 @@ val commonAppLaunch = commonProject.sourceSets.named("applaunch")
 val commonAppLaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val commonMixins = commonProject.sourceSets.named("mixins")
 val commonMain = commonProject.sourceSets.named("main")
+val commonTest = commonProject.sourceSets.named("test")
 
 // SpongeForge source sets
 // Service layer
@@ -161,6 +166,16 @@ val main by sourceSets.named("main") {
     spongeImpl.addDependencyToRuntimeOnly(commonMixins.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(mixins, this)
     spongeImpl.addDependencyToRuntimeOnly(lang, this)
+
+    // The bootstrap
+    spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
+}
+val testSources = sourceSets.named("test") {
+    spongeImpl.addDependencyToImplementation(commonTest.get(), this)
+
+    spongeImpl.addDependencyToImplementation(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
 }
 
 configurations.configureEach {
@@ -170,13 +185,17 @@ configurations.configureEach {
     }
 }
 
+configurations.testRuntimeOnly {
+    exclude(module = "testplugins")
+}
+
 dependencies {
     "minecraft"("net.minecraftforge:forge:$minecraftVersion-$forgeVersion")
 
     val service = serviceLibrariesConfig.name
     service(apiLibs.pluginSpi)
     service(project(transformersProject.path)) {
-        exclude(group = "cpw.mods", module = "modlauncher")
+        exclude(group = "net.neoforged.fancymodloader", module = "loader")
     }
     service(project(libraryManagerProject.path))
 
@@ -205,9 +224,23 @@ dependencies {
         spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), serviceLayerConfig.get(), gameManagedLibrariesConfig.get())
     }
 
-    runtimeOnly(project(bootstrapDevProject.path))
     testPluginsProject?.also {
         runtimeOnly(project(it.path))
+    }
+
+    testImplementation(platform(apiLibs.junit.bom))
+    testImplementation(apiLibs.junit.api)
+    testImplementation(apiLibs.junit.params)
+    testImplementation(apiLibs.junit.launcher)
+    testRuntimeOnly(apiLibs.junit.engine)
+
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junitJupiter) {
+        exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
+    }
+
+    testRuntimeOnly(libs.jacoco.core) {
+        exclude(group = "org.ow2.asm")
     }
 }
 
@@ -217,7 +250,7 @@ AWToAT.convert(awFiles, atFile)
 
 val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
 
-extensions.configure(UserDevExtension::class) {
+minecraft {
     mappings("official", minecraftVersion)
     accessTransformers.from(atFile)
     reobf = false
@@ -226,8 +259,8 @@ extensions.configure(UserDevExtension::class) {
         configureEach {
             ideaModule("Sponge.SpongeForge.main")
 
-            // property("forge.logging.console.level", "debug")
-            // jvmArgs("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
+            // jvmArgs("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
+            main("org.spongepowered.bootstrap.forge.ForgeBootstrap")
 
             args(mixinConfigs.flatMap { sequenceOf("--mixin.config", it) })
             environment("MOD_CLASSES", "nop")
@@ -242,8 +275,8 @@ extensions.configure(UserDevExtension::class) {
 }
 
 afterEvaluate {
-    extensions.configure(UserDevExtension::class) {
-        // Configure bootstrap-dev
+    minecraft {
+        // Configure bootstrap dev
         val bootFileNames = spongeImpl.buildRuntimeFileNames(serviceLayerConfig.get()) // service in boot during dev
         val gameShadedFileNames = spongeImpl.buildRuntimeFileNames(gameShadedLibrariesConfig.get())
         runs.configureEach {
@@ -394,6 +427,37 @@ tasks {
 
     assemble {
         dependsOn(universalJar)
+    }
+
+    test {
+        useJUnitPlatform()
+
+        testClassesDirs = commonTest.get().output.classesDirs + testSources.get().output.classesDirs
+
+        val runServer = minecraft.runs.getByName("server")
+        jvmArgs(runServer.jvmArgs)
+        jvmArgs("-Dsponge.test.args=" + runServer.args.joinToString(" "))
+        jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
+        workingDir = layout.buildDirectory.dir("test-run").get().asFile
+
+        doFirst {
+            // reset test directory
+            workingDir.deleteRecursively()
+            workingDir.mkdirs()
+            workingDir.resolve("eula.txt").writeText("eula=true")
+        }
+
+        extensions.configure(JacocoTaskExtension::class) {
+            excludeClassLoaders = listOf("cpw.mods.modlauncher.TransformingClassLoader")
+        }
+
+        finalizedBy(jacocoTestReport)
+    }
+
+    jacocoTestReport {
+        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
+        sourceSets(appLaunch, launch, lang, accessors, mixins, main)
+        dependsOn(test)
     }
 }
 

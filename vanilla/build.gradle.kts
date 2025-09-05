@@ -6,11 +6,11 @@ plugins {
     alias(libs.plugins.shadow)
     id("implementation-structure")
     alias(libs.plugins.blossom)
-    eclipse
+    jacoco
 }
 
 val commonProject = parent!!
-val bootstrapDevProject = commonProject.project(":bootstrap-dev")
+val bootstrapProject = commonProject.project(":bootstrap")
 val transformersProject = commonProject.project(":modlauncher-transformers")
 val libraryManagerProject = commonProject.project(":library-manager")
 val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
@@ -26,7 +26,6 @@ version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVer
 
 // SpongeVanilla libraries
 val installerLibrariesConfig = configurations.register("installerLibraries")
-val initLibrariesConfig = configurations.register("initLibraries") // JVM initial classpath
 val bootLibrariesConfig = configurations.register("bootLibraries")
 val gameLibrariesConfig = configurations.register("gameLibraries") {
     extendsFrom(configurations.minecraft.get())
@@ -39,13 +38,16 @@ val gameShadedLibrariesConfig = configurations.register("gameShadedLibraries")
 
 // ModLauncher layers
 val bootLayerConfig = configurations.register("bootLayer") {
-    extendsFrom(initLibrariesConfig.get())
     extendsFrom(bootLibrariesConfig.get())
 }
 val gameLayerConfig = configurations.register("gameLayer") {
     extendsFrom(bootLayerConfig.get())
     extendsFrom(gameLibrariesConfig.get())
 }
+
+// Bootstrap source sets
+val bootstrapMain = bootstrapProject.sourceSets.named("main")
+val bootstrapForge = bootstrapProject.sourceSets.named("forge")
 
 // SpongeCommon source sets
 val commonAccessors = commonProject.sourceSets.named("accessors")
@@ -54,11 +56,15 @@ val commonAppLaunch = commonProject.sourceSets.named("applaunch")
 val commonAppLaunchConf = commonProject.sourceSets.named("applaunchConfig")
 val commonMixins = commonProject.sourceSets.named("mixins")
 val commonMain = commonProject.sourceSets.named("main")
+val commonTest = commonProject.sourceSets.named("test")
 
 // SpongeVanilla source sets
 // Prod launch
 val installer by sourceSets.register("installer") {
     spongeImpl.addDependencyToImplementation(commonAppLaunchConf.get(), this)
+
+    spongeImpl.addDependencyToImplementation(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(installerLibrariesConfig.get())
@@ -128,6 +134,16 @@ val main by sourceSets.named("main") {
     // The rest of the project because we want everything in the initial classpath
     spongeImpl.addDependencyToRuntimeOnly(commonMixins.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(mixins, this)
+
+    // The bootstrap
+    spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToRuntimeOnly(bootstrapForge.get(), this)
+}
+val testSources = sourceSets.named("test") {
+    spongeImpl.addDependencyToImplementation(commonTest.get(), this)
+
+    spongeImpl.addDependencyToImplementation(bootstrapMain.get(), this)
+    spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
 }
 
 val superclassConfigs = spongeImpl.getNamedConfigurations("superClassChanges")
@@ -145,16 +161,23 @@ configurations.configureEach {
     }
 }
 
+configurations.testRuntimeOnly {
+    exclude(module = "testplugins")
+}
+
 dependencies {
     val installer = installerLibrariesConfig.name
+    installer(libs.securemodules)
+    installer(libs.asm.commons)
+    installer(libs.asm.util)
+    installer(libs.jarjar.fs)
+
     installer(apiLibs.gson)
     installer(apiLibs.checkerQual)
     installer(libs.joptSimple)
     installer(libs.tinylog.api)
     installer(libs.tinylog.impl)
 
-    installer(libs.asm.commons)
-    installer(libs.asm.tree)
     installer(libs.forgeAutoRenamingTool) {
         exclude(group = "net.sf.jopt-simple")
         exclude(group = "org.ow2.asm")
@@ -162,17 +185,14 @@ dependencies {
 
     installer(project(libraryManagerProject.path))
 
-    val init = initLibrariesConfig.name
-    init(libs.securemodules)
-    init(libs.asm.commons)
-    init(libs.asm.util)
-    init(libs.jarjar.fs)
+    // optional at runtime
+    "installerCompileOnly"(platform(apiLibs.junit.bom))
+    "installerCompileOnly"(apiLibs.junit.launcher)
 
     val boot = bootLibrariesConfig.name
     boot(libs.securemodules)
     boot(libs.asm.commons)
     boot(libs.asm.util)
-    boot(libs.bootstrap)
 
     boot(libs.modlauncher) {
         exclude(group = "org.apache.logging.log4j")
@@ -209,7 +229,7 @@ dependencies {
     spongeImpl.copyModulesExcludingPrefix(configurations.minecraft.get(), "net.minecraft", "joined", bootLibrariesConfig.get())
 
     boot(project(transformersProject.path)) {
-        exclude(group = "cpw.mods", module = "modlauncher")
+        exclude(group = "net.neoforged.fancymodloader", module = "loader")
     }
 
     val game = gameLibrariesConfig.name
@@ -234,19 +254,33 @@ dependencies {
 
     spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), bootLayerConfig.get(), gameManagedLibrariesConfig.get())
 
-    runtimeOnly(project(bootstrapDevProject.path))
     testPluginsProject?.also {
         runtimeOnly(project(it.path))
+    }
+
+    testImplementation(platform(apiLibs.junit.bom))
+    testImplementation(apiLibs.junit.api)
+    testImplementation(apiLibs.junit.params)
+    testImplementation(apiLibs.junit.launcher)
+    testRuntimeOnly(apiLibs.junit.engine)
+
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junitJupiter) {
+        exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
+    }
+
+    testRuntimeOnly(libs.jacoco.core) {
+        exclude(group = "org.ow2.asm")
     }
 }
 
 minecraft {
     runs {
         // Full development environment
-        server("runServer") {
+        server() {
             args("--nogui", "--launchTarget", "sponge_server_dev")
         }
-        client("runClient") {
+        client() {
             args("--launchTarget", "sponge_client_dev")
         }
 
@@ -258,7 +292,7 @@ minecraft {
             args("--launchTarget", "sponge_client_it")
         }
 
-        // Configure bootstrap-dev
+        // Configure bootstrap dev
         val bootFileNames = spongeImpl.buildRuntimeFileNames(bootLayerConfig.get())
         val gameShadedFileNames = spongeImpl.buildRuntimeFileNames(gameShadedLibrariesConfig.get())
 
@@ -274,10 +308,9 @@ minecraft {
             jvmArgs(
                 "-Dlog4j.configurationFile=log4j2_dev.xml",
                 "-Dmixin.dumpTargetOnFailure=true",
-                "-Dmixin.debug.verbose=true",
+                // "-Dmixin.debug.verbose=true",
                 "-Dmixin.debug.countInjections=true",
-                "-Dmixin.debug.strict=true",
-                "-Dmixin.debug.strict.unique=false"
+                "-Dmixin.debug.strict=true"
             )
 
             allArgumentProviders += CommandLineArgumentProvider {
@@ -292,8 +325,8 @@ minecraft {
             }
 
             // ModLauncher
-            // jvmArgs("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
-            mainClass("net.minecraftforge.bootstrap.ForgeBootstrap")
+            // jvmArgs("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
+            mainClass("org.spongepowered.bootstrap.forge.VanillaBootstrap")
 
             // Configure resources
             jvmArgs("-Dsponge.dev.root=" + project.rootDir)
@@ -403,7 +436,7 @@ tasks {
         archiveClassifier.set("installer-shadow")
 
         mergeServiceFiles()
-        configurations = listOf(installerLibrariesConfig.get(), initLibrariesConfig.get())
+        configurations = listOf(installerLibrariesConfig.get())
         exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "**/module-info.class")
 
         manifest {
@@ -420,6 +453,10 @@ tasks {
 
         from(commonAppLaunchConf.map { it.output })
         from(installer.output)
+        from(bootstrapMain.map { it.output })
+        from(bootstrapForge.map { it.output })
+
+        exclude("org/spongepowered/bootstrap/dev")
     }
 
     shadowJar {
@@ -468,6 +505,37 @@ tasks {
 
     assemble {
         dependsOn(universalJar)
+    }
+
+    test {
+        useJUnitPlatform()
+
+        testClassesDirs = commonTest.get().output.classesDirs + testSources.get().output.classesDirs
+
+        val runServer = minecraft.runs.server().get()
+        jvmArgs(runServer.allJvmArguments())
+        jvmArgs("-Dsponge.test.args=" + runServer.allArguments().joinToString(" "))
+        jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
+        workingDir = layout.buildDirectory.dir("test-run").get().asFile
+
+        doFirst {
+            // reset test directory
+            workingDir.deleteRecursively()
+            workingDir.mkdirs()
+            workingDir.resolve("eula.txt").writeText("eula=true")
+        }
+
+        extensions.configure(JacocoTaskExtension::class) {
+            excludeClassLoaders = listOf("cpw.mods.modlauncher.TransformingClassLoader")
+        }
+
+        finalizedBy(jacocoTestReport)
+    }
+
+    jacocoTestReport {
+        sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
+        sourceSets(appLaunch, launch, accessors, mixins, main)
+        dependsOn(test)
     }
 }
 
