@@ -36,6 +36,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.biome.ambient.ParticleConfig;
 import org.spongepowered.api.world.biome.ambient.SoundConfig;
+import org.spongepowered.api.world.biome.climate.GrassColorModifier;
 import org.spongepowered.api.world.biome.climate.Precipitation;
 import org.spongepowered.api.world.biome.climate.TemperatureModifier;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
@@ -97,6 +98,8 @@ public final class BiomeData {
                         .get(h -> h.getSpecialEffects().getFoliageColorOverride().map(Color::ofRgb).orElse(null))
                     .create(Keys.GRASS_COLOR)
                         .get(h -> h.getSpecialEffects().getGrassColorOverride().map(Color::ofRgb).orElse(null))
+                    .create(Keys.GRASS_COLOR_MODIFIER)
+                        .get(h -> (GrassColorModifier) (Object) h.getSpecialEffects().getGrassColorModifier())
                     .create(Keys.BACKGROUND_MUSIC)
                         .get(h -> h.getSpecialEffects().getBackgroundMusic().map(e -> e.unwrap().getFirst().data()).map(SoundConfig.BackgroundMusic.class::cast).orElse(null))
                     .create(Keys.AMBIENT_ADDITIONAL_SOUND)
