@@ -28,7 +28,6 @@ import com.google.common.collect.Iterators;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
@@ -655,15 +654,13 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         }
     }
 
-    @WrapOperation(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V",
+    @ModifyExpressionValue(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V",
         at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
     private Iterator<net.minecraft.server.level.ServerPlayer> impl$filterPlayersToBroadcastChatMessage(
-        final List<net.minecraft.server.level.ServerPlayer> players, final Operation<Iterator<net.minecraft.server.level.ServerPlayer>> original,
-        @Share("filter") final LocalRef<Predicate<ServerPlayer>> spongeFilterRef
+        Iterator<net.minecraft.server.level.ServerPlayer> original, @Share("filter") final LocalRef<Predicate<ServerPlayer>> spongeFilterRef
     ) {
-        final Iterator<net.minecraft.server.level.ServerPlayer> originalIterator = original.call(players);
         final Predicate<ServerPlayer> spongeFilter = spongeFilterRef.get();
-        return spongeFilter == null ? originalIterator : Iterators.filter(originalIterator, (p) -> spongeFilter.test((ServerPlayer) p));
+        return spongeFilter == null ? original : Iterators.filter(original, (p) -> spongeFilter.test((ServerPlayer) p));
     }
 
     @Inject(method = "save", at = @At("HEAD"), cancellable = true)
