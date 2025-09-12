@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.mixin.core.world.entity;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Wolf;
@@ -46,7 +47,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 public abstract class LivingEntityMixin_Vanilla_Damage implements TrackedDamageBridge {
 
     @ModifyExpressionValue(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isDamageSourceBlocked(Lnet/minecraft/world/damagesource/DamageSource;)Z"))
-    private boolean damage$modifyBeforeAndAfterShield(final boolean original) {
+    private boolean damage$modifyBeforeAndAfterShield(final boolean original, @Local(argsOnly = true) final float damage) {
         if (!original) {
             return false;
         }
@@ -57,7 +58,7 @@ public abstract class LivingEntityMixin_Vanilla_Damage implements TrackedDamageB
         }
 
         final SpongeDamageStep step = tracker.newStep(DamageStepTypes.SHIELD, ItemStackUtil.snapshotOf(((LivingEntity) (Object) this).getUseItem()));
-        step.applyChildrenBefore((float) tracker.preEvent().baseDamage());
+        step.applyChildrenBefore(damage);
         step.applyChildrenAfter(0);
         return !step.isSkipped();
     }

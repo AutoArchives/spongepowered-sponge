@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Cancellable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -39,7 +40,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.entity.TrackedAttackBridge;
 import org.spongepowered.common.event.cause.entity.damage.SpongeAttackTracker;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStep;
@@ -56,20 +56,21 @@ public abstract class MobMixin_Attack extends LivingEntityMixin_Damage implement
         return this.attack$trackers.peekLast();
     }
 
-    @Inject(
+    @WrapOperation(
         method = "doHurtTarget",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;modifyDamage(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;F)F"),
-        cancellable = true,
-        locals = LocalCapture.CAPTURE_FAILHARD
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;modifyDamage(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;F)F")
     )
-    private void attack$firePreEvent(final ServerLevel level, final Entity target, final CallbackInfoReturnable<Boolean> cir,
-                                     final float damage, final ItemStack weapon, final DamageSource source) {
+    private float attack$firePreEvent(final ServerLevel level, final ItemStack weapon, final Entity target, final DamageSource source, float damage, final Operation<Float> original, @Cancellable CallbackInfoReturnable<Boolean> cir) {
         final SpongeAttackTracker tracker = SpongeAttackTracker.callAttackPreEvent((org.spongepowered.api.entity.Entity) target, source, damage, weapon);
         if (tracker == null) {
             cir.setReturnValue(false);
-        } else {
-            this.attack$trackers.addLast(tracker);
+            return damage;
         }
+
+        this.attack$trackers.addLast(tracker);
+        damage = tracker.applyStartStep();
+
+        return original.call(level, weapon, target, source, damage);
     }
 
     @WrapOperation(method = "doHurtTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;getAttackDamageBonus(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))

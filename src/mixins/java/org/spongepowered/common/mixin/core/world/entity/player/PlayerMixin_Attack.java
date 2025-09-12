@@ -28,6 +28,8 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Cancellable;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -50,7 +52,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.entity.TrackedAttackBridge;
 import org.spongepowered.common.event.cause.entity.damage.SpongeAttackTracker;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStep;
@@ -77,22 +78,17 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         return this.attack$trackers.peekLast();
     }
 
-    @Inject(method = "attack", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true,
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F", ordinal = 0))
-    private void attack$firePreEvent(final Entity target, final CallbackInfo ci, final float damage, final ItemStack weapon, final DamageSource source) {
+    @ModifyVariable(method = "attack", at = @At("LOAD"),
+        slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F", ordinal = 0)))
+    private float attack$firePreEvent(final float damage, @Local(argsOnly = true) final Entity target, @Local final DamageSource source, @Local final ItemStack weapon, final @Cancellable CallbackInfo ci) {
         final SpongeAttackTracker tracker = SpongeAttackTracker.callAttackPreEvent((org.spongepowered.api.entity.Entity) target, source, damage, weapon);
         if (tracker == null) {
             ci.cancel();
-        } else {
-            this.attack$trackers.addLast(tracker);
+            return damage;
         }
-    }
 
-    @ModifyVariable(method = "attack",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F", ordinal = 0))
-    private float attack$setBaseDamage(final float damage) {
-        final SpongeAttackTracker tracker = this.attack$tracker();
-        return tracker == null ? damage : (float) tracker.preEvent().baseDamage();
+        this.attack$trackers.addLast(tracker);
+        return tracker.applyStartStep();
     }
 
     @ModifyExpressionValue(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"))
@@ -245,7 +241,7 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         }
 
         this.attack$trackers.addLast(sweepTracker);
-        damage = (float) sweepTracker.preEvent().baseDamage();
+        damage = sweepTracker.applyStartStep();
 
         // In vanilla, this step is outside the loop, but we move it to here so it can be modified per target
         SpongeDamageStep step = sweepTracker.newStep(DamageStepTypes.SWEEPING, sweepTracker.weaponSnapshot());
