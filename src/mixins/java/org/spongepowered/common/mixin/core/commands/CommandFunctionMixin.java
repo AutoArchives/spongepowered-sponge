@@ -48,7 +48,7 @@ public interface CommandFunctionMixin {
         final ResourceLocation $$0, final CommandDispatcher<T> $$1, final T $$2, final List<String> $$3, final Operation<CommandFunction<T>> original) {
         if ($$1 instanceof final DelegatingCommandDispatcher delegatingCommandDispatcher) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
-                frame.pushCause(delegatingCommandDispatcher.permissionService().newSubjectReference(PermissionService.SUBJECTS_SYSTEM, "console").resolve().join());
+                frame.pushCause(delegatingCommandDispatcher.permissionService().newSubjectReference(PermissionService.SUBJECTS_FUNCTION, $$0.toString()).resolve().join());
                 final CommandCause cause = ((CommandSourceStackBridge) $$2).bridge$withCurrentCause();
                 ((CommandSourceStackBridge) cause).bridge$permissionService(delegatingCommandDispatcher.permissionService());
                 return original.call($$0, $$1, cause, $$3);

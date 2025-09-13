@@ -174,8 +174,8 @@ public final class SpongeLifecycle implements Lifecycle {
     }
 
     @Override
-    public void establishServerServices(final ResourceManager resourceManager) {
-        final SpongeServerScopedServiceProvider serviceProvider = new SpongeServerScopedServiceProvider(this.game, this.injector);
+    public void establishServerServices(final ResourceManager resourceManager, final int functionsPermissionLevel) {
+        final SpongeServerScopedServiceProvider serviceProvider = new SpongeServerScopedServiceProvider(this.game, this.injector, functionsPermissionLevel);
         serviceProvider.init();
         ((ResourceManagerBridge) resourceManager).bridge$services(serviceProvider);
     }

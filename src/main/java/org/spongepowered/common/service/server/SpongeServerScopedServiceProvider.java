@@ -25,7 +25,6 @@
 package org.spongepowered.common.service.server;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -52,9 +51,11 @@ import java.util.Optional;
 
 public final class SpongeServerScopedServiceProvider extends SpongeServiceProvider implements ServiceProvider.ServerScoped {
 
-    @Inject
-    public SpongeServerScopedServiceProvider(final Game game, final Injector injector) {
+    private final int functionsPermissionLevel;
+
+    public SpongeServerScopedServiceProvider(final Game game, final Injector injector, final int functionsPermissionLevel) {
         super(game, injector);
+        this.functionsPermissionLevel = functionsPermissionLevel;
     }
 
     @Override
@@ -71,11 +72,11 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
                 .add(new Service<>(
                         EconomyService.class,
                         servicePluginSubCategory -> servicePluginSubCategory.economyService,
-                        null))
+                        (Class<EconomyService>) null))
                 .add(new Service<>(
                         PermissionService.class,
                         servicePluginSubCategory -> servicePluginSubCategory.permissionService,
-                        SpongePermissionService.class))
+                        i -> new SpongePermissionService(this.getGame(), this.functionsPermissionLevel)))
                 .add(new Service<>(
                         WhitelistService.class,
                         servicePluginSubCategory -> servicePluginSubCategory.whitelistService,

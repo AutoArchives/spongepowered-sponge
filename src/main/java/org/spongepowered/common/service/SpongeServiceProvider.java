@@ -269,14 +269,22 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
     protected static final class Service<T> {
 
         @NonNull private final Class<T> service;
-        private final @Nullable Class<? extends T> defaultServiceClass;
+        private final @Nullable Function<Injector, ? extends T> defaultServiceProvider;
         @NonNull private final Function<ServicesCategory.ServicePluginSubCategory, String> configEntryProvider;
 
         public Service(final @NonNull Class<T> service,
                 final @NonNull Function<ServicesCategory.ServicePluginSubCategory, String> configEntryProvider,
                 final @Nullable Class<? extends T> defaultServiceClass) {
             this.service = service;
-            this.defaultServiceClass = defaultServiceClass;
+            this.defaultServiceProvider = defaultServiceClass != null ? i -> i.getInstance(defaultServiceClass) : null;
+            this.configEntryProvider = configEntryProvider;
+        }
+
+        public Service(final @NonNull Class<T> service,
+                final @NonNull Function<ServicesCategory.ServicePluginSubCategory, String> configEntryProvider,
+                final @Nullable Function<Injector, ? extends T> defaultServiceProvider) {
+            this.service = service;
+            this.defaultServiceProvider = defaultServiceProvider;
             this.configEntryProvider = configEntryProvider;
         }
 
@@ -289,12 +297,12 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
         }
 
         public boolean suppliesDefault() {
-            return this.defaultServiceClass != null;
+            return this.defaultServiceProvider != null;
         }
 
         public @Nullable T provideDefaultService(final Injector injector) {
-            if (this.defaultServiceClass != null) {
-                return injector.getInstance(this.defaultServiceClass);
+            if (this.defaultServiceProvider != null) {
+                return this.defaultServiceProvider.apply(injector);
             } else {
                 return null;
             }
