@@ -29,9 +29,11 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.BiGenericEvent;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
@@ -61,6 +63,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -125,12 +128,18 @@ public abstract class SpongeEventManager implements EventManager {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventType,
             final Order order, final boolean beforeModifications, final EventListener<? super T> handler) {
-        @Nullable Type genericType = null;
+        @Nullable List<? extends TypeToken<?>> genericType = null;
         final Class<?> erased = GenericTypeReflector.erase(eventType);
-        if (GenericEvent.class.isAssignableFrom(erased)) {
-            genericType = TypeTokenUtil.typeArgumentFromSupertype(eventType, GenericEvent.class, 0);
+        if (BiGenericEvent.class.isAssignableFrom(erased)) {
+            genericType = SpongeEventManager.typeArgumentsFromSupertype(eventType, BiGenericEvent.class);
+        } else if (GenericEvent.class.isAssignableFrom(erased)) {
+            genericType = SpongeEventManager.typeArgumentsFromSupertype(eventType, GenericEvent.class);
         }
         return new RegisteredListener(plugin, new EventType(erased, genericType), order, handler, beforeModifications);
+    }
+
+    private static List<? extends TypeToken<?>> typeArgumentsFromSupertype(final Type sub, final Class<?> superType) {
+        return Arrays.stream(TypeTokenUtil.typeArgumentsFromSupertype(sub, superType)).map(TypeToken::get).toList();
     }
 
     <T extends Event> RegisteredListener.Cache bakeHandlers(final EventType<T> eventType) {
@@ -146,12 +155,20 @@ public abstract class SpongeEventManager implements EventManager {
                 final Class<?> type = it.next();
                 final Collection<RegisteredListener<?>> listeners = this.handlersByEvent.get(type);
                 if (GenericEvent.class.isAssignableFrom(type)) {
-                    final Type genericType = Objects.requireNonNull(eventType.getGenericType());
-                    for (final RegisteredListener<?> listener : listeners) {
-                        final Type genericType1 = Objects.requireNonNull(listener.getEventType().getGenericType());
-                        if (TypeTokenUtil.isAssignable(genericType, genericType1)) {
-                            handlers.add(listener);
+                    final List<? extends TypeToken<?>> eventGenericTypes = Objects.requireNonNull(eventType.getGenericType());
+                    listeners: for (final RegisteredListener<?> listener : listeners) {
+                        final List<? extends TypeToken<?>> listenerGenericTypes = Objects.requireNonNull(listener.getEventType().getGenericType());
+                        if (eventGenericTypes.size() != listenerGenericTypes.size()) {
+                            continue;
                         }
+                        for (int i = 0; i < eventGenericTypes.size(); i++) {
+                            final TypeToken<?> eventGenericType = Objects.requireNonNull(eventGenericTypes.get(i));
+                            final TypeToken<?> listenerGenericType = Objects.requireNonNull(listenerGenericTypes.get(i));
+                            if (!TypeTokenUtil.isAssignable(eventGenericType.getType(), listenerGenericType.getType())) {
+                                continue listeners;
+                            }
+                        }
+                        handlers.add(listener);
                     }
                 } else {
                     handlers.addAll(listeners);
@@ -355,8 +372,8 @@ public abstract class SpongeEventManager implements EventManager {
     protected RegisteredListener.Cache getHandlerCache(final Event event) {
         final Class<? extends Event> eventClass = Objects.requireNonNull(event, "event").getClass();
         final EventType<? extends Event> eventType;
-        if (event instanceof GenericEvent) {
-            eventType = new EventType(eventClass, Objects.requireNonNull(((GenericEvent<?>) event).paramType().getType()));
+        if (event instanceof GenericEvent genericEvent) {
+            eventType = new EventType(eventClass, Objects.requireNonNull(genericEvent.paramTypes()));
         } else {
             eventType = new EventType(eventClass, null);
         }
