@@ -52,12 +52,9 @@ import java.util.Optional;
 
 public final class SpongeServerScopedServiceProvider extends SpongeServiceProvider implements ServiceProvider.ServerScoped {
 
-    private final Server server;
-
     @Inject
-    public SpongeServerScopedServiceProvider(final Server server, final Game game, final Injector injector) {
+    public SpongeServerScopedServiceProvider(final Game game, final Injector injector) {
         super(game, injector);
-        this.server = server;
     }
 
     @Override
@@ -89,7 +86,7 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
     @Override
     protected <T> AbstractProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service) {
         return new AbstractProvideServiceEventImpl.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.getGame()),
-                this.getGame(), TypeToken.get(service.getServiceClass()), this.server);
+                this.getGame(), TypeToken.get(service.getServiceClass()), TypeToken.get(Server.class));
     }
 
     @Override

@@ -29,6 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.service.permission.PermissionService;
 
 import java.util.function.Supplier;
 
@@ -47,4 +48,6 @@ public interface CommandSourceStackBridge {
     void bridge$setCause(Cause build);
 
     void bridge$setPotentialPermissionNode(@Nullable Supplier<String> permission);
+
+    void bridge$permissionService(PermissionService permissionService);
 }

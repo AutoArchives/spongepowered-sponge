@@ -52,6 +52,7 @@ public abstract class WorldLoaderMixin {
         final Pair<WorldDataConfiguration, CloseableResourceManager> pair = original.call(instance);
         final CloseableResourceManager resourceManager = pair.getSecond();
         final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.establishServerServices(resourceManager);
         lifecycle.setWorldDataConfiguration(pair.getFirst());
         lifecycle.beginEstablishServerRegistries((RegistryHolder) resourceManager);
         return pair;

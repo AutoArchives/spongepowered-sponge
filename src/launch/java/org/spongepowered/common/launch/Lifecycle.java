@@ -66,7 +66,7 @@ public interface Lifecycle {
 
     void establishGameServices();
 
-    void establishServerServices();
+    void establishServerServices(ResourceManager resourceManager);
 
     void establishServerFeatures();
 

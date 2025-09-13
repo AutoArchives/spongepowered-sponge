@@ -95,8 +95,6 @@ public final class SpongeForgeMod {
         ConfigHandle.setSaveSuppressed(false);
 
         final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishServerServices();
-
         lifecycle.establishServerFeatures();
 
         lifecycle.callStartingEngineEvent((Server) event.getServer());
