@@ -22,21 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.boot;
+package org.spongepowered.bootstrap;
 
-import org.junit.platform.launcher.LauncherSession;
-import org.junit.platform.launcher.LauncherSessionListener;
+import java.net.URL;
+import java.net.URLClassLoader;
 
-public final class SpongeSessionListener implements LauncherSessionListener {
+public final class ResourceClassLoader extends URLClassLoader {
 
-    private final ClassLoader classLoader;
+    static {
+        ClassLoader.registerAsParallelCapable();
+    }
 
-    public SpongeSessionListener() {
-        this.classLoader = Thread.currentThread().getContextClassLoader();
+    public ResourceClassLoader(final String name, final URL[] urls, final ClassLoader parent) {
+        super(name, urls, parent);
     }
 
     @Override
-    public void launcherSessionOpened(final LauncherSession session) {
-        Thread.currentThread().setContextClassLoader(this.classLoader);
+    protected Class<?> findClass(final String name) throws ClassNotFoundException {
+        throw new ClassNotFoundException(name);
     }
 }

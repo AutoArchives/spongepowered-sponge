@@ -22,21 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.boot;
+package org.spongepowered.common.mixin.api.minecraft.world.damagesource;
 
-import org.junit.platform.launcher.LauncherSession;
-import org.junit.platform.launcher.LauncherSessionListener;
+import net.minecraft.world.damagesource.DamageEffects;
+import org.spongepowered.api.event.cause.entity.damage.DamageEffect;
+import org.spongepowered.asm.mixin.Mixin;
 
-public final class SpongeSessionListener implements LauncherSessionListener {
-
-    private final ClassLoader classLoader;
-
-    public SpongeSessionListener() {
-        this.classLoader = Thread.currentThread().getContextClassLoader();
-    }
-
-    @Override
-    public void launcherSessionOpened(final LauncherSession session) {
-        Thread.currentThread().setContextClassLoader(this.classLoader);
-    }
+@Mixin(DamageEffects.class)
+public abstract class DamageEffectsMixin_API implements DamageEffect {
 }

@@ -90,7 +90,7 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
             cir.setReturnValue(false);
         } else {
             this.damage$trackers.addLast(tracker);
-            this.damage$setContainerDamage((float) tracker.preEvent().baseDamage());
+            this.damage$setContainerDamage(tracker.applyStartStep());
         }
     }
 

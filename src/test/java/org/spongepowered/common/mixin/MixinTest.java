@@ -24,13 +24,11 @@
  */
 package org.spongepowered.common.mixin;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
 public class MixinTest {
 
-    @Disabled
     @Test
     public void auditMixins() {
         // Ensure all Mixins apply without error
