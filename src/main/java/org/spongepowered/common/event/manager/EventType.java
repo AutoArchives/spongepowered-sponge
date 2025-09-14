@@ -24,20 +24,21 @@
  */
 package org.spongepowered.common.event.manager;
 
+import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Event;
 
-import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Objects;
 
 public final class EventType<T extends Event> {
 
     private final Class<T> eventType;
-    private final @Nullable Type genericType;
+    private final @Nullable List<? extends TypeToken<?>> genericType;
 
     private int hashCode;
 
-    EventType(final Class<T> eventType, final @Nullable Type genericType) {
+    EventType(final Class<T> eventType, final @Nullable List<? extends TypeToken<?>> genericType) {
         this.genericType = genericType;
         this.eventType = eventType;
     }
@@ -50,7 +51,7 @@ public final class EventType<T extends Event> {
         return this.eventType;
     }
 
-    public @Nullable Type getGenericType() {
+    public @Nullable List<? extends TypeToken<?>> getGenericType() {
         return this.genericType;
     }
 

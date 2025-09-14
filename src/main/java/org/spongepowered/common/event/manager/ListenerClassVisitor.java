@@ -135,7 +135,7 @@ public class ListenerClassVisitor extends ClassVisitor {
                 return;
             }
             if (signature != null) { // We only care about the first parameter
-                new SignatureReader(signature).accept(new ListenerSignatureVisitor(parameter));
+                new SignatureReader(signature).accept(new ListenerSignatureVisitor(parameter).visitParameterType());
             } else if (this.discoveredMethod.signature != null) {
                 // In some compiled languages, the local variable signature is
                 // not available, but we can still grab it from the method's
@@ -194,8 +194,7 @@ public class ListenerClassVisitor extends ClassVisitor {
 
     static final class ListenerSignatureVisitor extends SignatureVisitor {
         private final ListenerParameter parameter;
-        private boolean secondType = true;
-        private boolean isGeneric = false;
+        private State state;
 
         public ListenerSignatureVisitor(final ListenerParameter parameter) {
             super(ListenerClassVisitor.ASM_VERSION);
@@ -203,41 +202,48 @@ public class ListenerClassVisitor extends ClassVisitor {
         }
 
         @Override
-        public void visitClassType(final String name) {
-            // The order of operations is that visitClassType gets called
-            // twice, once for the generic class, then a second time for
-            // the generic type. Ideally we don't have to deal with additional
-            // nested types, but if we do, well, we'll just ignore them.
+        public SignatureVisitor visitParameterType() {
+            this.state = State.PARSING;
+            return this;
+        }
 
-            // Only accept the first and second type
-            if (!secondType) {
-                return;
+        @Override
+        public void visitClassType(final String name) {
+            if (this.state == State.PARSING) {
+                if (this.parameter.baseType == null) {
+                    this.parameter.baseType = Type.getType("L" + name + ";");
+                }
+            } else if (this.state == State.GENERIC) {
+                this.parameter.genericTypes.add(new ListenerParameter.GenericType(Type.getType("L" + name + ";")));
             }
-            // The first type will be base type
-            if (this.parameter.baseType == null) {
-                this.parameter.baseType = Type.getType("L" + name + ";");
-                return;
-            }
-            // The second type will be generic type or ignore
-            else if (isGeneric && this.parameter.genericType == null) {
-                this.parameter.genericType = Type.getType("L" + name + ";");
-            }
-            // Ignore after second type
-            secondType = false;
         }
 
         @Override
         public void visitTypeArgument() {
             // And sometimes, some plugins just care about the parent type
             // and wildcard their bounds.
-            this.parameter.wildcard = true;
+            if (this.state == State.PARSING) {
+                this.parameter.genericTypes.add(new ListenerParameter.GenericType(null));
+            }
         }
 
         @Override
-        public SignatureVisitor visitTypeArgument(char wildcard) {
-            // For treating the second type as generic
-            this.isGeneric = true;
+        public SignatureVisitor visitTypeArgument(final char wildcard) {
+            if (this.state == State.PARSING) {
+                this.state = State.GENERIC;
+            }
             return this;
+        }
+
+        @Override
+        public void visitEnd() {
+            this.state = this.state == State.GENERIC ?  State.PARSING : State.DONE;
+        }
+
+        private enum State {
+            PARSING,
+            GENERIC,
+            DONE
         }
     }
 
@@ -280,7 +286,7 @@ public class ListenerClassVisitor extends ClassVisitor {
         private final DiscoveredMethod discoveredMethod;
 
         public ListenerExtractor(
-            final ListenerClassVisitor.DiscoveredMethod discoveredMethod
+            final DiscoveredMethod discoveredMethod
         ) {
             super(ListenerClassVisitor.ASM_VERSION);
             this.discoveredMethod = discoveredMethod;
@@ -439,15 +445,15 @@ public class ListenerClassVisitor extends ClassVisitor {
         private final DiscoveredMethod method;
         private final Type type;
         private final List<ListenerAnnotation> annotations;
-        public boolean wildcard = false;
         @MonotonicNonNull Type baseType;
-        @MonotonicNonNull Type genericType;
+        List<GenericType> genericTypes;
         @MonotonicNonNull String name;
 
         ListenerParameter(final DiscoveredMethod method, final Type type) {
             this.method = method;
             this.type = type;
             this.annotations = new LinkedList<>();
+            this.genericTypes = new LinkedList<>();
         }
 
         public Class<?> clazz() throws ClassNotFoundException {
@@ -490,15 +496,22 @@ public class ListenerClassVisitor extends ClassVisitor {
         }
 
         public java.lang.reflect.Type genericType() throws ClassNotFoundException {
-            if (this.genericType == null) {
-                if (this.wildcard) {
-                    return TypeFactory.parameterizedClass(this.clazz(), TypeFactory.unboundWildcard());
-                }
+            if (this.genericTypes.isEmpty()) {
                 return TypeFactory.parameterizedClass(this.clazz());
             }
-            final Class<?> gClazz = this.method.classByLoader(this.genericType.getClassName());
-//            final java.lang.reflect.Type generic = TypeFactory.parameterizedClass(gClazz);
-            return TypeFactory.parameterizedClass(this.clazz(), gClazz);
+            final java.lang.reflect.Type[] classes = new java.lang.reflect.Type[this.genericTypes.size()];
+            for (int i = 0; i < classes.length; i++) {
+                final GenericType type = this.genericTypes.get(i);
+                if (type.type() != null) {
+                    classes[i] = this.method.classByLoader(type.type().getClassName());
+                } else {
+                    classes[i] = TypeFactory.unboundWildcard();
+                }
+            }
+            return TypeFactory.parameterizedClass(this.clazz(), classes);
+        }
+
+        record GenericType(@Nullable Type type) {
         }
     }
 

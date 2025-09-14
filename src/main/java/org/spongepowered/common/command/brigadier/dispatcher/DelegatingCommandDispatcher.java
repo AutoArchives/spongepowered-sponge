@@ -36,6 +36,8 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.commands.CommandSourceStack;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 
 import java.util.Collection;
@@ -44,6 +46,7 @@ import java.util.concurrent.CompletableFuture;
 
 public final class DelegatingCommandDispatcher extends CommandDispatcher<CommandSourceStack> {
     private final BrigadierCommandRegistrar brigadier;
+    @MonotonicNonNull private PermissionService permissionService;
 
     public DelegatingCommandDispatcher(final BrigadierCommandRegistrar brigadier) {
         this.brigadier = brigadier;
@@ -123,5 +126,13 @@ public final class DelegatingCommandDispatcher extends CommandDispatcher<Command
     @Override
     public void findAmbiguities(final AmbiguityConsumer<CommandSourceStack> consumer) {
         this.brigadier.getDispatcher().findAmbiguities(consumer);
+    }
+
+    public void permissionService(final PermissionService permissionService) {
+        this.permissionService = permissionService;
+    }
+
+    public PermissionService permissionService() {
+        return this.permissionService;
     }
 }

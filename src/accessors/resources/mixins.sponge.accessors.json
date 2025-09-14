@@ -36,7 +36,6 @@
     "resources.ResourceKeyAccessor",
     "server.MinecraftServer_ReloadableResourcesAccessor",
     "server.MinecraftServerAccessor",
-    "server.ServerFunctionManagerAccessor",
     "server.level.ChunkMap_TrackedEntityAccessor",
     "server.level.ChunkMapAccessor",
     "server.level.ServerChunkCacheAccessor",

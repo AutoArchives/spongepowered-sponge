@@ -24,11 +24,16 @@
  */
 package org.spongepowered.common.bridge.server.packs.resources;
 
+import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.common.tag.SpongePluginTags;
 
 public interface ResourceManagerBridge {
 
     void bridge$pluginProvidedTags(SpongePluginTags pluginTags);
 
+    void bridge$services(SpongeServerScopedServiceProvider services);
+
     SpongePluginTags bridge$pluginProvidedTags();
+
+    SpongeServerScopedServiceProvider bridge$services();
 }

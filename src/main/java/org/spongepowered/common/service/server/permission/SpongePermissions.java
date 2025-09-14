@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
@@ -57,9 +56,8 @@ public final class SpongePermissions {
         }
     }
 
-    public static void registerPermission(final String permissionNode, final int opLevel) {
+    public static void registerPermission(final PermissionService service, final String permissionNode, final int opLevel) {
         if (SpongePermissions.REGISTERED_PERMISSIONS.add(permissionNode)) {
-            final PermissionService service = Sponge.server().serviceProvider().permissionService();
             if (opLevel == 0) {
                 // register as a default permission
                  service.defaults()

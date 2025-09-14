@@ -43,8 +43,6 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_
         ConfigHandle.setSaveSuppressed(false);
 
         final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishServerServices();
-
         lifecycle.establishServerFeatures();
 
         lifecycle.callStartingEngineEvent(this);

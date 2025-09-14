@@ -56,6 +56,14 @@ public final class TypeTokenUtil {
         return input;
     }
 
+    public static Type[] typeArgumentsFromSupertype(final Type sub, final Class<?> superType) {
+        final Type calculatedSuper = GenericTypeReflector.getExactSuperType(sub, superType);
+        if (!(calculatedSuper instanceof ParameterizedType)) {
+            throw new IllegalArgumentException("Calculated supertype " + calculatedSuper + " of original type " + sub + " is not parameterized");
+        }
+        return ((ParameterizedType) calculatedSuper).getActualTypeArguments();
+    }
+
     /**
      * Given a known declared subtype, determine the value of a specific type parameter in a supertype.
      *

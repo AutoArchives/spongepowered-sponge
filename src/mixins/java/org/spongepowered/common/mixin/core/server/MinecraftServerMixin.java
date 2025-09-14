@@ -24,13 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import com.google.inject.Injector;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.datafixers.DataFixer;
 import net.kyori.adventure.resource.ResourcePackRequest;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -47,10 +45,8 @@ import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleReloadInstance;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.util.Unit;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
@@ -62,7 +58,6 @@ import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -90,13 +85,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.accessor.server.ServerFunctionManagerAccessor;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.network.chat.SpongeChatDecorator;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -119,7 +114,6 @@ import org.spongepowered.common.world.server.SpongeWorldManager;
 import java.io.IOException;
 import java.net.Proxy;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -494,18 +488,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @Override
-    public void bridge$initServices(final Game game, final Injector injector) {
-        if (this.impl$serviceProvider == null) {
-            this.impl$serviceProvider = new SpongeServerScopedServiceProvider(this, game, injector);
-            this.impl$serviceProvider.init();
-
-            Util.blockUntilDone(e ->
-                SimpleReloadInstance.create(this.shadow$getResourceManager(), List.of(((ServerFunctionManagerAccessor) this.functionManager).accessor$library()),
-                    Util.backgroundExecutor(), e, CompletableFuture.completedFuture(Unit.INSTANCE), MinecraftServerMixin.LOGGER.isDebugEnabled()).done());
-        }
-    }
-
-    @Override
     public SpongeServerScopedServiceProvider bridge$getServiceProvider() {
         return this.impl$serviceProvider;
     }
@@ -544,6 +526,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Inject(method = "<init>", at = @At("TAIL"))
     public void impl$onInit(final CallbackInfo ci, final @Local(argsOnly = true) WorldStem levelStem) {
         this.bridge$reloadedServerRegistries(((SpongeRegistryHolder) levelStem.resourceManager()).registryHolder());
+        this.impl$serviceProvider = ((ResourceManagerBridge) levelStem.resourceManager()).bridge$services();
     }
 
     @Override

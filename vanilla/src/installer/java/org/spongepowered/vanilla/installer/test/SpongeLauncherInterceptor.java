@@ -22,15 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server;
+package org.spongepowered.vanilla.installer.test;
 
-import net.minecraft.server.ServerFunctionLibrary;
-import net.minecraft.server.ServerFunctionManager;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.junit.platform.launcher.LauncherInterceptor;
+import org.spongepowered.common.applaunch.test.TestGameAccess;
 
-@Mixin(ServerFunctionManager.class)
-public interface ServerFunctionManagerAccessor {
+public final class SpongeLauncherInterceptor implements LauncherInterceptor {
 
-    @Accessor("library") ServerFunctionLibrary accessor$library();
+    private final ClassLoader classLoader;
+
+    public SpongeLauncherInterceptor() {
+        try {
+            this.classLoader = SpongeTestBoot.getGameClassLoader();
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public <T> T intercept(final Invocation<T> invocation) {
+        final ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(this.classLoader);
+        try {
+            return invocation.proceed();
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
+    }
+
+    @Override
+    public void close() {
+        TestGameAccess.shutdownGame();
+    }
 }

@@ -27,7 +27,6 @@ package org.spongepowered.common.service.server.permission;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.server.players.ServerOpList;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -68,8 +67,7 @@ public final class SpongePermissionService implements PermissionService {
     private final SpongeSubjectCollection defaultCollection;
     private final SpongeSubject defaultData;
 
-    @Inject
-    public SpongePermissionService(final Game game) {
+    public SpongePermissionService(final Game game, final int functionsPermissionLevel) {
         this.game = game;
         this.subjects.put(SpongePermissionService.SUBJECTS_DEFAULT, (this.defaultCollection = this.newCollection(SpongePermissionService.SUBJECTS_DEFAULT)));
         this.subjects.put(PermissionService.SUBJECTS_USER, new UserCollection(this));
@@ -91,6 +89,10 @@ public final class SpongePermissionService implements PermissionService {
 //                    return null;
 //                }
                 ));
+
+        this.subjects.put(PermissionService.SUBJECTS_FUNCTION, new DataFactoryCollection(
+            PermissionService.SUBJECTS_FUNCTION, this,
+            s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(functionsPermissionLevel).asSubjectReference())));
 
         this.defaultData = this.getDefaultCollection().get(SpongePermissionService.SUBJECTS_DEFAULT);
     }
