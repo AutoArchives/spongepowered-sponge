@@ -24,14 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.server.players;
 
+import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.ProfileLookupCallback;
 import net.minecraft.server.players.GameProfileCache;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.players.GameProfileCache_GameProfileInfoAccessor;
@@ -142,26 +146,23 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
         }
     }
 
-    // TODO - 25w04a - This changed, it looks like the path itself has changed
-//    @Redirect(method = "lookupGameProfile",
-//        at = @At(
-//            value = "INVOKE",
-//            target = "Lcom/mojang/authlib/GameProfileRepository;findProfileByName(Ljava/lang/String;)Ljava/util/Optional;",
-//            remap = false
-//        )
-//    )
-//    private static void impl$lookUpViaSponge(final GameProfileRepository repository, final String names) {
-//        final GameProfileManager profileManager = Sponge.server().gameProfileManager();
-//        profileManager.basicProfile(names[0])
-//                .whenComplete((profile, ex) -> {
-//                    if (ex != null) {
-//                        callback.onProfileLookupFailed(names[0],
-//                                ex instanceof Exception ? (Exception) ex : new RuntimeException(ex));
-//                    } else {
-//                        callback.onProfileLookupSucceeded(SpongeGameProfile.toMcProfile(profile));
-//                    }
-//                });
-//    }
+    @Redirect(method = "lookupGameProfile",
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/mojang/authlib/GameProfileRepository;findProfilesByNames([Ljava/lang/String;Lcom/mojang/authlib/ProfileLookupCallback;)V",
+            remap = false
+        )
+    )
+    private static void impl$lookUpViaSponge(final GameProfileRepository repository, final String[] names,
+            final ProfileLookupCallback callback) {
+        final GameProfileManager profileManager = Sponge.server().gameProfileManager();
+        try {
+            callback.onProfileLookupSucceeded(SpongeGameProfile.toMcProfile(profileManager.basicProfile(names[0]).join()));
+        } catch (final Throwable e) {
+            callback.onProfileLookupFailed(names[0],
+                e instanceof final Exception ex ? ex : new RuntimeException(e));
+        }
+    }
 
     @Inject(method = "save", at = @At("HEAD"), cancellable = true)
     private void impl$ignoreSavingIfCancelled(final CallbackInfo ci) {
