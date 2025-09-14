@@ -94,13 +94,6 @@ public class TagRegistries {
                 "BannerPatternShapeTags"
             ),
             new TagGenerator(
-                "CAT_TYPE",
-                Registries.CAT_VARIANT,
-                context.relativeClass("data.type", "CatType"),
-                "tag",
-                "CatTypeTags"
-            ),
-            new TagGenerator(
                 "ART_TYPE",
                 Registries.PAINTING_VARIANT,
                 context.relativeClass("data.type", "ArtType"),
