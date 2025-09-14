@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.server.players;
 
 import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.ProfileLookupCallback;
 import net.minecraft.server.players.GameProfileCache;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
