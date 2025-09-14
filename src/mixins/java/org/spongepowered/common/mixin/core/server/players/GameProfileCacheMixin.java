@@ -146,21 +146,13 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
         }
     }
 
-    @Redirect(method = "lookupGameProfile",
-        at = @At(
-            value = "INVOKE",
-            target = "Lcom/mojang/authlib/GameProfileRepository;findProfilesByNames([Ljava/lang/String;Lcom/mojang/authlib/ProfileLookupCallback;)V",
-            remap = false
-        )
-    )
-    private static void impl$lookUpViaSponge(final GameProfileRepository repository, final String[] names,
-            final ProfileLookupCallback callback) {
+    @Redirect(method = "lookupGameProfile", at = @At(value = "INVOKE", target = "Lcom/mojang/authlib/GameProfileRepository;findProfileByName(Ljava/lang/String;)Ljava/util/Optional;"))
+    private static Optional<com.mojang.authlib.GameProfile> impl$lookUpViaSponge(final GameProfileRepository instance, final String name) {
         final GameProfileManager profileManager = Sponge.server().gameProfileManager();
         try {
-            callback.onProfileLookupSucceeded(SpongeGameProfile.toMcProfile(profileManager.basicProfile(names[0]).join()));
+            return Optional.of(SpongeGameProfile.toMcProfile(profileManager.basicProfile(name).join()));
         } catch (final Throwable e) {
-            callback.onProfileLookupFailed(names[0],
-                e instanceof final Exception ex ? ex : new RuntimeException(e));
+            return Optional.empty();
         }
     }
 
