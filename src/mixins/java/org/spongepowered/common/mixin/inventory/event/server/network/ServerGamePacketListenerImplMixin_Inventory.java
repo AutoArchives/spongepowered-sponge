@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.inventory.event.server.network;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
@@ -36,7 +37,6 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.ClickType;
@@ -53,7 +53,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.inventory.AbstractContainerMenu_InventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
@@ -82,13 +81,12 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         inventoryMenu.broadcastChanges();
     }
 
-    @Inject(method = "tryPickItem",
-        at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/entity/player/Inventory;findSlotMatchingItem(Lnet/minecraft/world/item/ItemStack;)I"),
-        locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void impl$onPickItem(final ItemStack stack, final CallbackInfo ci, Inventory inventory, int slotNum) {
+    @WrapOperation(method = "tryPickItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/InventoryMenu;broadcastChanges()V"))
+    private void impl$onPickItem(final InventoryMenu menu, final Operation<Void> original) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.serverLevel()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        try(final EffectTransactor ignored = transactor.logClickContainer(player.containerMenu, slotNum, 0, ClickType.PICKUP, player)) {
+        try (final EffectTransactor ignored = transactor.logClickContainer(menu, this.player.getInventory().selected, 0, ClickType.PICKUP, this.player)) {
+            original.call(menu);
         }
     }
 
