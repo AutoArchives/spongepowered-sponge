@@ -114,7 +114,7 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
 
     @Override
     public void playTotemOfUndyingEffect(final ItemStackLike stack) {
-        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.deathProtection(this, stack));
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.totemOfUndying(this, stack));
     }
 
     @Override

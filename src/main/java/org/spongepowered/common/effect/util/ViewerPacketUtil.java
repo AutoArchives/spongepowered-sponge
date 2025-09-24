@@ -89,7 +89,7 @@ public final class ViewerPacketUtil {
         return new ChangeViewerEnvironmentPacket((DimensionType) (Object) Objects.requireNonNull(worldType, "worldType"));
     }
 
-    public static ClientboundBundlePacket deathProtection(final Player player, final ItemStackLike stack) {
+    public static Packet<ClientGamePacketListener> totemOfUndying(final Player player, final ItemStackLike stack) {
         final ItemStack item = ItemStackUtil.fromLikeToNativeCopy(stack);
         // Client will play item animation only if it has DEATH_PROTECTION component,
         // otherwise it will use totem of undying
@@ -102,13 +102,18 @@ public final class ViewerPacketUtil {
         final int totemSlot = inventory.selected;
         final net.minecraft.world.item.ItemStack oldItem = inventory.getSelected();
 
+        final ClientboundEntityEventPacket effectPacket = new ClientboundEntityEventPacket(mcPlayer, (byte) 35);
+        if (ItemStack.matches(oldItem, item)) {
+            return effectPacket;
+        }
+
         final List<Packet<? super ClientGamePacketListener>> packets = new ArrayList<>();
 
         // First we need to send a fake totem ItemStack to the player's hand
         packets.add(new ClientboundSetPlayerInventoryPacket(totemSlot, item));
 
-        // Next we tell the client to play death protection animation
-        packets.add(new ClientboundEntityEventPacket(mcPlayer, (byte) 35));
+        // Next we tell the client to play the totem of undying effect
+        packets.add(effectPacket);
 
         // Now we can remove the fake totem
         packets.add(new ClientboundSetPlayerInventoryPacket(totemSlot, oldItem));
