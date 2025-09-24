@@ -232,7 +232,7 @@ public class InventoryEventFactory {
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.empty(), newCursor);
         final InteractContainerEvent.Open event =
                 SpongeEventFactory.createInteractContainerEventOpen(PhaseTracker.getWorldInstance(player.level()).currentCause(),
-                        (org.spongepowered.api.item.inventory.Container) player.containerMenu, cursorTransaction);
+                        (org.spongepowered.api.item.inventory.Container) menu, cursorTransaction);
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             return false;

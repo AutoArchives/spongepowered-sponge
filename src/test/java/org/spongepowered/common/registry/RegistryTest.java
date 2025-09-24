@@ -28,11 +28,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import com.google.common.reflect.TypeToken;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.registrar.tree.CommandCompletionProviders;
+import org.spongepowered.api.data.type.BoatTypes;
 import org.spongepowered.api.registry.*;
 import org.spongepowered.api.util.annotation.CatalogedBy;
 
@@ -88,10 +90,10 @@ public class RegistryTest {
                 .filter(field -> isPublicStatic(field) && DefaultedRegistryReference.class.isAssignableFrom(field.getType()));
     }
 
-    @Disabled
     @TestFactory
     public Stream<DynamicTest> generateDefaultedReferenceTests() {
         return RegistryTest.streamDefaultedReferenceFields().map(field -> {
+            Assumptions.assumeFalse(field.getDeclaringClass() == BoatTypes.class || field.getDeclaringClass() == CommandCompletionProviders.class);
             final String name = "Field " + field.getDeclaringClass().getSimpleName() + "#" + field.getName();
             return dynamicTest(name, () -> {
                 final DefaultedRegistryReference<?> ref = (DefaultedRegistryReference<?>) field.get(null);
@@ -111,7 +113,6 @@ public class RegistryTest {
                 .filter(clazz -> clazz.getName().startsWith("org.spongepowered.api."));
     }
 
-    @Disabled
     @TestFactory
     public Stream<DynamicTest> generateMethodTests() {
         return RegistryTest.streamRegistries().flatMap(Registry::streamEntries)

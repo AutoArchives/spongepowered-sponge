@@ -25,7 +25,6 @@
 package org.spongepowered.common.service.server;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -52,12 +51,11 @@ import java.util.Optional;
 
 public final class SpongeServerScopedServiceProvider extends SpongeServiceProvider implements ServiceProvider.ServerScoped {
 
-    private final Server server;
+    private final int functionsPermissionLevel;
 
-    @Inject
-    public SpongeServerScopedServiceProvider(final Server server, final Game game, final Injector injector) {
+    public SpongeServerScopedServiceProvider(final Game game, final Injector injector, final int functionsPermissionLevel) {
         super(game, injector);
-        this.server = server;
+        this.functionsPermissionLevel = functionsPermissionLevel;
     }
 
     @Override
@@ -74,11 +72,11 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
                 .add(new Service<>(
                         EconomyService.class,
                         servicePluginSubCategory -> servicePluginSubCategory.economyService,
-                        null))
+                        (Class<EconomyService>) null))
                 .add(new Service<>(
                         PermissionService.class,
                         servicePluginSubCategory -> servicePluginSubCategory.permissionService,
-                        SpongePermissionService.class))
+                        i -> new SpongePermissionService(this.getGame(), this.functionsPermissionLevel)))
                 .add(new Service<>(
                         WhitelistService.class,
                         servicePluginSubCategory -> servicePluginSubCategory.whitelistService,
@@ -89,7 +87,7 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
     @Override
     protected <T> AbstractProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service) {
         return new AbstractProvideServiceEventImpl.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.getGame()),
-                this.getGame(), TypeToken.get(service.getServiceClass()), this.server);
+                this.getGame(), TypeToken.get(service.getServiceClass()), TypeToken.get(Server.class));
     }
 
     @Override

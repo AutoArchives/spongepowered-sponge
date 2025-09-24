@@ -105,7 +105,6 @@ public class SpongeAttackTracker extends SpongeDamageTracker {
     }
 
     public static @Nullable SpongeAttackTracker callAttackPreEvent(final Entity entity, final DamageSource source, final float baseDamage, final ItemStack weapon) {
-        final SpongeAttackTracker tracker;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeDamageTracker.generateCauseFor(source, frame);
 
@@ -114,11 +113,8 @@ public class SpongeAttackTracker extends SpongeDamageTracker {
                 return null;
             }
 
-            tracker = new SpongeAttackTracker(event, source, weapon);
+            return new SpongeAttackTracker(event, source, weapon);
         }
-
-        tracker.newStep(DamageStepTypes.START).apply(baseDamage);
-        return tracker;
     }
 
     public static @Nullable SpongeAttackTracker of(final DamageSource source) {

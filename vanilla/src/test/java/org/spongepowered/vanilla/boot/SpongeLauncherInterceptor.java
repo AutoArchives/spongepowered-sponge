@@ -22,28 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server;
+package org.spongepowered.vanilla.boot;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.minecraft.server.ServerFunctionLibrary;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.asm.mixin.Mixin;
+import org.junit.platform.launcher.LauncherInterceptor;
+import org.spongepowered.common.applaunch.test.TestGameAccess;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
+public final class SpongeLauncherInterceptor implements LauncherInterceptor {
 
-@Mixin(ServerFunctionLibrary.class)
-public abstract class ServerFunctionLibraryMixin {
+    private final ClassLoader classLoader;
 
-    @WrapMethod(method = "reload")
-    private CompletableFuture<Void> impl$onReload(
-        final PreparableReloadListener.SharedState state, final Executor executor1,
-        final PreparableReloadListener.PreparationBarrier barrier, Executor executor2, Operation<CompletableFuture<Void>> original) {
-        if (Sponge.isServerAvailable()) {
-            return original.call(state, executor1, barrier, executor2);
+    public SpongeLauncherInterceptor() {
+        try {
+            this.classLoader = SpongeTestBoot.getGameClassLoader();
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         }
-        return barrier.wait(null);
+    }
+
+    @Override
+    public <T> T intercept(final Invocation<T> invocation) {
+        final ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(this.classLoader);
+        try {
+            return invocation.proceed();
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
+    }
+
+    @Override
+    public void close() {
+        TestGameAccess.shutdownGame();
     }
 }

@@ -48,10 +48,11 @@ public abstract class WorldLoaderMixin {
     @WrapOperation(method = "load", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/WorldLoader$PackConfig;createResourceManager()Lcom/mojang/datafixers/util/Pair;"))
     private static Pair<WorldDataConfiguration, CloseableResourceManager> impl$onCreateResourceManager(final WorldLoader.PackConfig instance,
-            final Operation<Pair<WorldDataConfiguration, CloseableResourceManager>> original) {
+            final Operation<Pair<WorldDataConfiguration, CloseableResourceManager>> original, final @Local(argsOnly = true) WorldLoader.InitConfig $$0) {
         final Pair<WorldDataConfiguration, CloseableResourceManager> pair = original.call(instance);
         final CloseableResourceManager resourceManager = pair.getSecond();
         final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.establishServerServices(resourceManager, $$0.functionCompilationLevel());
         lifecycle.setWorldDataConfiguration(pair.getFirst());
         lifecycle.beginEstablishServerRegistries((RegistryHolder) resourceManager);
         return pair;

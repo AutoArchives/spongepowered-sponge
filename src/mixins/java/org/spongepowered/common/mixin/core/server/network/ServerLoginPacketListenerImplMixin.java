@@ -68,7 +68,6 @@ import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.network.SpongeEngineConnection;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
-import org.spongepowered.common.network.channel.SpongeChannelPayload;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
@@ -288,13 +287,11 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                 : null;
     }
 
-    @Inject(method = "handleCustomQueryPacket", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "handleCustomQueryPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;disconnect(Lnet/minecraft/network/chat/Component;)V"), cancellable = true)
     private void impl$onHandleCustomQueryPacket(final ServerboundCustomQueryAnswerPacket packet, final CallbackInfo ci) {
         final CustomQueryAnswerPayload payload = packet.payload();
         final int transactionId = packet.transactionId();
-        if (!(payload instanceof SpongeChannelPayload
-            // some clients may answer a null payload to unknown queries
-            || (payload == null && ((ConnectionBridge) this.connection).bridge$getTransactionStore().contains(transactionId)))) {
+        if (!((ConnectionBridge) this.connection).bridge$getTransactionStore().contains(transactionId)) {
             return;
         }
 
@@ -303,7 +300,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         this.server.execute(() -> {
             final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
             final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
-            channelRegistry.handleLoginResponsePayload(connection, (EngineConnectionState) this, transactionId, payload == null ? null : ((SpongeChannelPayload) payload).consumer());
+            channelRegistry.handleLoginResponsePayload(connection, (EngineConnectionState) this, transactionId, payload == null ? null : payload::write);
         });
     }
 

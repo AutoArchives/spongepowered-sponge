@@ -47,7 +47,6 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
-import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryEvent;
@@ -69,6 +68,7 @@ import org.spongepowered.common.registry.SpongeRegistries;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.service.SpongeServiceProvider;
+import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.common.service.server.permission.SpongeContextCalculator;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -174,8 +174,10 @@ public final class SpongeLifecycle implements Lifecycle {
     }
 
     @Override
-    public void establishServerServices() {
-        ((MinecraftServerBridge) this.game.server()).bridge$initServices(this.game, this.injector);
+    public void establishServerServices(final ResourceManager resourceManager, final int functionsPermissionLevel) {
+        final SpongeServerScopedServiceProvider serviceProvider = new SpongeServerScopedServiceProvider(this.game, this.injector, functionsPermissionLevel);
+        serviceProvider.init();
+        ((ResourceManagerBridge) resourceManager).bridge$services(serviceProvider);
     }
 
     @Override

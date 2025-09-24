@@ -28,12 +28,14 @@ import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
+import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.common.tag.SpongePluginTags;
 
 @Mixin(MultiPackResourceManager.class)
 public abstract class MultiPackResourceManagerMixin implements ResourceManagerBridge {
 
     @MonotonicNonNull private SpongePluginTags impl$pluginTags;
+    @MonotonicNonNull private SpongeServerScopedServiceProvider impl$services;
 
     @Override
     public void bridge$pluginProvidedTags(final SpongePluginTags pluginTags) {
@@ -41,7 +43,17 @@ public abstract class MultiPackResourceManagerMixin implements ResourceManagerBr
     }
 
     @Override
+    public void bridge$services(final SpongeServerScopedServiceProvider services) {
+        this.impl$services = services;
+    }
+
+    @Override
     public SpongePluginTags bridge$pluginProvidedTags() {
         return this.impl$pluginTags;
+    }
+
+    @Override
+    public SpongeServerScopedServiceProvider bridge$services() {
+        return this.impl$services;
     }
 }

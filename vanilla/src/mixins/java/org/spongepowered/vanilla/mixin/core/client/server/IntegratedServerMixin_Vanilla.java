@@ -47,8 +47,6 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin
             ((MinecraftBridge) Minecraft.getInstance()).bridge$setTemporaryIntegratedServer((IntegratedServer) (Object) this);
         }
         final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishServerServices();
-
         lifecycle.establishServerFeatures();
 
         lifecycle.callStartingEngineEvent(this);

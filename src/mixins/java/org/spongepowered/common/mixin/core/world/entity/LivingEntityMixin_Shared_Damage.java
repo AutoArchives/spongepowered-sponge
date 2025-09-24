@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.world.entity.TrackedDamageBridge;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageStep;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
 
 // Forge and Vanilla
@@ -41,9 +42,13 @@ import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTracker;
 public abstract class LivingEntityMixin_Shared_Damage implements TrackedDamageBridge {
 
     @ModifyVariable(method = "hurtServer", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;noActionTime:I"), argsOnly = true)
-    private float damage$setBaseDamage(final float damage) {
+    private float damage$modifyAfterStart(final float damage) {
         final SpongeDamageTracker tracker = this.damage$tracker();
-        return tracker == null ? damage : (float) tracker.preEvent().baseDamage();
+        if (tracker == null) {
+            return damage;
+        }
+        final SpongeDamageStep step = tracker.currentStep(DamageStepTypes.START);
+        return step == null ? damage : (float) step.damageAfterChildren().getAsDouble();
     }
 
     @ModifyVariable(method = "actuallyHurt", at = @At("STORE"), argsOnly = true, slice = @Slice(

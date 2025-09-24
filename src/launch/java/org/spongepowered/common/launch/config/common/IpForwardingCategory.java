@@ -47,6 +47,11 @@ public class IpForwardingCategory {
                  + "Only used with 'MODERN' forwarding mode.")
     public String secret = "";
 
+    @Setting("online-mode")
+    @Comment("The mode to use to resolve game profiles.\n" +
+        "This should match the proxy's online-mode.")
+    public boolean onlineMode = true;
+
     public enum Mode {
         NONE,
         LEGACY,

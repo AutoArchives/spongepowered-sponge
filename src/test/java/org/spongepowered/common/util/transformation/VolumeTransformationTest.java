@@ -25,7 +25,6 @@
 package org.spongepowered.common.util.transformation;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -34,9 +33,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.block.entity.BlockEntityTypes;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.util.rotation.Rotations;
@@ -52,7 +54,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@Disabled
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class VolumeTransformationTest {
@@ -152,14 +153,18 @@ public final class VolumeTransformationTest {
         final Vector3i rawMax = max.max(min);
         final Vector3i size = rawMax.sub(rawMin).add(Vector3i.ONE);
         final Vector3i relativeMin = rawMin.sub(origin);
-        final RegistryHolder holder = Sponge.game();
+        final RegistryHolder holder = Sponge.server();
         final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(relativeMin, size, holder);
 
         final Vector3i volMax = volume.max().add(Vector3i.ONE);
         for (int x = relativeMin.x(); x < volMax.x(); x++) {
             for (int z = relativeMin.z(); z < volMax.z(); z++) {
                 for (int y = relativeMin.y(); y < volMax.y(); y++) {
-                    volume.addBlockEntity(x, y, z, BlockEntityArchetype.builder().blockEntityData(DataContainer.createNew().set(VolumeTransformationTest.POS, new Vector3i(x, y, z))).build());
+                    volume.addBlockEntity(x, y, z, BlockEntityArchetype.builder()
+                        .state(BlockTypes.CHEST.get().defaultState())
+                        .blockEntity(BlockEntityTypes.CHEST.get())
+                        .blockEntityData(DataContainer.createNew().set(VolumeTransformationTest.POS, new Vector3i(x, y, z)))
+                        .build());
                 }
             }
         }
@@ -239,7 +244,8 @@ public final class VolumeTransformationTest {
                     .sub(VolumePositionTranslators.BLOCK_OFFSET);
                 final Vector3i invertedBlockPos = invertedTransformedPos.toInt();
 
-                final Vector3i expectedPos = (Vector3i) entity.blockEntityData().get(VolumeTransformationTest.POS).get();
+                final DataView posView = entity.blockEntityData().getView(VolumeTransformationTest.POS).get();
+                final Vector3i expectedPos = new Vector3i(posView.getInt(DataQuery.of("x")).get(), posView.getInt(DataQuery.of("y")).get(), posView.getInt(DataQuery.of("z")).get());
 
                 Assertions.assertNotEquals(
                     VolumeTransformationTest.INVALID_STUB_POSITION,

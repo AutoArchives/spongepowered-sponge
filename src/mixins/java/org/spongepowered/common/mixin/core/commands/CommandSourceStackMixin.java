@@ -44,6 +44,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -86,6 +87,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     @Shadow @Final private TaskChainer chatMessageChainer;
     private Cause impl$cause;
     @Nullable private Supplier<String> impl$potentialPermissionNode = null;
+    private @Nullable PermissionService impl$permissionService;
 
     @Inject(method = "<init>(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;ILjava/lang/String;Lnet/minecraft/network/chat/Component;Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/entity/Entity;ZLnet/minecraft/commands/CommandResultCallback;Lnet/minecraft/commands/arguments/EntityAnchorArgument$Anchor;Lnet/minecraft/commands/CommandSigningContext;Lnet/minecraft/util/TaskChainer;)V",
             at = @At("RETURN"))
@@ -145,14 +147,17 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
             final CommandSourceStackBridge commandSourceStackBridge = ((CommandSourceStackBridge) cir.getReturnValue());
             commandSourceStackBridge.bridge$setPotentialPermissionNode(this.impl$potentialPermissionNode);
             commandSourceStackBridge.bridge$setCause(this.impl$cause);
+            commandSourceStackBridge.bridge$permissionService(this.impl$permissionService);
         }
     }
 
     @Override
     public CommandCause bridge$withCurrentCause() {
         // Cause is set in ctor.
-        return (CommandCause) CommandSourceStackAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel,
+        final CommandCause instance = (CommandCause) CommandSourceStackAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel,
                 this.textName, this.displayName, this.server, this.entity, this.silent, this.resultCallback, this.anchor, this.signingContext, this.chatMessageChainer);
+        ((CommandSourceStackBridge) instance).bridge$permissionService(this.impl$permissionService);
+        return instance;
     }
 
     /*
@@ -197,10 +202,14 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
 
     @Inject(method = "hasPermission", at = @At(value = "HEAD"), cancellable = true)
     private void impl$checkPermission(final int opLevel, final CallbackInfoReturnable<Boolean> cir) {
-        if (Sponge.isServerAvailable() && this.impl$potentialPermissionNode != null) {
+        if (this.impl$potentialPermissionNode != null) {
             final String perm = this.impl$potentialPermissionNode.get();
             // This will register the permission with the first op level we retrieve.
-            SpongePermissions.registerPermission(perm, opLevel);
+            if (this.impl$permissionService != null) {
+                SpongePermissions.registerPermission(this.impl$permissionService, perm, opLevel);
+            } else if (Sponge.isServerAvailable()) {
+                SpongePermissions.registerPermission(Sponge.server().serviceProvider().permissionService(), perm, opLevel);
+            }
             cir.setReturnValue(((CommandCause) this).hasPermission(perm));
         }
         // fall through to the op level check if we haven't set a permission node.
@@ -250,4 +259,8 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
         return Cause.builder().from(this.impl$cause).build(builder.build());
     }
 
+    @Override
+    public void bridge$permissionService(final PermissionService permissionService) {
+        this.impl$permissionService = permissionService;
+    }
 }

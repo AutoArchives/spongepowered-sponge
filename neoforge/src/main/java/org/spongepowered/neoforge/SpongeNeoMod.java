@@ -90,8 +90,6 @@ public final class SpongeNeoMod {
         ConfigHandle.setSaveSuppressed(false);
 
         final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishServerServices();
-
         lifecycle.establishServerFeatures();
 
         lifecycle.callStartingEngineEvent((Server) event.getServer());

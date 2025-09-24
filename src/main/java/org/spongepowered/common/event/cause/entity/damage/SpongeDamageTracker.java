@@ -148,6 +148,10 @@ public class SpongeDamageTracker implements DamageStepHistory {
         return step == null ? 0 : (float) step.damageAfterChildren().orElse(0);
     }
 
+    public float applyStartStep() {
+        return (float) this.newStep(DamageStepTypes.START).apply(this.preEvent.baseDamage());
+    }
+
     public float callDamagePostEvent(final Entity entity, float finalDamage) {
         if (this.postEvent != null) {
             throw new IllegalStateException("Post event already fired");
@@ -186,7 +190,6 @@ public class SpongeDamageTracker implements DamageStepHistory {
     }
 
     public static @Nullable SpongeDamageTracker callDamagePreEvent(final Entity entity, final DamageSource source, final float baseDamage) {
-        final SpongeDamageTracker tracker;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             SpongeDamageTracker.generateCauseFor(source, frame);
 
@@ -195,11 +198,8 @@ public class SpongeDamageTracker implements DamageStepHistory {
                 return null;
             }
 
-            tracker = new SpongeDamageTracker(event, source);
+            return new SpongeDamageTracker(event, source);
         }
-
-        tracker.newStep(DamageStepTypes.START).apply(baseDamage);
-        return tracker;
     }
 
     public static DamageEntityEvent.@Nullable Post callDamageEvents(final Entity entity, final DamageSource source, final float baseDamage) {
@@ -207,8 +207,7 @@ public class SpongeDamageTracker implements DamageStepHistory {
         if (tracker == null) {
             return null;
         }
-        final DamageStep step = tracker.currentStep(DamageStepTypes.START);
-        final float finalDamage = step == null ? baseDamage : (float) step.damageAfterChildren().orElse(baseDamage);
+        final float finalDamage = tracker.applyStartStep();
         tracker.callDamagePostEvent(entity, finalDamage);
         return (DamageEntityEvent.Post) tracker.postEvent;
     }

@@ -73,27 +73,27 @@ public abstract class AbstractProvideServiceEventImpl<T> extends AbstractLifecyc
         }
     }
 
-    public static final class EngineScopedImpl<T> extends AbstractProvideServiceEventImpl<T> implements ProvideServiceEvent.EngineScoped<T>{
+    public static final class EngineScopedImpl<T, E extends Engine> extends AbstractProvideServiceEventImpl<T> implements ProvideServiceEvent.EngineScoped<T, E>{
 
-        private final Engine engine;
+        private final TypeToken<E> engineToken;
 
-        public EngineScopedImpl(final Cause cause, final Game game, final TypeToken<T> token, final Engine engine) {
+        public EngineScopedImpl(final Cause cause, final Game game, final TypeToken<T> token, final TypeToken<E> engineToken) {
             super(cause, game, token);
-            this.engine = engine;
+            this.engineToken = engineToken;
         }
 
         @Override
-        public Engine engine() {
-            return this.engine;
+        public TypeToken<E> secondaryParamType() {
+            return this.engineToken;
         }
 
         @Override
         public String toString() {
             return new StringJoiner(", ", EngineScopedImpl.class.getSimpleName() + "[", "]")
-                    .add("cause=" + this.cause)
-                    .add("token=" + this.token)
-                    .add("engine=" + this.token)
-                    .toString();
+                .add("cause=" + this.cause)
+                .add("token=" + this.token)
+                .add("engine=" + this.token)
+                .toString();
         }
     }
 }

@@ -29,6 +29,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -93,6 +94,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected UUID uuid;
     @Shadow @Final private net.minecraft.world.entity.EntityType<?> type;
     @Shadow private Level level;
+    @Shadow @Final protected SynchedEntityData entityData;
 
     @Shadow public abstract double shadow$getX();
     @Shadow public abstract double shadow$getY();

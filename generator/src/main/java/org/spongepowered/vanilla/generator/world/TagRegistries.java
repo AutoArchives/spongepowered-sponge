@@ -79,13 +79,33 @@ public class TagRegistries {
                 "tag",
                 "EnchantmentTypeTags"
             ),
-
             new TagGenerator(
                 "DAMAGE_TYPE",
                 Registries.DAMAGE_TYPE,
                 context.relativeClass("event.cause.entity.damage", "DamageType"),
                 "tag",
                 "DamageTypeTags"
+            ),
+            new TagGenerator(
+                "BANNER_PATTERN_SHAPE",
+                Registries.BANNER_PATTERN,
+                context.relativeClass("data.type", "BannerPatternShape"),
+                "tag",
+                "BannerPatternShapeTags"
+            ),
+            new TagGenerator(
+                "ART_TYPE",
+                Registries.PAINTING_VARIANT,
+                context.relativeClass("data.type", "ArtType"),
+                "tag",
+                "ArtTypeTags"
+            ),
+            new TagGenerator(
+                "STRUCTURE",
+                Registries.STRUCTURE,
+                context.relativeClass("world.generation.structure", "Structure"),
+                "tag",
+                "StructureTags"
             )
         );
     }

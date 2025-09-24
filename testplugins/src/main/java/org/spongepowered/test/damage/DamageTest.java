@@ -75,6 +75,8 @@ import java.util.OptionalDouble;
 public class DamageTest implements LoadableModule {
     private static final ResourceKey EXHAUSTING_DAMAGE = ResourceKey.of("damagetest", "test");
 
+    private static final DamageStepType START_BONUS = DamageStepType.create();
+    private static final DamageStepType END_BONUS = DamageStepType.create();
     private static final DamageStepType DOUBLE_CRITICAL = DamageStepType.create();
     private static final DamageStepType DOUBLE_DOUBLE_CRITICAL = DamageStepType.create();
 
@@ -139,6 +141,8 @@ public class DamageTest implements LoadableModule {
     @Listener
     public void onRegisterDamageStepType(final RegisterRegistryValueEvent.GameScoped event) {
         event.registry(RegistryTypes.DAMAGE_STEP_TYPE, (r) -> {
+            r.register(ResourceKey.of(this.plugin, "start_bonus"), START_BONUS);
+            r.register(ResourceKey.of(this.plugin, "end_bonus"), END_BONUS);
             r.register(ResourceKey.of(this.plugin, "double_critical"), DOUBLE_CRITICAL);
             r.register(ResourceKey.of(this.plugin, "double_double_critical"), DOUBLE_DOUBLE_CRITICAL);
         });
@@ -167,6 +171,15 @@ public class DamageTest implements LoadableModule {
                     }).build());
             event.addModifierAfter(DOUBLE_CRITICAL,
                 DamageModifier.builder().type(DOUBLE_DOUBLE_CRITICAL).damageFunction((step, damage) -> damage * 2).build());
+        }
+
+        @Listener
+        private void onDamagePre(final DamageCalculationEvent.Pre event) {
+            event.addModifierBefore(DamageStepTypes.START,
+                DamageModifier.builder().type(START_BONUS).damageFunction((step, damage) -> damage + 1).build());
+
+            event.addModifierAfter(DamageStepTypes.END,
+                DamageModifier.builder().type(END_BONUS).damageFunction((step, damage) -> damage + 1).build());
         }
 
         @Listener
