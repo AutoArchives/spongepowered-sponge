@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.server.level;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -45,15 +46,16 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
-import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.data.datasync.VanishedFilteringSynchronizer;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Mixin(ServerEntity.class)
@@ -61,10 +63,16 @@ public abstract class ServerEntityMixin {
 
     // @formatter:off
     @Shadow @Final private Entity entity;
-    @Shadow @Final @Mutable private Consumer<Packet<?>> broadcast;
+    @Shadow @Final @Mutable private ServerEntity.Synchronizer synchronizer;
     // @formatter:on
 
     /**
+     * @param serverLevel         The world
+     * @param entity              The entity being tracked
+     * @param trackingRange       The update frequency
+     * @param trackMovementDeltas Whether velocity updates are sent
+     * @param broadcaster         The consumer (a method handle for EntityTracker#sendToAllTracking)
+     * @param ci                  The callback info
      * @author gabizou
      * @reason Because the packets for *most* all entity updates are handled
      * through this consumer tick, basically all the players tracking the
@@ -77,25 +85,13 @@ public abstract class ServerEntityMixin {
      * any and all players tracking our tracked entity by filtering the consumer first,
      * then as a fail safe, the EntityTracker mixin. Meanwhile, all other states are updated
      * just fine.
-     *
-     * @param serverLevel The world
-     * @param entity The entity being tracked
-     * @param trackingRange The update frequency
-     * @param trackMovementDeltas Whether velocity updates are sent
-     * @param broadcaster The consumer (a method handle for EntityTracker#sendToAllTracking)
-     * @param ci The callback info
      */
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$wrapConsumer(final ServerLevel serverLevel, final Entity entity, final int trackingRange,
-                                   final boolean trackMovementDeltas, final Consumer<Packet<?>> broadcaster,
-                                   final BiConsumer<?, ?> filter, final CallbackInfo ci) {
-        this.broadcast = (packet)  -> {
-            if (this.entity instanceof VanishableBridge bridge) {
-                if (!bridge.bridge$vanishState().invisible()) {
-                    broadcaster.accept(packet);
-                }
-            }
-        };
+    private void impl$wrapConsumer(
+        final ServerLevel serverLevel, final Entity entity, final int trackingRange,
+        final boolean trackMovementDeltas, final ServerEntity.Synchronizer broadcaster,
+        final CallbackInfo ci) {
+        this.synchronizer = new VanishedFilteringSynchronizer(broadcaster, new WeakReference<>(this.entity));
     }
 
     @Inject(method = "removePairing", at = @At("RETURN"))
@@ -139,8 +135,8 @@ public abstract class ServerEntityMixin {
         if (!(this.entity instanceof final HumanEntity human)) {
             return;
         }
-        final Stream<Packet<?>> packets = human.popQueuedPackets(null);
-        packets.forEach(this.broadcast);
+        final Stream<Packet<? super ClientGamePacketListener>> packets = human.popQueuedPackets(null);
+        packets.forEach(this.synchronizer::sendToTrackingPlayers);
         // Note that this will further call in ChunkManager_EntityTrackerMixin
         // for any player specific packets to send.
     }
@@ -169,15 +165,19 @@ public abstract class ServerEntityMixin {
         return packed;
     }
 
-    @WrapOperation(method = "sendChanges", at = @At(value = "INVOKE", target = "Ljava/util/function/BiConsumer;accept(Ljava/lang/Object;Ljava/lang/Object;)V"))
-    private void impl$sendSetPassengersToSelf(final BiConsumer<?, ?> instance, final Object packet, final Object ignored, final Operation<Void> original) {
+    @WrapOperation(method = "sendChanges",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/level/ServerEntity$Synchronizer;sendToTrackingPlayersFiltered(Lnet/minecraft/network/protocol/Packet;Ljava/util/function/Predicate;)V"))
+    private void impl$sendSetPassengersToSelf(
+        final ServerEntity.Synchronizer instance, final Packet<? super ClientGamePacketListener> packet,
+        final Predicate<ServerPlayer> serverPlayerPredicate, final Operation<Void> original) {
         // When passengers are removed from a player entity, the target
         // is the player itself, and we need to synchronize it to them.
         // In vanilla, it is not possible to ride player entities
         // so we never end up hitting this code path.
-        original.call(instance, packet, ignored);
+        original.call(instance, packet, serverPlayerPredicate);
         if (this.entity instanceof final ServerPlayer player) {
-            player.connection.send((Packet<?>) packet);
+            player.connection.send(packet);
         }
     }
 }

@@ -86,6 +86,7 @@ import org.spongepowered.common.accessor.world.entity.AvatarAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.data.datasync.NoOpSynchronizer;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.profile.SpongeProfileProperty;
 import org.spongepowered.common.util.Constants;
@@ -117,7 +118,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     // A queue of packets waiting to send to players tracking this human
-    private final Map<UUID, List<Stream<Packet<?>>>> playerPacketMap = new HashMap<>();
+    private final Map<UUID, List<Stream<Packet<? super ClientGamePacketListener>>>> playerPacketMap = new HashMap<>();
 
     private ResolvableProfile fakeProfile;
     private boolean aiDisabled = false, leftHanded = false;
@@ -398,8 +399,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         this.pushPackets(new ClientboundRemoveEntitiesPacket(this.getId()), this.createPlayerListPacket(EnumSet.allOf(ClientboundPlayerInfoUpdatePacket.Action.class)));
         this.pushPackets(this.getAddEntityPacket(new ServerEntity(
             (ServerLevel) this.level(),
-            this, 1, true, packet -> {},
-            (packet, list) -> {}
+            this, 1, true, NoOpSynchronizer.INSTANCE
         )));
     }
 
@@ -445,7 +445,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      *
      * @param packets All packets to send in a single tick
      */
-    public void pushPackets(final Packet<?>... packets) {
+    public void pushPackets(final Packet<? super ClientGamePacketListener>... packets) {
         this.pushPackets(null, packets); // null = all players
     }
 
@@ -456,8 +456,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      * @param player The player tracking this human
      * @param packets All packets to send in a single tick
      */
-    public void pushPackets(final @Nullable ServerPlayer player, final Packet<?>... packets) {
-        final List<Stream<Packet<?>>> queue;
+    public void pushPackets(final @Nullable ServerPlayer player, final Packet<? super ClientGamePacketListener>... packets) {
+        final List<Stream<Packet<? super ClientGamePacketListener>>> queue;
         if (player == null) {
             queue = this.playerPacketMap.computeIfAbsent(null, k -> new ArrayList<>());
         } else {
@@ -472,8 +472,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      * @param player The player to get packets for (or null for all players)
      * @return An array of packets to send in a single tick
      */
-    public Stream<Packet<?>> popQueuedPackets(final @Nullable ServerPlayer player) {
-        final List<Stream<Packet<?>>> queue = this.playerPacketMap.get(player == null ? null : player.getUUID());
+    public Stream<Packet<? super ClientGamePacketListener>> popQueuedPackets(final @Nullable ServerPlayer player) {
+        final List<Stream<Packet<? super ClientGamePacketListener>>> queue = this.playerPacketMap.get(player == null ? null : player.getUUID());
         return queue == null || queue.isEmpty() ? Stream.empty() : queue.remove(0);
     }
 

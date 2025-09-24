@@ -22,28 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.data.datasync;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
-import net.minecraft.server.level.ServerLevel;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+import java.util.function.Predicate;
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+public record NoOpSynchronizer() implements ServerEntity.Synchronizer {
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
+    public static final NoOpSynchronizer INSTANCE = new NoOpSynchronizer();
 
+    @Override
+    public void sendToTrackingPlayers(Packet<? super ClientGamePacketListener> var1) {
 
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(boolean flush);
+    }
 
-    @Accessor("visibleChunkMap") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$visibleChunkMap();
+    @Override
+    public void sendToTrackingPlayersAndSelf(Packet<? super ClientGamePacketListener> var1) {
 
-    @Accessor("level") ServerLevel accessor$level();
+    }
+
+    @Override
+    public void sendToTrackingPlayersFiltered(Packet<? super ClientGamePacketListener> var1, Predicate<ServerPlayer> var2) {
+
+    }
 }

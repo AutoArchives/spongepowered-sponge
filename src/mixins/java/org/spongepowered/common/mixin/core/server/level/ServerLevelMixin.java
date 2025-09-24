@@ -52,6 +52,7 @@ import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.CustomSpawner;
@@ -509,18 +510,20 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
     }
 
-    @Redirect(method = "lambda$updatePOIOnBlockStateChange$14",
+    @WrapOperation(method = "lambda$updatePOIOnBlockStateChange$15",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Holder;)V"
+            target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Holder;)Lnet/minecraft/world/entity/ai/village/poi/PoiRecord;"
         )
     )
-    private void impl$avoidAddingPoiUpdatesOnUnloadedWorld(final PoiManager manager, final BlockPos pos, final Holder<PoiType> type) {
+    private PoiRecord impl$avoidAddingPoiUpdatesOnUnloadedWorld(
+        final PoiManager instance, final BlockPos pos, final Holder<PoiType> type, final Operation<PoiRecord> original
+    ) {
         // Unloaded worlds should not notify PoiManager of changes
         if (!SpongeCommon.server().levelKeys().contains(this.shadow$dimension())) {
-            return;
+            return null;
         }
-        manager.add(pos, type);
+        return original.call(instance, pos, type);
     }
 
     @Inject(
