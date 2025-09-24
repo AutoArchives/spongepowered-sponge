@@ -24,6 +24,8 @@
  */
 package org.spongepowered.vanilla.mixin.core.world.level;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -105,12 +107,9 @@ public abstract class ServerExplosionMixin_Vanilla {
         return entities;
     }
 
-    @Redirect(method = "hurtEntities", at = @At(value = "NEW", target = "(DDD)Lnet/minecraft/world/phys/Vec3;"))
-    private Vec3 vanilla$useKnockbackMultiplier(final double $$0, final double $$1, final double $$2) {
-        // Honor our knockback value from event
-        return new Vec3($$0 * this.impl$knockbackMultiplier,
-            $$1 * this.impl$knockbackMultiplier,
-            $$2 * this.impl$knockbackMultiplier);
+    @WrapOperation(method = "hurtEntities",at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;scale(D)Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 vanilla$setKnockbackMultiplier(Vec3 instance, double xVel, Operation<Vec3> original) {
+        return original.call(instance, xVel * this.impl$knockbackMultiplier);
     }
 
 }

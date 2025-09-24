@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.world;
 
+import net.minecraft.core.GlobalPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelData;
@@ -56,15 +57,19 @@ public final class WorldPropertiesData {
         registrator
                 .asMutable(LevelData.class)
                     .create(Keys.SPAWN_POSITION)
-                        .get(h -> VecHelper.toVector3i(h.getSpawnPos()))
+                        .get(h -> VecHelper.toVector3i(h.getRespawnData().pos()))
                     .create(Keys.HARDCORE)
                         .get(LevelData::isHardcore)
                     .create(Keys.WORLD_DIFFICULTY)
                         .get(h -> (Difficulty) (Object) h.getDifficulty())
                 .asMutable(WritableLevelData.class)
                     .create(Keys.SPAWN_POSITION)
-                        .get(h -> VecHelper.toVector3i(h.getSpawnPos()))
-                        .set((h, v) -> h.setSpawn(VecHelper.toBlockPos(v), h.getSpawnAngle()))
+                        .get(h -> VecHelper.toVector3i(h.getRespawnData().pos()))
+                        .set((h, v) -> h.setSpawn(
+                            new LevelData.RespawnData(new GlobalPos(
+                                h.getRespawnData().dimension(),
+                                VecHelper.toBlockPos(v)
+                            ), h.getRespawnData().pitch(), h.getRespawnData().yaw())))
                 .asMutable(ServerLevelData.class)
                     .create(Keys.GAME_MODE)
                         .get(h -> (GameMode) (Object) h.getGameType())

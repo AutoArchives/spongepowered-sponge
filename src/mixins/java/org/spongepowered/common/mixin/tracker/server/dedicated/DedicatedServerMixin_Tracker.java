@@ -70,7 +70,7 @@ public abstract class DedicatedServerMixin_Tracker {
             }
         }
 
-        final BlockPos spawnPoint = worldIn.getSharedSpawnPos();
+        final BlockPos spawnPoint = worldIn.getRespawnData().pos();
         final int protectionRadius = this.shadow$spawnProtectionRadius();
 
         return protectionRadius > 0

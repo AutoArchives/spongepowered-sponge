@@ -278,7 +278,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             SpongeCommon.logger().warn("The player '{}' was located in a world that isn't loaded or doesn't exist. This is not safe so "
                                        + "the player will be moved to the spawn of the default world.", mcPlayer.getGameProfile().name());
             mcWorld = this.server.overworld();
-            final BlockPos spawnPoint = mcWorld.getSharedSpawnPos();
+            final BlockPos spawnPoint = mcWorld.getRespawnData().pos();
             mcPlayer.setPos(spawnPoint.getX() + 0.5, spawnPoint.getY() + 0.5, spawnPoint.getZ() + 0.5);
         }
 
@@ -488,7 +488,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getX()D"),
         slice = @Slice(
             from = @At(value = "NEW", target = "(Lnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;B)Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;"),
-            to = @At(value = "NEW", target = "(Lnet/minecraft/core/BlockPos;F)Lnet/minecraft/network/protocol/game/ClientboundSetDefaultSpawnPositionPacket;")
+            to = @At(value = "NEW", target = "(Lnet/minecraft/world/level/storage/LevelData$RespawnData;)Lnet/minecraft/network/protocol/game/ClientboundSetDefaultSpawnPositionPacket;")
         )
     )
     private double impl$callRespawnPlayerRecreateEvent(final net.minecraft.server.level.ServerPlayer newPlayer,

@@ -32,6 +32,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
@@ -61,6 +62,7 @@ import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelDataAndDimensions;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -933,10 +935,10 @@ public class SpongeWorldManager implements WorldManager {
                         if (levelDataBridge.bridge$performsSpawnLogic()) {
                             MinecraftServerAccessor.invoker$setInitialSpawn(level, levelData, worldData.worldGenOptions().generateBonusChest(), isDebugGeneration, server.getLevelLoadListener());
                         } else if (Level.END.equals(level.dimension())) {
-                            levelData.setSpawn(ServerLevel.END_SPAWN_POINT, 0);
+                            levelData.setSpawn(new LevelData.RespawnData(new GlobalPos(level.dimension(), ServerLevel.END_SPAWN_POINT), 0, 0));
                         }
                     } else if (worldData.worldGenOptions().generateBonusChest()) {
-                        final BlockPos pos = levelData.getSpawnPos();
+                        final BlockPos pos = levelData.getRespawnData().pos();
                         final ConfiguredFeature<?, ?> bonusChestFeature = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE).getValue(MiscOverworldFeatures.BONUS_CHEST);
                         bonusChestFeature.place(level, level.getChunkSource().getGenerator(), level.random, pos);
                     }
@@ -975,7 +977,8 @@ public class SpongeWorldManager implements WorldManager {
         MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for dimension {}", level.dimension().location());
 
         final ServerChunkCache chunkSource = level.getChunkSource();
-        level.setDefaultSpawnPos(level.getSharedSpawnPos(), level.getSharedSpawnAngle());
+        final var respawnData = level.getRespawnData();
+        level.setRespawnData(new LevelData.RespawnData(respawnData.globalPos(), respawnData.pitch(), respawnData.yaw()));
 
         final CompletableFuture<ServerLevel> generationFuture = new CompletableFuture<>();
         Sponge.asyncScheduler().submit(
@@ -999,10 +1002,10 @@ public class SpongeWorldManager implements WorldManager {
     private void loadSpawnChunks(final ServerLevel level) {
         MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for dimension {}", level.dimension().location());
 
-        final BlockPos spawnPoint = level.getSharedSpawnPos();
+        final var respawnData = level.getRespawnData();
         final ServerChunkCache chunkSource = level.getChunkSource();
         ((MinecraftServerAccessor) this.server).accessor$nextTickTimeNanos(Util.getNanos());
-        level.setDefaultSpawnPos(spawnPoint, level.getSharedSpawnAngle());
+        level.setRespawnData(respawnData);
 
         ((MinecraftServerAccessor) this.server).accessor$nextTickTimeNanos(Util.getNanos() + 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND);
         ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();

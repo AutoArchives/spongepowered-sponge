@@ -1009,7 +1009,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         @Share("sponge:overridden-respawn") final LocalRef<ResourceKey<Level>> dimension
     ) {
         final var config = original.call(player);
-        final var defaulted = config == null ? Level.OVERWORLD : config.dimension();
+        final var defaulted = config == null ? Level.OVERWORLD : config.respawnData().dimension();
 
         var playerRespawnDestination = this.server.getLevel(defaulted);
         if (playerRespawnDestination == null) {
@@ -1040,20 +1040,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
 
         return original.call(instance, key);
-    }
-
-    @WrapOperation(
-        method = "findRespawnPositionAndUseSpawnBlock",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;")
-    )
-    private ServerLevel impl$callRespawnPlayerSelectWorld(
-        final MinecraftServer instance, final Operation<ServerLevel> original,
-        @Share("sponge:overridden-respawn") final LocalRef<ResourceKey<Level>> dimension
-    ) {
-        if (dimension.get() != null) {
-            return instance.getLevel(dimension.get());
-        }
-        return original.call(instance);
     }
 
     @Inject(method = "findRespawnPositionAndUseSpawnBlock", at = @At("RETURN"))
