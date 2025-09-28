@@ -153,7 +153,7 @@ public final class VanillaRegistryLoader {
         final var materials = new HashMap<ArmorMaterial, String>();
         final var knownMaterials = new ArmorMaterial[]{
             ArmorMaterials.LEATHER,ArmorMaterials.CHAINMAIL, ArmorMaterials.IRON, ArmorMaterials.GOLD, ArmorMaterials.DIAMOND,
-            ArmorMaterials.TURTLE_SCUTE,ArmorMaterials.NETHERITE, ArmorMaterials.ARMADILLO_SCUTE,
+            ArmorMaterials.TURTLE_SCUTE,ArmorMaterials.NETHERITE, ArmorMaterials.ARMADILLO_SCUTE, ArmorMaterials.COPPER,
         };
         for (final ArmorMaterial armorMaterial : knownMaterials) {
             materials.put(armorMaterial, armorMaterial.assetId().location().toString());
@@ -276,6 +276,7 @@ public final class VanillaRegistryLoader {
             l.add(ItemTiers.NETHERITE, k -> (ItemTier) (Object) ToolMaterial.NETHERITE);
             l.add(ItemTiers.STONE, k -> (ItemTier) (Object) ToolMaterial.STONE);
             l.add(ItemTiers.WOOD, k -> (ItemTier) (Object) ToolMaterial.WOOD);
+            l.add(ItemTiers.COPPER, k -> (ItemTier) (Object) ToolMaterial.COPPER);
         });
     }
 

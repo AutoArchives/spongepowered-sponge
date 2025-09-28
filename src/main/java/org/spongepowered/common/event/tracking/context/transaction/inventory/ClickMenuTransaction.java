@@ -25,6 +25,8 @@
 package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.network.protocol.game.ServerboundPickItemFromBlockPacket;
+import net.minecraft.network.protocol.game.ServerboundPickItemFromEntityPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -108,6 +110,10 @@ public class ClickMenuTransaction extends ContainerBasedTransaction {
     ) {
         if (!(context instanceof InventoryPacketContext ipc)) {
             return false;
+        }
+        if(ipc.getPacket() instanceof ServerboundPickItemFromBlockPacket ||
+           ipc.getPacket() instanceof ServerboundPickItemFromEntityPacket) {
+            return true; //The item is always put in the player container menu
         }
         final int containerId = ipc.<ServerboundContainerClickPacket>getPacket().containerId();
         return containerId != this.player.containerMenu.containerId;
