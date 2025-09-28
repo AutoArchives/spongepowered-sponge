@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
+import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
@@ -47,28 +48,22 @@ public final class OldBlockOnReplaceEffect implements ProcessingSideEffect<Block
     ) {
         // This replaces LevelChunk#setBlockState block:
         /*
-
-        if ($$14) {
-            if (this.level instanceof ServerLevel $$17) {
-            // -- this block is this side effect
-                if (hasBlockEntity && $$16) {
-                    BlockEntity $$18 = this.level.getBlockEntity($$0);
-                    if ($$18 != null) {
-                        $$18.preRemoveSideEffects($$0, $$9, $$15);
-                    }
+        boolean $$13 = !$$9.is($$10);
+        boolean $$14 = ($$2 & 64) != 0;
+        boolean $$15 = ($$2 & 256) == 0;
+        if ($$13 && $$9.hasBlockEntity()) {
+            if (!this.level.isClientSide && $$15) {
+                BlockEntity $$16 = this.level.getBlockEntity($$0);
+                if ($$16 != null) {
+                    $$16.preRemoveSideEffects($$0, $$9);
                 }
-
-                if (hasBlockEntity) {
-                    this.removeBlockEntity($$0);
-                }
-
-                if (($$2 & 1) != 0) {
-                    $$9.affectNeighborsAfterRemoval($$17, $$0, $$15);
-                }
-                // -- end of side effect
-            } else if (hasBlockEntity) {
-                this.removeBlockEntity($$0);
             }
+
+            this.removeBlockEntity($$0);
+        }
+
+        if (($$13 || $$10 instanceof BaseRailBlock) && this.level instanceof ServerLevel $$17 && (($$2 & 1) != 0 || $$14)) {
+            $$9.affectNeighborsAfterRemoval($$17, $$0, $$14);
         }
         Notes:
         Since we know we're on the server context, we eliminate
@@ -81,22 +76,19 @@ public final class OldBlockOnReplaceEffect implements ProcessingSideEffect<Block
         final var flag = args.flag();
         final var pos = oldState.pos();
 
-        if (!oldState.state().is(newState.getBlock())) {
-            return EffectResult.nullPass();
-        }
-        // Spogne adds the block physics flag
-        if (hasBlockEntity && !flag.performBlockDestruction() && flag.performBlockPhysics()) {
-            final var blockEntity = oldState.tileEntity();
-            if (blockEntity != null) {
-                blockEntity.preRemoveSideEffects(pos, newState);
+        final boolean replaced = !oldState.state().is(newState.getBlock());
+        if (replaced && hasBlockEntity) {
+            if (flag.performBlockDestruction()) {
+                final var blockEntity = oldState.tileEntity();
+                if (blockEntity != null) {
+                    blockEntity.preRemoveSideEffects(pos, oldState.state());
+                }
             }
-        }
 
-        if (hasBlockEntity) {
             pipeline.getAffectedChunk().removeBlockEntity(pos);
         }
 
-        if (flag.updateNeighbors()) {
+        if ((replaced || newState.getBlock() instanceof BaseRailBlock) && (flag.updateNeighbors() || flag.movingBlocks())) {
             oldState.state().affectNeighborsAfterRemoval(pipeline.getServerWorld(), pos, flag.movingBlocks());
         }
 
