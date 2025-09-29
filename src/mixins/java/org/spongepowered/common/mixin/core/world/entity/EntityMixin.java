@@ -54,7 +54,6 @@ import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.PortalProcessor;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -108,6 +107,7 @@ import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.PortalProcessorAccessor;
+import org.spongepowered.common.accessor.world.level.storage.TagValueInputAccessor;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
@@ -955,12 +955,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Inject(method = "load", at = @At("RETURN"))
     private void impl$ReadSpongeDataFromCompound(final ValueInput input, final CallbackInfo ci) {
-        // TODO If we are in Forge data is already present
-        final var spongeData = input.read(Constants.Sponge.Data.V3.SPONGE_TAG_KEY, CustomData.CODEC);
-        if (spongeData.isEmpty()) {
-            return;
-        }
-        this.data$setCompound(spongeData.get().copyTag()); // For vanilla we set the incoming nbt
+        this.data$setCompound(((TagValueInputAccessor) input).accessor$input()); // For vanilla we set the incoming nbt
         // Deserialize custom data...
         DataUtil.syncTagToData(this);
         this.data$setCompound(null); // done reading

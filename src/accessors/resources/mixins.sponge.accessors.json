@@ -219,6 +219,7 @@
     "world.level.saveddata.maps.MapItemSavedDataAccessor",
     "world.level.storage.PlayerDataStorageAccessor",
     "world.level.storage.PrimaryLevelDataAccessor",
+    "world.level.storage.TagValueInputAccessor",
     "world.phys.AABBAccessor",
     "world.scores.PlayerTeamAccessor",
     "world.scores.ScoreboardAccessor",
