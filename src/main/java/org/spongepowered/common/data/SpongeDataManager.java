@@ -35,6 +35,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataHolderBuilder;
 import org.spongepowered.api.data.DataManager;
@@ -434,6 +435,7 @@ public final class SpongeDataManager implements DataManager {
             this.registryTypeMap.put(ParticleType.class, RegistryTypes.PARTICLE_TYPE);
             this.registryTypeMap.put(ParticleOption.class, RegistryTypes.PARTICLE_OPTION);
             this.registryTypeMap.put(PotionEffectType.class, RegistryTypes.POTION_EFFECT_TYPE);
+            this.registryTypeMap.put(BlockEntityType.class, RegistryTypes.BLOCK_ENTITY_TYPE);
             // TODO add all RegistryTypes that we have global registries for
             // there needs to be a better way to do this
         }
