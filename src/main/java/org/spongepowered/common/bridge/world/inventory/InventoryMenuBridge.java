@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.inventory;
 
-public interface InventoryMenuBridge {
+import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
+
+public interface InventoryMenuBridge extends ContainerBridge {
 
     void bridge$markClean();
 }

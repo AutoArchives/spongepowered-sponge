@@ -22,15 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.data;
+package org.spongepowered.common.item.shield;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
+import org.spongepowered.api.data.type.ShieldDamageReduction;
 
-@Mixin(value = {Entity.class, ItemStack.class}, priority = 899)
-public abstract class DataHolderMixin_API implements DataHolder, SpongeMutableDataHolder {
+public final class SpongeShieldDamageReductionFactory implements ShieldDamageReduction.Factory {
+
+    @Override
+    public ShieldDamageReduction<ShieldDamageReduction.MultiplyAdd> create(final ShieldDamageReduction.MultiplyAdd config) {
+        return (ShieldDamageReduction<ShieldDamageReduction.MultiplyAdd>) config;
+    }
 
 }

@@ -165,7 +165,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
             scale = null;
         }
 
-        final Entity createdEntity = this.bridge$createEntity(type, position, false);
+        final Entity createdEntity = this.bridge$createEntity(type, proposedPosition, false);
         dataContainer.getView(Constants.Sponge.UNSAFE_NBT)
                 .map(NBTTranslator.INSTANCE::translate)
                 .ifPresent(x -> {
