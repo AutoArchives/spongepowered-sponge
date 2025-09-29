@@ -1,6 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.neoforged.moddevgradle.internal.RunGameTask
-import org.gradle.api.tasks.JavaExec
 import org.spongepowered.gradle.impl.AWToAT
 
 buildscript {
@@ -405,6 +404,7 @@ tasks {
     test {
         useJUnitPlatform()
 
+        maxHeapSize = "4G"
         testClassesDirs = commonTest.get().output.classesDirs + testSources.get().output.classesDirs
 
         jvmArgs(runServer.get().jvmArgs)
