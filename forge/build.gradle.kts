@@ -1,6 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.minecraftforge.gradle.common.util.RunConfig
-import org.gradle.api.tasks.JavaExec
 import org.gradle.internal.DefaultTaskExecutionRequest
 import org.spongepowered.gradle.impl.AWToAT
 import org.spongepowered.gradle.impl.IdeHelper
@@ -429,6 +428,7 @@ tasks {
     test {
         useJUnitPlatform()
 
+        maxHeapSize = "4G"
         testClassesDirs = commonTest.get().output.classesDirs + testSources.get().output.classesDirs
 
         val runServer = minecraft.runs.getByName("server")

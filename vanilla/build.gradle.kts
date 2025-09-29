@@ -510,6 +510,7 @@ tasks {
     test {
         useJUnitPlatform()
 
+        maxHeapSize = "4G"
         testClassesDirs = commonTest.get().output.classesDirs + testSources.get().output.classesDirs
 
         val runServer = minecraft.runs.server().get()
