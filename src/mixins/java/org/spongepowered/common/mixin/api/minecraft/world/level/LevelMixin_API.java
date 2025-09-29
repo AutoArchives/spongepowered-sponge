@@ -311,7 +311,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Optional<Entity> createEntity(final DataContainer container) {
-        return ((LevelBridge) this).bridge$createEntity(container, null, null);
+        return Optional.ofNullable(((LevelBridge) this).bridge$createEntity(container, null, null));
     }
 
     @Override
