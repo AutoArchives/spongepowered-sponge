@@ -30,6 +30,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ExplosionParticleInfo;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketListener;
@@ -40,6 +41,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -313,9 +315,9 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     private org.spongepowered.api.world.explosion.Explosion tracker$apiExplosion;
 
-    @Redirect(method = "explode", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/world/level/ServerExplosion;explode()V"))
-    private void tracker$onExplode(final ServerExplosion instance) {
+    @WrapOperation(method = "explode", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/world/level/ServerExplosion;explode()I"))
+    private int tracker$onExplode(ServerExplosion instance, Operation<Integer> original) {
         var mcExplosion = instance;
         final var entity = instance.getDirectSourceEntity();
         // TODO entity can be null, what is our API explosive then?
@@ -327,21 +329,21 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         if (!(entity instanceof final Explosive apiExplosive)) {
             mcExplosion.explode();
             this.tracker$apiExplosion = explosionBuilder.build();
-            return;
+            return 0;
         }
         final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) (Object) this);
         final var detonateEvent = SpongeEventFactory.createDetonateExplosiveEvent(phaseTracker.currentCause(),
                 explosionBuilder, apiExplosive, (org.spongepowered.api.world.explosion.Explosion) instance);
         if (Sponge.eventManager().post(detonateEvent)) {
             this.tracker$cancelExplosionEffects(entity);
-            return;
+            return 0;
         }
 
         // Build the explosion from event
         var apiExplosion = detonateEvent.explosionBuilder().build();
         if (apiExplosion.radius() <= 0) {
             this.tracker$cancelExplosionEffects(entity);
-            return;
+            return 0;
         }
 
         if (ShouldFire.EXPLOSION_EVENT_PRE) {
@@ -350,7 +352,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 SpongeEventFactory.createExplosionEventPre(phaseTracker.currentCause(), apiExplosion, thisWorld);
             if (SpongeCommon.post(event)) {
                 this.tracker$cancelExplosionEffects(entity);
-                return;
+                return 0;
             }
 
             try {
@@ -365,18 +367,17 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             }
         }
 
+        this.tracker$apiExplosion = apiExplosion;
         try (final PhaseContext<@NonNull ?> ctx = GeneralPhase.State.EXPLOSION.createPhaseContext(phaseTracker).explosion(mcExplosion)
             .source(((Optional) apiExplosion.sourceExplosive()).orElse(this))) {
             ctx.buildAndSwitch();
 
-            mcExplosion.explode();
+            return original.call(mcExplosion);
         }
-
-        this.tracker$apiExplosion = apiExplosion;
     }
 
     @Inject(method = "explode", cancellable = true, at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/world/level/ServerExplosion;explode()V", shift = At.Shift.AFTER))
+        target = "Lnet/minecraft/world/level/ServerExplosion;explode()I", shift = At.Shift.AFTER))
     private void tracker$onCancelled(final CallbackInfo ci) {
         if (this.tracker$apiExplosion == null) {
             ci.cancel();
@@ -394,10 +395,11 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     }
 
     @Inject(method = "explode", at = @At(value = "RETURN"))
-    private void tracker$afterExplodeCleanup(final Entity $$0, final DamageSource $$1,
-        final ExplosionDamageCalculator $$2, final double $$3, final double $$4, final double $$5, final float $$6,
-        final boolean $$7, final Level.ExplosionInteraction $$8, final ParticleOptions $$9, final ParticleOptions $$10,
-        final Holder<SoundEvent> $$11, final CallbackInfo ci) {
+    private void tracker$afterExplodeCleanup(
+        final Entity $$0, final DamageSource $$1, final ExplosionDamageCalculator $$2, final double $$3,
+        final double $$4, final double $$5, final float $$6, final boolean $$7, final Level.ExplosionInteraction $$8,
+        final ParticleOptions $$9, final ParticleOptions $$10, final WeightedList<ExplosionParticleInfo> $$11,
+        final Holder<SoundEvent> $$12, final CallbackInfo ci) {
         this.tracker$apiExplosion = null;
     }
 

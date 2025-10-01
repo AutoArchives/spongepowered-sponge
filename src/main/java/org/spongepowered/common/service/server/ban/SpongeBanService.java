@@ -27,6 +27,7 @@ package org.spongepowered.common.service.server.ban;
 import com.google.inject.Singleton;
 import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.IpBanListEntry;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.StoredUserEntry;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
@@ -78,8 +79,8 @@ public final class SpongeBanService implements BanService {
     @SuppressWarnings("unchecked")
     @Override
     public CompletableFuture<Collection<Ban.Profile>> profileBans() {
-        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
-            (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
+        final StoredUserListAccessor<NameAndId, UserBanListEntry> accessor =
+            (StoredUserListAccessor<NameAndId, UserBanListEntry>) this.getUserBanList();
         accessor.invoker$removeExpired();
         return CompletableFuture.completedFuture(Collections.unmodifiableCollection(new ArrayList<>((Collection<Ban.Profile>) (Object) accessor.accessor$map().values())));
     }
@@ -87,7 +88,7 @@ public final class SpongeBanService implements BanService {
     @SuppressWarnings("unchecked")
     @Override
     public CompletableFuture<Collection<Ban.IP>> ipBans() {
-        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor = ((StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getIPBanList());
+        final StoredUserListAccessor<NameAndId, UserBanListEntry> accessor = ((StoredUserListAccessor<NameAndId, UserBanListEntry>) this.getIPBanList());
         accessor.invoker$removeExpired();
         return CompletableFuture.completedFuture(Collections.unmodifiableCollection(new ArrayList<>((Collection<Ban.IP>) (Object) accessor.accessor$map().values())));
     }
@@ -95,10 +96,10 @@ public final class SpongeBanService implements BanService {
     @SuppressWarnings("unchecked")
     @Override
     public CompletableFuture<Optional<Ban.Profile>> find(final GameProfile profile) {
-        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
-            (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
+        final StoredUserListAccessor<NameAndId, UserBanListEntry> accessor =
+            (StoredUserListAccessor<NameAndId, UserBanListEntry>) this.getUserBanList();
         accessor.invoker$removeExpired();
-        return CompletableFuture.completedFuture(Optional.ofNullable((Ban.Profile) accessor.accessor$map().get(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile)))));
+        return CompletableFuture.completedFuture(Optional.ofNullable((Ban.Profile) accessor.accessor$map().get(accessor.invoker$getKeyForUser(SpongeGameProfile.toNameAndId(profile)))));
     }
 
     @SuppressWarnings("unchecked")
@@ -112,11 +113,11 @@ public final class SpongeBanService implements BanService {
 
     @SuppressWarnings("unchecked")
     public boolean isBanned(final GameProfile profile) {
-        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
-            (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
+        final StoredUserListAccessor<NameAndId, UserBanListEntry> accessor =
+            (StoredUserListAccessor<NameAndId, UserBanListEntry>) this.getUserBanList();
 
         accessor.invoker$removeExpired();
-        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile)));
+        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(SpongeGameProfile.toNameAndId(profile)));
     }
 
     @SuppressWarnings("unchecked")
@@ -131,8 +132,8 @@ public final class SpongeBanService implements BanService {
     @Override
     public CompletableFuture<Boolean> pardon(final GameProfile profile) {
         final CompletableFuture<Optional<Ban.Profile>> ban = this.find(profile);
-        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
-            (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
+        final StoredUserListAccessor<NameAndId, UserBanListEntry> accessor =
+            (StoredUserListAccessor<NameAndId, UserBanListEntry>) this.getUserBanList();
         accessor.invoker$removeExpired();
         return ban.thenCompose(result -> result.map(this::remove).orElse(CompletableFuture.completedFuture(false)));
     }

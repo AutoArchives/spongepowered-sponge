@@ -70,7 +70,7 @@ public abstract class EndPortalBlockMixin implements PortalBlockBridge {
             return ServerLocation.of((ServerWorld) transition.newLevel(), VecHelper.toVector3d(transition.position()));
         }
 
-        final var sharedSpawnPos = toLevel.getSharedSpawnPos();
+        final var sharedSpawnPos = toLevel.getRespawnData().pos();
         final var spawnPos = ((net.minecraft.world.entity.Entity) entity).adjustSpawnLocation(toLevel, sharedSpawnPos).getBottomCenter();
         return ServerLocation.of((ServerWorld) toLevel, VecHelper.toVector3d(spawnPos));
     }

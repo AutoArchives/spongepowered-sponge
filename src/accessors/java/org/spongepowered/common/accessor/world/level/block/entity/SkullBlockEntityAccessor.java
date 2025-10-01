@@ -35,5 +35,4 @@ public interface SkullBlockEntityAccessor {
     @Accessor("noteBlockSound") void accessor$noteBlockSound(final ResourceLocation location);
 
     @Accessor("noteBlockSound") ResourceLocation accessor$noteBlockSound();
-
 }

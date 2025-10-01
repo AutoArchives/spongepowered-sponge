@@ -57,10 +57,9 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     // @formatter:off
     @Shadow public abstract boolean shadow$isEmpty();
-    @Shadow @Final private PatchedDataComponentMap components;
+    @Shadow @Final PatchedDataComponentMap components;
 
     // @formatter:on
-
 
 
     @Override
@@ -87,12 +86,11 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
         return DataHolderProcessor.bridge$remove(this, key);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public CompoundTag data$getCompound() {
         final @Nullable CustomData customData = this.components.get(DataComponents.CUSTOM_DATA);
         if (customData != null && customData != CustomData.EMPTY) {
-            return customData.getUnsafe();
+            return ((CustomDataAccessor) (Object) customData).accessor$tag();
         }
         return null;
     }

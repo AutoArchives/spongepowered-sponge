@@ -108,7 +108,7 @@ public abstract class ServerCommonPacketListenerImplMixin implements ServerCommo
 
     @Inject(method = "handleResourcePackResponse", at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V",
+            target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V",
             shift = At.Shift.AFTER))
     private void impl$onHandleResourcePackResponse(final ServerboundResourcePackPacket $$0, final CallbackInfo ci) {
         final @Nullable ResourcePackInfo pack = this.impl$resourcePackInfos.get($$0.id());

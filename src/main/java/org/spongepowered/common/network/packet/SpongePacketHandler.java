@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.network.packet;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
@@ -110,11 +110,11 @@ public final class SpongePacketHandler {
             final Optional<UUID> owner,
             final Optional<UUID> notifier
     ) {
-        final String ownerName = owner.flatMap(x -> SpongeCommon.server().getProfileCache().get(x))
-                .map(GameProfile::getName)
+        final String ownerName = owner.flatMap(SpongeCommon.server().services().nameToIdCache()::get)
+                .map(NameAndId::name)
                 .orElse("");
-        final String notifierName = notifier.flatMap(x -> SpongeCommon.server().getProfileCache().get(x))
-                .map(GameProfile::getName)
+        final String notifierName = notifier.flatMap(SpongeCommon.server().services().nameToIdCache()::get)
+                .map(NameAndId::name)
                 .orElse("");
         return new TrackerDataResponsePacket(ownerName, notifierName);
     }

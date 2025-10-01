@@ -84,7 +84,7 @@ public abstract class SynchedEntityDataMixin {
 
             final var thisEntity = (Entity) this.entity;
 
-            if (thisEntity.level() == null || thisEntity.level().isClientSide || ((EntityBridge) this.entity).bridge$isConstructing()) {
+            if (thisEntity.level() == null || thisEntity.level().isClientSide() || ((EntityBridge) this.entity).bridge$isConstructing()) {
                 return dataentry;
             }
             final Optional<DataParameterConverter<T>> converter = ((EntityDataAccessorBridge) (Object) accessor).bridge$getDataConverter();

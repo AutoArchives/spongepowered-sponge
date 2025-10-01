@@ -44,7 +44,6 @@ public abstract class NoiseRouterMixin_API implements org.spongepowered.api.worl
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction erosion;
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction depth;
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction ridges;
-    @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction initialDensityWithoutJaggedness;
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction finalDensity;
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction veinToggle;
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction veinRidged;
@@ -99,11 +98,6 @@ public abstract class NoiseRouterMixin_API implements org.spongepowered.api.worl
     @Override
     public DensityFunction ridges() {
         return (DensityFunction) this.ridges;
-    }
-
-    @Override
-    public DensityFunction initialDensityWithoutJaggedness() {
-        return (DensityFunction) this.initialDensityWithoutJaggedness;
     }
 
     @Override

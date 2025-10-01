@@ -43,7 +43,7 @@ public final class SpongePositionSourceFactory implements PositionSource.Factory
 
     @Override
     public PositionSource of(final int x, final int y, final int z) {
-        return (PositionSource) new BlockPositionSource(new BlockPos(x, y, z));
+        return (PositionSource) (Object) new BlockPositionSource(new BlockPos(x, y, z));
     }
 
     @Override

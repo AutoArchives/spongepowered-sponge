@@ -26,13 +26,13 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.PalettedContainerFactory;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -86,8 +86,8 @@ public abstract class ProtoChunkMixin_API extends ChunkAccess implements Generat
     private @Nullable Vector3i api$blockMax;
 
     public ProtoChunkMixin_API(
-        final ChunkPos $$0, final UpgradeData $$1, final LevelHeightAccessor $$2, final Registry<net.minecraft.world.level.biome.Biome> $$3, final long $$4,
-        final LevelChunkSection[] $$5, final BlendingData $$6
+        final ChunkPos $$0, final UpgradeData $$1, final LevelHeightAccessor $$2, final PalettedContainerFactory $$3,
+        final long $$4, final LevelChunkSection[] $$5, final BlendingData $$6
     ) {
         super($$0, $$1, $$2, $$3, $$4, $$5, $$6);
     }

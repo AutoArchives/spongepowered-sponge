@@ -40,7 +40,7 @@ public abstract class TrialSpawnerBlockEntityMixin_API extends BlockEntityMixin_
 
     @Override
     public void spawnImmediately(final boolean force) {
-        if (this.level.isClientSide) {
+        if (this.level.isClientSide()) {
             return;
         }
         final var thisLevel = (ServerLevel) this.level;

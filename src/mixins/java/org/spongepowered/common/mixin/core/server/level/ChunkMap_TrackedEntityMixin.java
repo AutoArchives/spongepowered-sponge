@@ -28,6 +28,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerPlayerConnection;
@@ -57,12 +58,12 @@ public abstract class ChunkMap_TrackedEntityMixin {
      *  2) We already have the players being iterated
      *  3) This achieves the same functionality without adding new accessors etc.
      */
-    @Inject(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+    @Inject(method = "sendToTrackingPlayers(Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
             target = "Lnet/minecraft/server/network/ServerPlayerConnection;send(Lnet/minecraft/network/protocol/Packet;)V"))
     private void impl$sendQueuedHumanPackets(final CallbackInfo ci, @Local final ServerPlayerConnection connection) {
         if (this.entity instanceof HumanEntity && connection instanceof ServerGamePacketListenerImpl) {
             final ServerPlayer player = ((ServerGamePacketListenerImpl) connection).player;
-            final Stream<Packet<?>> packets = ((HumanEntity) this.entity).popQueuedPackets(player);
+            final Stream<Packet<? super ClientGamePacketListener>> packets = ((HumanEntity) this.entity).popQueuedPackets(player);
             packets.forEach(player.connection::send);
         }
     }
@@ -74,7 +75,7 @@ public abstract class ChunkMap_TrackedEntityMixin {
      * entity is being "removed" from clients by way of literally being mimiced being
      * "untracked". This safeguards the players being updated erroneously.
      */
-    @Inject(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "sendToTrackingPlayers(Lnet/minecraft/network/protocol/Packet;)V", at = @At("HEAD"), cancellable = true)
     private void impl$ignoreVanished(final Packet<?> packet, final CallbackInfo ci) {
         if (this.entity instanceof VanishableBridge) {
             if (((VanishableBridge) this.entity).bridge$vanishState().invisible()) {

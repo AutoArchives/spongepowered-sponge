@@ -25,6 +25,8 @@
 package org.spongepowered.common.service.server.ban;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.server.notifications.EmptyNotificationService;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 import org.spongepowered.api.Sponge;
@@ -47,23 +49,23 @@ import java.util.concurrent.CompletableFuture;
 public class SpongeUserBanList extends UserBanList {
 
     public SpongeUserBanList(final File file) {
-        super(file);
+        super(file, new EmptyNotificationService());
     }
 
     @Override
-    protected boolean contains(final com.mojang.authlib.GameProfile profile) {
+    protected boolean contains(final NameAndId profile) {
         return Sponge.server().serviceProvider().banService().find(SpongeGameProfile.of(profile)).join().isPresent();
     }
 
     @Override
-    public UserBanListEntry get(final com.mojang.authlib.GameProfile profile) {
+    public UserBanListEntry get(final NameAndId profile) {
         final Optional<Ban.Profile> ban = Sponge.server().serviceProvider().banService().find(SpongeGameProfile.of(profile)).join();
         return ban.map(x -> {
             if (x instanceof UserBanListEntry) {
                 return (UserBanListEntry) x;
             } else {
                 final LegacyComponentSerializer lcs = LegacyComponentSerializer.legacySection();
-                return new UserBanListEntry(SpongeGameProfile.toMcProfile(x.profile()),
+                return new UserBanListEntry(SpongeGameProfile.toNameAndId(x.profile()),
                         Date.from(x.creationDate()),
                         x.banSource().map(lcs::serialize).orElse(null),
                         x.expirationDate().map(Date::from).orElse(null),
@@ -83,9 +85,10 @@ public class SpongeUserBanList extends UserBanList {
     }
 
     @Override
-    public void add(final UserBanListEntry entry) {
+    public boolean add(final UserBanListEntry entry) {
         final CompletableFuture<Optional<? extends Ban>> completableFuture = Sponge.server().serviceProvider().banService().add((Ban) entry);
         ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor().managedBlock(completableFuture::isDone);
+        return true;
     }
 
     @Override
@@ -94,9 +97,10 @@ public class SpongeUserBanList extends UserBanList {
     }
 
     @Override
-    public void remove(final com.mojang.authlib.GameProfile entry) {
+    public boolean remove(final NameAndId entry) {
         final CompletableFuture<Boolean> completableFuture = Sponge.server().serviceProvider().banService().pardon(SpongeGameProfile.of(entry));
         ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor().managedBlock(completableFuture::isDone);
+        return true;
     }
 
 }

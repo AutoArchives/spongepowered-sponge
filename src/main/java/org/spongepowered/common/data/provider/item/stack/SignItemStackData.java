@@ -29,7 +29,8 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SignText;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
@@ -50,10 +51,11 @@ public final class SignItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.SIGN_LINES)
                         .get(h -> {
-                            final CompoundTag tag = h.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).copyTag();
-                            if (tag.isEmpty()) {
+                            final @Nullable TypedEntityData<?> data = h.get(DataComponents.BLOCK_ENTITY_DATA);
+                            if (data == null) {
                                 return null;
                             }
+                            final var tag = data.getUnsafe();
 
                             final String id = tag.getStringOr(Constants.Item.BLOCK_ENTITY_ID, "");
                             if (!id.equalsIgnoreCase(Constants.TileEntity.SIGN)) {
@@ -76,7 +78,7 @@ public final class SignItemStackData {
                                 }
                                 tag.putString("Text" + (i + 1), gcs.serialize(line));
                             }
-                            h.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+                            h.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(BlockEntityType.SIGN, tag));
                         })
                         .delete(h -> h.remove(DataComponents.BLOCK_ENTITY_DATA));
     }

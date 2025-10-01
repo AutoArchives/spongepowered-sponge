@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.server.permission;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.ServerOpListEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -43,11 +44,13 @@ import java.util.Optional;
  */
 public class UserSubject extends SpongeSubject {
     private final GameProfile player;
+    private final NameAndId nameAndId;
     private final MemorySubjectData data;
     private final UserCollection collection;
 
     public UserSubject(final GameProfile player, final UserCollection users) {
         this.player = Objects.requireNonNull(player);
+        this.nameAndId = new NameAndId(player);
         this.data = new SingleParentMemorySubjectData(this) {
             @Override
             public SubjectReference parent() {
@@ -67,9 +70,9 @@ public class UserSubject extends SpongeSubject {
                 }
                 if (opLevel > 0) {
                     // TODO: Should bypassesPlayerLimit be true or false?
-                    SpongePermissionService.getOps().add(new ServerOpListEntry(player, opLevel, false));
+                    SpongePermissionService.getOps().add(new ServerOpListEntry(UserSubject.this.nameAndId, opLevel, false));
                 } else {
-                    SpongePermissionService.getOps().remove(player);
+                    SpongePermissionService.getOps().remove(UserSubject.this.nameAndId);
                 }
             }
         };
@@ -78,12 +81,12 @@ public class UserSubject extends SpongeSubject {
 
     @Override
     public String identifier() {
-        return this.player.getId().toString();
+        return this.player.id().toString();
     }
 
     @Override
     public Optional<String> friendlyIdentifier() {
-        final String name = this.player.getName();
+        final String name = this.player.name();
         return name.isEmpty() ? Optional.empty() : Optional.of(name);
     }
 
@@ -93,17 +96,17 @@ public class UserSubject extends SpongeSubject {
             return Optional.empty();
         }
 
-        return Sponge.server().player(this.player.getId());
+        return Sponge.server().player(this.player.id());
     }
 
     int getOpLevel() {
         Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
 
         // Query op level from server ops list based on player's game profile
-        final ServerOpListEntry entry = SpongePermissionService.getOps().get(this.player);
+        final ServerOpListEntry entry = SpongePermissionService.getOps().get(this.nameAndId);
         if (entry == null) {
             // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
-            return SpongeCommon.server().getPlayerList().isOp(this.player) ? SpongeCommon.server().getOperatorUserPermissionLevel() : 0;
+            return SpongeCommon.server().getPlayerList().isOp(this.nameAndId) ? SpongeCommon.server().operatorUserPermissionLevel() : 0;
         } else {
             return entry.getLevel();
         }

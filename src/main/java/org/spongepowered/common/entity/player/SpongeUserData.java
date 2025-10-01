@@ -149,7 +149,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         }
 
         final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
-        final Path p = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(profile.getId().toString() + ".dat");
+        final Path p = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(profile.id().toString() + ".dat");
         if (!Files.exists(p)) {
             return new SpongeUserData(profile, new CompoundTag());
         }
@@ -270,12 +270,12 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public UUID uniqueId() {
-        return this.profile.getId();
+        return this.profile.id();
     }
 
     @Override
     public String name() {
-        return this.profile.getName();
+        return this.profile.name();
     }
 
     @Override
@@ -288,8 +288,8 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         // TODO More data
         return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.contentVersion())
-            .set(Constants.Entity.Player.UUID, this.profile.getId())
-            .set(Constants.Entity.Player.NAME, this.profile.getName())
+            .set(Constants.Entity.Player.UUID, this.profile.id())
+            .set(Constants.Entity.Player.NAME, this.profile.name())
             .set(Constants.Entity.Player.SPAWNS, this.spawnLocations);
     }
 
@@ -473,7 +473,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public Optional<ServerPlayer> player() {
-        return Optional.ofNullable((ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.profile.getId()));
+        return Optional.ofNullable((ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.profile.id()));
     }
 
     @Override
@@ -601,12 +601,12 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
             return false;
         }
         final SpongeUserData other = (SpongeUserData) obj;
-        return this.profile.getId().equals(other.profile.getId());
+        return this.profile.id().equals(other.profile.id());
     }
 
     @Override
     public int hashCode() {
-        return this.profile.getId().hashCode();
+        return this.profile.id().hashCode();
     }
 
     @Override

@@ -22,29 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.commands;
+package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.commands.WorldBorderCommand;
-import net.minecraft.server.level.ServerLevel;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.decoration.Mannequin;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-@Mixin(WorldBorderCommand.class)
-public abstract class WorldBorderCommandMixin {
+public final class MannequinData {
+    private MannequinData() {
+    }
 
-    @Redirect(method = {
-        "setDamageBuffer",
-        "setDamageAmount",
-        "setWarningTime",
-        "setWarningDistance",
-        "getSize",
-        "setCenter",
-        "setSize"
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;"))
-    private static ServerLevel impl$useCurrentWorld(final MinecraftServer instance, final CommandSourceStack $$0) {
-        return $$0.getLevel();
+    public static void register(DataProviderRegistrator registrator) {
+        registrator
+            .asMutable(Mannequin.class)
+            .create(Keys.DOMINANT_HAND)
+            .get(h -> (HandPreference) (Object) h.getMainArm())
+            .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
+        ;
     }
 }

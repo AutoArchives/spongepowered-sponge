@@ -22,20 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.advancements.critereon;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block;
 
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.world.level.block.CopperGolemStatueBlock;
+import org.spongepowered.api.data.type.CopperGolemPose;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.Optional;
-
-@Mixin(MinMaxBounds.Ints.class)
-public interface MinMaxBounds_IntsAccessor {
-
-    @Invoker("<init>") static MinMaxBounds.Ints invoker$new(final Optional<Integer> min, final Optional<Integer> max) {
-        throw new UntransformedInvokerError();
-    }
-
+@Mixin(CopperGolemStatueBlock.Pose.class)
+public abstract class CopperGolemStatueBlock_PoseMixin_API implements CopperGolemPose {
 }

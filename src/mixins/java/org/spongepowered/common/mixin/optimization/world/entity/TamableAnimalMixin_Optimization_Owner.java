@@ -67,7 +67,7 @@ public abstract class TamableAnimalMixin_Optimization_Owner extends AgableMobMix
      */
     @Overwrite
     public void setOwner(final @javax.annotation.Nullable LivingEntity entity) {
-        final var reference = Optional.ofNullable(entity).map(EntityReference::new);
+        final var reference = Optional.ofNullable(entity).map(EntityReference::of);
         this.cachedOwner$OwnerId = reference.orElse(null);
         this.entityData.set(DATA_OWNERUUID_ID, reference);
     }

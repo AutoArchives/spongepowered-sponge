@@ -52,7 +52,7 @@ public final class AbstractHorseData {
                             return owner.getUUID();
                         })
                         .set((h, v) -> {
-                            ((AbstractHorseAccessor) h).accessor$setOwner(new EntityReference<>(v));
+                            ((AbstractHorseAccessor) h).accessor$setOwner(EntityReference.of(v));
                         })
                         .delete(h -> {
                             h.setOwner(null);

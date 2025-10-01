@@ -79,8 +79,9 @@ public abstract class LivingEntityMixin_Inventory extends Entity {
         original.call(slot, item);
     }
 
+
     @Inject(method = "handleHandSwap", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerChunkCache;broadcast(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/network/protocol/Packet;)V"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerChunkCache;sendToTrackingPlayers(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/network/protocol/Packet;)V"))
     protected void inventory$onHandleHandSwap(final Map<EquipmentSlot, ItemStack> map, final CallbackInfo ci) {
         final Slot mainHand = this.impl$getSpongeSlot(EquipmentSlot.MAINHAND);
         final var lastMainHand = this.lastEquipmentItems.get(EquipmentSlot.MAINHAND);

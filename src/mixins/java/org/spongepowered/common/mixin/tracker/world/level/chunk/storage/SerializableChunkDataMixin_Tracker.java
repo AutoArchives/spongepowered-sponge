@@ -55,6 +55,7 @@ public abstract class SerializableChunkDataMixin_Tracker implements Serializable
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void bridge$writeTrackerData(final CompoundTag level) {
         if (this.tracker$intPlayerPos == null && this.tracker$shortPlayerPos == null) {
@@ -83,6 +84,7 @@ public abstract class SerializableChunkDataMixin_Tracker implements Serializable
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void bridge$parseTrackerData(final CompoundTag fullTag) {
         final Optional<CompoundTag> spongeData = fullTag.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);

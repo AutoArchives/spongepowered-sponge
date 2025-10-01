@@ -278,7 +278,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "FIELD",
             target = "Lnet/minecraft/world/entity/LivingEntity;useItem:Lnet/minecraft/world/item/ItemStack;"))
     private void impl$onSetActiveItemStack(final InteractionHand hand, final CallbackInfo ci, final ItemStack stack) {
-        if (this.shadow$level().isClientSide) {
+        if (this.shadow$level().isClientSide()) {
             return;
         }
 
@@ -303,7 +303,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "FIELD",
             target = "Lnet/minecraft/world/entity/LivingEntity;useItemRemaining:I"))
     private void impl$getItemDuration(final LivingEntity this$0, final int count) {
-        if (this.shadow$level().isClientSide) {
+        if (this.shadow$level().isClientSide()) {
             this.useItemRemaining = count;
         }
         // If we're on the server, do nothing, since we already set this field on onSetActiveItemStack
@@ -332,7 +332,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             target = "Lnet/minecraft/world/entity/LivingEntity;getUseItemRemainingTicks()I",
             ordinal = 0))
     private int impl$onGetRemainingItemDuration(final LivingEntity self) {
-        if (this.shadow$level().isClientSide) {
+        if (this.shadow$level().isClientSide()) {
             return self.getUseItemRemainingTicks();
         }
 
@@ -375,7 +375,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/item/ItemStack;finishUsingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;)Lnet/minecraft/world/item/ItemStack;"))
     private void impl$onUpdateItemUse(final CallbackInfo ci) {
-        if (this.shadow$level().isClientSide) {
+        if (this.shadow$level().isClientSide()) {
             return;
         }
 
@@ -405,7 +405,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/LivingEntity;setItemInHand(Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;)V"))
     private void impl$onSetHeldItem(final LivingEntity self, final InteractionHand hand, final ItemStack stack) {
-        if (this.shadow$level().isClientSide) {
+        if (this.shadow$level().isClientSide()) {
             self.setItemInHand(hand, stack);
             return;
         }
@@ -450,7 +450,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             target = "Lnet/minecraft/world/item/ItemStack;releaseUsing(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;I)V"))
     // stopActiveHand
     private void impl$onStopPlayerUsing(final ItemStack stack, final net.minecraft.world.level.Level world, final LivingEntity self, final int duration) {
-        if (this.shadow$level().isClientSide) {
+        if (this.shadow$level().isClientSide()) {
             stack.releaseUsing(world, self, duration);
             return;
         }
@@ -475,7 +475,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Inject(method = "stopUsingItem",
         at = @At("HEAD"))
     private void impl$onResetActiveHand(final CallbackInfo ci) {
-        if (this.shadow$level().isClientSide) {
+        if (this.shadow$level().isClientSide()) {
             return;
         }
 
@@ -514,7 +514,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Inject(method = "stopSleeping", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;clearSleepingPos()V"))
     private void impl$callFinishSleepingEvent(final CallbackInfo ci) {
-        if (this.shadow$level().isClientSide) {
+        if (this.shadow$level().isClientSide()) {
             return;
         }
 

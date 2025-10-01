@@ -143,7 +143,7 @@ public final class ViewerPacketUtil {
 
     public static ClientboundStopSoundPacket stopSound(final SoundStop stop) {
         Objects.requireNonNull(stop, "stop");
-        final @Nullable ResourceLocation sound = SpongeAdventure.asVanillaNullable(stop.sound());
+        final @Nullable ResourceLocation sound = SpongeAdventure.asVanillaLocation(stop.sound());
         final @Nullable SoundSource source = SpongeAdventure.asVanillaNullable(stop.source());
         return new ClientboundStopSoundPacket(sound, source);
     }

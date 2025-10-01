@@ -72,7 +72,7 @@ public final class SpongeAdvancementBuilder implements Advancement.Builder.RootS
 
     @Override
     public Advancement.Builder background(final ResourceKey backgroundPath) {
-        this.backgroundPath = new ClientAsset((ResourceLocation) (Object) backgroundPath);
+        this.backgroundPath = new ClientAsset.ResourceTexture((ResourceLocation) (Object) backgroundPath);
         return this;
     }
 

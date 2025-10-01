@@ -197,7 +197,7 @@ public final class EntityData {
                         .delete(Entity::ejectPassengers)
                         .set((h, v) -> {
                             h.ejectPassengers();
-                            v.forEach(v1 -> ((Entity) v1).startRiding(h, true));
+                            v.forEach(v1 -> ((Entity) v1).startRiding(h, true, true));
                         })
                     .create(Keys.PUSH_REACTION)
                         .get(h -> (PushReaction) (Object) h.getPistonPushReaction())
@@ -224,7 +224,7 @@ public final class EntityData {
                         })
                     .create(Keys.VEHICLE)
                         .get(h -> (org.spongepowered.api.entity.Entity) h.getVehicle())
-                        .set((h, v) -> h.startRiding((Entity) v, true))
+                        .set((h, v) -> h.startRiding((Entity) v, true, true))
                         .delete(h -> h.stopRiding())
                     .create(Keys.VELOCITY)
                         .get(h -> VecHelper.toVector3d(h.getDeltaMovement()))

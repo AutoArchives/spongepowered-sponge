@@ -43,7 +43,9 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -76,7 +78,7 @@ import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class SpongeItemStack  {
+public final class SpongeItemStack {
 
     public static final class BuilderImpl extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
         private ItemType type;
@@ -195,9 +197,16 @@ public final class SpongeItemStack  {
             final Optional<ItemType> itemType = blockType.item();
             this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockTypeKey)));
             this.quantity(1);
-            if (blockSnapshot instanceof SpongeBlockSnapshot) {
-                ((SpongeBlockSnapshot) blockSnapshot).getCompound().ifPresent(compoundTag -> {
-                    this.components = DataComponentPatch.builder().set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(compoundTag)).build();
+            if (blockSnapshot instanceof SpongeBlockSnapshot sbs) {
+                sbs.getCompound().ifPresent(compoundTag -> {
+                    final var blockEntityTypes = SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE);
+                    final var blockEntityType = compoundTag.getString("id")
+                        .map(ResourceLocation::parse)
+                        .flatMap(blockEntityTypes::getOptional);
+                    blockEntityType.ifPresent(beType -> {
+                        TypedEntityData<BlockEntityType<?>> data = TypedEntityData.of(beType, compoundTag);
+                        this.components = DataComponentPatch.builder().set(DataComponents.BLOCK_ENTITY_DATA, data).build();
+                    });
                 });
 
                 // todo probably needs more testing, but this'll do donkey...
@@ -275,9 +284,9 @@ public final class SpongeItemStack  {
     public static DataContainer getDataContainer(final net.minecraft.world.item.ItemStack mcStack) {
         final ResourceLocation key = BuiltInRegistries.ITEM.getKey(mcStack.getItem());
         final DataContainer container = DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, ((ItemStack) (Object) mcStack).contentVersion())
-                .set(Constants.ItemStack.TYPE, key)
-                .set(Constants.ItemStack.COUNT, mcStack.getCount());
+            .set(Queries.CONTENT_VERSION, ((ItemStack) (Object) mcStack).contentVersion())
+            .set(Constants.ItemStack.TYPE, key)
+            .set(Constants.ItemStack.COUNT, mcStack.getCount());
         // Cleanup Old Custom Data
         SpongeItemStack.cleanupOldCustomData(mcStack);
         // Serialize all DataComponents...
@@ -305,15 +314,16 @@ public final class SpongeItemStack  {
 
     @SuppressWarnings("deprecation")
     private static void cleanupOldCustomData(final net.minecraft.world.item.ItemStack stack) {
-        final CompoundTag unsafe = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe();
-        unsafe.remove(Constants.Sponge.Data.V2.SPONGE_DATA); // and its V2.CUSTOM_MANIPULATOR_TAG_LIST
-        Constants.NBT.filterSpongeCustomData(unsafe); // FORGE_DATA > V2.SPONGE_DATA also removes it if empty
+        stack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, data -> data.update(tag -> {
+            tag.remove(Constants.Sponge.Data.V2.SPONGE_DATA); // and its V2.CUSTOM_MANIPULATOR_TAG_LIST
+            Constants.NBT.filterSpongeCustomData(tag); // FORGE_DATA > V2.SPONGE_DATA also removes it if empty
+        }));
     }
 
     // TODO updater for old (maybe V2?) Constants.Sponge.DATA_MANIPULATORS
     public static final ImmutableList<DataContentUpdater> STACK_UPDATERS = ImmutableList.of(
-                    ItemStackSnapshotDuplicateManipulatorUpdater.INSTANCE,
-                    ItemStackDataComponentsUpdater.INSTANCE);
+        ItemStackSnapshotDuplicateManipulatorUpdater.INSTANCE,
+        ItemStackDataComponentsUpdater.INSTANCE);
 
     @NotNull
     public static Optional<ItemStack> createItemStack(final DataView container) {
@@ -341,7 +351,7 @@ public final class SpongeItemStack  {
         final int count = updatedContainer.getInt(Constants.ItemStack.COUNT).get();
 
         final ItemType itemType = updatedContainer.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE)
-                .orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
+            .orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
         final var mcStack = new net.minecraft.world.item.ItemStack((Item) itemType, count);
         if (!mcStack.isEmpty()) { // ignore components when the stack is empty anyways
             // Read and apply components from container to mc stack

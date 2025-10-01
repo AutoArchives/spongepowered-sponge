@@ -41,11 +41,9 @@ import net.minecraft.server.ServerFunctionManager;
 import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.progress.ChunkProgressListener;
-import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.level.progress.LevelLoadListener;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
@@ -54,7 +52,6 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
-import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -113,11 +110,9 @@ import org.spongepowered.common.world.server.SpongeWorldManager;
 
 import java.io.IOException;
 import java.net.Proxy;
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge, CommandSourceProviderBridge, SubjectProxy,
@@ -129,20 +124,17 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow private int tickCount;
     @Shadow @Final private Thread serverThread;
     @Shadow @Final private ServerFunctionManager functionManager;
+    @Shadow private volatile boolean isSaving;
 
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
     @Shadow public abstract Iterable<ServerLevel> shadow$getAllLevels();
     @Shadow public abstract boolean shadow$isDedicatedServer();
     @Shadow public abstract boolean shadow$isRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
-    @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow public abstract RegistryAccess.Frozen shadow$registryAccess();
-    @Shadow public abstract GameProfileCache shadow$getProfileCache();
-    @Shadow public abstract CompletableFuture<Void> shadow$reloadResources(final Collection<String> $$0);
-    @Shadow public abstract WorldData shadow$getWorldData();
-    @Shadow public abstract boolean shadow$haveTime();
-    @Shadow private volatile boolean isSaving;
+    @Shadow protected abstract boolean shadow$haveTime();
     @Shadow public abstract ResourceManager shadow$getResourceManager();
+    @Shadow public abstract Services shadow$services();
     @Shadow @Nullable public abstract ServerLevel shadow$getLevel(ResourceKey<Level> $$0);
     // @formatter:on
 
@@ -202,7 +194,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     private void impl$setThreadOnServerPhaseTracker(
         Thread thread, LevelStorageSource.LevelStorageAccess storageAccess, PackRepository packRepo,
         WorldStem stem, Proxy proxy, DataFixer fixer,
-        Services services, ChunkProgressListenerFactory progress, CallbackInfo ci
+        Services services, LevelLoadListener progress, CallbackInfo ci
     ) {
         try {
             PhaseTracker.getServerInstanceExplicitly().setThread(thread);
@@ -235,8 +227,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         frame.pushCause(Sponge.systemSubject());
     }
 
-    @Inject(method = "createLevels", at = @At(value = "INVOKE", ordinal = 0,
-        target = "Lnet/minecraft/server/level/ServerLevel;<init>(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;Lnet/minecraft/server/level/progress/ChunkProgressListener;ZJLjava/util/List;ZLnet/minecraft/world/RandomSequences;)V"))
+    @Inject(method = "createLevels", at = @At(value = "NEW",
+        target = "(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;ZJLjava/util/List;ZLnet/minecraft/world/RandomSequences;)Lnet/minecraft/server/level/ServerLevel;"
+    ), slice = @Slice(
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;getValue(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"),
+        to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;readScoreboard(Lnet/minecraft/world/level/storage/DimensionDataStorage;)V")
+    ))
     private void impl$onCreateDefaultLevel(final CallbackInfo ci, @Local final ServerLevelData levelData, @Local final LevelStem levelStem) {
         ((PrimaryLevelDataBridge) levelData).bridge$populateFromLevelStem(levelStem);
         ((ServerLevelDataBridge) levelData).bridge$spongeData().setKey(DefaultWorldKeys.DEFAULT);
@@ -256,10 +252,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @WrapMethod(method = "setInitialSpawn")
-    private static void impl$wrapSetInitialSpawn(final ServerLevel level, final ServerLevelData levelData, final boolean generateBonusChest, final boolean debugWorld, final Operation<Void> original) {
+    private static void impl$wrapSetInitialSpawn(
+        final ServerLevel level, final ServerLevelData levelData, final boolean generateBonusChest,
+        final boolean debugWorld, final LevelLoadListener listener, Operation<Void> original) {
         try (final var state = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext(PhaseTracker.getInstance())) {
             state.buildAndSwitch();
-            original.call(level, levelData, generateBonusChest, debugWorld);
+            original.call(level, levelData, generateBonusChest, debugWorld, listener);
         }
     }
 
@@ -268,7 +266,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      * @reason Multi world.
      */
     @Overwrite
-    private void prepareLevels(final ChunkProgressListener progressListener) {
+    private void prepareLevels() {
         this.worldManager().prepareLevels();
     }
 
@@ -284,7 +282,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveAllChunks(ZZZ)Z"))
     private void impl$callUnloadWorldEvents(final CallbackInfo ci) {
-        for(final ServerLevel level : this.shadow$getAllLevels()) {
+        for (final ServerLevel level : this.shadow$getAllLevels()) {
             final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getInstance().currentCause(), (ServerWorld) level);
             SpongeCommon.post(unloadWorldEvent);
         }
@@ -433,7 +431,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         // Save the usercache.json file every 10 minutes or if forced to
         if (isForced || this.tickCount % 6000 == 0) {
             // We want to save the username cache json, as we normally bypass it.
-            final GameProfileCache profileCache = this.shadow$getProfileCache();
+            final var profileCache = this.shadow$services().nameToIdCache();
             ((GameProfileCacheBridge) profileCache).bridge$setCanSave(true);
             profileCache.save();
             ((GameProfileCacheBridge) profileCache).bridge$setCanSave(false);

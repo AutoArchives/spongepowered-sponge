@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.server.permission;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.server.players.NameAndId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -73,8 +74,7 @@ public class UserCollection extends SpongeSubjectCollection {
             return false;
         }
         // Name doesn't matter when getting entries
-        final GameProfile profile = new GameProfile(uuid, "");
-        return SpongePermissionService.getOps().get(profile) != null;
+        return SpongePermissionService.getOps().get(new NameAndId(uuid, "")) != null;
     }
 
     private @Nullable UUID identityToUuid(final String identifier) {

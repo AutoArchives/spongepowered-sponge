@@ -51,7 +51,7 @@ public abstract class SpawnerBlockEntityMixin_API extends BlockEntityMixin_API i
             bridge.bridge$setMaxNearbyEntities(Short.MAX_VALUE);
 
             bridge.bridge$setSpawnDelay(0);
-            if (!this.level.isClientSide) {
+            if (!this.level.isClientSide()) {
                 this.shadow$getSpawner().serverTick((ServerLevel) this.level, this.worldPosition);
             }
 

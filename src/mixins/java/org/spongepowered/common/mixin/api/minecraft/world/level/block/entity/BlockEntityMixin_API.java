@@ -89,7 +89,7 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
             throw new RuntimeException("The TileEntity has not been spawned in a world yet!");
         }
 
-        if (this.level.isClientSide) {
+        if (this.level.isClientSide()) {
             throw new RuntimeException("You should not attempt to make a server-side location on the client!");
         }
 

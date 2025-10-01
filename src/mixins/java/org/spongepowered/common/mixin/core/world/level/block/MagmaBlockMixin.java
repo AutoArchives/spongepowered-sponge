@@ -48,7 +48,7 @@ public abstract class MagmaBlockMixin extends BlockMixin {
         final BlockState blockState, final Entity entity
     ) {
         final DamageSource source = instance.hotFloor();
-        if (world.isClientSide) { // Short Circuit
+        if (world.isClientSide()) { // Short Circuit
             return source;
         }
         return SpongeDamageSources.createBlockBasedDamageSource((ServerWorld) world, blockPos, source);

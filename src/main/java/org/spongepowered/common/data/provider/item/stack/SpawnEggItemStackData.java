@@ -25,14 +25,15 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityArchetype;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 
@@ -47,11 +48,14 @@ public final class SpawnEggItemStackData {
                     .get(stack -> {
                         final Item item = stack.getItem();
                         final SpawnEggItem eggItem = (SpawnEggItem) item;
-                        final EntityType<?> type = eggItem.getType(SpongeCommon.vanillaRegistryAccess(), stack);
-                        final var tag = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY).getUnsafe();
+                        final @Nullable EntityType<?> type = eggItem.getType(stack);
+                        if (type == null) {
+                            return null;
+                        }
+                        final var data = stack.getOrDefault(DataComponents.ENTITY_DATA, TypedEntityData.of(type, new CompoundTag()));
 
                         final EntityArchetype.Builder builder = EntityArchetype.builder().type((org.spongepowered.api.entity.EntityType<?>) type);
-                        ((SpongeEntityArchetypeBuilder)builder).entityData(tag);
+                        ((SpongeEntityArchetypeBuilder)builder).entityData(data.copyTagWithoutId());
 
                         return builder.build();
                     })
@@ -61,7 +65,7 @@ public final class SpawnEggItemStackData {
                     .get(stack -> {
                         final Item item = stack.getItem();
                         final SpawnEggItem eggItem = (SpawnEggItem) item;
-                        return (org.spongepowered.api.entity.EntityType) eggItem.getType(SpongeCommon.vanillaRegistryAccess(), stack);
+                        return (org.spongepowered.api.entity.EntityType) eggItem.getType(stack);
                     })
         ;
     }

@@ -33,9 +33,8 @@ import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
-import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.server.players.UserNameToIdResolver;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,21 +54,22 @@ import java.util.Optional;
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$setServerOnGame(Thread $$0, LevelStorageSource.LevelStorageAccess $$1, PackRepository $$2, WorldStem $$3,
-            DedicatedServerSettings $$4, DataFixer $$5, Services $$6, ChunkProgressListenerFactory $$7, CallbackInfo ci) {
+    private void impl$setServerOnGame(
+        final Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2, final WorldStem $$3,
+        final DedicatedServerSettings $$4, final DataFixer $$5, final Services $$6, final CallbackInfo ci
+    ) {
         $$4.getProperties().serverResourcePackInfo.ifPresent(packInfo -> {
             try {
                 this.impl$resourcePack = ResourcePackRequest.resourcePackRequest()
-                        .packs(ResourcePackInfo.resourcePackInfo(packInfo.id(), new URI(packInfo.url()), packInfo.hash()))
-                        .required(packInfo.isRequired())
-                        .prompt(SpongeAdventure.asAdventure(Optional.ofNullable(packInfo.prompt())))
-                        .build();
+                    .packs(ResourcePackInfo.resourcePackInfo(packInfo.id(), new URI(packInfo.url()), packInfo.hash()))
+                    .required(packInfo.isRequired())
+                    .prompt(SpongeAdventure.asAdventure(Optional.ofNullable(packInfo.prompt())))
+                    .build();
             } catch (final URISyntaxException e) {
                 e.printStackTrace();
             }
         });
         SpongeCommon.game().setServer(this);
-        $$6.profileCache().load();
     }
 
     @Override
@@ -77,8 +77,8 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         return this.shadow$isRunning();
     }
 
-    @WrapOperation(method = "initServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/GameProfileCache;save()V"))
-    private void onSave(final GameProfileCache cache, final Operation<Void> original) {
+    @WrapOperation(method = "initServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/UserNameToIdResolver;save()V"))
+    private void onSave(final UserNameToIdResolver cache, final Operation<Void> original) {
         ((GameProfileCacheBridge) cache).bridge$setCanSave(true);
         original.call(cache);
         ((GameProfileCacheBridge) cache).bridge$setCanSave(false);

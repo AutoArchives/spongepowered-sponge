@@ -146,7 +146,7 @@ public class VelocityForwardingInfo {
             final String name = buf.readString();
             final String value = buf.readString();
             final String signature = buf.readBoolean() ? buf.readString() : null;
-            profile.getProperties().put(name, new Property(name, value, signature));
+            profile.properties().put(name, new Property(name, value, signature));
         }
     }
 }

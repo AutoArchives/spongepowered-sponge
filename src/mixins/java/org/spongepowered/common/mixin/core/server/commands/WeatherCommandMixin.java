@@ -24,24 +24,35 @@
  */
 package org.spongepowered.common.mixin.core.server.commands;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.commands.WeatherCommand;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(WeatherCommand.class)
 public abstract class WeatherCommandMixin {
 
-    @Redirect(method = {
-        "getDuration",
+    @WrapOperation(
+        method = "getDuration",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;getRandom()Lnet/minecraft/util/RandomSource;")
+    )
+    private static RandomSource impl$useCurrentWorld(final ServerLevel instance, final Operation<RandomSource> original, final CommandSourceStack source) {
+        return original.call(source.getLevel());
+    }
+
+    @WrapOperation(method = {
         "setClear",
         "setRain",
         "setThunder"
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;"))
-    private static ServerLevel impl$useCurrentWorld(final MinecraftServer instance, final CommandSourceStack $$0) {
-        return $$0.getLevel();
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;setWeatherParameters(IIZZ)V"))
+    private static void impl$useCurrentWorld(
+        ServerLevel instance, int delay, int duration, boolean rain, boolean thunder, Operation<Void> original,
+        final CommandSourceStack source
+    ) {
+        original.call(source.getLevel(), delay, duration, rain, thunder);
     }
 }

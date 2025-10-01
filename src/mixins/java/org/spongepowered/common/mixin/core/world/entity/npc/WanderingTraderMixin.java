@@ -42,7 +42,7 @@ public abstract class WanderingTraderMixin {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     private void impl$checkInfiniteTickDelay(
-        final ServerLevel $$0, final boolean $$1, final boolean $$2, final CallbackInfo cir
+        final ServerLevel $$0, final boolean $$1, final CallbackInfo cir
     ) {
         if (this.tickDelay == Constants.TickConversions.INFINITE_TICKS) {
             cir.cancel();

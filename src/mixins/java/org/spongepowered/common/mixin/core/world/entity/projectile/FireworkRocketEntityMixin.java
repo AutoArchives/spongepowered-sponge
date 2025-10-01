@@ -120,7 +120,7 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$postPrimeEvent(final CallbackInfo ci) {
-        if (this.life == 1 && !this.shadow$level().isClientSide) {
+        if (this.life == 1 && !this.shadow$level().isClientSide()) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$getProjectileSource());

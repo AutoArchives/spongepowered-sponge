@@ -53,7 +53,7 @@ public final class ShulkerBulletData {
                             }
                             return (Entity) target.getEntity(((ShulkerBullet) h).level(), net.minecraft.world.entity.Entity.class);
                         })
-                        .set((h, v) -> h.accessor$finalTarget(new EntityReference<>((net.minecraft.world.entity.Entity) v)));
+                        .set((h, v) -> h.accessor$finalTarget(EntityReference.of((net.minecraft.world.entity.Entity) v)));
     }
     // @formatter:on
 }

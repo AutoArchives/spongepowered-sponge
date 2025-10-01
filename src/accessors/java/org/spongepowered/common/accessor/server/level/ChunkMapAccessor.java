@@ -43,7 +43,7 @@ public interface ChunkMapAccessor {
 
     @Invoker("saveAllChunks") void invoker$saveAllChunks(boolean flush);
 
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
+    @Accessor("visibleChunkMap") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$visibleChunkMap();
 
     @Accessor("level") ServerLevel accessor$level();
 }

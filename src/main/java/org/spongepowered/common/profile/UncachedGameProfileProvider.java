@@ -36,6 +36,7 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.util.UndashedUuid;
+import net.minecraft.server.players.NameAndId;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.core.util.Throwables;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -92,7 +93,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
             final com.mojang.authlib.GameProfile mcProfile;
 
             if (SpongeGameProfileManager.canLookup(uniqueId)) { // only attempt to resolve profiles for online mode clients
-                ProfileResult result = SpongeCommon.server().getSessionService().fetchProfile(uniqueId, true);
+                ProfileResult result = SpongeCommon.server().services().sessionService().fetchProfile(uniqueId, true);
                 if (result != null) {
                     mcProfile = result.profile();
                 } else {
@@ -105,7 +106,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
                 return null;
             }
             final CachedProfile cachedProfile = new CachedProfile(SpongeGameProfile.of(mcProfile));
-            this.profileByNameCache.put(mcProfile.getName().toLowerCase(Locale.ROOT), cachedProfile);
+            this.profileByNameCache.put(mcProfile.name().toLowerCase(Locale.ROOT), cachedProfile);
             return cachedProfile;
         });
     }
@@ -185,7 +186,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
             });
         }
         final CompletableFuture<GameProfile> result = new CompletableFuture<>();
-        this.submit(() -> SpongeCommon.server().getProfileRepository().findProfilesByNames(new String[]{name},
+        this.submit(() -> SpongeCommon.server().services().profileRepository().findProfilesByNames(new String[]{name},
                 new SingleProfileLookupCallback(result)));
         return result;
     }
@@ -213,7 +214,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         }
         final List<String> nameList = Lists.newArrayList(names);
         final String[] namesArray = nameList.toArray(new String[0]);
-        this.submit(() -> SpongeCommon.server().getProfileRepository().findProfilesByNames(namesArray,
+        this.submit(() -> SpongeCommon.server().services().profileRepository().findProfilesByNames(namesArray,
                 new MapProfileLookupCallback(result, nameList)));
         return result;
     }
@@ -288,8 +289,8 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         }
 
         @Override
-        public void onProfileLookupSucceeded(final com.mojang.authlib.GameProfile profile) {
-            this.result.complete(SpongeGameProfile.of(profile));
+        public void onProfileLookupSucceeded(String profileName, UUID profileId) {
+            this.result.complete(SpongeGameProfile.of(new NameAndId(profileId, profileName)));
         }
 
         @Override
@@ -321,11 +322,11 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         }
 
         @Override
-        public void onProfileLookupSucceeded(final com.mojang.authlib.GameProfile profile) {
+        public void onProfileLookupSucceeded(String profileName, UUID profileId) {
             String originalName = null;
             while (originalName == null && !this.nameQueue.isEmpty()) {
                 final String name = this.nameQueue.remove(0);
-                if (name.equalsIgnoreCase(profile.getName())) {
+                if (name.equalsIgnoreCase(profileName)) {
                     originalName = name;
                 }
             }
@@ -333,7 +334,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
                 throw new IllegalStateException();
             }
             if (this.resultMap != null) {
-                this.resultMap.put(originalName, SpongeGameProfile.of(profile));
+                this.resultMap.put(originalName, SpongeGameProfile.of(new NameAndId(profileId, profileName)));
             }
         }
 

@@ -22,20 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.advancements.critereon;
+package org.spongepowered.common.accessor.world.level.storage;
 
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.TagValueInput;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+@Mixin(TagValueInput.class)
+public interface TagValueInputAccessor {
 
-@Mixin(MinMaxBounds.Doubles.class)
-public interface MinMaxBounds_DoublesAccessor {
-
-    @Invoker("<init>") static MinMaxBounds.Doubles invoker$new(final Optional<Double> min, final Optional<Double> max) {
-        throw new UntransformedInvokerError();
-    }
-
+    @Accessor("input") @Final CompoundTag accessor$input();
 }

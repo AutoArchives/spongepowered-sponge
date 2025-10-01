@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
+import com.google.common.collect.Iterables;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
@@ -181,7 +182,8 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         if (chunkProvider instanceof ServerChunkCache) {
             final ChunkMapAccessor chunkManager = (ChunkMapAccessor) ((ServerChunkCache) chunkProvider).chunkMap;
             final List<WorldChunk> chunks = new ArrayList<>();
-            chunkManager.invoker$getChunks().forEach(holder -> {
+            final var visibleChunks = chunkManager.accessor$visibleChunkMap();
+            Iterables.unmodifiableIterable(visibleChunks.values()).forEach(holder -> {
                 final WorldChunk chunk = (WorldChunk) holder.getTickingChunk();
                 if (chunk != null) {
                     chunks.add(chunk);
@@ -318,7 +320,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Optional<Entity> createEntity(final DataContainer container) {
-        return ((LevelBridge) this).bridge$createEntity(container, null, null);
+        return Optional.ofNullable(((LevelBridge) this).bridge$createEntity(container, null, null));
     }
 
     @Override

@@ -25,6 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.border;
 
 import net.minecraft.world.level.border.WorldBorder;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.math.vector.Vector2d;
@@ -32,57 +35,58 @@ import org.spongepowered.math.vector.Vector2d;
 import java.time.Duration;
 
 @Mixin(WorldBorder.Settings.class)
+@Implements(@Interface(iface = org.spongepowered.api.world.border.WorldBorder.class, prefix = "api$"))
 public abstract class WorldBorderMixin_Settings_API implements org.spongepowered.api.world.border.WorldBorder {
 
     //@formatter:off
-    @Shadow public abstract double shadow$getCenterX();
-    @Shadow public abstract double shadow$getCenterZ();
-    @Shadow public abstract double shadow$getDamagePerBlock();
-    @Shadow public abstract double shadow$getSafeZone();
-    @Shadow public abstract int shadow$getWarningBlocks();
-    @Shadow public abstract int shadow$getWarningTime();
-    @Shadow public abstract double shadow$getSize();
-    @Shadow public abstract long shadow$getSizeLerpTime();
-    @Shadow public abstract double shadow$getSizeLerpTarget();
+    @Shadow public abstract double shadow$centerX();
+    @Shadow public abstract double shadow$centerZ();
+    @Shadow public abstract double shadow$damagePerBlock();
+    @Shadow public abstract double shadow$safeZone();
+    @Shadow public abstract int shadow$warningBlocks();
+    @Shadow public abstract int shadow$warningTime();
+    @Shadow public abstract double shadow$size();
+    @Shadow public abstract long shadow$lerpTime();
+    @Shadow public abstract double shadow$lerpTarget();
     //@formatter:on
 
     @Override
     public Vector2d center() {
-        return new Vector2d(this.shadow$getCenterX(), this.shadow$getCenterZ());
+        return new Vector2d(this.shadow$centerX(), this.shadow$centerZ());
     }
 
     @Override
     public double targetDiameter() {
-        return this.shadow$getSizeLerpTarget();
+        return this.shadow$lerpTarget();
     }
 
     @Override
     public Duration timeUntilTargetDiameter() {
-        return Duration.ofMillis(this.shadow$getSizeLerpTime());
+        return Duration.ofMillis(this.shadow$lerpTime());
     }
 
     @Override
     public double diameter() {
-        return this.shadow$getSize();
+        return this.shadow$size();
     }
 
-    @Override
-    public double safeZone() {
-        return this.shadow$getSafeZone();
+    @Intrinsic
+    public double api$safeZone() {
+        return this.shadow$safeZone();
     }
 
-    @Override
-    public double damagePerBlock() {
-        return this.shadow$getDamagePerBlock();
+    @Intrinsic
+    public double api$damagePerBlock() {
+        return this.shadow$damagePerBlock();
     }
 
-    @Override
-    public Duration warningTime() {
-        return Duration.ofMillis(this.shadow$getWarningTime());
+    @Intrinsic
+    public Duration api$warningTime() {
+        return Duration.ofMillis(this.shadow$warningTime());
     }
 
     @Override
     public int warningDistance() {
-        return this.shadow$getWarningBlocks();
+        return this.shadow$warningBlocks();
     }
 }

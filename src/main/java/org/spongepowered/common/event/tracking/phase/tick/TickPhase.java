@@ -40,7 +40,7 @@ public final class TickPhase {
         public static final IPhaseState<TileEntityTickContext> TILE_ENTITY = new TileEntityTickPhaseState();
         public static final IPhaseState<BlockEventTickContext> BLOCK_EVENT = new BlockEventTickPhaseState();
         public static final IPhaseState<PlayerTickContext> PLAYER = new PlayerTickPhaseState();
-        public static final IPhaseState<?> WEATHER = new WeatherTickPhaseState();
+        public static final IPhaseState<TickContext.General> WEATHER = new WeatherTickPhaseState();
         public static final IPhaseState<ServerTickState.ServerTickContext> SERVER_TICK = new ServerTickState();
         public static final IPhaseState<WorldTickState.WorldTickContext> WORLD_TICK = new WorldTickState();
 

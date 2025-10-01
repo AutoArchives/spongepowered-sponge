@@ -28,6 +28,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.level.BaseCommandBlock;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -37,21 +38,30 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 
+import javax.annotation.Nullable;
+
 @Mixin(BaseCommandBlock.class)
 public abstract class BaseCommandBlockMixin implements CommandSourceProviderBridge, Audience {
 
     // @formatter:off
-    @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
-    @Shadow public abstract void shadow$sendSystemMessage(net.minecraft.network.chat.Component $$0);
+    @Shadow public abstract CommandSourceStack createCommandSourceStack(CommandSource var1);
+    @Shadow @Nullable protected abstract BaseCommandBlock.CloseableCommandBlockSource shadow$createSource();
     // @formatter:on
+
+
 
     @Override
     public CommandSourceStack bridge$getCommandSource(final Cause cause) {
-        return this.shadow$createCommandSourceStack();
+        return this.createCommandSourceStack(this.shadow$createSource());
     }
 
     @Override
+    @SuppressWarnings({"deprecation", "UnstableApiUsage"})
     public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
-        this.shadow$sendSystemMessage(SpongeAdventure.asVanilla(message));
+        final var source = this.shadow$createSource();
+        if (source == null) {
+            return;
+        }
+        source.sendSystemMessage(SpongeAdventure.asVanilla(message));
     }
 }

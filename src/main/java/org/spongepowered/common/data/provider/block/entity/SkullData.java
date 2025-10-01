@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -32,6 +34,8 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.level.block.entity.SkullBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.profile.SpongeGameProfile;
+
+import java.util.UUID;
 
 public final class SkullData {
 
@@ -45,12 +49,18 @@ public final class SkullData {
                     .create(Keys.GAME_PROFILE)
                         .get(h -> {
                             if (h.getOwnerProfile() != null) {
-                                return SpongeGameProfile.of(h.getOwnerProfile().gameProfile());
+                                return SpongeGameProfile.of(h.getOwnerProfile().partialProfile());
                             }
                             return null;
                         })
-                        .set((h, v) -> h.setOwner(new ResolvableProfile(SpongeGameProfile.toMcProfile(v))))
-                        .delete(h -> h.setOwner(null))
+                        .set((h, v) -> {
+                            h.applyComponents(h.components(), DataComponentPatch.builder()
+                                .set(DataComponents.PROFILE, ResolvableProfile.createResolved(SpongeGameProfile.toMcProfile(v)))
+                                .build());
+                        })
+                        .delete(h -> h.applyComponents(h.components(), DataComponentPatch.builder()
+                            .set(DataComponents.PROFILE, ResolvableProfile.createUnresolved(new UUID(0, 0)))
+                            .build()))
                 .asMutable(SkullBlockEntityAccessor.class)
                     .create(Keys.NOTE_BLOCK_SOUND)
                         .get(h -> (ResourceKey) (Object) h.accessor$noteBlockSound())

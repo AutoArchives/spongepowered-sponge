@@ -49,7 +49,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin_Tracker {
 
-    @Shadow public abstract int shadow$getSpawnProtectionRadius();
+    @Shadow public abstract int shadow$spawnProtectionRadius();
 
     /**
      * @author zml - March 9th, 2016
@@ -70,8 +70,8 @@ public abstract class DedicatedServerMixin_Tracker {
             }
         }
 
-        final BlockPos spawnPoint = worldIn.getSharedSpawnPos();
-        final int protectionRadius = this.shadow$getSpawnProtectionRadius();
+        final BlockPos spawnPoint = worldIn.getRespawnData().pos();
+        final int protectionRadius = this.shadow$spawnProtectionRadius();
 
         return protectionRadius > 0
                 && Math.max(Math.abs(pos.getX() - spawnPoint.getX()), Math.abs(pos.getZ() - spawnPoint.getZ())) <= protectionRadius

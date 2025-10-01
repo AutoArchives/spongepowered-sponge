@@ -48,7 +48,7 @@ public abstract class PointedDripstoneBlockMixin extends BlockMixin {
         final BlockPos pos,final  Entity ignored, final double distance
     ) {
         final DamageSource source = instance.stalagmite();
-        if (level.isClientSide) { // Short Circuit
+        if (level.isClientSide()) { // Short Circuit
             return source;
         }
         return SpongeDamageSources.createBlockBasedDamageSource((ServerWorld) level, pos, source);

@@ -44,18 +44,18 @@ import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.CustomSpawner;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.Block;
@@ -63,6 +63,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
@@ -159,16 +160,16 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
     private CustomBossEvents impl$bossBarManager;
-    private ChunkProgressListener impl$chunkProgressListener;
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$onInit(
-        final MinecraftServer server, final Executor executor, final LevelStorageSource.LevelStorageAccess storage, final ServerLevelData levelData,
-        final net.minecraft.resources.ResourceKey<Level> key, final LevelStem levelStem, final ChunkProgressListener listener, final boolean debug, final long biomeSeed,
-        final List<CustomSpawner> spawners, final boolean tick, final RandomSequences randomSequences, final CallbackInfo ci
+        final MinecraftServer server, final Executor executor, final LevelStorageSource.LevelStorageAccess storage,
+        final ServerLevelData levelData, final net.minecraft.resources.ResourceKey<Level> key, final LevelStem levelStem,
+        final boolean debug, final long biomeSeed, final List<CustomSpawner> spawners, final boolean tick,
+        final RandomSequences randomSequences, final CallbackInfo ci
     ) {
         final SpongeServerLevelData spongeData = ((ServerLevelDataBridge) levelData).bridge$spongeData();
 
@@ -186,7 +187,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
 
         this.impl$levelSave = storage;
-        this.impl$chunkProgressListener = listener;
         this.impl$prevWeather = ((ServerWorld) this).weather();
         ((LevelTicksBridge<?>) this.blockTicks).bridge$level((ServerLevel) (Object) this);
         ((LevelTicksBridge<?>) this.fluidTicks).bridge$level((ServerLevel) (Object) this);
@@ -207,11 +207,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Override
     public LevelStorageSource.LevelStorageAccess bridge$getLevelSave() {
         return this.impl$levelSave;
-    }
-
-    @Override
-    public ChunkProgressListener bridge$getChunkProgressListener() {
-        return this.impl$chunkProgressListener;
     }
 
     @Override
@@ -283,7 +278,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             for (ServerPlayer player : this.players) {
                 if (player.distanceToSqr(mcExplosion.center()) < 4096.0) {
                     Optional<Vec3> kb = Optional.ofNullable(mcExplosion.getHitPlayers().get(player));
-                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), kb, particle, sound);
+                    final var packet = new ClientboundExplodePacket(mcExplosion.center(), explosion.radius(), 1, kb, particle, sound, WeightedList.of());
                     this.bridge$handleExplosionPacket(player.connection, explosion, packet);
                     player.connection.send(packet);
                 }
@@ -300,7 +295,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         var soundEvent = Holder.direct(new SoundEvent(ResourceLocation.parse("sponge:none"), Optional.of(0f))); // "no" sound
         soundEvent = packet.explosionSound();
         // TODO apiExplosion.shouldPlaySmoke() is not initialized correctly
-        var newPacket = new ClientboundExplodePacket(packet.center(), packet.playerKnockback(), particleData, soundEvent);
+        var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), packet.playerKnockback(), particleData, soundEvent, packet.blockParticles());
         instance.send(newPacket);
     }
     @Override
@@ -355,18 +350,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         return server.getWorldData();
     }
 
-    @Redirect(method = "setDefaultSpawnPos",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/GameRules;getInt(Lnet/minecraft/world/level/GameRules$Key;)I"
-        ))
-    private int impl$respectKeepSpawnLoaded(GameRules gameRules, GameRules.Key<GameRules.IntegerValue> key) {
-        if ((((ServerLevelDataBridge) this.shadow$getLevelData()).bridge$performsSpawnLogic())) {
-            return gameRules.getInt(key);
-        }
-        return 0;
-    }
-
     @Inject(method = "save", at = @At("HEAD"), cancellable = true)
     public void impl$postSaveWorldEventPre(final CallbackInfo ci, final @Share("manualSave") LocalBooleanRef manualSave) {
         manualSave.set(this.impl$isManualSave);
@@ -387,7 +370,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             original.call(self, flush);
 
             // per-world WorldInfo/WorldBorder/BossBars
-            levelData.setWorldBorder(this.getWorldBorder().createSettings());
+            final var border = this.getWorldBorder();
+            levelData.setLegacyWorldBorderSettings(Optional.of(new WorldBorder.Settings(border)));
             if (levelData instanceof WorldData worldData) {
                 worldData.setCustomBossEvents(this.bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
                 this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess(), worldData, this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList().getSingleplayerData() : null);
@@ -477,7 +461,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     }
 
     private void impl$setWorldOnBorder() {
-        ((WorldBorderBridge) this.shadow$getWorldBorder()).bridge$setAssociatedWorld(((ServerWorld) this).key());
+        ((WorldBorderBridge) this.getWorldBorder()).bridge$setAssociatedWorld(((ServerWorld) this).key());
     }
 
     @Inject(method = "globalLevelEvent", at = @At("HEAD"), cancellable = true)
@@ -526,18 +510,20 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
     }
 
-    @Redirect(method = "lambda$updatePOIOnBlockStateChange$14",
+    @WrapOperation(method = "lambda$updatePOIOnBlockStateChange$15",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Holder;)V"
+            target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Holder;)Lnet/minecraft/world/entity/ai/village/poi/PoiRecord;"
         )
     )
-    private void impl$avoidAddingPoiUpdatesOnUnloadedWorld(final PoiManager manager, final BlockPos pos, final Holder<PoiType> type) {
+    private PoiRecord impl$avoidAddingPoiUpdatesOnUnloadedWorld(
+        final PoiManager instance, final BlockPos pos, final Holder<PoiType> type, final Operation<PoiRecord> original
+    ) {
         // Unloaded worlds should not notify PoiManager of changes
         if (!SpongeCommon.server().levelKeys().contains(this.shadow$dimension())) {
-            return;
+            return null;
         }
-        manager.add(pos, type);
+        return original.call(instance, pos, type);
     }
 
     @Inject(

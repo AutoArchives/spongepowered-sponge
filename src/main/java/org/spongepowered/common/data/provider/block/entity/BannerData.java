@@ -30,6 +30,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.common.bridge.world.level.block.entity.BannerBlockEntityBridge;
@@ -49,8 +50,8 @@ public final class BannerData {
                     .create(Keys.BANNER_PATTERN_LAYERS)
                         .get(h -> h.getPatterns().layers().stream().map(BannerPatternLayer.class::cast).toList())
                         .setAnd((h, v) -> {
-                            final Level world = h.getLevel();
-                            if (world != null && !world.isClientSide) { // This avoids a client crash because clientside.
+                            final @Nullable Level world = h.getLevel();
+                            if (world != null && !world.isClientSide()) { // This avoids a client crash because clientside.
                                 applyBannerPatternLayers(h, v);
                                 return true;
                             }

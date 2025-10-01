@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.server.dedicated;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
+import net.minecraft.server.notifications.EmptyNotificationService;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.spongepowered.api.Sponge;
@@ -46,18 +47,18 @@ import org.spongepowered.common.service.server.permission.SpongePermissionServic
 public abstract class DedicatedPlayerListMixin extends PlayerList {
 
     public DedicatedPlayerListMixin(final MinecraftServer server, final LayeredRegistryAccess<RegistryLayer> registryAccess,
-                                    final PlayerDataStorage playerIo, final int maxPlayers) {
-        super(server, registryAccess, playerIo, maxPlayers);
+                                    final PlayerDataStorage playerIo) {
+        super(server, registryAccess, playerIo, new EmptyNotificationService());
     }
 
     @Inject(method = "isWhiteListed", at = @At("HEAD"), cancellable = true)
-    private void impl$checkForWhitelistBypassPermission(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
+    private void impl$checkForWhitelistBypassPermission(final NameAndId profile, final CallbackInfoReturnable<Boolean> ci) {
         if (!this.isUsingWhitelist() || this.getWhiteList().isWhiteListed(profile)) {
             ci.setReturnValue(true);
             return;
         }
         final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
-        Subject subject = permissionService.userSubjects().subject(profile.getId().toString()).orElse(null);
+        Subject subject = permissionService.userSubjects().subject(profile.id().toString()).orElse(null);
         if (subject == null) {
             subject = permissionService.userSubjects().defaults();
         }
@@ -66,9 +67,9 @@ public abstract class DedicatedPlayerListMixin extends PlayerList {
     }
 
     @Inject(method = "canBypassPlayerLimit", at = @At("HEAD"), cancellable = true)
-    private void impl$checkForPlayerLimitBypassPermission(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
+    private void impl$checkForPlayerLimitBypassPermission(final NameAndId profile, final CallbackInfoReturnable<Boolean> ci) {
         final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
-        Subject subject = permissionService.userSubjects().subject(profile.getId().toString()).orElse(null);
+        Subject subject = permissionService.userSubjects().subject(profile.id().toString()).orElse(null);
         if (subject == null) {
             subject = permissionService.userSubjects().defaults();
         }

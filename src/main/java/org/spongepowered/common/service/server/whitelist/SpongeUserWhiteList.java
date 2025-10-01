@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.service.server.whitelist;
 
+import net.minecraft.server.notifications.EmptyNotificationService;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.server.players.UserWhiteListEntry;
 import org.spongepowered.api.Sponge;
@@ -42,11 +44,11 @@ import java.util.List;
 public class SpongeUserWhiteList extends UserWhiteList {
 
     public SpongeUserWhiteList(final File file) {
-        super(file);
+        super(file, new EmptyNotificationService());
     }
 
     @Override
-    protected boolean contains(final com.mojang.authlib.GameProfile entry) {
+    protected boolean contains(final NameAndId entry) {
         return Sponge.server().serviceProvider().whitelistService().isWhitelisted(SpongeGameProfile.of(entry)).join();
     }
 
@@ -61,13 +63,13 @@ public class SpongeUserWhiteList extends UserWhiteList {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void add(final UserWhiteListEntry entry) {
-        Sponge.server().serviceProvider().whitelistService().addProfile(SpongeGameProfile.of(((StoredUserEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user())).join();
+    public boolean add(final UserWhiteListEntry entry) {
+        return Sponge.server().serviceProvider().whitelistService().addProfile(SpongeGameProfile.of(((StoredUserEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user())).join();
     }
 
     @Override
-    public void remove(final com.mojang.authlib.GameProfile entry) {
-        Sponge.server().serviceProvider().whitelistService().removeProfile(SpongeGameProfile.of(entry)).join();
+    public boolean remove(final NameAndId entry) {
+        return Sponge.server().serviceProvider().whitelistService().removeProfile(SpongeGameProfile.of(entry)).join();
     }
 
     @Override

@@ -31,6 +31,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.server.players.NameAndId;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
@@ -64,7 +65,7 @@ public final class SpongeGameProfileValueParameter extends ResourceKeyedArgument
     public Optional<? extends GameProfile> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         try {
-            final Collection<com.mojang.authlib.GameProfile> profileCollection =
+            final Collection<NameAndId> profileCollection =
                     this.argument.parse((StringReader) reader).getNames((CommandSourceStack) cause);
             if (profileCollection.size() == 1) {
                 return Optional.of(SpongeGameProfile.of(profileCollection.iterator().next()));

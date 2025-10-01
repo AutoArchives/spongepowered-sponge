@@ -49,7 +49,7 @@ public class BedBlockMixin {
     @Inject(method = "useWithoutItem", at = @At(value = "HEAD"), cancellable = true)
     private void impl$onUseBed(final BlockState param0, final Level param1, final BlockPos param2, final Player param3, final BlockHitResult param5,
             final CallbackInfoReturnable<InteractionResult> cir) {
-        if (!param1.isClientSide) {
+        if (!param1.isClientSide()) {
             final Cause currentCause = PhaseTracker.getInstance().currentCause();
             final BlockPos bedLocation = param5.getBlockPos();
             final BlockSnapshot snapshot = ((ServerWorld) param1).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());

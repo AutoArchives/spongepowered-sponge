@@ -32,7 +32,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.UUIDUtil;
@@ -55,6 +55,7 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -91,11 +92,10 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
 
     // @formatter:off
     @Shadow private LevelSettings settings;
-    @Shadow private BlockPos spawnPos;
-    @Shadow private float spawnAngle;
+    @Shadow private LevelData.RespawnData respawnData;
 
     @Shadow public abstract boolean shadow$isDifficultyLocked();
-    @Shadow public abstract void shadow$setSpawn(BlockPos p_176143_1_, float p_176143_2_);
+    @Shadow public abstract void shadow$setSpawn(LevelData.RespawnData $$0);
     // @formatter:on
 
     @Shadow
@@ -249,7 +249,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
 
         final Vector3i spawnPos = bridge.bridge$spawnPosition();
         if (spawnPos != null) {
-            this.shadow$setSpawn(VecHelper.toBlockPos(spawnPos), this.spawnAngle);
+            this.shadow$setSpawn(new RespawnData(new GlobalPos(this.respawnData.dimension(), VecHelper.toBlockPos(spawnPos)),this.respawnData.pitch(), this.respawnData.yaw()));
             this.impl$customSpawnPosition = true;
         }
 
@@ -362,7 +362,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
                 .add("key=" + this.impl$spongeData.key())
                 .add("worldType=" + this.impl$dimensionType)
                 .add("uniqueId=" + this.impl$spongeData.uniqueId())
-                .add("spawn=" + VecHelper.toVector3i(this.spawnPos))
+                .add("spawn=" + this.respawnData.toString())
                 .add("gameType=" + this.getGameType())
                 .add("hardcore=" + this.isHardcore())
                 .add("difficulty=" + this.getDifficulty())

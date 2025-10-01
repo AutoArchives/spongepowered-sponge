@@ -40,7 +40,7 @@ public final class AnimalData {
                 .asMutable(AnimalAccessor.class)
                     .create(Keys.BREEDER)
                         .get(a -> a.accessor$loveCause().getUUID())
-                        .set(((animalAccessor, uuid) -> animalAccessor.accessor$loveCause(new EntityReference<>(uuid))));
+                        .set(((animalAccessor, uuid) -> animalAccessor.accessor$loveCause(EntityReference.of(uuid))));
     }
     // @formatter:on
 }

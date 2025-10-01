@@ -50,7 +50,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
-import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelData;
@@ -109,7 +108,6 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Shadow public abstract DifficultyInstance shadow$getCurrentDifficultyAt(BlockPos p_175649_1_);
     @Shadow public abstract boolean shadow$isRaining();
     @Shadow public abstract net.minecraft.world.level.block.entity.@Nullable BlockEntity shadow$getBlockEntity(BlockPos p_175625_1_);
-    @Shadow public abstract WorldBorder shadow$getWorldBorder();
     @Shadow public abstract RegistryAccess shadow$registryAccess();
     //@Shadow protected abstract void shadow$postGameEventInRadius(@javax.annotation.Nullable net.minecraft.world.entity.Entity $$0, GameEvent $$1, BlockPos $$2, int $$3);
     // @formatter on
@@ -165,7 +163,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
             scale = null;
         }
 
-        final Entity createdEntity = this.bridge$createEntity(type, position, false);
+        final Entity createdEntity = this.bridge$createEntity(type, proposedPosition, false);
         dataContainer.getView(Constants.Sponge.UNSAFE_NBT)
                 .map(NBTTranslator.INSTANCE::translate)
                 .ifPresent(x -> {

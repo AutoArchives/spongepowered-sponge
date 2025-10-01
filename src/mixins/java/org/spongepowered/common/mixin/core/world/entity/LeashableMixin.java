@@ -45,7 +45,7 @@ public interface LeashableMixin {
 
     @Inject(method = "setLeashedTo(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity;Z)V", at = @At("HEAD"), cancellable = true)
     private static <E extends net.minecraft.world.entity.Entity & Leashable> void impl$onSetLeashedTo(final E $$0, final net.minecraft.world.entity.Entity $$1, final boolean $$2, final CallbackInfo ci) {
-        if (!$$0.level().isClientSide) {
+        if (!$$0.level().isClientSide()) {
             final Cause currentCause = PhaseTracker.getInstance().currentCause();
             if (Sponge.eventManager().post(SpongeEventFactory.createLeashEntityEvent(currentCause, (Entity) $$0))) {
                 ci.cancel();
@@ -55,7 +55,7 @@ public interface LeashableMixin {
 
     @Inject(method = "dropLeash(Lnet/minecraft/world/entity/Entity;ZZ)V", at = @At("HEAD"), cancellable = true)
     private static void impl$onDropLeash(final net.minecraft.world.entity.Entity entity, final boolean $$1, final boolean $$2, final CallbackInfo ci) {
-        if (entity == null || entity.level().isClientSide) {
+        if (entity == null || entity.level().isClientSide()) {
             return;
         }
 

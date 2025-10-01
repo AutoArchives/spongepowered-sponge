@@ -30,7 +30,6 @@ import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.serialization.DataResult;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.HoverEvent;
@@ -46,6 +45,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -82,9 +82,11 @@ import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundAddEntityPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor;
+import org.spongepowered.common.accessor.world.entity.AvatarAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.data.datasync.NoOpSynchronizer;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.profile.SpongeProfileProperty;
 import org.spongepowered.common.util.Constants;
@@ -99,6 +101,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -115,16 +118,16 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     // A queue of packets waiting to send to players tracking this human
-    private final Map<UUID, List<Stream<Packet<?>>>> playerPacketMap = new HashMap<>();
+    private final Map<UUID, List<Stream<Packet<? super ClientGamePacketListener>>>> playerPacketMap = new HashMap<>();
 
     private ResolvableProfile fakeProfile;
     private boolean aiDisabled = false, leftHanded = false;
 
     public HumanEntity(final EntityType<? extends HumanEntity> type, final Level world) {
         super(type, world);
-        this.fakeProfile = new ResolvableProfile(new GameProfile(this.uuid, ""));
+        this.fakeProfile = ResolvableProfile.createUnresolved(this.uuid);
         this.setCanPickUpLoot(true);
-        this.entityData.set(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
+        this.entityData.set(AvatarAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
     }
 
     @Override
@@ -138,13 +141,15 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         $$0.define(LivingEntityAccessor.accessor$DATA_STINGER_COUNT_ID(), 0);
         $$0.define(LivingEntityAccessor.accessor$SLEEPING_POS_ID(), Optional.empty());
 
+        // Avatar
+        $$0.define(AvatarAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), (byte) 0);
+        $$0.define(AvatarAccessor.accessor$DATA_PLAYER_MAIN_HAND(), (byte) 1);
+
         // Player
         $$0.define(PlayerAccessor.accessor$DATA_PLAYER_ABSORPTION_ID(), 0.0F);
         $$0.define(PlayerAccessor.accessor$DATA_SCORE_ID(), 0);
-        $$0.define(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), (byte) 0);
-        $$0.define(PlayerAccessor.accessor$DATA_PLAYER_MAIN_HAND(), (byte) 1);
-        $$0.define(PlayerAccessor.accessor$DATA_SHOULDER_LEFT(), new CompoundTag());
-        $$0.define(PlayerAccessor.accessor$DATA_SHOULDER_RIGHT(), new CompoundTag());
+        $$0.define(PlayerAccessor.accessor$DATA_SHOULDER_LEFT(), OptionalInt.empty());
+        $$0.define(PlayerAccessor.accessor$DATA_SHOULDER_RIGHT(), OptionalInt.empty());
     }
 
     @Override
@@ -195,7 +200,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         tag.read("profile", ResolvableProfile.CODEC)
             .ifPresent(profile -> {
                 this.fakeProfile = profile;
-                this.setUUID(this.fakeProfile.id().get());
+                this.setUUID(this.fakeProfile.partialProfile().id());
             });
     }
 
@@ -306,26 +311,27 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     private void setProfileName(final net.minecraft.network.chat.@Nullable Component newName) {
         final Optional<String> optName = Optional.ofNullable(newName).map(net.minecraft.network.chat.Component::getString);
-        this.fakeProfile = new ResolvableProfile(optName, this.fakeProfile.id(), this.fakeProfile.properties());
+        final var profile = new GameProfile(this.fakeProfile.partialProfile().id(), optName.orElse(this.fakeProfile.name().orElse("")), this.fakeProfile.partialProfile().properties());
+        this.fakeProfile = ResolvableProfile.createResolved(profile);
     }
 
     public boolean getOrLoadSkin(final UUID minecraftAccount) {
-        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount).orElse(null);
-        if (gameProfile == null) {
-            ProfileResult result =
-                    SpongeCommon.server().getSessionService().fetchProfile(minecraftAccount, true);
+        final var server = SpongeCommon.server();
+        final @Nullable GameProfile profile = server.services().nameToIdCache().get(minecraftAccount).flatMap(name ->
+            server.services().profileResolver().fetchByName(name.name())
+        ).orElseGet(() -> {
+            final @Nullable ProfileResult result = server.services().sessionService().fetchProfile(minecraftAccount, true);
             if (result == null) {
-                return false;
+                return null;
             }
-
-            gameProfile = result.profile();
-
-            // TODO Should we put profile cache entries with UUIDs that don't have their names?
-
-            SpongeCommon.server().getProfileCache().add(gameProfile);
+            server.services().nameToIdCache().add(new NameAndId(result.profile()));
+            return result.profile();
+        });
+        if (profile == null) {
+            return false;
         }
 
-        this.fakeProfile.properties().replaceValues(ProfileProperty.TEXTURES, gameProfile.getProperties().get(ProfileProperty.TEXTURES));
+        this.fakeProfile.partialProfile().properties().replaceValues(ProfileProperty.TEXTURES, profile.properties().get(ProfileProperty.TEXTURES));
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
@@ -335,22 +341,16 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     public boolean getOrLoadSkin(final String minecraftAccount) {
         Objects.requireNonNull(minecraftAccount);
-        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount).orElse(null);
-        if (gameProfile == null) {
+        final var server = SpongeCommon.server();
+        final @Nullable GameProfile profile = server.services().nameToIdCache().get(minecraftAccount).flatMap(name ->
+            server.services().profileResolver().fetchByName(name.name())
+        ).orElse(null);
+        if (profile == null) {
             return false;
         }
 
-        if (gameProfile.getProperties().isEmpty()) {
-            ProfileResult result = SpongeCommon.server().getSessionService().fetchProfile(gameProfile.getId(), true);
-            if (result == null) {
-                return false;
-            }
-            gameProfile = result.profile();
-            SpongeCommon.server().getProfileCache().add(gameProfile);
-        }
-
-        this.fakeProfile.properties().clear();
-        this.fakeProfile.properties().putAll(gameProfile.getProperties());
+        this.fakeProfile.partialProfile().properties().clear();
+        this.fakeProfile.partialProfile().properties().putAll(profile.properties());
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
@@ -373,7 +373,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     public SpongeProfileProperty getSkinProperty() {
-        final Collection<Property> properties = this.fakeProfile.properties().get(ProfileProperty.TEXTURES);
+        final Collection<Property> properties = this.fakeProfile.partialProfile().properties().get(ProfileProperty.TEXTURES);
         if (properties.isEmpty()) {
             return null;
         }
@@ -381,7 +381,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     public void setSkinProperty(final ProfileProperty property) {
-        this.fakeProfile.properties()
+        this.fakeProfile.partialProfile().properties()
                 .replaceValues(
                         ProfileProperty.TEXTURES,
                         Collections.singletonList(((SpongeProfileProperty) property).asProperty()));
@@ -399,8 +399,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         this.pushPackets(new ClientboundRemoveEntitiesPacket(this.getId()), this.createPlayerListPacket(EnumSet.allOf(ClientboundPlayerInfoUpdatePacket.Action.class)));
         this.pushPackets(this.getAddEntityPacket(new ServerEntity(
             (ServerLevel) this.level(),
-            this, 1, true, packet -> {},
-            (packet, list) -> {}
+            this, 1, true, NoOpSynchronizer.INSTANCE
         )));
     }
 
@@ -411,7 +410,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      * @return Whether it can be removed with 0 ticks delay
      */
     public boolean canRemoveFromListImmediately() {
-        return !this.fakeProfile.properties().containsKey(ProfileProperty.TEXTURES);
+        return !this.fakeProfile.partialProfile().properties().containsKey(ProfileProperty.TEXTURES);
     }
 
     /**
@@ -437,7 +436,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         final ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(actions, List.of());
 
         ((ClientboundPlayerInfoUpdatePacketAccessor) packet).accessor$entries(List.of(
-            new ClientboundPlayerInfoUpdatePacket.Entry(this.uuid, this.fakeProfile.gameProfile(), false, 0, GameType.DEFAULT_MODE, this.getDisplayName(), false, 0, null)));
+            new ClientboundPlayerInfoUpdatePacket.Entry(this.uuid, this.fakeProfile.partialProfile(), false, 0, GameType.DEFAULT_MODE, this.getDisplayName(), false, 0, null)));
         return packet;
     }
 
@@ -446,7 +445,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      *
      * @param packets All packets to send in a single tick
      */
-    public void pushPackets(final Packet<?>... packets) {
+    public void pushPackets(final Packet<? super ClientGamePacketListener>... packets) {
         this.pushPackets(null, packets); // null = all players
     }
 
@@ -457,8 +456,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      * @param player The player tracking this human
      * @param packets All packets to send in a single tick
      */
-    public void pushPackets(final @Nullable ServerPlayer player, final Packet<?>... packets) {
-        final List<Stream<Packet<?>>> queue;
+    public void pushPackets(final @Nullable ServerPlayer player, final Packet<? super ClientGamePacketListener>... packets) {
+        final List<Stream<Packet<? super ClientGamePacketListener>>> queue;
         if (player == null) {
             queue = this.playerPacketMap.computeIfAbsent(null, k -> new ArrayList<>());
         } else {
@@ -473,8 +472,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      * @param player The player to get packets for (or null for all players)
      * @return An array of packets to send in a single tick
      */
-    public Stream<Packet<?>> popQueuedPackets(final @Nullable ServerPlayer player) {
-        final List<Stream<Packet<?>>> queue = this.playerPacketMap.get(player == null ? null : player.getUUID());
+    public Stream<Packet<? super ClientGamePacketListener>> popQueuedPackets(final @Nullable ServerPlayer player) {
+        final List<Stream<Packet<? super ClientGamePacketListener>>> queue = this.playerPacketMap.get(player == null ? null : player.getUUID());
         return queue == null || queue.isEmpty() ? Stream.empty() : queue.remove(0);
     }
 

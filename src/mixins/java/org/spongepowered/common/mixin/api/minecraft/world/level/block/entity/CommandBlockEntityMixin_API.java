@@ -36,6 +36,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.level.BaseCommandBlockAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.util.Constants;
 
@@ -64,8 +65,8 @@ public abstract class CommandBlockEntityMixin_API extends BlockEntityMixin_API i
         container.set(Constants.TileEntity.CommandBlock.STORED_COMMAND, this.shadow$getCommandBlock().getCommand());
         container.set(Constants.TileEntity.CommandBlock.SUCCESS_COUNT, this.shadow$getCommandBlock().getSuccessCount());
         container.set(Constants.TileEntity.CUSTOM_NAME, this.shadow$getCommandBlock().getName());
-        container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.shadow$getCommandBlock().shouldInformAdmins());
-        if (this.shadow$getCommandBlock().shouldInformAdmins()) {
+        container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.shadow$getCommandBlock().isTrackOutput());
+        if (this.shadow$getCommandBlock().isTrackOutput()) {
             container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, LegacyComponentSerializer.legacySection().serialize(SpongeAdventure.asAdventure(this.shadow$getCommandBlock().getLastOutput())));
         }
         return container;
@@ -89,8 +90,13 @@ public abstract class CommandBlockEntityMixin_API extends BlockEntityMixin_API i
         return this.shadow$getCommandBlock().getName().getString();
     }
 
+    @SuppressWarnings({"UnstableApiUsage", "deprecation"})
     @Override
     public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
-        this.shadow$getCommandBlock().sendSystemMessage(SpongeAdventure.asVanilla(message));
+        final var source = ((BaseCommandBlockAccessor) this.shadow$getCommandBlock()).invoker$createSource();
+        if (source == null) {
+            return;
+        }
+        source.sendSystemMessage(SpongeAdventure.asVanilla(message));
     }
 }

@@ -206,9 +206,9 @@ public final class PacketPhaseUtil {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
-    public static void onProcessPacket(final Packet packetIn, final PacketListener netHandler) {
-        if (netHandler instanceof ServerGamePacketListenerImpl) {
-            net.minecraft.server.level.ServerPlayer packetPlayer = ((ServerGamePacketListenerImpl) netHandler).player;
+    public static void onProcessPacket(final Packet packetIn, final PacketListener netHandler,final Runnable call) {
+        if (netHandler instanceof ServerGamePacketListenerImpl serverGameImpl) {
+            net.minecraft.server.level.ServerPlayer packetPlayer = serverGameImpl.player;
             // Only process the CustomPayload, Respawn & ChunkBatchReceived packets from players if they are dead.
             if (!packetPlayer.isAlive() && !((PacketBridge) packetIn).bridge$canProcessWhenDead()) {
                 return;
@@ -218,8 +218,7 @@ public final class PacketPhaseUtil {
 
                 // Don't process movement capture logic if player hasn't moved
                 boolean ignoreMovementCapture;
-                if (packetIn instanceof ServerboundMovePlayerPacket) {
-                    final ServerboundMovePlayerPacket movingPacket = ((ServerboundMovePlayerPacket) packetIn);
+                if (packetIn instanceof ServerboundMovePlayerPacket movingPacket) {
                     if (movingPacket instanceof ServerboundMovePlayerPacket.Rot) {
                         ignoreMovementCapture = true;
                     } else if (packetPlayer.getX() == ((ServerboundMovePlayerPacketAccessor) movingPacket).accessor$x() && packetPlayer.getY() == ((ServerboundMovePlayerPacketAccessor) movingPacket).accessor$y() && packetPlayer.getZ() == ((ServerboundMovePlayerPacketAccessor) movingPacket).accessor$z()) {
@@ -271,12 +270,12 @@ public final class PacketPhaseUtil {
                     try (final PhaseContext<?> packetContext = context) {
                         packetContext.buildAndSwitch();
 
-                        packetIn.handle(netHandler);
+                        call.run();
                     }
                 }
             }
         } else { // client
-            packetIn.handle(netHandler);
+            call.run();
         }
     }
 

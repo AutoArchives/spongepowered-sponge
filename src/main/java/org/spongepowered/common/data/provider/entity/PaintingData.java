@@ -52,7 +52,7 @@ public final class PaintingData {
                     .create(Keys.ART_TYPE)
                         .get(h -> (ArtType) (Object) h.getVariant().value())
                         .setAnd((h, v) -> {
-                            if (!h.level().isClientSide) {
+                            if (!h.level().isClientSide()) {
                                 final Holder<PaintingVariant> oldArt = h.getVariant();
                                 var newArt = SpongeCommon.vanillaRegistry(Registries.PAINTING_VARIANT).wrapAsHolder((PaintingVariant) (Object) v);
                                 ((PaintingAccessor) h).invoker$setVariant(newArt);

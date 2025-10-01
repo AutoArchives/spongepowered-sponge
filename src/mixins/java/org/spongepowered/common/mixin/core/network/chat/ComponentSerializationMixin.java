@@ -39,7 +39,7 @@ import java.util.Locale;
 @Mixin(ComponentSerialization.class)
 public abstract class ComponentSerializationMixin {
 
-    @ModifyVariable(method = "lambda$createCodec$6", at = @At(value = "HEAD"), argsOnly = true)
+    @ModifyVariable(method = "lambda$createCodec$5", at = @At(value = "HEAD"), argsOnly = true)
     private static Component impl$localizeComponent(final Component input) {
         final Locale locale = SpongeAdventure.ENCODING_LOCALE.get();
         final ServerPlayer player = SpongeAdventure.ENCODING_PLAYER.get();

@@ -27,11 +27,14 @@ package org.spongepowered.common.accessor.world.item.component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.component.CustomData;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(CustomData.class)
 public interface CustomDataAccessor {
+
+    @Accessor("tag") CompoundTag accessor$tag();
 
     @Invoker("<init>") static CustomData invoker$new(CompoundTag tag) {
         throw new UntransformedInvokerError();

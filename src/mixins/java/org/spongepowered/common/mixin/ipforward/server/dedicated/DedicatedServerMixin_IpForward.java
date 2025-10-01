@@ -40,10 +40,12 @@ import org.spongepowered.common.launch.config.core.SpongeConfigs;
 @Mixin(DedicatedServer.class)
 public class DedicatedServerMixin_IpForward {
 
-    @Shadow @Final private static Logger LOGGER;
+    @Shadow
+    @Final
+    static Logger LOGGER;
 
     @Inject(method = "initServer", at = @At(value = "INVOKE_STRING", remap = false, target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;)V",
-                                            args = "ldc=**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!"))
+        args = "ldc=**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!"))
     private void ipForward$logEnabled(final CallbackInfoReturnable<Boolean> ci) {
         final IpForwardingCategory.Mode mode = SpongeConfigs.getCommon().get().ipForwarding.mode;
         if (mode != IpForwardingCategory.Mode.NONE) {
@@ -52,10 +54,10 @@ public class DedicatedServerMixin_IpForward {
         }
     }
 
-    @WrapOperation(method = "initServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/GameProfileCache;setUsesAuthentication(Z)V"))
-    private void ipForwarding$proxyOnlineMode(final boolean value, final Operation<Void> original) {
+    @WrapOperation(method = "initServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServer;setUsesAuthentication(Z)V"))
+    private void ipForwarding$proxyOnlineMode(final DedicatedServer instance, final boolean value, final Operation<Void> original) {
         final IpForwardingCategory ipForwarding = SpongeConfigs.getCommon().get().ipForwarding;
-        original.call(ipForwarding.mode != IpForwardingCategory.Mode.NONE
+        original.call(instance, ipForwarding.mode != IpForwardingCategory.Mode.NONE
             ? ipForwarding.onlineMode
             : value);
     }

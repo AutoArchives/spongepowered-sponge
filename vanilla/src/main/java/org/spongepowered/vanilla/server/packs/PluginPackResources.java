@@ -31,8 +31,10 @@ import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
+import net.minecraft.server.packs.metadata.pack.PackFormat;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.resources.IoSupplier;
+import net.minecraft.util.InclusiveRange;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.common.SpongeCommon;
@@ -43,7 +45,11 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,7 +63,7 @@ public final class PluginPackResources extends AbstractPackResources {
     public PluginPackResources(final PackLocationInfo info, final PluginContainer container, final @Nullable Path pluginRoot) {
         super(info);
         this.container = container;
-        this.metadata = new PackMetadataSection(Component.literal("Plugin Resources"), 6, Optional.empty());
+        this.metadata = new PackMetadataSection(Component.literal("Plugin Resources"), new InclusiveRange<>(PackFormat.of(6)));
         this.pluginRoot = pluginRoot;
     }
 

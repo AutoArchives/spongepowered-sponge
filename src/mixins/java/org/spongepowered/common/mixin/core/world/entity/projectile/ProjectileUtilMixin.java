@@ -81,7 +81,7 @@ public abstract class ProjectileUtilMixin {
             "getEntityHitResult(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/projectile/Projectile;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Lnet/minecraft/world/phys/EntityHitResult;"
     }, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/ProjectileUtil;getEntityHitResult(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;F)Lnet/minecraft/world/phys/EntityHitResult;"))
     private static EntityHitResult impl$onGetEntityHitResult(final Level $$0, final Entity $$1, final Vec3 $$2, final Vec3 $$3, final AABB $$4, final Predicate<Entity> $$5, final float $$6) {
-        if ($$0.isClientSide) {
+        if ($$0.isClientSide()) {
             return ProjectileUtil.getEntityHitResult($$0, $$1, $$2, $$3, $$4, $$5, $$6);
         }
         try (final PhaseContext<@NonNull ?> context = EntityPhase.State.COLLISION
