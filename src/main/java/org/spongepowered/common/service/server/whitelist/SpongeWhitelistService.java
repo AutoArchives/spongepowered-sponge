@@ -75,7 +75,7 @@ public final class SpongeWhitelistService implements WhitelistService {
 
     @Override
     public CompletableFuture<Boolean> removeProfile(final GameProfile profile) {
-        final boolean wasWhitelisted = UserListUtil.removeEntry(SpongeWhitelistService.getWhitelist(), SpongeGameProfile.toMcProfile(profile)) != null;
+        final boolean wasWhitelisted = UserListUtil.removeEntry(SpongeWhitelistService.getWhitelist(), SpongeGameProfile.toNameAndId(profile)) != null;
         return CompletableFuture.completedFuture(wasWhitelisted);
     }
 

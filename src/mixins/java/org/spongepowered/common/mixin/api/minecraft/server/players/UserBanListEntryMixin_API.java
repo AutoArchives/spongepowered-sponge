@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server.players;
 
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.UserBanListEntry;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.Ban;
@@ -33,7 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 @Mixin(UserBanListEntry.class)
-public abstract class UserBanListEntryMixin_API extends BanListEntryMixin_API<com.mojang.authlib.GameProfile> implements Ban.Profile {
+public abstract class UserBanListEntryMixin_API extends BanListEntryMixin_API<NameAndId> implements Ban.Profile {
 
     @Override
     public BanType type() {
