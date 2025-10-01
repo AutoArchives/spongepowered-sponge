@@ -57,4 +57,8 @@ public interface MinecraftServerBridge {
     default void bridge$tickServer(int ticks) {
         throw new UnsupportedOperationException("Cannot trigger manual server tick outside test environment");
     }
+
+    default boolean bridge$insideTestEnvironment() {
+        return false;
+    }
 }

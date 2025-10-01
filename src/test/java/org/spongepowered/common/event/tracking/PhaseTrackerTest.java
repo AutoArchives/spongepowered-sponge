@@ -35,7 +35,7 @@ public class PhaseTrackerTest {
 
     @Test
     public void testPoppingFramePopsCauses() {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseTracker phaseTracker = PhaseTracker.createNew(Thread.currentThread());
 
         // We start by pushing a frame...
         CauseStackManager.StackFrame frame1 = phaseTracker.pushCauseFrame();
@@ -60,7 +60,7 @@ public class PhaseTrackerTest {
 
     @Test
     public void testPoppingFrameRemovesFrameContexts() {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseTracker phaseTracker = PhaseTracker.createNew(Thread.currentThread());
 
         String cmd1 = "one";
         String cmd2 = "two";
