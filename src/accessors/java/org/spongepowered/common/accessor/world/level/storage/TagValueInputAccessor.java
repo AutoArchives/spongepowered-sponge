@@ -22,15 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.data;
+package org.spongepowered.common.accessor.world.level.storage;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.TagValueInput;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(value = {Entity.class, ItemStack.class}, priority = 899)
-public abstract class DataHolderMixin_API implements DataHolder, SpongeMutableDataHolder {
+@Mixin(TagValueInput.class)
+public interface TagValueInputAccessor {
 
+    @Accessor("input") @Final CompoundTag accessor$input();
 }

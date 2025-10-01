@@ -29,7 +29,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -37,6 +36,8 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,14 +48,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.data.DataUtil;
+import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.StringJoiner;
 
-@Mixin(BlockEntity.class)
-public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoundHolder {
+@Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
+public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoundHolder, SpongeMutableDataHolder {
 
     //@formatter:off
     @Shadow @Final private BlockEntityType<?> type;
@@ -133,5 +137,11 @@ public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoun
     @Override
     public String bridge$getPrettyPrinterString() {
         return this.getPrettyPrinterStringHelper().toString();
+    }
+
+    @Override
+    public List<DataHolder> impl$delegateDataHolder() {
+        final org.spongepowered.api.block.BlockState state = ((BlockEntity) this).block();
+        return Arrays.asList(this, state, state.type());
     }
 }

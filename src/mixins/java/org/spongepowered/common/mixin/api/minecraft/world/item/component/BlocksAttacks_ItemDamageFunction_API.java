@@ -22,15 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.data;
+package org.spongepowered.common.mixin.api.minecraft.world.item.component;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
+import net.minecraft.world.item.component.BlocksAttacks;
+import org.spongepowered.api.data.type.ShieldItemDamageFunction;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(value = {Entity.class, ItemStack.class}, priority = 899)
-public abstract class DataHolderMixin_API implements DataHolder, SpongeMutableDataHolder {
+@Mixin(BlocksAttacks.ItemDamageFunction.class)
+public abstract class BlocksAttacks_ItemDamageFunction_API implements ShieldItemDamageFunction.MultiplyAdd, ShieldItemDamageFunction<ShieldItemDamageFunction.MultiplyAdd> {
+
+    @Shadow @Final private float threshold;
+    @Shadow @Final private float base;
+    @Shadow @Final private float factor;
+
+    @Shadow public abstract int shadow$apply(float $$0);
+
+    @Override
+    public MultiplyAdd configuration() {
+        return this;
+    }
+
+    @Override
+    public double resolve(final double damage) {
+        return this.shadow$apply((float) damage);
+    }
+
+    @Override
+    public double minAttackDamage() {
+        return this.threshold;
+    }
+
+    @Override
+    public double constantDamage() {
+        return this.base;
+    }
+
+    @Override
+    public double fractionalDamage() {
+        return this.factor;
+    }
 
 }
