@@ -49,7 +49,7 @@ public class FireBlockMixin_Forge {
             cancellable = true)
     private void impl$onCatchFirePreCheck(
             final Level world, final BlockPos pos, final int chance, final RandomSource random, final int age, final Direction dir, final CallbackInfo callbackInfo) {
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }
@@ -65,7 +65,7 @@ public class FireBlockMixin_Forge {
             cancellable = true)
     private void impl$onCatchFirePreCheckOther(
         final Level world, final BlockPos pos, final int chance, final RandomSource random, final int age, final Direction dir, final CallbackInfo callbackInfo) {
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }
