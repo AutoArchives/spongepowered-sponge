@@ -34,8 +34,6 @@ import org.spongepowered.common.launch.plugin.SpongePluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -70,8 +68,7 @@ public class NeoPluginContainer implements SpongePluginContainer {
 
     @Override
     public Optional<URI> locateResource(String relative) {
-        final Path p = this.modContainer.getModInfo().getOwningFile().getFile().findResource(Objects.requireNonNull(relative, "relative"));
-        return Files.exists(p) ? Optional.of(p.toUri()) : Optional.empty();
+        return this.modContainer.getModInfo().getOwningFile().getFile().getContents().findFile(Objects.requireNonNull(relative, "relative"));
     }
 
     @Override

@@ -1,1 +1,2 @@
-org.spongepowered.vanilla.applaunch.plugin.ListenerPluginService
+org.spongepowered.vanilla.applaunch.transformation.JacocoPluginService
+org.spongepowered.vanilla.applaunch.transformation.ListenerPluginService

@@ -24,9 +24,8 @@
  */
 package org.spongepowered.neoforge.applaunch.plugin;
 
-import cpw.mods.modlauncher.Environment;
-import cpw.mods.modlauncher.api.IEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
@@ -43,28 +42,26 @@ public final class NeoForgePluginPlatform implements PluginPlatform {
 
     private static volatile boolean bootstrapped;
 
-    private final Environment environment;
     private final Logger logger;
     private final LaunchConfig config;
     private final TokenReplacement tokens;
     private final List<Path> pluginDirectories;
 
-    public static synchronized void bootstrap(final Environment environment) {
+    public static synchronized void bootstrap() {
         if (NeoForgePluginPlatform.bootstrapped) {
             return;
         }
         NeoForgePluginPlatform.bootstrapped = true;
         final NeoForgePluginPlatform platform;
         try {
-            platform = new NeoForgePluginPlatform(environment);
+            platform = new NeoForgePluginPlatform();
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
         AppLaunch.setPluginPlatform(platform);
     }
 
-    private NeoForgePluginPlatform(final Environment environment) throws IOException {
-        this.environment = environment;
+    private NeoForgePluginPlatform() throws IOException {
         this.logger = LogManager.getLogger("plugin");
         this.config = LaunchConfig.load(this.baseDirectory(), true);
 
@@ -80,7 +77,7 @@ public final class NeoForgePluginPlatform implements PluginPlatform {
 
     @Override
     public String version() {
-        return this.environment.getProperty(IEnvironment.Keys.VERSION.get()).orElse("dev");
+        return NeoForgeVersion.getVersion();
     }
 
     @Override

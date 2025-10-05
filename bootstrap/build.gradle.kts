@@ -17,5 +17,5 @@ dependencies {
     forgeLib(libs.securemodules)
 
     val neoforgeLib = neoforge.implementationConfigurationName
-    neoforgeLib(libs.fancymodloader.securejarhandler)
+    neoforgeLib(libs.fancymodloader)
 }

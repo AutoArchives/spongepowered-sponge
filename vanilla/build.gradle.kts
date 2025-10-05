@@ -11,7 +11,6 @@ plugins {
 
 val commonProject = parent!!
 val bootstrapProject = commonProject.project(":bootstrap")
-val transformersProject = commonProject.project(":modlauncher-transformers")
 val libraryManagerProject = commonProject.project(":library-manager")
 val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
 
@@ -146,7 +145,6 @@ val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
 }
 
-val superclassConfigs = spongeImpl.getNamedConfigurations("superClassChanges")
 val mixinConfigs = spongeImpl.mixinConfigurations
 
 minecraft {
@@ -217,6 +215,7 @@ dependencies {
     boot(libs.log4j.core)
     boot(libs.log4j.slf4j2)
 
+    boot(libs.accessWidener)
     boot(libs.mixin)
     boot(libs.mixinextras.common)
     boot(libs.asm.tree)
@@ -227,10 +226,6 @@ dependencies {
 
     // All minecraft dependencies except itself
     spongeImpl.copyModulesExcludingPrefix(configurations.minecraft.get(), "net.minecraft", "joined", bootLibrariesConfig.get())
-
-    boot(project(transformersProject.path)) {
-        exclude(group = "net.neoforged.fancymodloader", module = "loader")
-    }
 
     val game = gameLibrariesConfig.name
     game("org.spongepowered:spongeapi:$apiVersion")
@@ -245,9 +240,6 @@ dependencies {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-
-    val bootShadedLibraries = bootShadedLibrariesConfig.name
-    bootShadedLibraries(project(transformersProject.path)) { isTransitive = false }
 
     val gameShadedLibraries = gameShadedLibrariesConfig.name
     gameShadedLibraries("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
@@ -316,11 +308,6 @@ minecraft {
             allArgumentProviders += CommandLineArgumentProvider {
                 mixinConfigs.asSequence()
                     .flatMap { sequenceOf("--mixin.config", it) }
-                    .toList()
-            }
-            allArgumentProviders += CommandLineArgumentProvider {
-                superclassConfigs.asSequence()
-                    .flatMap { sequenceOf("--superclass_change.config", it) }
                     .toList()
             }
 

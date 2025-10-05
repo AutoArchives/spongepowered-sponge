@@ -66,7 +66,7 @@ public final class PluginModContainer extends ModContainer {
             .markerType(IModBusEvent.class)
             .allowPerPhasePost()
             .build();
-        this.module = gameLayer.findModule(info.getOwningFile().moduleName()).orElseThrow();
+        this.module = gameLayer.findModule(info.getOwningFile().getFile().getId()).orElseThrow();
 
         ModLoadingContext context = ModLoadingContext.get();
         try {

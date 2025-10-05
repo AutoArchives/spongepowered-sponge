@@ -27,6 +27,7 @@ package org.spongepowered.bootstrap;
 import org.spongepowered.bootstrap.dev.DevClasspath;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
 import java.net.URL;
@@ -45,7 +46,7 @@ public abstract class Bootstrap<Jar> {
 
     public abstract String name();
 
-    protected abstract Jar createJar(Path[] paths);
+    protected abstract Jar createJar(Path[] paths) throws IOException;
 
     protected abstract String getModuleName(Jar jar);
 

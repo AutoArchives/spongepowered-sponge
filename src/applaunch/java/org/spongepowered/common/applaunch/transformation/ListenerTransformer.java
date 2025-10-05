@@ -22,12 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.transformers.modlauncher;
+package org.spongepowered.common.applaunch.transformation;
 
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.RETURN;
-
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -37,14 +34,15 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-public class ListenerTransformerHelper {
-    public static final String LISTENER_DESC = "Lorg/spongepowered/api/event/Listener;";
+public class ListenerTransformer {
+    public static final String NAME = "listener";
+    public static final String ANNOTATION_DESC = "Lorg/spongepowered/api/event/Listener;";
 
-    public static boolean shouldTransform(ClassNode classNode) {
+    public final boolean shouldTransform(final ClassNode classNode) {
         for (final MethodNode method : classNode.methods) {
             if (method.visibleAnnotations != null) {
                 for (final AnnotationNode annotation : method.visibleAnnotations) {
-                    if (annotation.desc.equals(LISTENER_DESC)) {
+                    if (annotation.desc.equals(ANNOTATION_DESC)) {
                         return true;
                     }
                 }
@@ -53,7 +51,7 @@ public class ListenerTransformerHelper {
         return false;
     }
 
-    public static void transform(ClassNode classNode) {
+    public final void transform(final ClassNode classNode) {
         MethodNode clinit = null;
         for (final MethodNode method : classNode.methods) {
             if (method.name.equals("<clinit>") && method.desc.equals("()V")) {
@@ -63,16 +61,16 @@ public class ListenerTransformerHelper {
         }
 
         if (clinit == null) {
-            clinit = new MethodNode(ACC_STATIC, "<clinit>", "()V", null, null);
-            clinit.instructions.add(new InsnNode(RETURN));
+            clinit = new MethodNode(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
+            clinit.instructions.add(new InsnNode(Opcodes.RETURN));
             classNode.methods.add(clinit);
         }
 
 
         final InsnList list = new InsnList();
         list.add(new LdcInsnNode(Type.getObjectType(classNode.name)));
-        list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/invoke/MethodHandles", "lookup", "()Ljava/lang/invoke/MethodHandles$Lookup;", false));
-        list.add(new MethodInsnNode(INVOKESTATIC, "org/spongepowered/common/event/ListenerLookups", "set", "(Ljava/lang/Class;Ljava/lang/invoke/MethodHandles$Lookup;)V"));
+        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/invoke/MethodHandles", "lookup", "()Ljava/lang/invoke/MethodHandles$Lookup;", false));
+        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/spongepowered/common/event/ListenerLookups", "set", "(Ljava/lang/Class;Ljava/lang/invoke/MethodHandles$Lookup;)V"));
 
         clinit.instructions.insert(list);
     }

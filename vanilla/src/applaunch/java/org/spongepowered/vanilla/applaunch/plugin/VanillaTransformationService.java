@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.applaunch.plugin;
 
-import com.google.common.collect.ImmutableList;
 import cpw.mods.jarhandling.SecureJar;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IEnvironment;
@@ -33,29 +32,26 @@ import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.fusesource.jansi.AnsiConsole;
 import org.spongepowered.asm.launch.MixinLaunchPlugin;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.transformers.modlauncher.AccessWidenerTransformationService;
-import org.spongepowered.transformers.modlauncher.SuperclassChanger;
-import org.spongepowered.vanilla.applaunch.Constants;
 import org.spongepowered.vanilla.applaunch.plugin.resource.SecureJarPluginResource;
+import org.spongepowered.vanilla.applaunch.transformation.VanillaAccessWidenerTransformer;
+import org.spongepowered.vanilla.applaunch.transformation.VanillaSuperclassChangeTransformer;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 public final class VanillaTransformationService implements ITransformationService {
     private @MonotonicNonNull VanillaPluginPlatform pluginPlatform;
 
     @Override
-    public @NonNull String name() {
+    public String name() {
         return "spongevanilla";
     }
 
@@ -102,15 +98,13 @@ public final class VanillaTransformationService implements ITransformationServic
     }
 
     @Override
-    public List<Resource> completeScan(IModuleLayerManager layerManager) {
+    public List<Resource> completeScan(final IModuleLayerManager layerManager) {
         this.pluginPlatform.discoverLanguageServices();
         this.pluginPlatform.getLanguageServices().forEach((k, v) -> this.pluginPlatform.logger().info("Plugin language loader '{}' found.", k));
 
         this.pluginPlatform.createPluginCandidates();
 
-        IEnvironment env = Launcher.INSTANCE.environment();
-        final AccessWidenerTransformationService accessWidener = env.getProperty(AccessWidenerTransformationService.INSTANCE.get()).orElse(null);
-        final SuperclassChanger superclassChanger = env.getProperty(SuperclassChanger.INSTANCE.get()).orElse(null);
+        final IEnvironment env = Launcher.INSTANCE.environment();
         final ILaunchPluginService mixin = env.findLaunchPlugin(MixinLaunchPlugin.NAME).orElse(null);
 
         final List<SecureJar> gameResources = new ArrayList<>();
@@ -131,40 +125,6 @@ public final class VanillaTransformationService implements ITransformationServic
                     mixin.offerResource(resource.path(), resource.path().getFileName().toString());
                 }
 
-                // Offer jar to the AW service
-                if (accessWidener != null) {
-                    final Optional<String> awFiles = resource.property(Constants.ManifestAttributes.ACCESS_WIDENER);
-                    if (awFiles.isPresent()) {
-                        for (final String awFile : awFiles.get().split(",")) {
-                            if (!awFile.endsWith(AccessWidenerTransformationService.ACCESS_WIDENER_EXTENSION)) {
-                                continue;
-                            }
-                            try {
-                                accessWidener.offerResource(resource.locateResource(awFile).get().toURL(), awFile);
-                            } catch (final Exception ex) {
-                                this.pluginPlatform.logger().warn("Failed to read declared access widener {}, from {}:", awFile, resource.locator());
-                            }
-                        }
-                    }
-                }
-
-                // Offer jar to the SuperclassChanger service
-                if (superclassChanger != null) {
-                    final Optional<String> superclassChangeFiles = resource.property(Constants.ManifestAttributes.SUPERCLASS_CHANGE);
-                    if (superclassChangeFiles.isPresent()) {
-                        for (final String superclassChangeFile : superclassChangeFiles.get().split(",")) {
-                            if (!superclassChangeFile.endsWith(SuperclassChanger.SUPER_CLASS_EXTENSION)) {
-                                continue;
-                            }
-                            try {
-                                superclassChanger.offerResource(resource.locateResource(superclassChangeFile).get().toURL(), superclassChangeFile);
-                            } catch (final Exception ex) {
-                                this.pluginPlatform.logger().warn("Failed to read declared superclass changer {}, from {}:", superclassChangeFile, resource.locator());
-                            }
-                        }
-                    }
-                }
-
                 // Log warning about plugin using Mixin
                 if (mixin != null && resource.property(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS).isPresent()) {
                     if (!VanillaTransformationService.isSponge(resource)) {
@@ -181,10 +141,10 @@ public final class VanillaTransformationService implements ITransformationServic
         return resource instanceof SecureJarPluginResource secureJarResource && secureJarResource.jar().name().equals("spongevanilla");
     }
 
-    @Override
     @SuppressWarnings("rawtypes")
-    public @NonNull List<ITransformer> transformers() {
-        return ImmutableList.of();
+    @Override
+    public List<ITransformer> transformers() {
+        return List.of(new VanillaAccessWidenerTransformer(this.pluginPlatform), new VanillaSuperclassChangeTransformer(this.pluginPlatform));
     }
 
     private String getCodeSource() {

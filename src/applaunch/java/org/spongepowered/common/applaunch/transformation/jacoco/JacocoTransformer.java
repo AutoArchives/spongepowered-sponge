@@ -22,15 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.transformers.modlauncher.jacoco;
+package org.spongepowered.common.applaunch.transformation.jacoco;
 
-import cpw.mods.modlauncher.TransformingClassLoader;
-import cpw.mods.modlauncher.api.ITransformerActivity;
-import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -39,22 +35,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
-public class JacocoPluginService implements ILaunchPluginService {
-    private static final Logger logger = LogManager.getLogger();
-
+public abstract class JacocoTransformer {
+    public static final String NAME = "jacoco";
     private static final String MIXIN_DESC = "Lorg/spongepowered/asm/mixin/Mixin;";
 
-    private static final EnumSet<Phase> YAY = EnumSet.of(Phase.BEFORE);
-    private static final EnumSet<Phase> NAY = EnumSet.noneOf(Phase.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
-    private boolean disabled;
+    protected boolean disabled;
     private String[] packages;
     private ClassLoader loader;
 
-    public JacocoPluginService() {
+    public JacocoTransformer() {
         try {
             getClass().getClassLoader().loadClass("org.jacoco.core.JaCoCo");
         } catch (final ClassNotFoundException e) {
@@ -71,16 +64,6 @@ public class JacocoPluginService implements ILaunchPluginService {
         }
     }
 
-    @Override
-    public String name() {
-        return "jacoco";
-    }
-
-    @Override
-    public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
-        return this.disabled || isEmpty ? NAY : YAY;
-    }
-
     private boolean testClassName(final String name) {
         for (final String pkg : this.packages) {
             if (name.startsWith(pkg)) {
@@ -90,17 +73,18 @@ public class JacocoPluginService implements ILaunchPluginService {
         return false;
     }
 
-    @Override
-    public int processClassWithFlags(final Phase phase, final ClassNode classNode, final Type classType, final String reason) {
-        if (ITransformerActivity.COMPUTING_FRAMES_REASON.equals(reason)) {
-            return ComputeFlags.NO_REWRITE;
+    protected abstract boolean isTransformingClassloader(final ClassLoader loader);
+
+    protected boolean transform(final ClassNode classNode) {
+        if (this.disabled) {
+            return false;
         }
 
         // Capture a reference to the transforming class loader
         if (this.loader == null) {
             // First transformed class context, aka game entrypoint is supposed to be the transforming class loader
             final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-            if (!((Object) contextLoader instanceof TransformingClassLoader)) { // Ignore IDE warning
+            if (!isTransformingClassloader(contextLoader)) {
                 throw new IllegalStateException("Context class loader of the first transformed class is not a transforming class loader");
             }
             // Context class loader may change for next classes, so capture it
@@ -111,7 +95,7 @@ public class JacocoPluginService implements ILaunchPluginService {
         // - Performance
         // - JaCoCo changes the LVT which can cause mixins targeting the current class to fail
         if (!this.testClassName(classNode.name)) {
-            return ComputeFlags.NO_REWRITE;
+            return false;
         }
 
         // We need the original bytes for two reasons:
@@ -120,16 +104,16 @@ public class JacocoPluginService implements ILaunchPluginService {
         byte[] originalBytes;
         try (final InputStream in = this.loader.getResourceAsStream(classNode.name + ".class")) {
             if (in == null) {
-                logger.warn("Failed to find original class bytes for class {}", classNode.name);
-                return ComputeFlags.NO_REWRITE;
+                LOGGER.warn("Failed to find original class bytes for class {}", classNode.name);
+                return false;
             }
 
             final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             in.transferTo(buffer);
             originalBytes = buffer.toByteArray();
         } catch (IOException e) {
-            logger.warn("Failed to read original class bytes for class {}", classNode.name, e);
-            return ComputeFlags.NO_REWRITE;
+            LOGGER.warn("Failed to read original class bytes for class {}", classNode.name, e);
+            return false;
         }
 
         // Detect the mixin annotation
@@ -168,9 +152,7 @@ public class JacocoPluginService implements ILaunchPluginService {
             classNode.methods = instrumentedClassNode.methods;
         }
 
-        // JaCoCo has already updated the frames
-        return ComputeFlags.SIMPLE_REWRITE;
+        return true;
     }
-
 
 }

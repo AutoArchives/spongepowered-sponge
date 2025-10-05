@@ -22,43 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.applaunch.transformation;
+package org.spongepowered.forge.applaunch.transformation;
 
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerActivity;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
-import cpw.mods.modlauncher.api.TargetType;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
-import net.neoforged.fml.loading.LoadingModList;
-import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
-import net.neoforged.neoforgespi.language.ModFileScanData;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.minecraftforge.fml.loading.LoadingModList;
+import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
+import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.transformers.modlauncher.ListenerTransformerHelper;
+import org.spongepowered.common.applaunch.transformation.ListenerTransformer;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class ListenerTransformer implements ITransformer<ClassNode> {
+public class ForgeListenerTransformer extends ListenerTransformer implements ITransformer<ClassNode> {
+    private static final String[] LABELS = { ListenerTransformer.NAME };
 
-    @NonNull
+    @Override
+    public String[] labels() {
+        return LABELS;
+    }
+
     @Override
     public ClassNode transform(final ClassNode input, final ITransformerVotingContext context) {
-        ListenerTransformerHelper.transform(input);
+        this.transform(input);
         return input;
     }
 
-    @NonNull
     @Override
     public TransformerVoteResult castVote(final ITransformerVotingContext context) {
         return context.getReason().equals(ITransformerActivity.CLASSLOADING_REASON) ? TransformerVoteResult.YES : TransformerVoteResult.NO;
     }
 
-    @NonNull
     @Override
-    public Set<Target<ClassNode>> targets() {
-        final Type listenerType = Type.getType(ListenerTransformerHelper.LISTENER_DESC);
+    public Set<Target> targets() {
+        final Type listenerType = Type.getType(ListenerTransformer.ANNOTATION_DESC);
 
         final Set<Type> listenerClasses = new HashSet<>();
         for (ModFileInfo fileInfo : LoadingModList.get().getModFiles()) {
@@ -69,16 +70,10 @@ public class ListenerTransformer implements ITransformer<ClassNode> {
             }
         }
 
-        final Set<Target<ClassNode>> targets = new HashSet<>();
+        final Set<Target> targets = new HashSet<>();
         for (Type listener : listenerClasses) {
             targets.add(Target.targetClass(listener.getInternalName()));
         }
         return targets;
-    }
-
-    @NonNull
-    @Override
-    public TargetType<ClassNode> getTargetType() {
-        return TargetType.CLASS;
     }
 }

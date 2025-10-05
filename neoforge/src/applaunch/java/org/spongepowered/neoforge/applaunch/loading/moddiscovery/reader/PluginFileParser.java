@@ -24,8 +24,9 @@
  */
 package org.spongepowered.neoforge.applaunch.loading.moddiscovery.reader;
 
-import cpw.mods.jarhandling.JarContents;
-import cpw.mods.jarhandling.SecureJar;
+import net.neoforged.fml.classloading.SecureJar;
+import net.neoforged.fml.jarcontents.JarContents;
+import net.neoforged.fml.jarcontents.JarResource;
 import net.neoforged.fml.loading.moddiscovery.ModFile;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
 import net.neoforged.fml.loading.moddiscovery.ModJarMetadata;
@@ -43,8 +44,6 @@ import org.spongepowered.plugin.metadata.builtin.MetadataParser;
 import java.io.Reader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,11 +51,14 @@ public final class PluginFileParser {
 
     @SuppressWarnings("UnstableApiUsage")
     private static IModFileInfo parsePluginMetadata(final IModFile modFile) throws InvalidModFileException {
-        final Path metadataFile = modFile.findResource(PluginPlatformConstants.METADATA_FILE_LOCATION);
+        final JarResource metadataFile = modFile.getContents().get(PluginPlatformConstants.METADATA_FILE_LOCATION);
+        if (metadataFile == null) {
+            throw new InvalidModFileException("Plugin metadata not found", modFile.getModFileInfo());
+        }
 
         try {
             final MetadataContainer container;
-            try (final Reader reader = Files.newBufferedReader(metadataFile, StandardCharsets.UTF_8)) {
+            try (final Reader reader = metadataFile.bufferedReader(StandardCharsets.UTF_8)) {
                 container = MetadataParser.read(reader);
             }
 

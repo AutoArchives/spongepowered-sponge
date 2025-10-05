@@ -1,0 +1,3 @@
+org.spongepowered.neoforge.applaunch.transformation.NeoAccessWidenerTransformer
+org.spongepowered.neoforge.applaunch.transformation.NeoListenerTransformer
+org.spongepowered.neoforge.applaunch.transformation.NeoSuperclassChangeTransformer

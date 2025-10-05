@@ -24,11 +24,12 @@
  */
 package org.spongepowered.bootstrap.neoforge;
 
-import cpw.mods.cl.JarModuleFinder;
-import cpw.mods.cl.ModuleClassLoader;
-import cpw.mods.jarhandling.SecureJar;
+import net.neoforged.fml.classloading.JarModuleFinder;
+import net.neoforged.fml.classloading.ModuleClassLoader;
+import net.neoforged.fml.classloading.SecureJar;
 import org.spongepowered.bootstrap.Bootstrap;
 
+import java.io.IOException;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
 import java.nio.file.Path;
@@ -48,7 +49,7 @@ public class NeoForgeBootstrap extends Bootstrap<SecureJar> {
     }
 
     @Override
-    protected SecureJar createJar(final Path[] paths) {
+    protected SecureJar createJar(final Path[] paths) throws IOException {
         return SecureJar.from(paths);
     }
 
@@ -69,6 +70,7 @@ public class NeoForgeBootstrap extends Bootstrap<SecureJar> {
 
     @Override
     protected void runApplication(final ModuleLayer layer) throws Exception {
+        // TODO net.neoforged.fml.startup.*
         final Class<?> appClass = layer.findModule("fml_loader").get().getClassLoader().loadClass("cpw.mods.modlauncher.Launcher");
         appClass.getDeclaredMethod("main", String[].class).invoke(null, (Object) this.args);
     }

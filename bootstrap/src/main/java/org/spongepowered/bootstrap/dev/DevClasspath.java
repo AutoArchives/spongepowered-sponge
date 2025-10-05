@@ -79,7 +79,7 @@ public class DevClasspath {
                         case "bootstrap":
                             // ignore
                             break;
-                        case "modlauncher-transformers", "library-manager":
+                        case "library-manager":
                             bootUnions.add(projectName, path);
                             break;
                         case "SpongeAPI":

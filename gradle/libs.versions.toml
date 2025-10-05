@@ -11,7 +11,7 @@ mixin = "0.8.7"
 mixinextras = "0.5.0"
 modlauncher = "10.2.2"
 securemodules = "2.2.22"
-fancymodloader = "9.0.16"
+fancymodloader = "10.0.14"
 jarjar = "0.3.26"
 guava = "32.1.2-jre"
 mockito = "5.11.0"
@@ -34,18 +34,15 @@ log4j-jpl = { module = "org.apache.logging.log4j:log4j-jpl", version.ref = "log4
 log4j-slf4j2 = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 modlauncher = { module = "net.minecraftforge:modlauncher", version.ref = "modlauncher" }
 securemodules = { module = "net.minecraftforge:securemodules", version.ref = "securemodules" }
-fancymodloader-loader = { module = "net.neoforged.fancymodloader:loader", version.ref = "fancymodloader" }
-fancymodloader-securejarhandler = { module = "net.neoforged.fancymodloader:securejarhandler", version.ref = "fancymodloader" }
+fancymodloader = { module = "net.neoforged.fancymodloader:loader", version.ref = "fancymodloader" }
 tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
 tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
 tinylog-slf4j = { module = "org.tinylog:slf4j-tinylog", version.ref = "tinylog" }
+accessWidener = { module = "net.fabricmc:access-widener", version = "2.1.0" }
 
 # generator
 javaparser =  { module = "com.github.javaparser:javaparser-core", version = "3.25.9" }
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
-
-# modlauncher-transformers
-accessWidener = { module = "net.fabricmc:access-widener", version = "2.1.0" }
 
 # Sponge
 adventure-serializerAnsi = { module = "net.kyori:adventure-text-serializer-ansi" } # version inherited from bom in API catalog

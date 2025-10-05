@@ -142,7 +142,6 @@ dependencies {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
     launchConfig(apiLibs.gson)
-    launchConfig(libs.asm.tree)
     launchConfig(libs.asm.util)
 
     // Applaunch -- initialization that needs to occur without game access
@@ -159,6 +158,12 @@ dependencies {
         exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
     }
+    applaunchConfig(libs.asm.commons)
+    applaunchConfig(libs.accessWidener)
+
+    // Optional
+    val applaunchCompileOnly = applaunch.get().compileOnlyConfigurationName
+    applaunchCompileOnly(libs.jacoco.core)
 
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 

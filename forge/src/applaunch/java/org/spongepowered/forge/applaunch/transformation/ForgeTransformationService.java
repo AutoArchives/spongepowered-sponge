@@ -22,35 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.plugin;
+package org.spongepowered.forge.applaunch.transformation;
 
-import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.transformers.modlauncher.ListenerTransformerHelper;
+import cpw.mods.modlauncher.api.IEnvironment;
+import cpw.mods.modlauncher.api.ITransformationService;
+import cpw.mods.modlauncher.api.ITransformer;
 
-import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
-public class ListenerPluginService implements ILaunchPluginService {
-    private static final EnumSet<Phase> YAY = EnumSet.of(Phase.AFTER);
-    private static final EnumSet<Phase> NAY = EnumSet.noneOf(Phase.class);
-
+public class ForgeTransformationService implements ITransformationService {
     @Override
     public String name() {
-        return "listener";
+        return "spongeforge";
     }
 
     @Override
-    public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
-        return isEmpty ? NAY : YAY;
-    }
+    public void initialize(final IEnvironment environment) {}
 
     @Override
-    public int processClassWithFlags(final Phase phase, final ClassNode classNode, final Type classType, final String reason) {
-        if (ListenerTransformerHelper.shouldTransform(classNode)) {
-            ListenerTransformerHelper.transform(classNode);
-            return ComputeFlags.COMPUTE_FRAMES;
-        }
-        return ComputeFlags.NO_REWRITE;
+    public void onLoad(final IEnvironment env, final Set<String> otherServices) {}
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public List<ITransformer> transformers() {
+        return List.of(new ForgeAccessWidenerTransformer(), new ForgeListenerTransformer(), new ForgeSuperclassChangeTransformer());
     }
 }

@@ -30,7 +30,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
@@ -53,7 +53,7 @@ public final class NeoLaunch extends Launch {
 
     @Override
     public boolean dedicatedServer() {
-        return FMLLoader.getDist() == Dist.DEDICATED_SERVER;
+        return FMLEnvironment.getDist() == Dist.DEDICATED_SERVER;
     }
 
     @Override
@@ -63,7 +63,7 @@ public final class NeoLaunch extends Launch {
 
     @Override
     public Stage injectionStage() {
-        return FMLLoader.isProduction() ? Stage.PRODUCTION : Stage.DEVELOPMENT;
+        return FMLEnvironment.isProduction() ? Stage.PRODUCTION : Stage.DEVELOPMENT;
     }
 
     @Override

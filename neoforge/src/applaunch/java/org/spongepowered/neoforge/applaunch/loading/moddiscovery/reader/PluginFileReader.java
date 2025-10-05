@@ -24,7 +24,7 @@
  */
 package org.spongepowered.neoforge.applaunch.loading.moddiscovery.reader;
 
-import cpw.mods.jarhandling.JarContents;
+import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.neoforgespi.locating.IModFile;
 import net.neoforged.neoforgespi.locating.IModFileReader;
 import net.neoforged.neoforgespi.locating.ModFileDiscoveryAttributes;

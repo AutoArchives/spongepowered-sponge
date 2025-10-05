@@ -22,12 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch;
+package org.spongepowered.vanilla.applaunch.transformation;
 
-public final class Constants {
+import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.common.applaunch.transformation.ListenerTransformer;
 
-    public static final class ManifestAttributes {
-        public static final String ACCESS_WIDENER = "Access-Widener";
-        public static final String SUPERCLASS_CHANGE = "Superclass-Transformer";
+import java.util.EnumSet;
+
+public class ListenerPluginService extends ListenerTransformer implements ILaunchPluginService {
+    private static final EnumSet<Phase> YAY = EnumSet.of(Phase.AFTER);
+    private static final EnumSet<Phase> NAY = EnumSet.noneOf(Phase.class);
+
+    @Override
+    public String name() {
+        return ListenerTransformer.NAME;
+    }
+
+    @Override
+    public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
+        return isEmpty ? NAY : YAY;
+    }
+
+    @Override
+    public int processClassWithFlags(final Phase phase, final ClassNode classNode, final Type classType, final String reason) {
+        if (this.shouldTransform(classNode)) {
+            this.transform(classNode);
+            return ComputeFlags.COMPUTE_FRAMES;
+        }
+        return ComputeFlags.NO_REWRITE;
     }
 }

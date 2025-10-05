@@ -25,10 +25,8 @@
 package org.spongepowered.neoforge.applaunch.loading.moddiscovery;
 
 import com.google.common.collect.ImmutableMap;
-import cpw.mods.jarhandling.JarContents;
-import cpw.mods.jarhandling.SecureJar;
-import cpw.mods.modlauncher.Environment;
-import cpw.mods.modlauncher.Launcher;
+import net.neoforged.fml.classloading.SecureJar;
+import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.moddiscovery.readers.JarModsDotTomlModFileReader;
 import net.neoforged.neoforgespi.ILaunchContext;
@@ -42,6 +40,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.neoforge.applaunch.plugin.NeoForgePluginPlatform;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.FileSystem;
@@ -56,15 +55,14 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public SpongeNeoModLocator() {
-        final Environment env = Launcher.INSTANCE.environment();
-        NeoForgePluginPlatform.bootstrap(env);
+        NeoForgePluginPlatform.bootstrap();
     }
 
     @Override
     public void findCandidates(ILaunchContext context, IDiscoveryPipeline pipeline) {
         final ModFileDiscoveryAttributes attributes = ModFileDiscoveryAttributes.DEFAULT.withLocator(this);
 
-        if (!FMLEnvironment.production) {
+        if (!FMLEnvironment.isProduction()) {
             final String resourcesProp = System.getProperty("sponge.resources");
             if (resourcesProp != null) {
                 for (final String entry : resourcesProp.split(File.pathSeparator)) {
@@ -72,7 +70,14 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
                         continue;
                     }
 
-                    final JarContents jarContents = JarContents.of(Stream.of(entry.split("&")).map(Path::of).toList());
+                    final JarContents jarContents;
+                    try {
+                        jarContents = JarContents.ofPaths(Stream.of(entry.split("&")).map(Path::of).toList());
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to create jar contents from {}", entry, e);
+                        continue;
+                    }
+
                     IModFile modFile = null;
                     try {
                         // attempt to load as mod or plugin

@@ -83,7 +83,6 @@ includeBuild("SpongeAPI") {
         substitute(module("org.spongepowered:spongeapi")).using(project(":"))
     }
 }
-include("modlauncher-transformers")
 include("library-manager")
 include("bootstrap")
 include("generator")

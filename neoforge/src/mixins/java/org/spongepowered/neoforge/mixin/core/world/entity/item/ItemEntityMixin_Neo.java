@@ -46,7 +46,7 @@ public abstract class ItemEntityMixin_Neo {
         final CallbackInfo ci
     ) {
         // Check the level is not null to avoid an NPE
-        if (level != null && !level.isClientSide) {
+        if (level != null && !level.isClientSide()) {
             this.lifespan = SpongeGameConfigs.getForWorld(level).get().entity.item.despawnRate;
         }
     }

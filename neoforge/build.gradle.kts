@@ -23,7 +23,6 @@ plugins {
 
 val commonProject = parent!!
 val bootstrapProject = commonProject.project(":bootstrap")
-val transformersProject = commonProject.project(":modlauncher-transformers")
 val libraryManagerProject = commonProject.project(":library-manager")
 val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
 
@@ -205,9 +204,6 @@ configurations.testRuntimeOnly.get().extendsFrom(configurations.getByName("modDe
 dependencies {
     val service = serviceLibrariesConfig.name
     service(apiLibs.pluginSpi)
-    service(project(transformersProject.path)) {
-        exclude(group = "net.neoforged.fancymodloader", module = "loader")
-    }
     service(project(libraryManagerProject.path))
 
     val game = gameLibrariesConfig.name
@@ -217,7 +213,6 @@ dependencies {
     game(libs.adventure.serializerConfigurate4)
 
     val serviceShadedLibraries = serviceShadedLibrariesConfig.name
-    serviceShadedLibraries(project(transformersProject.path)) { isTransitive = false }
     serviceShadedLibraries(project(libraryManagerProject.path)) { isTransitive = false }
 
     val gameShadedLibraries = gameShadedLibrariesConfig.name

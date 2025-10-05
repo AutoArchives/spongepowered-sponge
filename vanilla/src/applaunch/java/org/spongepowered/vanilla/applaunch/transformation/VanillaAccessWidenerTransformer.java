@@ -22,56 +22,67 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.transformation;
+package org.spongepowered.vanilla.applaunch.transformation;
 
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerActivity;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
-import net.minecraftforge.fml.loading.LoadingModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
-import net.minecraftforge.forgespi.language.ModFileScanData;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.transformers.modlauncher.ListenerTransformerHelper;
+import org.spongepowered.common.applaunch.transformation.AccessWidenerTransformer;
+import org.spongepowered.plugin.PluginResource;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.net.URL;
+import java.util.*;
+import java.util.stream.Collectors;
 
-public class ListenerTransformer implements ITransformer<ClassNode> {
+public class VanillaAccessWidenerTransformer extends AccessWidenerTransformer implements ITransformer<ClassNode> {
+    private static final String[] LABELS = { AccessWidenerTransformer.NAME };
 
-    @NonNull
-    @Override
-    public ClassNode transform(final ClassNode input, final ITransformerVotingContext context) {
-        ListenerTransformerHelper.transform(input);
-        return input;
+    private final VanillaPluginPlatform pluginPlatform;
+
+    public VanillaAccessWidenerTransformer(final VanillaPluginPlatform pluginPlatform) {
+        this.pluginPlatform = pluginPlatform;
     }
 
-    @NonNull
+    @Override
+    public String[] labels() {
+        return LABELS;
+    }
+
+    @Override
+    public ClassNode transform(final ClassNode input, final ITransformerVotingContext context) {
+        return this.transform(input);
+    }
+
     @Override
     public TransformerVoteResult castVote(final ITransformerVotingContext context) {
         return context.getReason().equals(ITransformerActivity.CLASSLOADING_REASON) ? TransformerVoteResult.YES : TransformerVoteResult.NO;
     }
 
-    @NonNull
     @Override
     public Set<Target> targets() {
-        final Type listenerType = Type.getType(ListenerTransformerHelper.LISTENER_DESC);
+        return this.targetClasses().stream().map(Target::targetClass).collect(Collectors.toSet());
+    }
 
-        final Set<Type> listenerClasses = new HashSet<>();
-        for (ModFileInfo fileInfo : LoadingModList.get().getModFiles()) {
-            for (ModFileScanData.AnnotationData annotation : fileInfo.getFile().getScanResult().getAnnotations()) {
-                if (listenerType.equals(annotation.annotationType())) {
-                    listenerClasses.add(annotation.clazz());
+    @Override
+    protected Collection<URL> collectResources() {
+        final Collection<URL> resources = new ArrayList<>();
+        for (final Set<? extends PluginResource> plugins : this.pluginPlatform.getResources().values()) {
+            for (final PluginResource plugin : plugins) {
+                final Optional<String> attribute = plugin.property(AccessWidenerTransformer.MANIFEST_ATTRIBUTE);
+                if (attribute.isPresent()) {
+                    for (final String path : attribute.get().split(",")) {
+                        try {
+                            resources.add(plugin.locateResource(path).get().toURL());
+                        } catch (final Exception e) {
+                            LOGGER.warn("Failed to locate access widener {} from {}", path, plugin.path().getFileName(), e);
+                        }
+                    }
                 }
             }
         }
-
-        final Set<Target> targets = new HashSet<>();
-        for (Type listener : listenerClasses) {
-            targets.add(Target.targetClass(listener.getInternalName()));
-        }
-        return targets;
+        return resources;
     }
 }
