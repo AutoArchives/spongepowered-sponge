@@ -558,13 +558,13 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 .toString();
     }
 
-    @Redirect(method = {
-        "advanceWeatherCycle",
-        "globalLevelEvent",
-        "setDefaultSpawnPos"
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"))
-    private void impl$broadcastAllCurrentDimensionOnly(final PlayerList instance, final Packet<?> $$0) {
-        //Weather, game rules and spawns are per world in Sponge.
-        instance.broadcastAll($$0, this.shadow$dimension());
+    @Redirect(
+        method = "advanceWeatherCycle",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"),
+        require = 0 // already done in Neo
+    )
+    private void impl$broadcastAllCurrentDimensionOnly(final PlayerList instance, final Packet<?> packet) {
+        // Weather is per world in Sponge.
+        instance.broadcastAll(packet, this.shadow$dimension());
     }
 }

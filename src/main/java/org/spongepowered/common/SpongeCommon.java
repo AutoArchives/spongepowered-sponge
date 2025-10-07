@@ -45,7 +45,6 @@ import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -61,19 +60,6 @@ public final class SpongeCommon {
     @Inject private @Nullable static SpongeGame game;
 
     private static @MonotonicNonNull Path pluginConfigDir;
-
-    static {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            final @Nullable SpongeGame game = SpongeCommon.game;
-            if (game != null) {
-                try {
-                    game.configManager().close();
-                } catch (final IOException e) {
-                    SpongeCommon.logger().error("Failed to shut down configuration watch service", e);
-                }
-            }
-        }, "Sponge shutdown thread"));
-    }
 
     private SpongeCommon() {
     }

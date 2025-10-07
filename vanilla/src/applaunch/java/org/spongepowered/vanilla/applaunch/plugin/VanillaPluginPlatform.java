@@ -26,7 +26,6 @@ package org.spongepowered.vanilla.applaunch.plugin;
 
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.config.LaunchConfig;
 import org.spongepowered.common.applaunch.config.TokenReplacement;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
@@ -45,6 +44,7 @@ import org.spongepowered.vanilla.applaunch.plugin.resource.SecureJarPluginResour
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -56,6 +56,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 
 public final class VanillaPluginPlatform implements PluginPlatform {
+    private static final List<AutoCloseable> closeCallbacks = new ArrayList<>();
 
     private final Environment environment;
     private final LaunchConfig config;
@@ -104,11 +105,6 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     }
 
     @Override
-    public Logger logger() {
-        return this.environment.logger();
-    }
-
-    @Override
     public boolean vanilla() {
         return true;
     }
@@ -144,6 +140,11 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
     private void setPluginDirectories(final List<Path> pluginDirectories) {
         this.environment.blackboard().set(Keys.PLUGIN_DIRECTORIES, pluginDirectories);
+    }
+
+    @Override
+    public void addLoaderCloseCallback(final AutoCloseable closeable) {
+        VanillaPluginPlatform.closeCallbacks.add(closeable);
     }
 
     public String metadataFilePath() {
@@ -254,5 +255,17 @@ public final class VanillaPluginPlatform implements PluginPlatform {
                 }
             }
         }
+    }
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            for (final AutoCloseable closeCallback : VanillaPluginPlatform.closeCallbacks) {
+                try {
+                    closeCallback.close();
+                } catch (Exception e) {
+                    PluginPlatform.LOGGER.error("Failed to run close callback {}", closeCallback, e);
+                }
+            }
+        }, "Sponge shutdown thread"));
     }
 }

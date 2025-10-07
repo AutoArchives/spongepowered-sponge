@@ -22,25 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.boot;
+package org.spongepowered.bootstrap.neoforge;
 
-import org.spongepowered.bootstrap.neoforge.TestServer;
-import org.spongepowered.common.applaunch.test.TestGameAccess;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.startup.Entrypoint;
+import net.neoforged.fml.startup.FatalStartupException;
+import org.spongepowered.bootstrap.dev.DevClasspath;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.lang.invoke.MethodHandle;
 
-public class SpongeTestBoot {
+public class TestServer extends Entrypoint {
 
-    public static ClassLoader getGameClassLoader() throws Exception {
-        if (TestGameAccess.getGameClassLoader() == null) {
-            final Path argsFile = Path.of(System.getProperty("sponge.test.args").substring(1));
-            final String[] args = Files.lines(argsFile).map(String::trim).filter(line -> !line.startsWith("#") && !line.isEmpty())
-                .skip(1) // main class
-                .toArray(String[]::new);
-            System.setProperty("sponge.test.active", "true");
-            TestServer.main(args);
+    public static void main(final String[] args) {
+        DevClasspath.resolve();
+
+        // Do not close the loader until tests are done
+        final FMLLoader loader = Entrypoint.startup(args, true, Dist.DEDICATED_SERVER, true);
+
+        final MethodHandle main = Entrypoint.createMainMethodCallable(loader, "net.minecraft.server.Main");
+        try {
+            main.invokeExact(loader.getProgramArgs().getArguments());
+        } catch (Throwable e) {
+            throw new FatalStartupException("Failed to invoke main", e);
         }
-        return TestGameAccess.getGameClassLoader();
     }
 }

@@ -22,25 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.boot;
+package org.spongepowered.bootstrap.neoforge;
 
-import org.spongepowered.bootstrap.neoforge.TestServer;
-import org.spongepowered.common.applaunch.test.TestGameAccess;
+import net.neoforged.fml.startup.Client;
+import org.spongepowered.bootstrap.dev.DevClasspath;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+public class DevClient {
 
-public class SpongeTestBoot {
-
-    public static ClassLoader getGameClassLoader() throws Exception {
-        if (TestGameAccess.getGameClassLoader() == null) {
-            final Path argsFile = Path.of(System.getProperty("sponge.test.args").substring(1));
-            final String[] args = Files.lines(argsFile).map(String::trim).filter(line -> !line.startsWith("#") && !line.isEmpty())
-                .skip(1) // main class
-                .toArray(String[]::new);
-            System.setProperty("sponge.test.active", "true");
-            TestServer.main(args);
-        }
-        return TestGameAccess.getGameClassLoader();
+    public static void main(final String[] args) {
+        DevClasspath.resolve();
+        Client.main(args);
     }
 }

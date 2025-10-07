@@ -1,6 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.neoforged.moddevgradle.internal.RunGameTask
 import org.spongepowered.gradle.impl.AWToAT
+import org.spongepowered.gradle.impl.DigestUtil
 
 buildscript {
     repositories {
@@ -182,18 +183,17 @@ neoForge {
     runs {
         configureEach {
             // jvmArgument("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
-            mainClass = "org.spongepowered.bootstrap.neoforge.NeoForgeBootstrap"
-
-            programArguments.addAll(mixinConfigs.flatMap { sequenceOf("--mixin.config", it) })
         }
 
         create("client") {
             client()
+            mainClass = "org.spongepowered.bootstrap.neoforge.DevClient"
         }
 
         create("server") {
             server()
             programArgument("--nogui")
+            mainClass = "org.spongepowered.bootstrap.neoforge.DevServer"
         }
     }
 }
@@ -204,6 +204,7 @@ configurations.testRuntimeOnly.get().extendsFrom(configurations.getByName("modDe
 dependencies {
     val service = serviceLibrariesConfig.name
     service(apiLibs.pluginSpi)
+    service(libs.accessWidener)
     service(project(libraryManagerProject.path))
 
     val game = gameLibrariesConfig.name
@@ -275,6 +276,7 @@ sourceSets {
             property("version", version.toString())
             property("description", description.toString())
             property("neoForgeVersion", neoForgeVersion)
+            property("mixins", mixinConfigs.joinToString(",") { "{config=\"$it\"}" })
         }
     }
 
@@ -357,8 +359,7 @@ tasks {
             from(neoManifest)
             attributes(
                 "Access-Widener" to "common.accesswidener",
-                "Superclass-Transformer" to "common.superclasschange,neoforge.superclasschange",
-                "MixinConfigs" to mixinConfigs.joinToString(",")
+                "Superclass-Transformer" to "common.superclasschange,neoforge.superclasschange"
             )
         }
 
@@ -386,6 +387,10 @@ tasks {
 
             from(langJar)
             rename("spongeneo-(.*)-lang.jar", "spongeneo-lang.jar")
+        }
+
+        doLast {
+            DigestUtil.generateChecksums(archiveFile.get().asFile, "jars", "SHA-256")
         }
     }
 

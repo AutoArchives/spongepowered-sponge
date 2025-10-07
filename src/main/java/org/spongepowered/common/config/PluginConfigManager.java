@@ -30,6 +30,7 @@ import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
@@ -54,6 +55,8 @@ public final class PluginConfigManager implements ConfigManager {
         this.listener = WatchServiceListener.builder()
                 .threadFactory(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Sponge-WatchService-%d").build())
                 .build();
+
+        AppLaunch.pluginPlatform().addLoaderCloseCallback(this.listener);
 
         this.serializers = TypeSerializerCollection.defaults().childBuilder()
                 // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
@@ -89,9 +92,5 @@ public final class PluginConfigManager implements ConfigManager {
     public static ConfigurationOptions getOptions(final TypeSerializerCollection serializers) {
         return ConfigurationOptions.defaults()
                 .serializers(serializers);
-    }
-
-    public void close() throws IOException {
-        this.listener.close();
     }
 }

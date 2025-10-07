@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.applaunch.plugin;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.config.LaunchConfig;
 import org.spongepowered.common.applaunch.config.TokenReplacement;
@@ -32,10 +33,13 @@ import java.nio.file.Path;
 import java.util.List;
 
 public interface PluginPlatform {
+    Logger LOGGER = LogManager.getLogger("plugin");
 
     String version();
 
-    Logger logger();
+    default Logger logger() {
+        return LOGGER;
+    }
 
     boolean vanilla();
 
@@ -48,5 +52,11 @@ public interface PluginPlatform {
     TokenReplacement tokens();
 
     List<Path> pluginDirectories();
+
+    /**
+     * Adds a callback that will be called once, when the platform loader is about to close.
+     * When the platform loader is closed, no new class can be loaded, so this is the last thing we can do.
+     */
+    void addLoaderCloseCallback(AutoCloseable closeable);
 
 }

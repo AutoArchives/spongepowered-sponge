@@ -24,14 +24,13 @@
  */
 package org.spongepowered.neoforge.boot;
 
+import net.neoforged.fml.loading.FMLLoader;
 import org.junit.platform.launcher.LauncherInterceptor;
 import org.spongepowered.common.applaunch.test.TestGameAccess;
 
 public final class SpongeLauncherInterceptor implements LauncherInterceptor {
 
     private final ClassLoader classLoader;
-
-    private long counter;
 
     public SpongeLauncherInterceptor() {
         try {
@@ -43,10 +42,6 @@ public final class SpongeLauncherInterceptor implements LauncherInterceptor {
 
     @Override
     public <T> T intercept(final Invocation<T> invocation) {
-        // getResources broken on Neo
-        if (this.counter++ == 1) {
-            return invocation.proceed();
-        }
         final ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(this.classLoader);
         try {
@@ -59,5 +54,6 @@ public final class SpongeLauncherInterceptor implements LauncherInterceptor {
     @Override
     public void close() {
         TestGameAccess.shutdownGame();
+        FMLLoader.getCurrent().close();
     }
 }

@@ -26,8 +26,6 @@ package org.spongepowered.neoforge.applaunch.plugin;
 
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.config.LaunchConfig;
 import org.spongepowered.common.applaunch.config.TokenReplacement;
@@ -42,7 +40,6 @@ public final class NeoForgePluginPlatform implements PluginPlatform {
 
     private static volatile boolean bootstrapped;
 
-    private final Logger logger;
     private final LaunchConfig config;
     private final TokenReplacement tokens;
     private final List<Path> pluginDirectories;
@@ -62,7 +59,6 @@ public final class NeoForgePluginPlatform implements PluginPlatform {
     }
 
     private NeoForgePluginPlatform() throws IOException {
-        this.logger = LogManager.getLogger("plugin");
         this.config = LaunchConfig.load(this.baseDirectory(), true);
 
         this.tokens = new TokenReplacement();
@@ -78,11 +74,6 @@ public final class NeoForgePluginPlatform implements PluginPlatform {
     @Override
     public String version() {
         return NeoForgeVersion.getVersion();
-    }
-
-    @Override
-    public Logger logger() {
-        return this.logger;
     }
 
     @Override
@@ -113,5 +104,10 @@ public final class NeoForgePluginPlatform implements PluginPlatform {
     @Override
     public List<Path> pluginDirectories() {
         return this.pluginDirectories;
+    }
+
+    @Override
+    public void addLoaderCloseCallback(AutoCloseable closeable) {
+        // TODO FML
     }
 }

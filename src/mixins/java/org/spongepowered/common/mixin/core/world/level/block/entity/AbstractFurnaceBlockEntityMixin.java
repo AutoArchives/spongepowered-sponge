@@ -113,13 +113,13 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     }
 
     // Interrupt-Active - e.g. a player removing the currently smelting item
-    @Inject(
+    /*@Inject(
         method = "setItem",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;getTotalCookTime(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;)I"
         )
-    )
+    )*/ // TODO Neo
     private void impl$interruptSmelt(final CallbackInfo ci) {
         this.impl$callInteruptSmeltEvent();
     }

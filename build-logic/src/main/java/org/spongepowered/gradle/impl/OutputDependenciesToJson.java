@@ -46,10 +46,7 @@ import org.gradle.api.tasks.TaskAction;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -60,8 +57,6 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public abstract class OutputDependenciesToJson extends DefaultTask {
-
-    private static final char[] hexChars = "0123456789abcdef".toCharArray();
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
@@ -171,42 +166,17 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
             .map(dependency -> {
                 final ModuleComponentIdentifier id = (ModuleComponentIdentifier) dependency.getId().getComponentIdentifier();
 
-                final MessageDigest digest;
+                final String digest;
                 try {
-                    digest = MessageDigest.getInstance("SHA-512");
-                } catch (final NoSuchAlgorithmException e) {
-                    throw new GradleException("Failed to find digest algorithm", e);
-                }
-
-                try (final InputStream in = Files.newInputStream(dependency.getFile().toPath())) {
-                    final byte[] buf = new byte[4096];
-                    int read;
-                    while ((read = in.read(buf)) != -1) {
-                        digest.update(buf, 0, read);
-                    }
-                } catch (final IOException e) {
+                    digest = DigestUtil.digest(dependency.getFile().toPath(), "SHA-512");
+                } catch (final Exception e) {
                     throw new GradleException("Failed to digest file for " + dependency, e);
                 }
 
-                return new DependencyDescriptor(
-                    id.getGroup(),
-                    id.getModule(),
-                    id.getVersion(),
-                    OutputDependenciesToJson.toHexString(digest.digest())
-                );
+                return new DependencyDescriptor(id.getGroup(), id.getModule(), id.getVersion(), digest);
             })
             .sorted(Comparator.naturalOrder()) // sort dependencies for stable output
             .collect(Collectors.toList());
-    }
-
-    public static String toHexString(final byte[] bytes) {
-        final char[] chars = new char[bytes.length << 1];
-        int i = 0;
-        for (final byte b : bytes) {
-            chars[i++] = OutputDependenciesToJson.hexChars[(b >> 4) & 15];
-            chars[i++] = OutputDependenciesToJson.hexChars[b & 15];
-        }
-        return new String(chars);
     }
 
     public static class ConfigurationHolder {

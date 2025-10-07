@@ -4,6 +4,8 @@ license="MIT License"
 
 issueTrackerURL="https://github.com/SpongePowered/Sponge/issues"
 
+mixins = [{{ mixins }}]
+
 
 [[mods]]
 modId="spongeneo"

@@ -27,8 +27,6 @@ package org.spongepowered.forge.applaunch.plugin;
 import cpw.mods.modlauncher.Environment;
 import cpw.mods.modlauncher.api.IEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.config.LaunchConfig;
 import org.spongepowered.common.applaunch.config.TokenReplacement;
@@ -37,14 +35,15 @@ import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class ForgePluginPlatform implements PluginPlatform {
+    private static final List<AutoCloseable> closeCallbacks = new ArrayList<>();
 
     private static volatile boolean bootstrapped;
 
     private final Environment environment;
-    private final Logger logger;
     private final LaunchConfig config;
     private final TokenReplacement tokens;
     private final List<Path> pluginDirectories;
@@ -65,7 +64,6 @@ public final class ForgePluginPlatform implements PluginPlatform {
 
     private ForgePluginPlatform(final Environment environment) throws IOException {
         this.environment = environment;
-        this.logger = LogManager.getLogger("plugin");
         this.config = LaunchConfig.load(this.baseDirectory(), true);
 
         this.tokens = new TokenReplacement();
@@ -81,11 +79,6 @@ public final class ForgePluginPlatform implements PluginPlatform {
     @Override
     public String version() {
         return this.environment.getProperty(IEnvironment.Keys.VERSION.get()).orElse("dev");
-    }
-
-    @Override
-    public Logger logger() {
-        return this.logger;
     }
 
     @Override
@@ -116,5 +109,22 @@ public final class ForgePluginPlatform implements PluginPlatform {
     @Override
     public List<Path> pluginDirectories() {
         return this.pluginDirectories;
+    }
+
+    @Override
+    public void addLoaderCloseCallback(final AutoCloseable closeable) {
+        ForgePluginPlatform.closeCallbacks.add(closeable);
+    }
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            for (final AutoCloseable closeCallback : ForgePluginPlatform.closeCallbacks) {
+                try {
+                    closeCallback.close();
+                } catch (Exception e) {
+                    PluginPlatform.LOGGER.error("Failed to run close callback {}", closeCallback, e);
+                }
+            }
+        }, "Sponge shutdown thread"));
     }
 }
