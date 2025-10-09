@@ -24,22 +24,22 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.decoration.Mannequin;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public final class MannequinData {
-    private MannequinData() {
+public final class AvatarData {
+    private AvatarData() {
     }
 
     public static void register(DataProviderRegistrator registrator) {
         registrator
-            .asMutable(Mannequin.class)
-            .create(Keys.DOMINANT_HAND)
-            .get(h -> (HandPreference) (Object) h.getMainArm())
-            .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
+            .asMutable(Avatar.class)
+                .create(Keys.DOMINANT_HAND)
+                    .get(h -> (HandPreference) (Object) h.getMainArm())
+                    .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
         ;
     }
 }

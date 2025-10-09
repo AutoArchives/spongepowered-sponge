@@ -31,7 +31,6 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
@@ -39,8 +38,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Server;
-import org.spongepowered.common.entity.SpongeEntityTypes;
-import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
@@ -60,7 +57,6 @@ public final class SpongeNeoMod {
         // modBus: add all FML events with it
         modBus.addListener(this::onCommonSetup);
         modBus.addListener(this::onClientSetup);
-        modBus.addListener(this::onEntityAttributeCreationEvent);
 
         // annotation events, for non-FML things
         NeoForge.EVENT_BUS.register(this);
@@ -107,9 +103,5 @@ public final class SpongeNeoMod {
     public void onServerStoppingEvent(final ServerStoppingEvent event) {
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.callStoppingEngineEvent((Server) event.getServer());
-    }
-
-    public void onEntityAttributeCreationEvent(final EntityAttributeCreationEvent event) {
-        event.put(SpongeEntityTypes.HUMAN, HumanEntity.createAttributes());
     }
 }

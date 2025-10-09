@@ -82,7 +82,6 @@ import org.spongepowered.common.bridge.effect.ViewerBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.effect.SpongeForwardingViewer;
 import org.spongepowered.common.effect.util.ViewerPacketUtil;
-import org.spongepowered.common.entity.SpongeEntityTypes;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.util.VecHelper;
@@ -361,7 +360,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             ));
 
         this.entityStream(min, max, StreamOptions.lazily())
-            .filter((world, entity, x, y, z) -> ((EntityAccessor) entity.get()).invoker$getEncodeId() != null || entity.get().type() == SpongeEntityTypes.HUMAN)
+            .filter((world, entity, x, y, z) -> ((EntityAccessor) entity.get()).invoker$getEncodeId() != null)
             .map((world, entity, x, y, z) -> entity.get().createArchetype())
             .apply(VolumeCollectors.of(
                 volume,

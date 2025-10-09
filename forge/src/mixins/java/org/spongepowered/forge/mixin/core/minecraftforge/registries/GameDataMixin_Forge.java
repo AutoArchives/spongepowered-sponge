@@ -24,18 +24,12 @@
  */
 package org.spongepowered.forge.mixin.core.minecraftforge.registries;
 
-import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.GameData;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.entity.SpongeEntityTypes;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
@@ -43,13 +37,6 @@ import org.spongepowered.common.network.packet.SpongePacketHandler;
 
 @Mixin(GameData.class)
 public class GameDataMixin_Forge {
-
-    @Inject(method = "postRegisterEvents", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/ModLoader;postEventWrapContainerInModOrder(Lnet/minecraftforge/fml/event/IModBusEvent;)V", shift = At.Shift.AFTER))
-    private static void forge$registerSpongeTypesLast(final CallbackInfo ci, @Nullable @Local final Registry<?> vanillaRegistry) {
-        if (vanillaRegistry != null && Registries.ENTITY_TYPE.equals(vanillaRegistry.key())) {
-            SpongeEntityTypes.register((Registry<EntityType<?>>) vanillaRegistry);
-        }
-    }
 
     @Inject(method = "postRegisterEvents", at = @At("HEAD"))
     private static void forge$onRegisterEvents(final CallbackInfo ci) {

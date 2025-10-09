@@ -73,7 +73,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -159,14 +158,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             }
         } else {
             this.impl$deathEventsPosted = 0;
-        }
-    }
-
-    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V"),
-            cancellable = true)
-    private void impl$doNotSendStateForHumans(final DamageSource cause, final CallbackInfo ci) {
-        if (((LivingEntity) (Object) this) instanceof HumanEntity) {
-            ci.cancel();
         }
     }
 

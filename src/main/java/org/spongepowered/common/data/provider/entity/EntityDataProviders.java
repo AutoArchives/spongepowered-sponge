@@ -142,7 +142,6 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         GuardianData.register(this.registrator);
         HangingData.register(this.registrator);
         HorseData.register(this.registrator);
-        HumanData.register(this.registrator);
         IdentifiableData.register(this.registrator);
         InteractionData.register(this.registrator);
         InvulnerableData.register(this.registrator);
@@ -154,7 +153,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         LivingData.register(this.registrator);
         LlamaData.register(this.registrator);
         LocationTargetingData.register(this.registrator);
-        MannequinData.register(this.registrator);
+        AvatarData.register(this.registrator);
         MobData.register(this.registrator);
         MooshroomData.register(this.registrator);
         OcelotData.register(this.registrator);

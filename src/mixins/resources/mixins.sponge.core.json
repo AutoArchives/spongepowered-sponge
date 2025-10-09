@@ -50,7 +50,6 @@
     "network.protocol.login.ClientboundCustomQueryPacketMixin",
     "network.protocol.login.ServerboundCustomQueryAnswerPacketMixin",
     "network.syncher.EntityDataAccessorMixin",
-    "network.syncher.SynchedEntityData_BuilderMixin",
     "network.syncher.SynchedEntityDataMixin",
     "resources.RegistryDataLoader_LoaderMixin",
     "resources.RegistryDataLoaderMixin",

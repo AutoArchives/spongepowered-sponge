@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.common.accessor.world.entity.player.AbilitiesAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.accessor.world.food.FoodDataAccessor;
@@ -56,9 +54,6 @@ public final class PlayerData {
                             h.getAbilities().mayfly = v;
                             h.onUpdateAbilities();
                         })
-                    .create(Keys.DOMINANT_HAND)
-                        .get(h -> (HandPreference) (Object) h.getMainArm())
-                        .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
                     .create(Keys.EXHAUSTION)
                         .get(h -> (double) ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel())
                         .set((h, v) -> ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel(v.floatValue()))

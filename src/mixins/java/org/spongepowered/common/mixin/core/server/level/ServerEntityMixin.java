@@ -28,8 +28,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
@@ -48,15 +46,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.data.datasync.VanishedFilteringSynchronizer;
-import org.spongepowered.common.entity.living.human.HumanEntity;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 @Mixin(ServerEntity.class)
 public abstract class ServerEntityMixin {
@@ -92,53 +86,6 @@ public abstract class ServerEntityMixin {
         final boolean trackMovementDeltas, final ServerEntity.Synchronizer broadcaster,
         final CallbackInfo ci) {
         this.synchronizer = new VanishedFilteringSynchronizer(broadcaster, new WeakReference<>(this.entity));
-    }
-
-    @Inject(method = "removePairing", at = @At("RETURN"))
-    private void impl$removeHumanFromPlayerClient(final ServerPlayer viewer, final CallbackInfo ci) {
-        if (this.entity instanceof HumanEntity) {
-            ((HumanEntity) this.entity).untrackFrom(viewer);
-        }
-    }
-
-    /**
-     * @author gabizou
-     * @reason Because the entity spawn packet is just a lone packet, we have to actually
-     * do some hackery to create the player list packet first, then the spawn packet,
-     * then perform the remove packet.
-     */
-    @Redirect(
-        method = "sendPairingData",
-        at = @At(value = "INVOKE", target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V", ordinal = 0)
-    )
-    public void impl$sendHumanSpawnPacket(final Consumer<Packet<?>> consumer, final Object spawnPacket) {
-        if (!(this.entity instanceof final HumanEntity human)) {
-            consumer.accept((Packet<?>) spawnPacket);
-            return;
-        }
-        // Adds the GameProfile to the client
-        consumer.accept(human.createPlayerListPacket(EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)));
-        // Actually spawn the human (a player)
-        consumer.accept((Packet<?>) spawnPacket);
-        // Remove from the player map
-        final ClientboundPlayerInfoRemovePacket removePacket = new ClientboundPlayerInfoRemovePacket(List.of(human.getUUID()));
-        if (human.canRemoveFromListImmediately()) {
-            consumer.accept(removePacket);
-        } else {
-            // Human is a Player entity on the client and needs to tick once for the skin to render
-            human.removeFromTabListDelayed(null, removePacket);
-        }
-    }
-
-    @Inject(method = "sendDirtyEntityData", at = @At("HEAD"))
-    public void impl$sendHumanMetadata(final CallbackInfo ci) {
-        if (!(this.entity instanceof final HumanEntity human)) {
-            return;
-        }
-        final Stream<Packet<? super ClientGamePacketListener>> packets = human.popQueuedPackets(null);
-        packets.forEach(this.synchronizer::sendToTrackingPlayers);
-        // Note that this will further call in ChunkManager_EntityTrackerMixin
-        // for any player specific packets to send.
     }
 
     @ModifyArg(method = "sendDirtyEntityData", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundUpdateAttributesPacket;<init>(ILjava/util/Collection;)V"))

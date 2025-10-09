@@ -7,7 +7,6 @@
     "client.ClientBrandRetrieverMixin_Vanilla",
     "client.MinecraftMixin_Vanilla",
     "client.gui.screens.TitleScreenMixin_Vanilla",
-    "client.renderer.entity.EntityRenderDispatcherMixin_Vanilla",
     "client.server.IntegratedServerMixin_Vanilla"
   ],
   "server": [
@@ -32,10 +31,8 @@
     "server.packs.repository.PackRepositoryMixin_Vanilla",
     "tags.TagLoaderMixin_Vanilla",
     "world.entity.EntityMixin_Vanilla",
-    "world.entity.EntityTypeMixin_Vanilla",
     "world.entity.LivingEntityMixin_Vanilla",
     "world.entity.LivingEntityMixin_Vanilla_Damage",
-    "world.entity.ai.attributes.DefaultAttributesMixin",
     "world.entity.animal.SnowGolemMixin_Vanilla",
     "world.entity.item.ItemEntityMixin_Vanilla",
     "world.entity.player.PlayerMixin_Vanilla_Damage",

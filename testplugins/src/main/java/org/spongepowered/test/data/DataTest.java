@@ -1202,9 +1202,9 @@ public final class DataTest  {
         final Entity slime = world.createEntity(EntityTypes.SLIME.get(), position);
         this.checkOfferData(slime, Keys.SIZE, 10);
 
-        final Entity human = world.createEntity(EntityTypes.HUMAN.get(), position);
+        final Entity mannequin = world.createEntity(EntityTypes.MANNEQUIN.get(), position);
         player.get(Keys.SKIN_PROFILE_PROPERTY).ifPresent(data -> {
-            this.checkOfferData(human, Keys.SKIN_PROFILE_PROPERTY, data);
+            this.checkOfferData(mannequin, Keys.SKIN_PROFILE_PROPERTY, data);
         });
 
         this.checkOfferData(dolphin, Keys.SKIN_MOISTURE, 1);
@@ -1297,8 +1297,6 @@ public final class DataTest  {
                 .build();
         this.checkOfferListData(villager, Keys.TRADE_OFFERS, Arrays.asList(tradeOffer));
 
-        final Entity hooman = world.createEntity(EntityTypes.HUMAN.get(), position);
-        this.checkGetData(hooman, Keys.TRANSIENT, true);
         this.checkOfferData(villager, Keys.TRANSIENT, true);
 
 

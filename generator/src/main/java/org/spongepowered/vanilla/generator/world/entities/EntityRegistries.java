@@ -25,7 +25,6 @@
 package org.spongepowered.vanilla.generator.world.entities;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
@@ -49,7 +48,6 @@ import org.spongepowered.vanilla.generator.RegistryEntriesValidator;
 import org.spongepowered.vanilla.generator.RegistryScope;
 
 import java.util.List;
-import java.util.Set;
 
 public class EntityRegistries {
     public static List<Generator> enumEntries(final Context context) {
@@ -195,9 +193,7 @@ public class EntityRegistries {
             new RegistryEntriesValidator<>(
                 "entity",
                 "EntityTypes",
-                Registries.ENTITY_TYPE,
-                $ -> true,
-                Set.of(ResourceLocation.fromNamespaceAndPath("sponge", "human")) // Sponge's Human type is an extra addition
+                Registries.ENTITY_TYPE
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",

@@ -133,17 +133,13 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
             Objects.requireNonNull(entity, "Cannot build an EntityArchetype for a null entity!").type(),
             "Entity is returning a null EntityType!"
         );
-        if (!((net.minecraft.world.entity.EntityType) entityType).canSerialize() && entityType != SpongeEntityTypes.HUMAN) {
+        if (!((net.minecraft.world.entity.EntityType) entityType).canSerialize()) {
             throw new IllegalArgumentException("Attempting to archetype a non-serializable entity: " + entity);
         }
         this.entityType = entityType;
         net.minecraft.world.entity.Entity mcEntity = (net.minecraft.world.entity.Entity) entity;
         final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, mcEntity.level().registryAccess());
-        if (entityType == SpongeEntityTypes.HUMAN) {
-            mcEntity.saveWithoutId(output);
-        } else {
-            mcEntity.saveAsPassenger(output);
-        }
+        mcEntity.saveAsPassenger(output);
         final CompoundTag compound = output.buildResult();
         this.position = new Vector3d(mcEntity.getX(), mcEntity.getY(), mcEntity.getZ());
         SpongeEntityArchetypeBuilder.stripCompound(compound);

@@ -98,12 +98,6 @@
             "description": "Testing entities"
         },
         {
-            "id": "humantest",
-            "name": "Human Test",
-            "entrypoint": "org.spongepowered.test.human.HumanTest",
-            "description": "Testing human"
-        },
-        {
             "id": "interacttest",
             "name": "Interact Test",
             "entrypoint": "org.spongepowered.test.interact.InteractTest",

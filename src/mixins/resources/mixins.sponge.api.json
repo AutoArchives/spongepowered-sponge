@@ -4,7 +4,6 @@
   "package": "org.spongepowered.common.mixin.api",
   "mixinPriority": 1100,
   "mixins": [
-    "common.entity.living.HumanEntityMixin_API",
     "data.DataHolderMixin_API",
     "data.persistence.DataContainerMixin_API",
     "entity.ai.goal.AbstractGoalMixin_API",
