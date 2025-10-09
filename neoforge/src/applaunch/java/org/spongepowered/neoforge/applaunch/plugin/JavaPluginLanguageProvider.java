@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.lang.provider;
+package org.spongepowered.neoforge.applaunch.plugin;
 
 import net.neoforged.fml.Logging;
 import net.neoforged.fml.ModContainer;

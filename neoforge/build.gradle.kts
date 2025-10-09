@@ -60,12 +60,8 @@ val serviceLayerConfig = configurations.register("serviceLayer") {
     extendsFrom(bootLayerConfig.get())
     extendsFrom(serviceLibrariesConfig.get())
 }
-val langLayerConfig = configurations.register("langLayer") {
-    extendsFrom(bootLayerConfig.get())
-}
 val gameLayerConfig = configurations.register("gameLayer") {
     extendsFrom(serviceLayerConfig.get())
-    extendsFrom(langLayerConfig.get())
     extendsFrom(gameLibrariesConfig.get())
 }
 
@@ -90,13 +86,6 @@ val appLaunch by sourceSets.register("applaunch") {
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(serviceLayerConfig.get())
-    }
-}
-
-// Lang layer
-val lang by sourceSets.register("lang") {
-    configurations.named(implementationConfigurationName) {
-        extendsFrom(langLayerConfig.get())
     }
 }
 
@@ -153,7 +142,6 @@ val main by sourceSets.named("main") {
     // The rest of the project because we want everything in the initial classpath
     spongeImpl.addDependencyToRuntimeOnly(commonMixins.get(), this)
     spongeImpl.addDependencyToRuntimeOnly(mixins, this)
-    spongeImpl.addDependencyToRuntimeOnly(lang, this)
 
     // The bootstrap
     spongeImpl.addDependencyToRuntimeOnly(bootstrapMain.get(), this)
@@ -302,13 +290,6 @@ tasks {
         manifest.from(neoManifest)
     }
 
-    val langJar by existing(Jar::class) {
-        manifest.attributes(
-            "Automatic-Module-Name" to "spongeneo.lang",
-            "FMLModType" to "LIBRARY"
-        )
-    }
-
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
     appLaunch.resources.srcDir(installerResources)
 
@@ -384,9 +365,6 @@ tasks {
         into("jars") {
             from(shadowJar)
             rename("spongeneo-(.*)-mod.jar", "spongeneo-mod.jar")
-
-            from(langJar)
-            rename("spongeneo-(.*)-lang.jar", "spongeneo-lang.jar")
         }
 
         doLast {
@@ -431,7 +409,7 @@ tasks {
 
     jacocoTestReport {
         sourceSets(commonAppLaunchConf.get(), commonAppLaunch.get(), commonLaunch.get(), commonAccessors.get(), commonMixins.get(), commonMain.get())
-        sourceSets(appLaunch, launch, lang, accessors, mixins, main)
+        sourceSets(appLaunch, launch, accessors, mixins, main)
         dependsOn(test)
     }
 }
@@ -443,9 +421,6 @@ publishing {
 
             artifact(tasks["jar"])
             artifact(tasks["sourcesJar"])
-
-            artifact(tasks["langJar"])
-            artifact(tasks["langSourcesJar"])
 
             artifact(tasks["mixinsJar"])
             artifact(tasks["mixinsSourcesJar"])
