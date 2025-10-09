@@ -42,9 +42,9 @@ jobs:
           - project: forge
             gradleProject: ':SpongeForge'
             skipUpdateBranch: true
-#          - project: neoforge
-#            gradleProject: ':SpongeNeo'
-#            skipUpdateBranch: true
+          - project: neoforge
+            gradleProject: ':SpongeNeo'
+            skipUpdateBranch: true
     steps:
       - name: setup
         if: "!(matrix.skipUpdateBranch && startsWith(github.ref, 'refs/heads/update/'))"

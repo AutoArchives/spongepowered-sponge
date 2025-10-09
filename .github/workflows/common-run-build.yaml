@@ -17,14 +17,14 @@ jobs:
         project:
           - vanilla
           - forge
-#          - neoforge
+          - neoforge
         include:
           - project: vanilla
             gradleProject: SpongeVanilla
           - project: forge
             gradleProject: SpongeForge
-#          - project: neoforge
-#            gradleProject: SpongeNeo
+          - project: neoforge
+            gradleProject: SpongeNeo
     steps:
       - name: setup
         id: setup
