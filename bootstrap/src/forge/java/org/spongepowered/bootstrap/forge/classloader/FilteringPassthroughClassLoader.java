@@ -22,23 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.bootstrap;
+package org.spongepowered.bootstrap.forge.classloader;
 
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.lang.module.ModuleReference;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 
-public final class ResourceClassLoader extends URLClassLoader {
+public final class FilteringPassthroughClassLoader extends ClassLoader {
+
+    private final Set<String> filteredPackages = new HashSet<>();
 
     static {
         ClassLoader.registerAsParallelCapable();
     }
 
-    public ResourceClassLoader(final String name, final URL[] urls, final ClassLoader parent) {
-        super(name, urls, parent);
+    public FilteringPassthroughClassLoader(final ClassLoader parent, final Stream<ModuleReference> modules) {
+        super(parent);
+        modules.forEach(m -> this.filteredPackages.addAll(m.descriptor().packages()));
     }
 
     @Override
-    protected Class<?> findClass(final String name) throws ClassNotFoundException {
+    protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
+        if (!this.filteredPackages.contains(FilteringPassthroughClassLoader.nameToPackage(name))) {
+            return super.loadClass(name, resolve);
+        }
         throw new ClassNotFoundException(name);
+    }
+
+    private static String nameToPackage(final String name) {
+        final int index = name.lastIndexOf('.');
+        if (index == -1 || index == name.length() - 1) {
+            return "";
+        }
+        return name.substring(0, index);
     }
 }
