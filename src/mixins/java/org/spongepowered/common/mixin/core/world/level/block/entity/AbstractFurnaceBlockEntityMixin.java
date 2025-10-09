@@ -108,20 +108,8 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         if (!(this.level instanceof ServerLevel se)) {
             return Optional.empty();
         }
-        var recipeInpuit = new SingleRecipeInput(this.items.get(0));
-        return this.quickCheck.getRecipeFor(recipeInpuit, se);
-    }
-
-    // Interrupt-Active - e.g. a player removing the currently smelting item
-    /*@Inject(
-        method = "setItem",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;getTotalCookTime(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;)I"
-        )
-    )*/ // TODO Neo
-    private void impl$interruptSmelt(final CallbackInfo ci) {
-        this.impl$callInteruptSmeltEvent();
+        var recipeInput = new SingleRecipeInput(this.items.get(0));
+        return this.quickCheck.getRecipeFor(recipeInput, se);
     }
 
     // Interrupt-Passive - if the currently smelting item was removed in some other way
@@ -145,10 +133,11 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     )
     private static void impl$onResetCookTimePassive(final ServerLevel level, final BlockPos pos, final BlockState state,
         @Coerce final AbstractFurnaceBlockEntityMixin entity, final CallbackInfo ci) {
-        entity.impl$callInteruptSmeltEvent();
+        entity.impl$callInterruptSmeltEvent();
     }
 
-    private void impl$callInteruptSmeltEvent() {
+    @Override
+    public void impl$callInterruptSmeltEvent() {
         if (this.cookingTimer > 0) {
             final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.items.get(1));
             final Cause cause = PhaseTracker.getInstance().currentCause();

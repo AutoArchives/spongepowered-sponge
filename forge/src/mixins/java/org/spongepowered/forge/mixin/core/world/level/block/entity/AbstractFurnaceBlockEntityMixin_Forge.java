@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
@@ -179,5 +180,17 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
         for (final SlotTransaction transaction : transactions) {
             transaction.custom().ifPresent(item -> slots.set(((SlotAdapter) transaction.slot()).getOrdinal(), ItemStackUtil.fromSnapshotToNative(item)));
         }
+    }
+
+    // Interrupt-Active - e.g. a player removing the currently smelting item
+    @Inject(
+        method = "setItem",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;getTotalCookTime(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;)I"
+        )
+    )
+    private void forge$interruptSmelt(final CallbackInfo ci) {
+        this.impl$callInterruptSmeltEvent();
     }
 }

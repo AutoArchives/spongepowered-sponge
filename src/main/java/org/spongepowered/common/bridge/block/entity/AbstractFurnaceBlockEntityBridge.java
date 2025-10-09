@@ -33,4 +33,5 @@ public interface AbstractFurnaceBlockEntityBridge {
 
     Optional<? extends RecipeHolder<? extends AbstractCookingRecipe>> bridge$getCurrentRecipe();
 
+    void impl$callInterruptSmeltEvent();
 }
