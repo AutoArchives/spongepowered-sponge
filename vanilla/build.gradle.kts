@@ -146,7 +146,6 @@ val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
 }
 
-val superclassConfigs = spongeImpl.getNamedConfigurations("superClassChanges")
 val mixinConfigs = spongeImpl.mixinConfigurations
 
 minecraft {
@@ -316,11 +315,6 @@ minecraft {
             allArgumentProviders += CommandLineArgumentProvider {
                 mixinConfigs.asSequence()
                     .flatMap { sequenceOf("--mixin.config", it) }
-                    .toList()
-            }
-            allArgumentProviders += CommandLineArgumentProvider {
-                superclassConfigs.asSequence()
-                    .flatMap { sequenceOf("--superclass_change.config", it) }
                     .toList()
             }
 
@@ -518,6 +512,7 @@ tasks {
         jvmArgs("-Dsponge.test.args=" + runServer.allArguments().joinToString(" "))
         jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
         jvmArgs("-Djunit.platform.launcher.interceptors.enabled=true")
+        jvmArgs("-Djunit.jupiter.extensions.autodetection.enabled=true")
         workingDir = layout.buildDirectory.dir("test-run").get().asFile
 
         doFirst {
