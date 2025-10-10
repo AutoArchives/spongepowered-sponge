@@ -742,20 +742,20 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @WrapOperation(method = "lambda$checkInsideBlocks$0",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/state/BlockState;entityInside(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/InsideBlockEffectApplier;)V"
+                    target = "Lnet/minecraft/world/level/block/state/BlockState;entityInside(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/InsideBlockEffectApplier;Z)V"
             )
     ) // doBlockCollisions
     private void impl$onCheckInsideBlocksCollide(
         final BlockState blockState, final Level worldIn, final BlockPos pos, final Entity entityIn,
-        final InsideBlockEffectApplier insideBlockEffectApplier, final Operation<Void> original) {
+        final InsideBlockEffectApplier insideBlockEffectApplier, final boolean applies, final Operation<Void> original) {
         if (!ShouldFire.COLLIDE_BLOCK_EVENT_INSIDE || worldIn.isClientSide() || blockState.isAir()) {
-            original.call(blockState, worldIn, pos, entityIn, insideBlockEffectApplier);
+            original.call(blockState, worldIn, pos, entityIn, insideBlockEffectApplier, applies);
             return;
         }
 
         final org.spongepowered.api.util.Direction dir = org.spongepowered.api.util.Direction.NONE;
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(blockState.getBlock(), worldIn, pos, blockState, entityIn, dir, SpongeCommonEventFactory.CollisionType.INSIDE)) {
-            original.call(blockState, worldIn, pos, entityIn, insideBlockEffectApplier);
+            original.call(blockState, worldIn, pos, entityIn, insideBlockEffectApplier, applies);
             this.impl$lastCollidedBlockPos = pos;
         }
 
