@@ -111,15 +111,17 @@ public final class PhaseTracker implements CauseStackManager {
             return PhaseTracker.CLIENT;
         }
 
-        return PhaseTracker.SPINOFF_TRACKERS.computeIfAbsent(current, (thread) -> {
-            try {
-                final PhaseTracker phaseTracker = new PhaseTracker();
-                phaseTracker.setThread(thread);
-                return phaseTracker;
-            } catch (final IllegalAccessException e) {
-                throw new RuntimeException("Unable to create a new PhaseTracker for Thread: " + thread, e);
-            }
-        });
+        return PhaseTracker.SPINOFF_TRACKERS.computeIfAbsent(current, PhaseTracker::createNew);
+    }
+
+    public static PhaseTracker createNew(final Thread thread) {
+        try {
+            final PhaseTracker phaseTracker = new PhaseTracker();
+            phaseTracker.setThread(thread);
+            return phaseTracker;
+        } catch (final IllegalAccessException e) {
+            throw new RuntimeException("Unable to create a new PhaseTracker for Thread: " + thread, e);
+        }
     }
 
     /**

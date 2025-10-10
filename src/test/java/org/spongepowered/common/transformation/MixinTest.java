@@ -22,39 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server;
+package org.spongepowered.common.transformation;
 
-import net.kyori.adventure.resource.ResourcePackRequest;
-import net.minecraft.util.thread.BlockableEventLoop;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.common.registry.RegistryHolderLogic;
-import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
-import org.spongepowered.common.user.SpongeUserManager;
+import org.junit.jupiter.api.Test;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
-public interface MinecraftServerBridge {
+public class MixinTest {
 
-    SpongeServerScopedServiceProvider bridge$getServiceProvider();
-
-    @Nullable ResourcePackRequest bridge$getResourcePack();
-
-    boolean bridge$performAutosaveChecks();
-
-    SpongeUserManager bridge$userManager();
-
-    BlockableEventLoop<Runnable> bridge$spongeMainThreadExecutor();
-
-    void bridge$reloadServerRegistries(RegistryHolder holder);
-
-    void bridge$reloadedServerRegistries(RegistryHolderLogic holder);
-
-    RegistryHolderLogic bridge$registryHolder();
-
-    default void bridge$tickServer(int ticks) {
-        throw new UnsupportedOperationException("Cannot trigger manual server tick outside test environment");
+    @Test
+    public void auditMixins() {
+        // Ensure all Mixins apply without error
+        MixinEnvironment.getCurrentEnvironment().audit();
     }
 
-    default boolean bridge$insideTestEnvironment() {
-        return false;
-    }
 }

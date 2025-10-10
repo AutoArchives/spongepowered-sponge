@@ -22,39 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server;
+package org.spongepowered.bootstrap.dev;
 
-import net.kyori.adventure.resource.ResourcePackRequest;
-import net.minecraft.util.thread.BlockableEventLoop;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.common.registry.RegistryHolderLogic;
-import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
-import org.spongepowered.common.user.SpongeUserManager;
+import java.nio.file.Path;
 
-public interface MinecraftServerBridge {
-
-    SpongeServerScopedServiceProvider bridge$getServiceProvider();
-
-    @Nullable ResourcePackRequest bridge$getResourcePack();
-
-    boolean bridge$performAutosaveChecks();
-
-    SpongeUserManager bridge$userManager();
-
-    BlockableEventLoop<Runnable> bridge$spongeMainThreadExecutor();
-
-    void bridge$reloadServerRegistries(RegistryHolder holder);
-
-    void bridge$reloadedServerRegistries(RegistryHolderLogic holder);
-
-    RegistryHolderLogic bridge$registryHolder();
-
-    default void bridge$tickServer(int ticks) {
-        throw new UnsupportedOperationException("Cannot trigger manual server tick outside test environment");
-    }
-
-    default boolean bridge$insideTestEnvironment() {
-        return false;
+public record WeightedPath(int weight, Path path) implements Comparable<WeightedPath> {
+    @Override
+    public int compareTo(WeightedPath o) {
+        final int result = Integer.compare(this.weight, o.weight);
+        if (result != 0) {
+            return result;
+        }
+        return this.path.compareTo(o.path);
     }
 }

@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -70,7 +71,9 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
             context.buildAndSwitch();
             original.call(hasTimeLeft);
         }
-        PhaseTracker.getServerInstanceExplicitly().ensureEmpty();
+        if (!((MinecraftServerBridge) this).bridge$insideTestEnvironment()) {
+            PhaseTracker.getServerInstanceExplicitly().ensureEmpty();
+        }
     }
 
     @WrapOperation(
