@@ -146,7 +146,6 @@ val testSources = sourceSets.named("test") {
     spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
 }
 
-val superclassConfigs = spongeImpl.getNamedConfigurations("superClassChanges")
 val mixinConfigs = spongeImpl.mixinConfigurations
 
 minecraft {
@@ -316,11 +315,6 @@ minecraft {
             allArgumentProviders += CommandLineArgumentProvider {
                 mixinConfigs.asSequence()
                     .flatMap { sequenceOf("--mixin.config", it) }
-                    .toList()
-            }
-            allArgumentProviders += CommandLineArgumentProvider {
-                superclassConfigs.asSequence()
-                    .flatMap { sequenceOf("--superclass_change.config", it) }
                     .toList()
             }
 
