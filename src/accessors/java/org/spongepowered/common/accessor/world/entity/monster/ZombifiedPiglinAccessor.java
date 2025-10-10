@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ZombifiedPiglin.class)
 public interface ZombifiedPiglinAccessor {
 
-    @Accessor("remainingPersistentAngerTime") int accessor$remainingPersistentAngerTime();
+    @Accessor("persistentAngerEndTime") long accessor$remainingPersistentAngerTime();
 
-    @Accessor("remainingPersistentAngerTime") void accessor$remainingPersistentAngerTime(final int remainingPersistentAngerTime);
+    @Accessor("persistentAngerEndTime") void accessor$remainingPersistentAngerTime(final long remainingPersistentAngerTime);
 }

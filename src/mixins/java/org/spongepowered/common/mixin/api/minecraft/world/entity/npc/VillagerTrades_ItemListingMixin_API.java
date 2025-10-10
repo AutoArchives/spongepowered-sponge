@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.npc;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -39,12 +40,15 @@ import org.spongepowered.asm.mixin.Shadow;
 public interface VillagerTrades_ItemListingMixin_API extends TradeOfferGenerator {
 
     // @formatter:off
-    @Shadow @Nullable MerchantOffer shadow$getOffer(Entity entity, RandomSource random);
+    @Shadow @Nullable MerchantOffer shadow$getOffer(ServerLevel level, Entity entity, RandomSource random);
     // @formatter:on
 
     @Override
     default TradeOffer apply(final org.spongepowered.api.entity.Entity merchant, final RandomProvider.Source random) {
-        return (TradeOffer) this.shadow$getOffer((Entity) merchant, (RandomSource) random);
+        if (merchant.world() instanceof ServerLevel sl) {
+            return (TradeOffer) this.shadow$getOffer(sl, (Entity) merchant, (RandomSource) random);
+        }
+        throw new IllegalStateException("The merchant is not in a server world!");
     }
 
 }

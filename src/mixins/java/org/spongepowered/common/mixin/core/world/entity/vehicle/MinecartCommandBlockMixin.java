@@ -56,6 +56,9 @@ public abstract class MinecartCommandBlockMixin extends AbstractMinecartMixin im
 
     @Override
     public CommandSourceStack bridge$getCommandSource(final Cause cause) {
-        return this.commandBlock.createCommandSourceStack(SpongeCommon.server());
+        if (this.level() instanceof net.minecraft.server.level.ServerLevel sl) {
+            return this.commandBlock.createCommandSourceStack(sl, SpongeCommon.server());
+        }
+        return this.commandBlock.createCommandSourceStack(SpongeCommon.server().overworld(), SpongeCommon.server());
     }
 }

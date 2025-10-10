@@ -22,25 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.nautilus;
 
-import net.kyori.adventure.audience.Audience;
-import net.minecraft.commands.CommandSource;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.BaseCommandBlock;
+import org.spongepowered.api.entity.living.animal.ZombieNautilus;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 
-import javax.annotation.Nullable;
-
-@Mixin(BaseCommandBlock.class)
-public abstract class BaseCommandBlockMixin implements CommandSourceProviderBridge, Audience {
-
-    // @formatter:off
-    @Shadow public abstract CommandSourceStack createCommandSourceStack(ServerLevel level, CommandSource var1);
-    @Shadow @Nullable protected abstract BaseCommandBlock.CloseableCommandBlockSource shadow$createSource(ServerLevel level);
-    // @formatter:on
-
+@Mixin(net.minecraft.world.entity.animal.nautilus.ZombieNautilus.class)
+public abstract class ZombieNautilusMixin_API extends AbstractNautilusMixin_API implements ZombieNautilus {
 }

@@ -32,6 +32,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.util.TaskChainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
@@ -50,7 +51,7 @@ public interface CommandSourceStackAccessor {
             final Vec3 $$1,
             final Vec2 $$2,
             final ServerLevel $$3,
-            final int $$4,
+            final PermissionSet $$4,
             final String $$5,
             final Component $$6, final MinecraftServer $$7,
             @Nullable final Entity $$8,

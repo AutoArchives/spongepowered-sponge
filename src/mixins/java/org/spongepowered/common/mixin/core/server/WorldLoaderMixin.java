@@ -31,6 +31,9 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -52,7 +55,11 @@ public abstract class WorldLoaderMixin {
         final Pair<WorldDataConfiguration, CloseableResourceManager> pair = original.call(instance);
         final CloseableResourceManager resourceManager = pair.getSecond();
         final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishServerServices(resourceManager, $$0.functionCompilationLevel());
+        var permLevel = $$0.functionCompilationPermissions() == PermissionSet.ALL_PERMISSIONS ? PermissionLevel.OWNERS : PermissionLevel.ALL;
+        if ($$0.functionCompilationPermissions() instanceof LevelBasedPermissionSet lbps) {
+            permLevel = lbps.level();
+        }
+        lifecycle.establishServerServices(resourceManager, permLevel);
         lifecycle.setWorldDataConfiguration(pair.getFirst());
         lifecycle.beginEstablishServerRegistries((RegistryHolder) resourceManager);
         return pair;

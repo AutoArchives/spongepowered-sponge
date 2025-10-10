@@ -42,7 +42,7 @@ public final class ZombifiedPiglinData {
                     .create(Keys.ANGER_LEVEL)
                         .get(ZombifiedPiglinAccessor::accessor$remainingPersistentAngerTime)
                         .set(ZombifiedPiglinAccessor::accessor$remainingPersistentAngerTime)
-                        .resetOnDelete(400 + new SplittableRandom().nextInt(400));
+                        .resetOnDelete(() -> (long)(400 + new SplittableRandom().nextInt(400)));
     }
     // @formatter:on
 }

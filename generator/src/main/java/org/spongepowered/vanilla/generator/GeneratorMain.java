@@ -42,6 +42,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.vanilla.generator.item.ItemRegistries;
@@ -151,7 +152,7 @@ public final class GeneratorMain {
             pendingTags,
             packRepository.getRequestedFeatureFlags(),
             CommandSelection.ALL,
-            2, // functionPermissionLevel
+            LevelBasedPermissionSet.ALL_PERMISSIONS, // functionPermissionLevel
             Util.backgroundExecutor(), // prepareExecutor
             Runnable::run // applyExecutor
         ).whenComplete((result, ex) -> {

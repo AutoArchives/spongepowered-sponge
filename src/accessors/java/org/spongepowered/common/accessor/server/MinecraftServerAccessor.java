@@ -61,8 +61,6 @@ public interface MinecraftServerAccessor {
 
     @Accessor("nextTickTimeNanos") void accessor$nextTickTimeNanos(final long nextTickTime);
 
-    @Invoker("isSpawningMonsters") boolean invoker$isSpawningMonsters();
-
     @Invoker("setupDebugLevel") void invoker$setupDebugLevel(final WorldData serverConfiguration);
 
     @Invoker("forceDifficulty") void invoker$forceDifficulty();

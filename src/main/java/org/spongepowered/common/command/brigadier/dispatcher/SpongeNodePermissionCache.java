@@ -27,6 +27,7 @@ package org.spongepowered.common.command.brigadier.dispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.PermissionLevel;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
@@ -65,7 +66,7 @@ public final class SpongeNodePermissionCache {
                     && ((CommandSourceStackBridge) source).bridge$getCommandSource() instanceof ServerPlayer) {
                 // If the entity is a player, then we should try to add it anyway.
                 final String permission = supplier.get();
-                SpongePermissions.registerPermission(Sponge.server().serviceProvider().permissionService(), permission, 0);
+                SpongePermissions.registerPermission(Sponge.server().serviceProvider().permissionService(), permission, PermissionLevel.ALL);
                 return ((CommandCause) source).hasPermission(permission);
             }
             return result;

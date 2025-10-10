@@ -125,10 +125,10 @@ public final class SpongeBiomeBuilder implements Biome.Builder {
             .grassColorModifier((BiomeSpecialEffects.GrassColorModifier) (Object) grassColorModifier);
         foliageColor.ifPresent(c -> effectsBuilder.foliageColorOverride(c.rgb()));
         grassColor.ifPresent(c -> effectsBuilder.grassColorOverride(c.rgb()));
-        particleSettings.ifPresent(ps -> effectsBuilder.ambientParticle((AmbientParticleSettings) ps));
+        particleSettings.ifPresent(ps -> effectsBuilder.ambientParticle((AmbientParticleSettings) (Object) ps));
         ambientSound.ifPresent(s -> effectsBuilder.ambientLoopSound(Holder.direct((SoundEvent) (Object) s)));
-        ambientMood.ifPresent(m -> effectsBuilder.ambientMoodSound((net.minecraft.world.level.biome.AmbientMoodSettings) m));
-        additionalSound.ifPresent(s -> effectsBuilder.ambientAdditionsSound((AmbientAdditionsSettings) s));
+        ambientMood.ifPresent(m -> effectsBuilder.ambientMoodSound((net.minecraft.world.level.biome.AmbientMoodSettings) (Object)  m));
+        additionalSound.ifPresent(s -> effectsBuilder.ambientAdditionsSound((AmbientAdditionsSettings) (Object)  s));
         backgroundMusic.ifPresent(m -> effectsBuilder.backgroundMusic((Music) (Object) m));
 
         final MobSpawnSettings.Builder spawnerBuilder = new MobSpawnSettings.Builder()

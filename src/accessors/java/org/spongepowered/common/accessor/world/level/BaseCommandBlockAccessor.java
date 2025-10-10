@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.level;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseCommandBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -41,6 +42,6 @@ public interface BaseCommandBlockAccessor {
 
     @Accessor("command") void accessor$command(final String command);
 
-    @Invoker("createSource") BaseCommandBlock.CloseableCommandBlockSource invoker$createSource();
+    @Invoker("createSource") BaseCommandBlock.CloseableCommandBlockSource invoker$createSource(ServerLevel level);
 
 }

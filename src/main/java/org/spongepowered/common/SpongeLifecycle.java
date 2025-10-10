@@ -31,6 +31,7 @@ import io.leangen.geantyref.TypeToken;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.WorldDataConfiguration;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -174,7 +175,7 @@ public final class SpongeLifecycle implements Lifecycle {
     }
 
     @Override
-    public void establishServerServices(final ResourceManager resourceManager, final int functionsPermissionLevel) {
+    public void establishServerServices(final ResourceManager resourceManager, final PermissionLevel functionsPermissionLevel) {
         final SpongeServerScopedServiceProvider serviceProvider = new SpongeServerScopedServiceProvider(this.game, this.injector, functionsPermissionLevel);
         serviceProvider.init();
         ((ResourceManagerBridge) resourceManager).bridge$services(serviceProvider);

@@ -28,6 +28,7 @@ import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -51,7 +52,10 @@ public abstract class CommandBlockEntityMixin_API extends BlockEntityMixin_API i
 
     @Override
     public void execute() {
-        this.shadow$getCommandBlock().performCommand(this.level);
+        if (!(this.level instanceof ServerLevel sl)) {
+            return;
+        }
+        this.shadow$getCommandBlock().performCommand(sl);
     }
 
     @Override
@@ -93,7 +97,11 @@ public abstract class CommandBlockEntityMixin_API extends BlockEntityMixin_API i
     @SuppressWarnings({"UnstableApiUsage", "deprecation"})
     @Override
     public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
-        final var source = ((BaseCommandBlockAccessor) this.shadow$getCommandBlock()).invoker$createSource();
+        final var block = this.shadow$getCommandBlock();
+        if (!(this.level instanceof ServerLevel sl)) {
+            return;
+        }
+        final var source = ((BaseCommandBlockAccessor) block).invoker$createSource(sl);
         if (source == null) {
             return;
         }

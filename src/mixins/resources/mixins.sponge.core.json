@@ -64,7 +64,6 @@
     "server.bossevents.CustomBossEventMixin",
     "server.commands.BossBarCommandsMixin",
     "server.commands.DifficultyCommandMixin",
-    "server.commands.GameRuleCommandMixin",
     "server.commands.KickCommandMixin",
     "server.commands.SaveAllCommandMixin",
     "server.commands.TeleportCommandMixin",

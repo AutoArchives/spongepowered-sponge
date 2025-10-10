@@ -31,6 +31,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.server.commands.DifficultyCommand;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.storage.LevelData;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Final;
@@ -38,7 +39,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 
 @Mixin(DifficultyCommand.class)
 public abstract class DifficultyCommandMixin {
@@ -58,7 +58,7 @@ public abstract class DifficultyCommandMixin {
         } else {
             final LevelData levelData = source.getLevel().getLevelData();
             ((ServerWorldProperties) levelData).setDifficulty((org.spongepowered.api.world.difficulty.Difficulty) (Object) difficulty);
-            source.getLevel().setSpawnSettings(((MinecraftServerAccessor) SpongeCommon.server()).invoker$isSpawningMonsters());
+            source.getLevel().setSpawnSettings(SpongeCommon.server().getWorldData().getGameRules().getBoolean(GameRules.RULE_SPAWN_MONSTERS));
             source.getLevel().getPlayers(p -> true).forEach(p -> p.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(),
                     levelData.isDifficultyLocked())));
             source.sendSuccess(() -> Component.translatable("commands.difficulty.success", difficulty.getDisplayName()), true);

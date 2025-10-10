@@ -28,10 +28,14 @@ import net.minecraft.world.level.biome.AmbientParticleSettings;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.world.biome.ambient.ParticleConfig;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(AmbientParticleSettings.class)
+@Implements(@Interface(iface = ParticleConfig.class, prefix = "api$"))
 public abstract class AmbientParticleSettingsMixin_API implements ParticleConfig {
 
     // @formatter:off
@@ -39,8 +43,8 @@ public abstract class AmbientParticleSettingsMixin_API implements ParticleConfig
     @Shadow @Final private net.minecraft.core.particles.ParticleOptions options;
     // @formatter:on
 
-    @Override
-    public float probability() {
+    @Intrinsic
+    public float api$probability() {
         return this.probability;
     }
 

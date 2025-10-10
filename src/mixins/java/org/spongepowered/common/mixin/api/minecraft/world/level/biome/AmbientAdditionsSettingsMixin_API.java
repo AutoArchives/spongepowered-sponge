@@ -30,10 +30,14 @@ import net.minecraft.world.level.biome.AmbientAdditionsSettings;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.world.biome.ambient.SoundConfig;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(AmbientAdditionsSettings.class)
+@Implements(@Interface(iface = SoundConfig.Additional.class, prefix = "api$"))
 public abstract class AmbientAdditionsSettingsMixin_API implements SoundConfig.Additional {
 
     // @formatter:off
@@ -46,8 +50,8 @@ public abstract class AmbientAdditionsSettingsMixin_API implements SoundConfig.A
         return (SoundType) (Object) this.soundEvent.value();
     }
 
-    @Override
-    public double tickChance() {
+    @Intrinsic
+    public double api$tickChance() {
         return this.tickChance;
     }
 }

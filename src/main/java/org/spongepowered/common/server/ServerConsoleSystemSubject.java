@@ -29,6 +29,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -59,14 +60,14 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
     @Override
     public CommandSourceStack bridge$getCommandSource(final Cause cause) {
         return new CommandSourceStack(this,
-                Vec3.ZERO,
-                Vec2.ZERO,
-                SpongeCommon.server().getLevel(Level.OVERWORLD),
-                4,
-                "System Subject",
-                net.minecraft.network.chat.Component.literal("System Subject"),
-                SpongeCommon.server(),
-                null);
+            Vec3.ZERO,
+            Vec2.ZERO,
+            SpongeCommon.server().getLevel(Level.OVERWORLD),
+            LevelBasedPermissionSet.OWNER,
+            "System Subject",
+            net.minecraft.network.chat.Component.literal("System Subject"),
+            SpongeCommon.server(),
+            null);
     }
 
     @Override

@@ -24,12 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.mixin.core.world.BaseCommandBlockMixin;
 
 @Mixin(targets = "net.minecraft.world.level.block.entity.CommandBlockEntity$1")
@@ -42,5 +49,26 @@ public abstract class CommandBlockEntity_Mixin extends BaseCommandBlockMixin imp
     @Override
     public Subject subject() {
         return (Subject) this.this$0;
+    }
+
+    @Override
+    public CommandSourceStack bridge$getCommandSource(final Cause cause) {
+        if (!(this.this$0.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel)) {
+            return null;
+        }
+        return this.createCommandSourceStack(serverLevel, this.shadow$createSource(serverLevel));
+    }
+
+    @Override
+    @SuppressWarnings({"deprecation", "UnstableApiUsage"})
+    public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
+        if (!(this.this$0.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel)) {
+            return;
+        }
+        final var source = this.shadow$createSource(serverLevel);
+        if (source == null) {
+            return;
+        }
+        source.sendSystemMessage(SpongeAdventure.asVanilla(message));
     }
 }

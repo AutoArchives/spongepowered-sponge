@@ -24,15 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.mixin.core.world.BaseCommandBlockMixin;
 
-@Mixin(MinecartCommandBlock.MinecartCommandBase.class)
+@Mixin(targets = "net.minecraft.world.entity.vehicle.MinecartCommandBlock$MinecartCommandBase")
 public abstract class MinecartCommandBlock_MinecartCommandBaseMixin extends BaseCommandBlockMixin implements SubjectProxy {
 
     // @formatter:off
@@ -42,5 +50,26 @@ public abstract class MinecartCommandBlock_MinecartCommandBaseMixin extends Base
     @Override
     public Subject subject() {
         return (Subject) this.this$0;
+    }
+
+    @Override
+    public CommandSourceStack bridge$getCommandSource(final Cause cause) {
+        if (!(this.this$0.level() instanceof ServerLevel sl)) {
+            return null;
+        }
+        return this.createCommandSourceStack(sl, this.shadow$createSource(sl));
+    }
+
+    @Override
+    @SuppressWarnings({"deprecation", "UnstableApiUsage"})
+    public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
+        if (!(this.this$0.level() instanceof ServerLevel sl)) {
+            return;
+        }
+        final var source = this.shadow$createSource(sl);
+        if (source == null) {
+            return;
+        }
+        source.sendSystemMessage(SpongeAdventure.asVanilla(message));
     }
 }

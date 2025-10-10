@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.entity.player;
 
+import net.minecraft.server.permissions.PermissionLevel;
+
 public final class LoginPermissions {
 
-    public static final int BYPASS_WHITELIST_LEVEL = 1;
+    public static final PermissionLevel BYPASS_WHITELIST_LEVEL = PermissionLevel.MODERATORS;
 
     public static final String BYPASS_WHITELIST_PERMISSION = "minecraft.login.bypass-whitelist";
 

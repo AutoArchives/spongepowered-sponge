@@ -34,7 +34,7 @@ import org.spongepowered.common.bridge.world.entity.AggressiveEntityBridge;
 public abstract class ZombifiedPiglinMixin extends MonsterMixin implements AggressiveEntityBridge {
 
     // @formatter:off
-    @Shadow private int remainingPersistentAngerTime;
+    @Shadow private long persistentAngerEndTime;
     // @formatter:on
 
     @Override
@@ -45,9 +45,9 @@ public abstract class ZombifiedPiglinMixin extends MonsterMixin implements Aggre
     @Override
     public void bridge$setAngry(boolean angry) {
         if (angry) {
-            this.remainingPersistentAngerTime = 400 + this.random.nextInt(400);
+            this.persistentAngerEndTime = 400 + this.random.nextInt(400);
         } else {
-            this.remainingPersistentAngerTime = 0;
+            this.persistentAngerEndTime = 0;
         }
     }
 }

@@ -30,10 +30,14 @@ import net.minecraft.world.level.biome.AmbientMoodSettings;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.world.biome.ambient.SoundConfig;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(AmbientMoodSettings.class)
+@Implements(@Interface(iface = SoundConfig.Mood.class, prefix = "api$"))
 public abstract class AmbientMoodSettingsMixin_API implements SoundConfig.Mood {
 
     // @formatter:off
@@ -48,18 +52,18 @@ public abstract class AmbientMoodSettingsMixin_API implements SoundConfig.Mood {
         return (SoundType) (Object) this.soundEvent.value();
     }
 
-    @Override
-    public int tickDelay() {
+    @Intrinsic
+    public int api$tickDelay() {
         return this.tickDelay;
     }
 
-    @Override
-    public int searchRadius() {
+    @Intrinsic
+    public int api$searchRadius() {
         return this.blockSearchExtent;
     }
 
-    @Override
-    public double distanceModifier() {
+    @Intrinsic
+    public double api$distanceModifier() {
         return this.soundPositionOffset;
     }
 

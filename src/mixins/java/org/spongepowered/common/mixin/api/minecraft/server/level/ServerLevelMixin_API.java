@@ -336,6 +336,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         return this.api$chunkLayout;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public WorldBorder setBorder(final WorldBorder border) {
 

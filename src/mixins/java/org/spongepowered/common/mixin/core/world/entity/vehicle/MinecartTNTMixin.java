@@ -103,8 +103,8 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
         this.impl$primeCause = damageSource;
     }
 
-    @Inject(method = "activateMinecart(IIIZ)V", at = @At("HEAD"))
-    private void impl$onActivateSetPrimeCauseNotifier(final int x, final int y, final int z, final boolean receivingPower, final CallbackInfo ci) {
+    @Inject(method = "activateMinecart(Lnet/minecraft/server/level/ServerLevel;IIIZ)V", at = @At("HEAD"))
+    private void impl$onActivateSetPrimeCauseNotifier(final ServerLevel level, final int x, final int y, final int z, final boolean receivingPower, final CallbackInfo ci) {
         if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
             return;
         }

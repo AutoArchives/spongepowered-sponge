@@ -33,6 +33,6 @@ public class SpongeParticleConfigFactory implements ParticleConfig.Factory {
 
     @Override
     public ParticleConfig of(final ParticleType type, final float probability) {
-        return (ParticleConfig) new AmbientParticleSettings(((ParticleOptions) type), probability);
+        return (ParticleConfig) (Object) new AmbientParticleSettings(((ParticleOptions) type), probability);
     }
 }

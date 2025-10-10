@@ -42,6 +42,7 @@ import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ChunkLevel;
 import net.minecraft.server.level.FullChunkStatus;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -397,11 +398,11 @@ public final class Constants {
 
         public static final String SELECTOR_PERMISSION = "minecraft.selector";
         public static final String COMMAND_BLOCK_PERMISSION = "minecraft.commandblock";
-        public static final int COMMAND_BLOCK_LEVEL = 2;
-        public static final int SELECTOR_LEVEL = 2;
+        public static final PermissionLevel COMMAND_BLOCK_LEVEL = PermissionLevel.GAMEMASTERS;
+        public static final PermissionLevel SELECTOR_LEVEL = PermissionLevel.GAMEMASTERS;
         public static final String SPONGE_HELP_PERMISSION = "sponge.command.help";
         public static final String DEBUG_HOVER_STACKTRACE = "sponge.debug.hover-stacktrace";
-        public static final int SPONGE_HELP_LEVEL = 0;
+        public static final PermissionLevel SPONGE_HELP_LEVEL = PermissionLevel.ALL;
     }
 
     /**

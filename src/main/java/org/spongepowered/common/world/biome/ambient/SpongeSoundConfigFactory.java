@@ -36,12 +36,12 @@ public class SpongeSoundConfigFactory implements SoundConfig.Factory {
 
     @Override
     public SoundConfig.Mood ofAmbientMood(final SoundType sound, final int tickDelay, final int searchRadius, final double distanceModifier) {
-        return (SoundConfig.Mood) new AmbientMoodSettings(Holder.direct((SoundEvent) (Object) sound), tickDelay, searchRadius, distanceModifier);
+        return (SoundConfig.Mood) (Object) new AmbientMoodSettings(Holder.direct((SoundEvent) (Object) sound), tickDelay, searchRadius, distanceModifier);
     }
 
     @Override
     public SoundConfig.Additional ofAdditional(final SoundType sound, final double tickChance) {
-        return (SoundConfig.Additional) new AmbientAdditionsSettings(Holder.direct((SoundEvent) (Object) sound), tickChance);
+        return (SoundConfig.Additional) (Object) new AmbientAdditionsSettings(Holder.direct((SoundEvent) (Object) sound), tickChance);
     }
 
     @Override

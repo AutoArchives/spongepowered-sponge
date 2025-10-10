@@ -47,6 +47,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -67,7 +68,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
@@ -291,7 +291,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
         } else if (server.isSingleplayer()) {
             level.setSpawnSettings(difficulty != Difficulty.PEACEFUL);
         } else {
-            level.setSpawnSettings(((MinecraftServerAccessor) server).invoker$isSpawningMonsters());
+            level.setSpawnSettings(server.getWorldData().getGameRules().getBoolean(GameRules.RULE_SPAWN_MONSTERS));
         }
 
         level.players().forEach(player -> player.connection.send(new ClientboundChangeDifficultyPacket(difficulty, isLocked)));

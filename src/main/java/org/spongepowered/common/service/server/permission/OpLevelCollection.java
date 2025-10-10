@@ -26,6 +26,7 @@ package org.spongepowered.common.service.server.permission;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.server.permissions.PermissionLevel;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -45,8 +46,8 @@ public class OpLevelCollection extends SpongeSubjectCollection {
     public OpLevelCollection(final SpongePermissionService service) {
         super(PermissionService.SUBJECTS_GROUP, service);
         final ImmutableMap.Builder<String, OpLevelSubject> build = ImmutableMap.builder();
-        for (int i = 0; i <= 4; ++i) {
-            build.put("op_" + i, new OpLevelSubject(service, i)); // TODO: Add subject data
+        for (var level : PermissionLevel.values()) {
+            build.put("op_" + level.ordinal(), new OpLevelSubject(service, level)); // TODO: Add subject data
         }
         this.levels = build.build();
     }
@@ -74,10 +75,10 @@ public class OpLevelCollection extends SpongeSubjectCollection {
     public static class OpLevelSubject extends SpongeSubject {
 
         private final SpongePermissionService service;
-        private final int level;
+        private final PermissionLevel level;
         private final MemorySubjectData data;
 
-        public OpLevelSubject(final SpongePermissionService service, final int level) {
+        public OpLevelSubject(final SpongePermissionService service, final PermissionLevel level) {
             this.service = service;
             this.level = level;
             this.data = new GlobalMemorySubjectData(this) {
@@ -87,23 +88,27 @@ public class OpLevelCollection extends SpongeSubjectCollection {
                     if (!contexts.isEmpty()) {
                         return Collections.emptyList();
                     }
-                    if (level == 0) {
+                    if (level == PermissionLevel.ALL) {
                         return super.parents(contexts);
                     } else {
-                        return ImmutableList.<SubjectReference>builder().add(service.getGroupForOpLevel(level - 1).asSubjectReference()).addAll(super.parents(contexts)).build();
+                        if (level == PermissionLevel.ALL) {
+                            return ImmutableList.<SubjectReference>builder().add(service.getGroupForOpLevel(level).asSubjectReference()).addAll(super.parents(contexts)).build();
+                        }
+                        var lesser = PermissionLevel.values()[level.ordinal() - 1];
+                        return ImmutableList.<SubjectReference>builder().add(service.getGroupForOpLevel(lesser).asSubjectReference()).addAll(super.parents(contexts)).build();
                     }
                 }
             };
             SpongePermissions.populateNonCommandPermissions(this.data, (permLevel, name) -> level == permLevel);
         }
 
-        public int opLevel() {
+        public PermissionLevel opLevel() {
             return this.level;
         }
 
         @Override
         public String identifier() {
-            return "op_" + this.level;
+            return "op_" + this.level.ordinal();
         }
 
         @Override
