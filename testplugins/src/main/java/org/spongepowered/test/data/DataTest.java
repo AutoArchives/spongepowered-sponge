@@ -139,7 +139,7 @@ import java.util.Random;
 import java.util.Set;
 
 @Plugin("datatest")
-public final class DataTest  {
+public final class DataTest {
 
     private final PluginContainer plugin;
 
@@ -159,32 +159,32 @@ public final class DataTest  {
                     return CommandResult.success();
                 })
                 .build()
-        , "datatest");
+            , "datatest");
 
         final Parameter.Value<String> mimicParameter = Parameter.string().key("mimic_username").optional().build();
         event.register(this.plugin, Command
-                        .builder()
-                        .addParameter(mimicParameter)
-                        .executor(context -> {
-                            final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
-                            final String mimicUsername = context.requireOne(mimicParameter);
-                            this.setPlayerSkin(player, mimicUsername);
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "mimic"
+                .builder()
+                .addParameter(mimicParameter)
+                .executor(context -> {
+                    final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
+                    final String mimicUsername = context.requireOne(mimicParameter);
+                    this.setPlayerSkin(player, mimicUsername);
+                    return CommandResult.success();
+                })
+                .build()
+            , "mimic"
         );
         event.register(this.plugin, Command
-                        .builder()
-                        .addParameter(mimicParameter)
-                        .executor(context -> {
-                            final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
-                            this.mimic = context.requireOne(mimicParameter);
-                            player.kick();
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "mimickick"
+                .builder()
+                .addParameter(mimicParameter)
+                .executor(context -> {
+                    final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
+                    this.mimic = context.requireOne(mimicParameter);
+                    player.kick();
+                    return CommandResult.success();
+                })
+                .build()
+            , "mimickick"
         );
     }
 
@@ -230,15 +230,15 @@ public final class DataTest  {
         this.checkOfferData(minecartEntity, Keys.AIRBORNE_VELOCITY_MODIFIER, new Vector3d(2, 0.5, 2)); // falls at ~50% flies at -200%
 
         final Entity zombifiedPiglin = world.createEntity(EntityTypes.ZOMBIFIED_PIGLIN.get(), position);
-        this.checkGetData(zombifiedPiglin, Keys.ANGER_LEVEL, 0);
-        this.checkOfferData(zombifiedPiglin, Keys.ANGER_LEVEL, 10);
+        this.checkGetData(zombifiedPiglin, Keys.ANGER_LEVEL, (long) 0);
+        this.checkOfferData(zombifiedPiglin, Keys.ANGER_LEVEL, (long) 10);
 
         final ItemStack goldenApple = ItemStack.of(ItemTypes.ENCHANTED_GOLDEN_APPLE);
         final List<PotionEffect> notchAppleEffects = Arrays.asList(
-                PotionEffect.builder().potionType(PotionEffectTypes.REGENERATION).amplifier(1).ambient(false).duration(Ticks.of(400)).build(),
-                PotionEffect.builder().potionType(PotionEffectTypes.RESISTANCE).amplifier(0).ambient(false).duration(Ticks.of(6000)).build(),
-                PotionEffect.builder().potionType(PotionEffectTypes.FIRE_RESISTANCE).amplifier(0).ambient(false).duration(Ticks.of(6000)).build(),
-                PotionEffect.builder().potionType(PotionEffectTypes.ABSORPTION).amplifier(3).ambient(false).duration(Ticks.of(2400)).build());
+            PotionEffect.builder().potionType(PotionEffectTypes.REGENERATION).amplifier(1).ambient(false).duration(Ticks.of(400)).build(),
+            PotionEffect.builder().potionType(PotionEffectTypes.RESISTANCE).amplifier(0).ambient(false).duration(Ticks.of(6000)).build(),
+            PotionEffect.builder().potionType(PotionEffectTypes.FIRE_RESISTANCE).amplifier(0).ambient(false).duration(Ticks.of(6000)).build(),
+            PotionEffect.builder().potionType(PotionEffectTypes.ABSORPTION).amplifier(3).ambient(false).duration(Ticks.of(2400)).build());
 
         this.checkOfferListData(goldenApple, Keys.APPLIED_ENCHANTMENTS, Arrays.asList(Enchantment.of(EnchantmentTypes.SHARPNESS, 5)));
         this.checkOfferListData(goldenApple, Keys.APPLIED_ENCHANTMENTS, Arrays.asList(Enchantment.of(EnchantmentTypes.PROTECTION, 4)));
@@ -274,10 +274,10 @@ public final class DataTest  {
 
         final ItemStack shieldStack = ItemStack.of(ItemTypes.SHIELD);
         this.checkGetListData(shieldStack, Keys.BANNER_PATTERN_LAYERS, Collections.emptyList());
-        this.checkOfferListData(shieldStack, Keys.BANNER_PATTERN_LAYERS,pattern);
+        this.checkOfferListData(shieldStack, Keys.BANNER_PATTERN_LAYERS, pattern);
 
         final ItemStack bannerStack = ItemStack.of(ItemTypes.RED_BANNER);
-        this.checkGetListData(bannerStack, Keys.BANNER_PATTERN_LAYERS,  Collections.emptyList());
+        this.checkGetListData(bannerStack, Keys.BANNER_PATTERN_LAYERS, Collections.emptyList());
         this.checkOfferListData(bannerStack, Keys.BANNER_PATTERN_LAYERS, pattern);
 
         world.setBlock(blockPos, BlockTypes.RED_BANNER.get().defaultState());
@@ -286,8 +286,8 @@ public final class DataTest  {
 
         // Keys.BASE_COLOR
 
-        this.checkGetData(sheep, Keys.BASE_SIZE, (double)0.9f);
-        this.checkGetData(player, Keys.BASE_SIZE, (double)0.6f);
+        this.checkGetData(sheep, Keys.BASE_SIZE, (double) 0.9f);
+        this.checkGetData(player, Keys.BASE_SIZE, (double) 0.6f);
 
         final Entity donkey = world.createEntity(EntityTypes.DONKEY.get(), position);
         final Entity wolf = world.createEntity(EntityTypes.WOLF.get(), position);
@@ -313,7 +313,7 @@ public final class DataTest  {
 
         // TODO Keys.BLOCK_LIGHT
 
-        final Entity fallingBlock = world.createEntity(EntityTypes.FALLING_BLOCK.get(), position.add(0,5,0));
+        final Entity fallingBlock = world.createEntity(EntityTypes.FALLING_BLOCK.get(), position.add(0, 5, 0));
         final BlockState sandState = BlockTypes.SAND.get().defaultState();
         this.checkOfferData(fallingBlock, Keys.BLOCK_STATE, sandState);
         this.checkOfferData(minecartEntity, Keys.BLOCK_STATE, dirtState);
@@ -485,14 +485,14 @@ public final class DataTest  {
         // TODO DisplayNames include font
 
         this.checkGetData(jungleAxe, Keys.DISPLAY_NAME,
-                Component.translatable("chat.square_brackets").args(Component.empty().append(Component.text("Jungle Axe")).decorate(TextDecoration.ITALIC))
-                        .color(NamedTextColor.WHITE).hoverEvent(jungleAxe.asImmutable().asHoverEvent()));
+            Component.translatable("chat.square_brackets").args(Component.empty().append(Component.text("Jungle Axe")).decorate(TextDecoration.ITALIC))
+                .color(NamedTextColor.WHITE).hoverEvent(jungleAxe.asImmutable().asHoverEvent()));
         this.checkGetData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet")
-                .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("shulker_bullet"), shulkerBullet.uniqueId(), Component.text("Angry Shulker Bullet")))
-                .insertion(shulkerBullet.uniqueId().toString()));
+            .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("shulker_bullet"), shulkerBullet.uniqueId(), Component.text("Angry Shulker Bullet")))
+            .insertion(shulkerBullet.uniqueId().toString()));
         this.checkGetData(sheep, Keys.DISPLAY_NAME, Component.text("A sheep")
-                .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("sheep"), sheep.uniqueId(), Component.text("A sheep")))
-                .insertion(sheep.uniqueId().toString())); // Set with CUSTOM_NAME
+            .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("sheep"), sheep.uniqueId(), Component.text("A sheep")))
+            .insertion(sheep.uniqueId().toString())); // Set with CUSTOM_NAME
         world.setBlock(blockPos, BlockTypes.CHEST.get().defaultState());
         this.checkGetData(location, Keys.CUSTOM_NAME, null);
         this.checkGetData(location, Keys.DISPLAY_NAME, Component.translatable("container.chest"));
@@ -554,8 +554,8 @@ public final class DataTest  {
 
         this.checkOfferData(tntEntity, Keys.EXPLOSION_RADIUS, 1f);
 
-        this.checkGetData(player, Keys.EYE_HEIGHT, (double)1.62f);
-        this.checkGetData(sheep, Keys.EYE_HEIGHT,  (double)(1.3f * 0.95f));
+        this.checkGetData(player, Keys.EYE_HEIGHT, (double) 1.62f);
+        this.checkGetData(sheep, Keys.EYE_HEIGHT, (double) (1.3f * 0.95f));
 
         this.checkGetData(sheep, Keys.EYE_POSITION, position.add(0, (double) (1.3f * 0.95f), 0));
 
@@ -594,7 +594,7 @@ public final class DataTest  {
 
         // TODO Keys.FLUID_TANK_CONTENTS
 
-        this.checkGetData(player, Keys.FLYING_SPEED, (double)0.05f);
+        this.checkGetData(player, Keys.FLYING_SPEED, (double) 0.05f);
 
         this.checkOfferData(player, Keys.FOOD_LEVEL, 0);
         this.checkOfferData(player, Keys.FOOD_LEVEL, 20);
@@ -1292,9 +1292,9 @@ public final class DataTest  {
         // Keys.TRACKS_OUTPUT
 
         final TradeOffer tradeOffer = TradeOffer.builder()
-                .firstBuyingItem(ItemStack.of(ItemTypes.EMERALD))
-                .sellingItem(jungleAxe)
-                .build();
+            .firstBuyingItem(ItemStack.of(ItemTypes.EMERALD))
+            .sellingItem(jungleAxe)
+            .build();
         this.checkOfferListData(villager, Keys.TRADE_OFFERS, Arrays.asList(tradeOffer));
 
         final Entity hooman = world.createEntity(EntityTypes.HUMAN.get(), position);
@@ -1421,11 +1421,11 @@ public final class DataTest  {
             final List<T> actual = gotValue.get().get(new Random());
             if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
                 this.plugin.logger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
-                        key.key().asString(), expected, actual);
+                    key.key().asString(), expected, actual);
             }
         } else {
             this.plugin.logger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder),
-                    key.key().asString(), expected);
+                key.key().asString(), expected);
         }
     }
 
@@ -1449,7 +1449,7 @@ public final class DataTest  {
         if (actualValue != null) {
             if (!Objects.equals(actualValue, expectedValue)) {
                 this.plugin.logger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder), key,
-                        expectedValue, actualValue);
+                    expectedValue, actualValue);
             }
         } else if (expectedValue != null) {
             this.plugin.logger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder), key, expectedValue);
@@ -1466,11 +1466,10 @@ public final class DataTest  {
         return String.format("%s[%s]", holder.getClass().getSimpleName(), value);
     }
 
-    public void setPlayerSkin(final DataHolder.Mutable player, final String mimicUsername)
-    {
+    public void setPlayerSkin(final DataHolder.Mutable player, final String mimicUsername) {
         final GameProfile profile = Sponge.server().gameProfileManager().profile(mimicUsername).join();
         final Optional<ProfileProperty> skinProperty =
-                profile.properties().stream().filter(prop -> prop.name().equals(ProfileProperty.TEXTURES)).findFirst();
+            profile.properties().stream().filter(prop -> prop.name().equals(ProfileProperty.TEXTURES)).findFirst();
         player.offer(Keys.SKIN_PROFILE_PROPERTY, skinProperty.get());
     }
 }
