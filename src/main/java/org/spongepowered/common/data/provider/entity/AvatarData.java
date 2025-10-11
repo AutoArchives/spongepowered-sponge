@@ -29,17 +29,24 @@ import net.minecraft.world.entity.HumanoidArm;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.entity.avatar.MobAvatar;
 
 public final class AvatarData {
     private AvatarData() {
     }
 
-    public static void register(DataProviderRegistrator registrator) {
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
         registrator
             .asMutable(Avatar.class)
                 .create(Keys.DOMINANT_HAND)
                     .get(h -> (HandPreference) (Object) h.getMainArm())
                     .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
+            .asMutable(MobAvatar.class)
+                .create(Keys.DOMINANT_HAND)
+                    .get(h -> (HandPreference) (Object) h.getMainArm())
+                    .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
         ;
     }
+    // @formatter:on
 }

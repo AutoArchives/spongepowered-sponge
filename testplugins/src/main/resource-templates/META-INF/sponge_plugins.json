@@ -98,6 +98,12 @@
             "description": "Testing entities"
         },
         {
+            "id": "mannequintest",
+            "name": "Mannequin Test",
+            "entrypoint": "org.spongepowered.test.mannequin.MannequinTest",
+            "description": "Testing mannequins"
+        },
+        {
             "id": "interacttest",
             "name": "Interact Test",
             "entrypoint": "org.spongepowered.test.interact.InteractTest",

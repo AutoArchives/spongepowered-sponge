@@ -25,15 +25,18 @@
 package org.spongepowered.common.transformation;
 
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.decoration.Mannequin;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.api.entity.ai.goal.AbstractGoal;
+import org.spongepowered.common.entity.avatar.MobAvatar;
 
 public class SuperclassChangeTest {
 
     @Test
     public void testSuperclassChange() {
         assertSuperclassEquals(AbstractGoal.class, Goal.class);
+        assertSuperclassEquals(Mannequin.class, MobAvatar.class);
     }
 
     private static void assertSuperclassEquals(final Class<?> base, final Class<?> expectedSuper) {

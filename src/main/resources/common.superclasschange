@@ -1,1 +1,2 @@
 org.spongepowered.api.entity.ai.goal.AbstractGoal:net.minecraft.world.entity.ai.goal.Goal
+net.minecraft.world.entity.decoration.Mannequin:org.spongepowered.common.entity.avatar.MobAvatar

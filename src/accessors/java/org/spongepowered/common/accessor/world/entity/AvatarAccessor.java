@@ -24,20 +24,23 @@
  */
 package org.spongepowered.common.accessor.world.entity;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.Avatar;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.Pose;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
 
+import java.util.Map;
+
 @Mixin(Avatar.class)
 public interface AvatarAccessor {
 
-    @Accessor("DATA_PLAYER_MODE_CUSTOMISATION") static EntityDataAccessor<Byte> accessor$DATA_PLAYER_MODE_CUSTOMISATION() {
+    @Accessor("STANDING_DIMENSIONS") static EntityDimensions accessor$STANDING_DIMENSIONS() {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_PLAYER_MAIN_HAND") static EntityDataAccessor<Byte> accessor$DATA_PLAYER_MAIN_HAND() {
+    @Accessor("POSES") static Map<Pose, EntityDimensions> accessor$POSES() {
         throw new UntransformedAccessorError();
     }
 

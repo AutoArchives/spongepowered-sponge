@@ -24,33 +24,14 @@
  */
 package org.spongepowered.common.accessor.world.entity.player;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
-
-import java.util.OptionalInt;
 
 @Mixin(Player.class)
 public interface PlayerAccessor {
 
-    @Accessor("DATA_PLAYER_ABSORPTION_ID") static EntityDataAccessor<Float> accessor$DATA_PLAYER_ABSORPTION_ID() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DATA_SCORE_ID") static EntityDataAccessor<Integer> accessor$DATA_SCORE_ID() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DATA_SHOULDER_PARROT_LEFT") static EntityDataAccessor<OptionalInt> accessor$DATA_SHOULDER_LEFT() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DATA_SHOULDER_PARROT_RIGHT") static EntityDataAccessor<OptionalInt> accessor$DATA_SHOULDER_RIGHT() {
-        throw new UntransformedAccessorError();
-    }
     @Invoker("getPermissionLevel") int invoker$getPermissionLevel();
 
     @Accessor("sleepCounter") void accessor$sleepCounter(final int sleepCounter);

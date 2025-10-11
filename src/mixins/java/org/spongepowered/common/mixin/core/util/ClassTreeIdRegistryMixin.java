@@ -22,13 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.decoration;
+package org.spongepowered.common.mixin.core.util;
 
-import org.spongepowered.api.entity.Mannequin;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.util.ClassTreeIdRegistry;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.common.entity.avatar.MobAvatar;
 
-// Warning: superclass has been changed
-@Mixin(net.minecraft.world.entity.decoration.Mannequin.class)
-public abstract class MannequinMixin implements Mannequin {
+@Mixin(ClassTreeIdRegistry.class)
+public class ClassTreeIdRegistryMixin {
 
+    @WrapOperation(method = "getLastIdFor", at = @At(value = "INVOKE", target = "Ljava/lang/Class;getSuperclass()Ljava/lang/Class;"))
+    private Class<?> impl$skipMobAvatarSuperclass(final Class<?> type, final Operation<Class<?>> original) {
+        if (type == MobAvatar.class) {
+            return LivingEntity.class;
+        }
+        return original.call(type);
+    }
 }

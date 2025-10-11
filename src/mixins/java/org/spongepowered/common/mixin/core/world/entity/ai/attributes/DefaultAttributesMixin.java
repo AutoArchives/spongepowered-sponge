@@ -22,13 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.decoration;
+package org.spongepowered.common.mixin.core.world.entity.ai.attributes;
 
-import org.spongepowered.api.entity.Mannequin;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.entity.avatar.MobAvatar;
 
-// Warning: superclass has been changed
-@Mixin(net.minecraft.world.entity.decoration.Mannequin.class)
-public abstract class MannequinMixin implements Mannequin {
+@Mixin(DefaultAttributes.class)
+public class DefaultAttributesMixin {
 
+    @ModifyExpressionValue(
+        method = "<clinit>",
+        slice = @Slice(from = @At(value = "FIELD", opcode = Opcodes.GETSTATIC, target = "Lnet/minecraft/world/entity/EntityType;MANNEQUIN:Lnet/minecraft/world/entity/EntityType;")),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;createLivingAttributes()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;")
+    )
+    private static AttributeSupplier.Builder impl$modifyMannequinAttributes(final AttributeSupplier.Builder original) {
+        MobAvatar.addAttributes(original);
+        return original;
+    }
 }
