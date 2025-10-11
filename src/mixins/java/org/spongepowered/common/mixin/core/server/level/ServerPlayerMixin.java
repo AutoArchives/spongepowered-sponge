@@ -1052,4 +1052,15 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private boolean impl$skipUnserializableRootVehicle(final Entity instance) {
         return instance.hasExactlyOnePlayerPassenger() && !((TransientBridge) instance).bridge$isTransient();
     }
+
+    /**
+     * Fixes <a href="https://bugs.mojang.com/browse/MC/issues/MC-302672">MC-302672</a>
+     */
+    @WrapOperation(method =  "onEffectAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
+    private void impl$onEffectAdded(ServerGamePacketListenerImpl instance, Packet packet, Operation<Void> original) {
+        if (instance == null) {
+            return;
+        }
+        original.call(instance, packet);
+    }
 }
