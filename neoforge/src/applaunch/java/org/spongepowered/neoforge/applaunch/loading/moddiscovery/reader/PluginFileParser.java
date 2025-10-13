@@ -24,7 +24,6 @@
  */
 package org.spongepowered.neoforge.applaunch.loading.moddiscovery.reader;
 
-import net.neoforged.fml.classloading.SecureJar;
 import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.fml.jarcontents.JarResource;
 import net.neoforged.fml.loading.moddiscovery.ModFile;
@@ -79,8 +78,8 @@ public final class PluginFileParser {
             return null;
         }
 
-        final ModJarMetadata mjm = new ModJarMetadata(contents);
-        final IModFile modFile = IModFile.create(SecureJar.from(contents, mjm), PluginFileParser::parsePluginMetadata, attributes);
+        final ModJarMetadata mjm = new ModJarMetadata();
+        final IModFile modFile = new ModFile(contents, mjm, PluginFileParser::parsePluginMetadata, attributes);
         mjm.setModFile(modFile);
         return modFile;
     }

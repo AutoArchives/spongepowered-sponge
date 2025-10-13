@@ -24,7 +24,7 @@
  */
 package org.spongepowered.neoforge.applaunch.transformation;
 
-import net.neoforged.fml.classloading.SecureJar;
+import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
 import net.neoforged.neoforgespi.transformation.ClassProcessor;
@@ -68,14 +68,14 @@ public class NeoAccessWidenerTransformer extends AccessWidenerTransformer implem
     protected Collection<URL> collectResources() {
         final Collection<URL> resources = new ArrayList<>();
         for (ModFileInfo fileInfo : FMLLoader.getCurrent().getLoadingModList().getModFiles()) {
-            final SecureJar jar = fileInfo.getFile().getSecureJar();
-            final Attributes attributes = jar.moduleDataProvider().getManifest().getMainAttributes();
+            final JarContents jar = fileInfo.getFile().getContents();
+            final Attributes attributes = jar.getManifest().getMainAttributes();
 
             final String attribute = attributes.getValue(AccessWidenerTransformer.MANIFEST_ATTRIBUTE);
             if (attribute != null) {
                 for (final String path : attribute.split(",")) {
                     try {
-                        resources.add(jar.contents().findFile(path).get().toURL());
+                        resources.add(jar.findFile(path).get().toURL());
                     } catch (final Exception e) {
                         LOGGER.warn("Failed to locate access widener {} from {}", path, fileInfo.getFile().getFileName(), e);
                     }
