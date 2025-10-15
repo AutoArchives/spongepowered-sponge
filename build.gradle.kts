@@ -1,3 +1,6 @@
+import org.jetbrains.gradle.ext.compiler
+import org.jetbrains.gradle.ext.delegateActions
+import org.jetbrains.gradle.ext.settings
 import org.spongepowered.gradle.vanilla.task.DecompileJarTask
 import java.util.Locale
 
@@ -14,7 +17,6 @@ plugins {
     alias(libs.plugins.versions)
 }
 
-val commonProject = project
 val apiVersion: String by project
 val apiJavaTarget: String by project
 val minecraftVersion: String by project
@@ -22,21 +24,21 @@ val recommendedVersion: String by project
 val organization: String by project
 val projectUrl: String by project
 
+version = spongeImpl.generateImplementationVersionString(apiVersion, minecraftVersion, recommendedVersion)
+
 val commonManifest = java.manifest {
     attributes(
         "Specification-Title" to "Sponge",
         "Specification-Vendor" to "SpongePowered",
         "Specification-Version" to apiVersion,
         "Implementation-Title" to project.name,
-        "Implementation-Version" to spongeImpl.generateImplementationVersionString(apiVersion, minecraftVersion, recommendedVersion),
+        "Implementation-Version" to version,
         "Implementation-Vendor" to "SpongePowered"
     )
     // These two are included by most CI's
     System.getenv()["GIT_COMMIT"]?.apply { attributes("Git-Commit" to this) }
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
-
-version = spongeImpl.generateImplementationVersionString(apiVersion, minecraftVersion, recommendedVersion)
 
 // SpongeCommon configurations
 val applaunchConfig by configurations.register("applaunch")
@@ -171,6 +173,26 @@ dependencies {
     testImplementation(libs.mockito.junitJupiter) {
         exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
     }
+
+    testImplementation(libs.mixin)
+}
+
+minecraft {
+    accessWideners(main.resources.filter { it.name.endsWith(".accesswidener") })
+}
+
+idea {
+    project.settings {
+        delegateActions {
+            delegateBuildRunToGradle = false
+            testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.GRADLE
+        }
+        compiler {
+            addNotNullAssertions = false
+            useReleaseOption = true
+            parallelCompilation = true
+        }
+    }
 }
 
 allprojects {
@@ -178,12 +200,11 @@ allprojects {
         resolutionStrategy.dependencySubstitution {
             // https://github.com/zml2008/guice/tree/backport/5.0.1
             substitute(module("com.google.inject:guice:5.0.1"))
-                    .because("We need to run against Guava 21")
-                    .using(module("ca.stellardrift.guice-backport:guice:5.0.1"))
+                .because("We need to run against Guava 21")
+                .using(module("ca.stellardrift.guice-backport:guice:5.0.1"))
         }
     }
 
-    apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
     apply(plugin = "net.kyori.indra.licenser.spotless")
@@ -196,13 +217,6 @@ allprojects {
         minecraft {
             version(minecraftVersion)
             injectRepositories(false)
-            project.sourceSets["main"].resources
-                .filter { it.name.endsWith(".accesswidener") }
-                .files
-                .forEach {
-                    accessWideners(it)
-                    parent?.minecraft?.accessWideners(it)
-                }
         }
 
         dependencies {
@@ -211,22 +225,6 @@ allprojects {
 
         tasks.named("decompile", DecompileJarTask::class) {
             extraFernFlowerArgs.put("win", "0")
-        }
-    }
-
-    idea {
-        if (project != null) {
-            (project as ExtensionAware).extensions["settings"].run {
-                (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.ActionDelegationConfig::class).run {
-                    delegateBuildRunToGradle = false
-                    testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.PLATFORM
-                }
-                extensions.getByType(org.jetbrains.gradle.ext.IdeaCompilerConfiguration::class).run {
-                    addNotNullAssertions = false
-                    useReleaseOption = JavaVersion.current().isJava10Compatible
-                    parallelCompilation = true
-                }
-            }
         }
     }
 
@@ -274,24 +272,20 @@ allprojects {
     val spongeSnapshotRepo: String? by project
     val spongeReleaseRepo: String? by project
     tasks {
-        val emptyAnnotationProcessors = objects.fileCollection()
         withType(JavaCompile::class).configureEach {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
             options.release.set(apiJavaTarget.toInt())
-            if (project.name != "testplugins" && System.getProperty("idea.sync.active") != null) {
-                options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
-            }
         }
 
         withType(PublishToMavenRepository::class).configureEach {
             onlyIf {
                 (repository == publishing.repositories["GitHubPackages"] &&
-                        !(rootProject.version as String).endsWith("-SNAPSHOT")) ||
-                        (!spongeSnapshotRepo.isNullOrBlank()
-                                && !spongeReleaseRepo.isNullOrBlank()
-                                && repository == publishing.repositories["spongeRepo"]
-                                && publication == publishing.publications["sponge"])
+                    !(rootProject.version as String).endsWith("-SNAPSHOT")) ||
+                    (!spongeSnapshotRepo.isNullOrBlank()
+                        && !spongeReleaseRepo.isNullOrBlank()
+                        && repository == publishing.repositories["spongeRepo"]
+                        && publication == publishing.publications["sponge"])
 
             }
         }
@@ -387,22 +381,27 @@ tasks {
     jar {
         manifest.from(commonManifest)
     }
+
     val mixinsJar by registering(Jar::class) {
+        group = "build"
         archiveClassifier.set("mixins")
         manifest.from(commonManifest)
         from(mixins.map { it.output })
     }
     val accessorsJar by registering(Jar::class) {
+        group = "build"
         archiveClassifier.set("accessors")
         manifest.from(commonManifest)
         from(accessors.map { it.output })
     }
     val launchJar by registering(Jar::class) {
+        group = "build"
         archiveClassifier.set("launch")
         manifest.from(commonManifest)
         from(launch.map { it.output })
     }
     val applaunchJar by registering(Jar::class) {
+        group = "build"
         archiveClassifier.set("applaunch")
         manifest.from(commonManifest)
         from(applaunch.map { it.output })
@@ -436,15 +435,12 @@ tasks {
     }
 
     test {
-        useJUnitPlatform()
+        // tests can only be run in subprojects
+        enabled = false
     }
 
     check {
         dependsOn(gradle.includedBuild("SpongeAPI").task(":check"))
-    }
-
-    prepareWorkspace {
-        dependsOn(gradle.includedBuild("SpongeAPI").task(":genEventImpl"))
     }
 }
 

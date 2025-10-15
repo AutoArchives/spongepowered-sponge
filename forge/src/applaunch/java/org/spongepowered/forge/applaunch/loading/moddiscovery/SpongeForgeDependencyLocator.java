@@ -25,10 +25,8 @@
 package org.spongepowered.forge.applaunch.loading.moddiscovery;
 
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider;
 import net.minecraftforge.forgespi.locating.IDependencyLocator;
 import net.minecraftforge.forgespi.locating.IModFile;
-import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
@@ -44,7 +42,7 @@ public class SpongeForgeDependencyLocator extends AbstractModProvider implements
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
-    public List<IModFile> scanMods(Iterable<IModFile> loadedMods) {
+    public List<IModFile> scanMods(final Iterable<IModFile> loadedMods) {
         final List<IModFile> modFiles = new ArrayList<>();
 
         // Add Sponge-specific libraries
@@ -67,21 +65,11 @@ public class SpongeForgeDependencyLocator extends AbstractModProvider implements
             for (final LibraryManager.Library library : libraryManager.getAll("main")) {
                 final Path path = library.file();
                 SpongeForgeDependencyLocator.LOGGER.debug("Proposing jar {} as a game library", path);
-
-                final IModLocator.ModFileOrException fileOrException = this.createMod(path);
-                if (fileOrException.ex() != null) {
-                    throw fileOrException.ex();
-                }
-                modFiles.add(fileOrException.file());
+                modFiles.add(PluginFileParser.newLibraryFile(this, path));
             }
         }
 
         return modFiles;
-    }
-
-    @Override
-    protected String getDefaultJarModType() {
-        return IModFile.Type.GAMELIBRARY.name();
     }
 
     @Override

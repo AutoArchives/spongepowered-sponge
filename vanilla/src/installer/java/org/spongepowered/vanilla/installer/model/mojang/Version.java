@@ -38,7 +38,7 @@ public record Version(AssetIndex assetIndex, String assets, Downloads downloads,
         }
     }
 
-    public record Library(Library.Downloads downloads, String name) {
+    public record Library(Downloads downloads, String name) {
         public record Downloads(Artifact artifact, Map<String, Artifact> classifiers) {
             public record Artifact(String path, String sha1, int size, URL url) {
             }

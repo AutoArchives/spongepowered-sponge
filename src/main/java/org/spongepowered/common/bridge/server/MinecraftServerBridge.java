@@ -45,4 +45,12 @@ public interface MinecraftServerBridge {
     SpongeUserManager bridge$userManager();
 
     BlockableEventLoop<Runnable> bridge$spongeMainThreadExecutor();
+
+    default void bridge$tickServer(int ticks) {
+        throw new UnsupportedOperationException("Cannot trigger manual server tick outside test environment");
+    }
+
+    default boolean bridge$insideTestEnvironment() {
+        return false;
+    }
 }

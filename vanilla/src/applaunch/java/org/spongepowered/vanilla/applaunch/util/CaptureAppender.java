@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class CaptureAppender extends AbstractAppender {
     private final Queue<String> messages = new ConcurrentLinkedQueue<>();
 
-    public static CaptureAppender.Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -63,7 +63,7 @@ public class CaptureAppender extends AbstractAppender {
         return this.messages;
     }
 
-    public static class Builder extends AbstractAppender.Builder<CaptureAppender.Builder> {
+    public static class Builder extends AbstractAppender.Builder<Builder> {
 
         Builder() {
         }

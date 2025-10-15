@@ -28,6 +28,7 @@ import com.google.inject.Injector;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.datafixers.DataFixer;
 import net.kyori.adventure.resource.ResourcePackRequest;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -39,8 +40,11 @@ import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionManager;
+import net.minecraft.server.Services;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleReloadInstance;
@@ -82,7 +86,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.ServerFunctionManagerAccessor;
@@ -108,13 +111,12 @@ import org.spongepowered.common.util.AutoSaveMapQueue;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge, CommandSourceProviderBridge, SubjectProxy,
@@ -195,11 +197,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         return SpongeCommon.game().systemSubject();
     }
 
-    @Inject(method = "spin", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private static void impl$setThreadOnServerPhaseTracker(final Function<Thread, MinecraftServer> p_240784_0_,
-                                                           final CallbackInfoReturnable<MinecraftServerMixin> cir,
-                                                           final AtomicReference<MinecraftServer> atomicReference,
-                                                           final Thread thread) {
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$setThreadOnServerPhaseTracker(
+        Thread thread, LevelStorageSource.LevelStorageAccess storageAccess, PackRepository packRepo,
+        WorldStem stem, Proxy proxy, DataFixer fixer,
+        Services services, ChunkProgressListenerFactory progress, CallbackInfo ci
+    ) {
         try {
             PhaseTracker.SERVER.setThread(thread);
         } catch (final IllegalAccessException e) {

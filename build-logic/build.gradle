@@ -13,6 +13,8 @@ indra {
 dependencies {
     api(apiLibs.gson)
     implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:${apiLibs.versions.ideaExt.get()}")
+    implementation(libs.at)
+    implementation(libs.accessWidener)
 }
 
 indraSpotlessLicenser {
