@@ -15,19 +15,19 @@ The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms
 
 [![SpongeVanilla Latest](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
 
-[![SpongeVanilla 1.21.1](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=1.21.1&queryOpt=%3Aversion%3D1.21.1*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.1*)
+[![SpongeVanilla 1.21.1](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=1.21.1&queryOpt=%3Aversion%3D1.21.1-*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.1-*)
 
 ### SpongeForge
 
 [![SpongeForge Latest](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeforge?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeforge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
 
-[![SpongeForge 1.21.1](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeforge?label=1.21.1&queryOpt=%3Aversion%3D1.21.1*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeforge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.1*)
+[![SpongeForge 1.21.1](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeforge?label=1.21.1&queryOpt=%3Aversion%3D1.21.1-*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeforge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.1-*)
 
 ### SpongeNeo
 
 [![SpongeNeo Latest](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeneo?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeneo%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
 
-[![SpongeNeo 1.21.1](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeneo?label=1.21.1&queryOpt=%3Aversion%3D1.21.1*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeneo%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.1*)
+[![SpongeNeo 1.21.1](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongeneo?label=1.21.1&queryOpt=%3Aversion%3D1.21.1-*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongeneo%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.21.1-*)
 
 
 ## Prerequisites
