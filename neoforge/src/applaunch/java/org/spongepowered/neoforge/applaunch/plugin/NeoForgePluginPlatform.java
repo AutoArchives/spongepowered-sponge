@@ -24,6 +24,7 @@
  */
 package org.spongepowered.neoforge.applaunch.plugin;
 
+import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion;
 import org.spongepowered.common.applaunch.AppLaunch;
@@ -108,6 +109,6 @@ public final class NeoForgePluginPlatform implements PluginPlatform {
 
     @Override
     public void addLoaderCloseCallback(AutoCloseable closeable) {
-        // TODO FML
+        FMLLoader.getCurrent().addCloseCallback(closeable);
     }
 }
