@@ -38,17 +38,15 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
-import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 
+import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
@@ -102,14 +100,11 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     public SpawnEntityEvent createSpawnEvent(
         final ExplosionContext context,
         final @Nullable GameTransaction<@NonNull ?> parent,
-        final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
+        final ImmutableList<Entity> collect,
         final Cause currentCause
     ) {
         if (parent instanceof ChangeBlock) {
-            return SpongeEventFactory.createDropItemEventDestruct(currentCause,
-                collect.stream()
-                    .map(t -> (org.spongepowered.api.entity.Entity) t.first())
-                    .collect(Collectors.toList()));
+            return SpongeEventFactory.createDropItemEventDestruct(currentCause, (List) collect);
         }
         return super.createSpawnEvent(context, parent, collect, currentCause);
     }
