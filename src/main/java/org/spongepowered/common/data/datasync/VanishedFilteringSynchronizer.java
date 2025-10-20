@@ -41,7 +41,7 @@ public record VanishedFilteringSynchronizer(
     @Override
     public void sendToTrackingPlayers(Packet<? super ClientGamePacketListener> var1) {
         if (this.ref.get() instanceof VanishableBridge vb) {
-            if (!vb.bridge$isInvisible()) {
+            if (!vb.bridge$vanishState().invisible()) {
                 this.proxy.sendToTrackingPlayers(var1);
             }
             return;
@@ -52,7 +52,7 @@ public record VanishedFilteringSynchronizer(
     @Override
     public void sendToTrackingPlayersAndSelf(Packet<? super ClientGamePacketListener> var1) {
         if (this.ref.get() instanceof VanishableBridge vb) {
-            if (!vb.bridge$isInvisible()) {
+            if (!vb.bridge$vanishState().invisible()) {
                 this.proxy.sendToTrackingPlayersAndSelf(var1);
             }
             return;
@@ -63,7 +63,7 @@ public record VanishedFilteringSynchronizer(
     @Override
     public void sendToTrackingPlayersFiltered(Packet<? super ClientGamePacketListener> var1, Predicate<ServerPlayer> var2) {
         if (this.ref.get() instanceof VanishableBridge vb) {
-            if (!vb.bridge$isInvisible()) {
+            if (!vb.bridge$vanishState().invisible()) {
                 this.proxy.sendToTrackingPlayersFiltered(var1, var2);
             }
             return;
