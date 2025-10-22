@@ -59,6 +59,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
 
     // @formatter:off
     @Shadow @Nullable private Entity hookedIn;
+    @Shadow private int nibble;
     // @formatter:on
 
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
@@ -88,6 +89,14 @@ public abstract class FishingHookMixin extends ProjectileMixin {
 
         return transactions.stream().filter(Transaction::isValid)
             .map(t -> (ItemStack) (Object) t.finalReplacement().asMutable()).collect(ObjectArrayList.toList());
+    }
+
+    @Inject(method = "retrieve", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;onGround()Z"), cancellable = true)
+    private void impl$onRetrieveEmpty(final ItemStack tool, final CallbackInfoReturnable<Integer> cir) {
+        if (this.hookedIn == null && this.nibble <= 0
+            && SpongeCommon.post(SpongeEventFactory.createFishingEventStop(PhaseTracker.getInstance().currentCause(), ((FishingBobber) this), List.of()))) {
+            cir.setReturnValue(0);
+        }
     }
 
     @WrapMethod(method = "retrieve")
