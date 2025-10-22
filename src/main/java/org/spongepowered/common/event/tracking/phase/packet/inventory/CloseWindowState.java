@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -54,7 +53,7 @@ public final class CloseWindowState extends PacketState<CloseWindowContext> {
 
     @Override
     public SpawnEntityEvent createSpawnEvent(final CloseWindowContext context, final @Nullable GameTransaction<@NonNull ?> parent,
-            final ImmutableList<Entity> collect, final Cause currentCause) {
+            final List<Entity> collect, final Cause currentCause) {
         return SpongeEventFactory.createDropItemEventClose(currentCause, (List) collect);
     }
 }

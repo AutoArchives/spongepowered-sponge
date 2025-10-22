@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
@@ -83,7 +82,7 @@ public final class PacketCommandState extends PacketState<PlayerCommandPhaseCont
     @Override
     public SpawnEntityEvent createSpawnEvent(
         final PlayerCommandPhaseContext context, final GameTransaction<@NonNull ?> parent,
-        final ImmutableList<Entity> collect, final Cause currentCause
+        final List<Entity> collect, final Cause currentCause
     ) {
         final Cause newCauseWithSpawnType = Cause.builder().from(currentCause).build(
             EventContext.builder().from(currentCause.context()).add(

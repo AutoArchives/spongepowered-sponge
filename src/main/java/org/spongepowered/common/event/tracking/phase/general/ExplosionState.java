@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
@@ -100,7 +99,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     public SpawnEntityEvent createSpawnEvent(
         final ExplosionContext context,
         final @Nullable GameTransaction<@NonNull ?> parent,
-        final ImmutableList<Entity> collect,
+        final List<Entity> collect,
         final Cause currentCause
     ) {
         if (parent instanceof ChangeBlock) {

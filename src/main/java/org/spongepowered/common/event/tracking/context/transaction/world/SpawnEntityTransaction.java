@@ -44,10 +44,12 @@ import org.spongepowered.common.event.tracking.context.transaction.block.ChangeB
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @DefaultQualifier(NonNull.class)
@@ -102,9 +104,9 @@ public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEnt
         final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause
     ) {
-        final ImmutableList<Entity> collect = gameTransactions.stream()
+        final List<Entity> collect = gameTransactions.stream()
             .map(transaction -> ((SpawnEntityTransaction) transaction).entityToSpawn)
-            .collect(ImmutableList.toImmutableList());
+            .collect(Collectors.toList());
         return Optional.of(context.createSpawnEvent(parent, collect, currentCause));
     }
 

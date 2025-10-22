@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -55,7 +54,7 @@ public final class DropInventoryState extends BasicInventoryPacketState {
     @Override
     public SpawnEntityEvent createSpawnEvent(
         final InventoryPacketContext context, final GameTransaction<@NonNull ?> parent,
-        final ImmutableList<net.minecraft.world.entity.Entity> collect,
+        final List<net.minecraft.world.entity.Entity> collect,
         final Cause currentCause
     ) {
         return SpongeEventFactory.createDropItemEventDispense(currentCause, (List) collect);

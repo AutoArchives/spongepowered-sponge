@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -372,7 +371,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     default SpawnEntityEvent createSpawnEvent(final C context,
         final @Nullable GameTransaction<@NonNull ?> parent,
-        final ImmutableList<Entity> collect,
+        final List<Entity> collect,
         final Cause currentCause
     ) {
         return SpongeEventFactory.createSpawnEntityEvent(currentCause, (List) collect);
