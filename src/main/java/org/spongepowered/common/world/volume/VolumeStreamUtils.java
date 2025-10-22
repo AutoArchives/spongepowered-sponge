@@ -31,7 +31,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
@@ -179,10 +178,7 @@ public final class VolumeStreamUtils {
         final int maskedX = x & 3;
         final int maskedY = y & 3;
         final int maskedZ = z & 3;
-        final Registry<Biome> biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
-        final ResourceKey<Biome> biomeResourceKey = biomeRegistry.getResourceKey((Biome) (Object) biome)
-            .orElseThrow(() -> new IllegalStateException("Missing resource in " + biomeRegistry.key() + ": " + biome));
-        final Holder.Reference<Biome> biomeHolder = biomeRegistry.getHolderOrThrow(biomeResourceKey);
+        final Holder<Biome> biomeHolder = SpongeCommon.vanillaRegistry(Registries.BIOME).wrapAsHolder((Biome) (Object) biome);
         final var old = ((PalettedContainer<Holder<Biome>>) section.getBiomes()).getAndSet(maskedX, maskedY, maskedZ, biomeHolder);
         if (old.value() == (Object) biome) {
             return false;
