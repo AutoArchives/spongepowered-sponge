@@ -24,22 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
-import com.google.common.collect.Sets;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.event.Cause;
@@ -49,10 +46,10 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
@@ -65,15 +62,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.StringJoiner;
 
 @Mixin(net.minecraft.world.level.Explosion.class)
 public abstract class ExplosionMixin implements ExplosionBridge {
 
     // @formatter:off
-    @Shadow @Final private ExplosionDamageCalculator damageCalculator;
     @Shadow @Final private ObjectArrayList<BlockPos> toBlow;
     @Shadow @Final private Map<Player, Vec3> hitPlayers;
     @Shadow @Final private boolean fire;
@@ -84,8 +78,6 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     @Shadow @Final private Entity source;
     @Shadow @Final private float radius;
     @Shadow @Final private net.minecraft.world.level.Explosion.BlockInteraction blockInteraction;
-
-    @Shadow @Final private DamageSource damageSource;
     // @formatter:on
 
     private boolean impl$shouldBreakBlocks;
@@ -123,79 +115,22 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         this.impl$knockback = 1.0;
     }
 
-    /**
-     * @author gabizou
-     * @author zidane
-     * @reason Fire ExplosionEvent.Detonate
-     */
-    @Overwrite
-    public void explode() {
-
-        // Sponge Start - Do not run calculation logic on client thread
+    @Inject(method = "explode", at = @At("HEAD"), cancellable = true)
+    private void impl$onExplodeStart(final CallbackInfo ci) {
         if (this.level.isClientSide) {
-            return;
+            ci.cancel();
         }
-        // Sponge End
+    }
 
-        // Sponge Start - If the explosion should not break blocks, don't bother calculating it on server thread
-        if (this.impl$shouldBreakBlocks) {
-            final Set<BlockPos> set = Sets.newHashSet();
-            final int i = 16;
+    @ModifyVariable(method = "explode", ordinal = 1, at = @At("STORE"))
+    private int impl$initFirstLoopIndex(final int originalIndex) {
+        // If the explosion should not break blocks, skip the loop by modifying the initial index
+        return this.impl$shouldBreakBlocks ? originalIndex : Integer.MAX_VALUE;
+    }
 
-            for (int j = 0; j < 16; ++j) {
-                for (int k = 0; k < 16; ++k) {
-                    for (int l = 0; l < 16; ++l) {
-                        if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15) {
-                            double d0 = (double) ((float) j / 15.0F * 2.0F - 1.0F);
-                            double d1 = (double) ((float) k / 15.0F * 2.0F - 1.0F);
-                            double d2 = (double) ((float) l / 15.0F * 2.0F - 1.0F);
-                            final double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-                            d0 = d0 / d3;
-                            d1 = d1 / d3;
-                            d2 = d2 / d3;
-                            float f = this.radius * (0.7F + this.level.random.nextFloat() * 0.6F);
-                            double d4 = this.x;
-                            double d6 = this.y;
-                            double d8 = this.z;
-
-                            for (final float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
-                                final BlockPos blockpos = new BlockPos((int) d4, (int) d6, (int) d8);
-                                final BlockState blockstate = this.level.getBlockState(blockpos);
-                                final FluidState fluidstate = this.level.getFluidState(blockpos);
-                                final Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance((net.minecraft.world.level.Explosion) (Object) this, this.level, blockpos, blockstate, fluidstate);
-                                if (optional.isPresent()) {
-                                    f -= (optional.get() + 0.3F) * 0.3F;
-                                }
-
-                                if (f > 0.0F && this.damageCalculator.shouldBlockExplode((net.minecraft.world.level.Explosion) (Object) this, this.level, blockpos, blockstate, f)) {
-                                    set.add(blockpos);
-                                }
-
-                                d4 += d0 * (double) 0.3F;
-                                d6 += d1 * (double) 0.3F;
-                                d8 += d2 * (double) 0.3F;
-                            }
-                        }
-                    }
-                }
-            }
-
-            this.toBlow.addAll(set);
-        }
-        // Sponge End
-
-        final float f3 = this.radius * 2.0F;
-        final int k1 = Mth.floor(this.x - (double) f3 - 1.0D);
-        final int l1 = Mth.floor(this.x + (double) f3 + 1.0D);
-        final int i2 = Mth.floor(this.y - (double) f3 - 1.0D);
-        final int i1 = Mth.floor(this.y + (double) f3 + 1.0D);
-        final int j2 = Mth.floor(this.z - (double) f3 - 1.0D);
-        final int j1 = Mth.floor(this.z + (double) f3 + 1.0D);
-
-        // Sponge Start - Only query for entities if we're to damage them
-        final List<Entity> list = this.impl$shouldDamageEntities ? this.level.getEntities(this.source,
-                new AABB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1)) : Collections.emptyList();
-        // Sponge End
+    @WrapOperation(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"))
+    private List<Entity> impl$filterEntitiesAndFireEvent(final Level level, final Entity source, final AABB aabb, final Operation<List<Entity>> original) {
+        final List<Entity> list = this.impl$shouldDamageEntities ? original.call(level, source, aabb) : Collections.emptyList();
 
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
             final List<ServerLocation> blockPositions = new ArrayList<>(this.toBlow.size());
@@ -217,7 +152,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             // Clear the positions so that they can be pulled from the event
             this.toBlow.clear();
             if (detonate.isCancelled()) {
-                return;
+                return List.of();
             }
             if (this.impl$shouldBreakBlocks) {
                 for (final ServerLocation worldLocation : detonate.affectedLocations()) {
@@ -236,45 +171,13 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                 }
             }
         }
-        // Sponge End
 
-        final Vec3 vec3d = new Vec3(this.x, this.y, this.z);
+        return list;
+    }
 
-        for (int k2 = 0; k2 < list.size(); ++k2) {
-            final Entity entity = list.get(k2);
-            if (!entity.ignoreExplosion((net.minecraft.world.level.Explosion) (Object) this)) {
-                final double d12 = (Math.sqrt(entity.distanceToSqr(vec3d)) / f3);
-                if (d12 <= 1.0D) {
-                    double d5 = entity.getX() - this.x;
-                    double d7 = entity.getEyeY() - this.y;
-                    double d9 = entity.getZ() - this.z;
-                    final double d13 = Math.sqrt(d5 * d5 + d7 * d7 + d9 * d9);
-                    if (d13 != 0.0D) {
-                        d5 = d5 / d13;
-                        d7 = d7 / d13;
-                        d9 = d9 / d13;
-                        final double d14 = (double) net.minecraft.world.level.Explosion.getSeenPercent(vec3d, entity);
-                        final double d10 = (1.0D - d12) * d14;
-                        entity.hurt(this.damageSource, (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
-                        double d11 = d10;
-                        if (entity instanceof LivingEntity living) {
-                            d11 = d10 * (1.0 - living.getAttributeValue(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE));
-                        }
-
-                        // Sponge Start - Honor our knockback value from event
-                        entity.setDeltaMovement(entity.getDeltaMovement().add(d5 * d11 * this.impl$knockback, d7 * d11 * this.impl$knockback, d9 * d11 * this.impl$knockback));
-                        if (entity instanceof Player) {
-                            final Player playerentity = (Player)entity;
-                            if (!playerentity.isSpectator() && (!playerentity.isCreative() || !playerentity.getAbilities().flying)) {
-                                this.hitPlayers.put(playerentity, new Vec3(d5 * d10 * this.impl$knockback,
-                                        d7 * d10 * this.impl$knockback, d9 * d10 * this.impl$knockback));
-                            }
-                        }
-                        // Sponge End
-                    }
-                }
-            }
-        }
+    @ModifyExpressionValue(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/ExplosionDamageCalculator;getKnockbackMultiplier(Lnet/minecraft/world/entity/Entity;)F"))
+    private float impl$multiplyKnockback(final float original) {
+        return (float) (original * this.impl$knockback);
     }
 
     @Override
