@@ -25,36 +25,25 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.animal.Cow;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.ChickenVariant;
+import org.spongepowered.api.data.type.CowVariant;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.SpongeTicks;
 
-public final class ChickenData {
+public final class CowData {
 
-    private ChickenData() {
+    private CowData() {
     }
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(Chicken.class)
-                    .create(Keys.EGG_TIME)
-                        .get(h -> new SpongeTicks(h.eggTime))
-                        .setAnd((h, v) -> {
-                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
-                            if (v.isInfinite() || ticks < 0) {
-                                return false;
-                            }
-                            h.eggTime = ticks;
-                            return true;
-                        })
-                    .create(Keys.CHICKEN_VARIANT)
-                        .get(h -> (ChickenVariant) (Object) h.getVariant().value())
+                .asMutable(Cow.class)
+                    .create(Keys.COW_VARIANT)
+                        .get(h -> (CowVariant) (Object) h.getVariant().value())
                         .set((h, v) -> {
-                            final var holder = h.level().registryAccess().lookupOrThrow(Registries.CHICKEN_VARIANT)
-                                .wrapAsHolder((net.minecraft.world.entity.animal.ChickenVariant) (Object) v);
+                            final var holder = h.level().registryAccess().lookupOrThrow(Registries.COW_VARIANT)
+                                .wrapAsHolder((net.minecraft.world.entity.animal.CowVariant) (Object) v);
                             h.setVariant(holder);
                         });
     }

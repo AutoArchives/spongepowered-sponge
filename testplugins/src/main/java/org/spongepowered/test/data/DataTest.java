@@ -51,6 +51,8 @@ import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.BoatTypes;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.data.type.CatTypes;
+import org.spongepowered.api.data.type.ChickenVariants;
+import org.spongepowered.api.data.type.CowVariants;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.FoxTypes;
 import org.spongepowered.api.data.type.FrogTypes;
@@ -963,6 +965,13 @@ public final class DataTest  {
         final Entity frog = world.createEntity(EntityTypes.FROG.get(), position);
         this.checkOfferData(frog, Keys.FROG_TYPE, FrogTypes.WARM.get());
         this.checkGetData(frog, Keys.FROG_TYPE, FrogTypes.WARM.get());
+
+        this.checkOfferData(chicken, Keys.CHICKEN_VARIANT, ChickenVariants.WARM.get());
+        this.checkGetData(chicken, Keys.CHICKEN_VARIANT, ChickenVariants.WARM.get());
+
+        final Entity cow = world.createEntity(EntityTypes.COW.get(), position);
+        this.checkOfferData(cow, Keys.COW_VARIANT, CowVariants.WARM.get());
+        this.checkGetData(cow, Keys.COW_VARIANT, CowVariants.WARM.get());
 
 //        this.checkOfferData(panda, Keys.IS_UNHAPPY, true);
 
