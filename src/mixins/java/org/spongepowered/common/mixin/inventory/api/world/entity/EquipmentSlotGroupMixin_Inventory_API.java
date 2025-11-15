@@ -24,27 +24,41 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.entity;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import org.spongepowered.api.item.inventory.equipment.EquipmentCondition;
-import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(EquipmentSlot.class)
-public abstract class EquipmentSlotMixin_Inventory_API implements EquipmentType {
+import java.util.Objects;
 
-    @Shadow @Final private EquipmentSlot.Type type;
+@Mixin(EquipmentSlotGroup.class)
+public abstract class EquipmentSlotGroupMixin_Inventory_API implements EquipmentCondition {
 
-    @Override
-    public EquipmentGroup group() {
-        return (EquipmentGroup) (Object) this.type;
+    @Shadow public abstract boolean shadow$test(EquipmentSlot slot);
+
+    @Shadow @Final private String key;
+
+    private Component api$component;
+
+    @Inject(method = "<init>(Ljava/lang/String;IILjava/lang/String;Ljava/util/function/Predicate;)V", at = @At("RETURN"))
+    private void api$setComponent(final CallbackInfo ci) {
+        this.api$component = Component.translatable("item.modifiers." + this.key);
     }
 
     @Override
-    public EquipmentCondition condition() {
-        return (EquipmentCondition) (Object) EquipmentSlotGroup.bySlot((EquipmentSlot) (Object) this);
+    public Component asComponent() {
+        return this.api$component;
+    }
+
+    @Override
+    public boolean test(final EquipmentType type) {
+        return this.shadow$test((EquipmentSlot) (Object) Objects.requireNonNull(type, "type"));
     }
 }
