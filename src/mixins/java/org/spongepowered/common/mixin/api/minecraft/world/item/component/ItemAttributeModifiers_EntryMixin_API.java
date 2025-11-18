@@ -22,29 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api.world.entity;
+package org.spongepowered.common.mixin.api.minecraft.world.item.component;
 
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import org.spongepowered.api.entity.attribute.AttributeModifier;
+import org.spongepowered.api.entity.attribute.ItemAttribute;
+import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentCondition;
-import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EquipmentSlot.class)
-public abstract class EquipmentSlotMixin_Inventory_API implements EquipmentType {
+@Mixin(ItemAttributeModifiers.Entry.class)
+@Implements(@Interface(iface = ItemAttribute.class, prefix = "attribute$"))
+public abstract class ItemAttributeModifiers_EntryMixin_API implements ItemAttribute {
 
-    @Shadow @Final private EquipmentSlot.Type type;
+    @Shadow @Final private Holder<Attribute> attribute;
+    @Shadow @Final private net.minecraft.world.entity.ai.attributes.AttributeModifier modifier;
+    @Shadow @Final private EquipmentSlotGroup slot;
 
     @Override
-    public EquipmentGroup group() {
-        return (EquipmentGroup) (Object) this.type;
+    public AttributeType type() {
+        return (AttributeType) this.attribute.value();
+    }
+
+    @Intrinsic
+    public AttributeModifier attribute$modifier() {
+        return (AttributeModifier) (Object) this.modifier;
     }
 
     @Override
     public EquipmentCondition condition() {
-        return (EquipmentCondition) (Object) EquipmentSlotGroup.bySlot((EquipmentSlot) (Object) this);
+        return (EquipmentCondition) (Object) this.slot;
     }
 }
