@@ -22,29 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api.world.entity;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EquipmentSlotGroup;
-import org.spongepowered.api.item.inventory.equipment.EquipmentCondition;
-import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.entity.animal.CowVariant;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EquipmentSlot.class)
-public abstract class EquipmentSlotMixin_Inventory_API implements EquipmentType {
-
-    @Shadow @Final private EquipmentSlot.Type type;
-
-    @Override
-    public EquipmentGroup group() {
-        return (EquipmentGroup) (Object) this.type;
-    }
-
-    @Override
-    public EquipmentCondition condition() {
-        return (EquipmentCondition) (Object) EquipmentSlotGroup.bySlot((EquipmentSlot) (Object) this);
-    }
+@Mixin(CowVariant.class)
+public abstract class CowVariantMixin_API implements org.spongepowered.api.data.type.CowVariant {
 }

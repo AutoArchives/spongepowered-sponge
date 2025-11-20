@@ -81,7 +81,7 @@ public class ClientSuggestionsRawCommand implements Command.Raw {
         return CommandTreeNode.root()
                 .child("s1", CommandTreeNodeTypes.RESOURCE_LOCATION.get(registryHolder).createNode()
                 .executable()
-                .completions(CommandCompletionProviders.ALL_RECIPES));
+                .completions(CommandCompletionProviders.AVAILABLE_SOUNDS));
     }
 
 }

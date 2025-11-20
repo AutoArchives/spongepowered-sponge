@@ -22,29 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api.world.entity;
+package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EquipmentSlotGroup;
-import org.spongepowered.api.item.inventory.equipment.EquipmentCondition;
-import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.entity.animal.Cow;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.CowVariant;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-@Mixin(EquipmentSlot.class)
-public abstract class EquipmentSlotMixin_Inventory_API implements EquipmentType {
+public final class CowData {
 
-    @Shadow @Final private EquipmentSlot.Type type;
-
-    @Override
-    public EquipmentGroup group() {
-        return (EquipmentGroup) (Object) this.type;
+    private CowData() {
     }
 
-    @Override
-    public EquipmentCondition condition() {
-        return (EquipmentCondition) (Object) EquipmentSlotGroup.bySlot((EquipmentSlot) (Object) this);
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+                .asMutable(Cow.class)
+                    .create(Keys.COW_VARIANT)
+                        .get(h -> (CowVariant) (Object) h.getVariant().value())
+                        .set((h, v) -> {
+                            final var holder = h.level().registryAccess().lookupOrThrow(Registries.COW_VARIANT)
+                                .wrapAsHolder((net.minecraft.world.entity.animal.CowVariant) (Object) v);
+                            h.setVariant(holder);
+                        });
     }
+    // @formatter:on
 }

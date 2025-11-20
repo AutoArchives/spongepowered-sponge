@@ -22,29 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api.world.entity;
+package org.spongepowered.neoforge.mixin.core.network.protocol.common;
 
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EquipmentSlotGroup;
-import org.spongepowered.api.item.inventory.equipment.EquipmentCondition;
-import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.network.channel.ChannelUtils;
 
-@Mixin(EquipmentSlot.class)
-public abstract class EquipmentSlotMixin_Inventory_API implements EquipmentType {
+import java.util.ArrayList;
+import java.util.List;
 
-    @Shadow @Final private EquipmentSlot.Type type;
+@SuppressWarnings({"rawtypes", "unchecked"})
+@Mixin(ServerboundCustomPayloadPacket.class)
+public abstract class ServerboundCustomPayloadPacketMixin_Neo {
 
-    @Override
-    public EquipmentGroup group() {
-        return (EquipmentGroup) (Object) this.type;
-    }
+    // @formatter: off
+    @Shadow @Final private static int MAX_PAYLOAD_SIZE;
+    // @formatter: on
 
-    @Override
-    public EquipmentCondition condition() {
-        return (EquipmentCondition) (Object) EquipmentSlotGroup.bySlot((EquipmentSlot) (Object) this);
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList([Ljava/lang/Object;)Ljava/util/ArrayList;"), remap = false)
+    private static ArrayList neo$registerCustomPacketPayloads(final Object[] registrations) {
+        final ArrayList allRegistrations = new ArrayList<>(List.of(registrations));
+        allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ServerboundCustomPayloadPacketMixin_Neo.MAX_PAYLOAD_SIZE));
+        return allRegistrations;
     }
 }
