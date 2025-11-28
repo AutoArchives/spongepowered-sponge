@@ -42,6 +42,7 @@ import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ChunkLevel;
 import net.minecraft.server.level.FullChunkStatus;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -82,6 +83,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -757,6 +759,8 @@ public final class Constants {
         public static final DataQuery ROTATION = of("Rotation");
         public static final DataQuery SCALE = of("Scale");
         public static final DataQuery CUSTOM_NAME = of("CustomName");
+
+        public static final Set<Relative> RELATIVE_POSITION = EnumSet.of(Relative.X, Relative.Y, Relative.Z);
 
         public static final class Ageable {
 
