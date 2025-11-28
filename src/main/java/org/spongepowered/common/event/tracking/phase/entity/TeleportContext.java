@@ -28,21 +28,10 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public final class TeleportContext extends EntityContext<TeleportContext> {
-
-    private boolean isPlayer;
     private boolean isWorldChange;
 
     public TeleportContext(final IPhaseState<TeleportContext> state, PhaseTracker tracker) {
         super(state, tracker);
-    }
-
-    public boolean isPlayer() {
-        return this.isPlayer;
-    }
-
-    public TeleportContext player() {
-        this.isPlayer = true;
-        return this;
     }
 
     public boolean isWorldChange() {

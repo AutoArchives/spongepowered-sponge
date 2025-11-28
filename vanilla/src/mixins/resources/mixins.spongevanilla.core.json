@@ -26,7 +26,6 @@
     "server.BootstrapMixin_Vanilla",
     "server.MinecraftServerMixin_Vanilla",
     "server.ReloadableServerResourcesMixin_Vanilla",
-    "server.commands.SpreadPlayersCommandMixin_Vanilla",
     "server.level.ServerPlayerMixin_Vanilla",
     "server.network.ServerGamePacketListenerImplMixin_Vanilla",
     "server.packs.repository.PackRepositoryMixin_Vanilla",

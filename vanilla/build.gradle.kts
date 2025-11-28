@@ -402,10 +402,11 @@ tasks {
     }
 
     val bootShadowJar by register("bootShadowJar", ShadowJar::class) {
-        group = "shadow"
+        group = "build"
         archiveClassifier.set("boot")
 
         mergeServiceFiles()
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         configurations = listOf(bootShadedLibrariesConfig.get())
 
         manifest {
@@ -419,10 +420,11 @@ tasks {
     }
 
     val installerShadowJar by register("installerShadowJar", ShadowJar::class) {
-        group = "shadow"
+        group = "build"
         archiveClassifier.set("installer-shadow")
 
         mergeServiceFiles()
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         configurations = listOf(installerLibrariesConfig.get())
         exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "**/module-info.class")
 
@@ -447,10 +449,10 @@ tasks {
     }
 
     shadowJar {
-        group = "shadow"
         archiveClassifier.set("mod")
 
         mergeServiceFiles()
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         configurations = listOf(gameShadedLibrariesConfig.get())
 
         manifest {

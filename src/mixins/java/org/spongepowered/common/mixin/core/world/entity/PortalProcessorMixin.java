@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PortalProcessor;
 import net.minecraft.world.entity.Relative;
@@ -49,7 +48,6 @@ import org.spongepowered.common.bridge.world.entity.PortalProcessorBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
-import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -78,16 +76,12 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
     @Redirect(method = "getPortalDestination",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Portal;getPortalDestination(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/portal/TeleportTransition;"))
     public TeleportTransition impl$onGetPortalDestination(final Portal instance, final ServerLevel serverLevel, final Entity entity, final BlockPos blockPos) {
-        final var spongEntity = (org.spongepowered.api.entity.Entity) entity;
-
+        final var spongeEntity = (org.spongepowered.api.entity.Entity) entity;
         var finalPortal = instance;
-        final var contextToSwitchTo = EntityPhase.State.PORTAL_DIMENSION_CHANGE.createPhaseContext(PhaseTracker.getInstance()).worldChange();
-        if (entity instanceof ServerPlayer) {
-            contextToSwitchTo.player();
-        }
 
-        try (final TeleportContext context = contextToSwitchTo.buildAndSwitch();
-                final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(serverLevel);
+        try (final TeleportContext context = EntityPhase.State.PORTAL_DIMENSION_CHANGE.createPhaseContext(phaseTracker).worldChange().buildAndSwitch();
+             final CauseStackManager.StackFrame frame = phaseTracker.pushCauseFrame()) {
             frame.pushCause(entity);
             var be = serverLevel.getBlockEntity(this.entryPosition);
             if (be != null) {
@@ -101,7 +95,7 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, movementType);
             frame.addContext(EventContextKeys.PORTAL_LOGIC, (PortalLogic) portal);
 
-            var preEvent = SpongeEventFactory.createInvokePortalEventPrepare(frame.currentCause(), spongEntity, (PortalLogic) this.portal);
+            var preEvent = SpongeEventFactory.createInvokePortalEventPrepare(frame.currentCause(), spongeEntity, (PortalLogic) this.portal);
             if (SpongeCommon.post(preEvent)) {
                 return null;
             }
@@ -118,18 +112,23 @@ public abstract class PortalProcessorMixin implements PortalProcessorBridge {
             frame.pushCause(finalPortal);
             frame.addContext(EventContextKeys.PORTAL, (org.spongepowered.api.world.portal.Portal) this);
 
-            var preWorldChangeEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(entity, transition.newLevel());
+            final var preWorldChangeEvent = SpongeEventFactory.createChangeEntityWorldEventPre(
+                frame.currentCause(),
+                (org.spongepowered.api.entity.Entity) entity,
+                (ServerWorld) entity.level(),
+                (ServerWorld) transition.newLevel(),
+                (ServerWorld) transition.newLevel());
             if (preWorldChangeEvent.isCancelled()) {
                 wrapperTransaction.markCancelled();
                 return null;
             }
 
             var tpEvent = SpongeEventFactory.createInvokePortalEventExecute(frame.currentCause(),
-                    spongEntity,
+                    spongeEntity,
                     (ServerWorld) entity.level(),
                     new Vector3d(transition.xRot(), transition.yRot(), 0),
-                    spongEntity.position(),
-                    spongEntity.rotation(),
+                    spongeEntity.position(),
+                    spongeEntity.rotation(),
                     (ServerWorld) transition.newLevel(),
                     VecHelper.toVector3d(transition.position()),
                     VecHelper.toVector3d(transition.position()),
