@@ -46,7 +46,7 @@ public abstract class TeleportCommandMixin {
     private static boolean impl$createCauseFrameForPerformTeleport(
         final Entity instance, final ServerLevel level, final double x, final double y, final double z,
         final Set<Relative> relativeMovements, final float yRot, final float xRot, final boolean setCamera, final Operation<Boolean> original) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getWorldInstance(instance.level()).pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
             return original.call(instance, level, x, y, z, relativeMovements, yRot, xRot, setCamera);
         }

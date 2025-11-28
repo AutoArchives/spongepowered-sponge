@@ -25,7 +25,6 @@
     "network.protocol.common.ServerboundCustomPayloadPacketMixin_Forge",
     "server.BootstrapMixin_Forge",
     "server.MinecraftServerMixin_Forge",
-    "server.commands.SpreadPlayersCommandMixin_Forge",
     "server.level.ServerPlayerMixin_Forge",
     "server.network.ServerGamePacketListenerImplMixin_Forge",
     "tags.TagLoaderMixin_Forge",
