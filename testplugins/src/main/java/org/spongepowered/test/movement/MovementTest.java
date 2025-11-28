@@ -193,6 +193,9 @@ public final class MovementTest implements LoadableModule {
             final Optional<MovementType> type = event.context().get(EventContextKeys.MOVEMENT_TYPE);
             final Logger logger = MovementTest.this.plugin.logger();
             logger.info(MovementTest.marker, name + ": Movement Type: " + type.map(t -> RegistryTypes.MOVEMENT_TYPE.get().valueKey(t).toString()).orElse("?"));
+            if (type.isEmpty()) {
+                Thread.dumpStack();
+            }
 
             if (MovementTest.this.cancelMovement) {
                 event.setCancelled(true);

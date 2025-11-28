@@ -67,6 +67,7 @@
     "server.commands.GameRuleCommandMixin",
     "server.commands.KickCommandMixin",
     "server.commands.SaveAllCommandMixin",
+    "server.commands.SpreadPlayersCommandMixin",
     "server.commands.TeleportCommandMixin",
     "server.commands.WeatherCommandMixin",
     "server.commands.WorldBorderCommandMixin",
