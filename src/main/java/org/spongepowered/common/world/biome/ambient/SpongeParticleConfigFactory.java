@@ -25,7 +25,7 @@
 package org.spongepowered.common.world.biome.ambient;
 
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.world.level.biome.AmbientParticleSettings;
+import net.minecraft.world.attribute.AmbientParticle;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.world.biome.ambient.ParticleConfig;
 
@@ -33,6 +33,6 @@ public class SpongeParticleConfigFactory implements ParticleConfig.Factory {
 
     @Override
     public ParticleConfig of(final ParticleType type, final float probability) {
-        return (ParticleConfig) (Object) new AmbientParticleSettings(((ParticleOptions) type), probability);
+        return (ParticleConfig) (Object) new AmbientParticle(((ParticleOptions) type), probability);
     }
 }

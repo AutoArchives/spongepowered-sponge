@@ -26,6 +26,8 @@ package org.spongepowered.common.data.provider.world.biome;
 
 import net.minecraft.core.Holder;
 import net.minecraft.util.random.Weighted;
+import net.minecraft.world.attribute.AmbientSounds;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
@@ -88,13 +90,22 @@ public final class BiomeData {
                     .create(Keys.NATURAL_SPAWNER_COST)
                         .get(BiomeData::naturalSpawnerCost)
                     .create(Keys.FOG_COLOR)
-                        .get(h -> Color.ofRgb(h.getSpecialEffects().getFogColor()))
+                    .get(h -> {
+                        final var value = h.getAttributes().applyModifier(EnvironmentAttributes.FOG_COLOR, EnvironmentAttributes.FOG_COLOR.defaultValue());
+                        return Color.ofRgb(value);
+                    })
                     .create(Keys.WATER_COLOR)
                         .get(h -> Color.ofRgb(h.getSpecialEffects().getWaterColor()))
                     .create(Keys.WATER_FOG_COLOR)
-                        .get(h -> Color.ofRgb(h.getSpecialEffects().getWaterFogColor()))
+                    .get(h -> {
+                        final var value = h.getAttributes().applyModifier(EnvironmentAttributes.WATER_FOG_COLOR, EnvironmentAttributes.WATER_FOG_COLOR.defaultValue());
+                        return Color.ofRgb(value);
+                    })
                     .create(Keys.SKY_COLOR)
-                        .get(h -> Color.ofRgb(h.getSpecialEffects().getSkyColor()))
+                    .get(h -> {
+                        final var value = h.getAttributes().applyModifier(EnvironmentAttributes.SKY_COLOR, EnvironmentAttributes.SKY_COLOR.defaultValue());
+                        return Color.ofRgb(value);
+                    })
                     .create(Keys.FOLIAGE_COLOR)
                         .get(h -> h.getSpecialEffects().getFoliageColorOverride().map(Color::ofRgb).orElse(null))
                     .create(Keys.GRASS_COLOR)
@@ -102,13 +113,19 @@ public final class BiomeData {
                     .create(Keys.GRASS_COLOR_MODIFIER)
                         .get(h -> (GrassColorModifier) (Object) h.getSpecialEffects().getGrassColorModifier())
                     .create(Keys.BACKGROUND_MUSIC)
-                        .get(h -> h.getSpecialEffects().getBackgroundMusic().map(a -> a.unwrap()).flatMap(e -> e.stream().findFirst().map(Weighted::value)).map(SoundConfig.BackgroundMusic.class::cast).orElse(null))
+                        .get(h -> {
+                            final var value = h.getAttributes().applyModifier(EnvironmentAttributes.BACKGROUND_MUSIC, EnvironmentAttributes.BACKGROUND_MUSIC.defaultValue());
+                            return (SoundConfig.BackgroundMusic) (Object) value;
+                        })
                     .create(Keys.AMBIENT_ADDITIONAL_SOUND)
-                        .get(h -> h.getSpecialEffects().getAmbientAdditionsSettings().map(SoundConfig.Additional.class::cast).orElse(null))
+                        .get(h -> {
+                            final var value = h.getAttributes().applyModifier(EnvironmentAttributes.AMBIENT_SOUNDS, EnvironmentAttributes.AMBIENT_SOUNDS.defaultValue());
+                            return (SoundConfig.Additional) (Object) value;
+                        })
                     .create(Keys.AMBIENT_MOOD)
-                        .get(h -> h.getSpecialEffects().getAmbientMoodSettings().map(SoundConfig.Mood.class::cast).orElse(null))
+                        .get(h -> h.getAttributes().applyModifier(EnvironmentAttributes.AMBIENT_SOUNDS, AmbientSounds.EMPTY).mood().map(SoundConfig.Mood.class::cast).orElse(null))
                     .create(Keys.AMBIENT_PARTICLE)
-                        .get(h -> h.getSpecialEffects().getAmbientParticleSettings().map(ParticleConfig.class::cast).orElse(null))
+                        .get(h -> h.getAttributes().applyModifier(EnvironmentAttributes.AMBIENT_PARTICLES,List.of()).stream().findFirst().map(ParticleConfig.class::cast).orElse(null))
                 .asImmutable(BiomeAccessor.class)
                     .create(Keys.HUMIDITY)
                         .get(h -> (double) h.accessor$climateSettings().downfall())

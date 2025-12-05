@@ -22,9 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
+package org.spongepowered.common.mixin.api.minecraft.world.attribute;
 
-import net.minecraft.world.level.biome.AmbientParticleSettings;
+import net.minecraft.world.attribute.AmbientParticle;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.world.biome.ambient.ParticleConfig;
 import org.spongepowered.asm.mixin.Final;
@@ -34,13 +34,13 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(AmbientParticleSettings.class)
+@Mixin(AmbientParticle.class)
 @Implements(@Interface(iface = ParticleConfig.class, prefix = "api$"))
 public abstract class AmbientParticleSettingsMixin_API implements ParticleConfig {
 
     // @formatter:off
     @Shadow @Final private float probability;
-    @Shadow @Final private net.minecraft.core.particles.ParticleOptions options;
+    @Shadow @Final private net.minecraft.core.particles.ParticleOptions particle;
     // @formatter:on
 
     @Intrinsic
@@ -50,10 +50,10 @@ public abstract class AmbientParticleSettingsMixin_API implements ParticleConfig
 
     @Override
     public ParticleType type() {
-        if (this.options instanceof ParticleType type) {
+        if (this.particle instanceof ParticleType type) {
             return type;
         }
-        throw new UnsupportedOperationException("Unsupported ParticleOptions: " + this.options.getClass().getSimpleName());
+        throw new UnsupportedOperationException("Unsupported ParticleOptions: " + this.particle.getClass().getSimpleName());
     }
 
 

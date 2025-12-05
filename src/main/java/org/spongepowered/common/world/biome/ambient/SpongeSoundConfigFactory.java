@@ -27,8 +27,8 @@ package org.spongepowered.common.world.biome.ambient;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.level.biome.AmbientAdditionsSettings;
-import net.minecraft.world.level.biome.AmbientMoodSettings;
+import net.minecraft.world.attribute.AmbientAdditionsSettings;
+import net.minecraft.world.attribute.AmbientMoodSettings;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.world.biome.ambient.SoundConfig;
 

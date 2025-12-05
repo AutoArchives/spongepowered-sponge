@@ -22,11 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
+package org.spongepowered.common.mixin.api.minecraft.world.attribute;
 
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.level.biome.AmbientAdditionsSettings;
+import net.minecraft.world.attribute.AmbientMoodSettings;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.world.biome.ambient.SoundConfig;
 import org.spongepowered.asm.mixin.Final;
@@ -36,13 +36,15 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(AmbientAdditionsSettings.class)
-@Implements(@Interface(iface = SoundConfig.Additional.class, prefix = "api$"))
-public abstract class AmbientAdditionsSettingsMixin_API implements SoundConfig.Additional {
+@Mixin(AmbientMoodSettings.class)
+@Implements(@Interface(iface = SoundConfig.Mood.class, prefix = "api$"))
+public abstract class AmbientMoodSettingsMixin_API implements SoundConfig.Mood {
 
     // @formatter:off
     @Shadow @Final private Holder<SoundEvent> soundEvent;
-    @Shadow @Final private double tickChance;
+    @Shadow @Final private int tickDelay;
+    @Shadow @Final private int blockSearchExtent;
+    @Shadow @Final private double soundPositionOffset;
     // @formatter:on
 
     @Override
@@ -51,7 +53,18 @@ public abstract class AmbientAdditionsSettingsMixin_API implements SoundConfig.A
     }
 
     @Intrinsic
-    public double api$tickChance() {
-        return this.tickChance;
+    public int api$tickDelay() {
+        return this.tickDelay;
     }
+
+    @Intrinsic
+    public int api$searchRadius() {
+        return this.blockSearchExtent;
+    }
+
+    @Intrinsic
+    public double api$distanceModifier() {
+        return this.soundPositionOffset;
+    }
+
 }

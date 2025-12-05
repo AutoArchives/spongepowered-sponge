@@ -67,8 +67,8 @@ public class BedBlockMixin {
         final BlockSnapshot snapshot = ((ServerWorld) param1).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
         if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) param3))) {
             param3.startSleepInBed(param2).ifLeft((param1x) -> {
-                if (param1x != null) {
-                    param3.displayClientMessage(param1x.getMessage(), true);
+                if (param1x != null && param1x.message() != null) {
+                    param3.displayClientMessage(param1x.message(), true);
                 }
             });
             cir.setReturnValue(InteractionResult.SUCCESS);

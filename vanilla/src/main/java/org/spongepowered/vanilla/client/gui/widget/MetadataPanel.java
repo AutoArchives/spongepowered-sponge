@@ -290,7 +290,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
 
         final Component component = entry.value;
         if (component != null) {
-            this.screen.handleComponentClicked(component.getStyle());
+//            this.screen.handleComponentClicked(component.getStyle());
             return true;
         }
         return super.mouseClicked(event, repeated);

@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.provider.world;
 
 import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.attribute.BedRule;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -54,7 +56,7 @@ public final class WorldTypeData {
                     .create(Keys.WORLD_TYPE_EFFECT)
                         .get(WorldTypeData::worldTypeEffect)
                     .create(Keys.SCORCHING)
-                        .get(DimensionType::ultraWarm)
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.WATER_EVAPORATES, false))
                     .create(Keys.NATURAL_WORLD_TYPE)
                         .get(DimensionType::natural)
                     .create(Keys.COORDINATE_MULTIPLIER)
@@ -64,17 +66,17 @@ public final class WorldTypeData {
                     .create(Keys.HAS_CEILING)
                         .get(DimensionType::hasCeiling)
                     .create(Keys.PIGLIN_SAFE)
-                        .get(DimensionType::piglinSafe)
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.NETHER_PORTAL_SPAWNS_PIGLINS, false))
                     .create(Keys.BEDS_USABLE)
-                        .get(DimensionType::bedWorks)
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.BED_RULE, BedRule.CAN_SLEEP_WHEN_DARK).explodes())
                     .create(Keys.RESPAWN_ANCHOR_USABLE)
-                        .get(DimensionType::respawnAnchorWorks)
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, false))
                     .create(Keys.INFINIBURN)
                         .get(dimensionType -> (Tag<BlockType>) (Object) dimensionType.infiniburn())
                     .create(Keys.WORLD_FLOOR)
                         .get(DimensionType::minY)
                     .create(Keys.HAS_RAIDS)
-                        .get(DimensionType::hasRaids)
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.CAN_START_RAID, true))
                     .create(Keys.WORLD_HEIGHT)
                         .get(DimensionType::height)
                     .create(Keys.WORLD_LOGICAL_HEIGHT)

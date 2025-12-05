@@ -26,6 +26,9 @@ package org.spongepowered.common.world.server;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.attribute.BedRule;
+import net.minecraft.world.attribute.EnvironmentAttributeMap;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -45,7 +48,6 @@ import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 
-import java.util.Optional;
 import java.util.OptionalLong;
 
 public final class SpongeWorldTypeBuilder implements WorldType.Builder {
@@ -106,16 +108,23 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
         final SpongeDimensionTypes.SpongeDataSection spongeData = new SpongeDimensionTypes.SpongeDataSection(createDragonFight);
         try {
 
+            final var attributes = EnvironmentAttributeMap.builder();
+            attributes.set(EnvironmentAttributes.PIGLINS_ZOMBIFY, !piglinSafe);
+            attributes.set(EnvironmentAttributes.BED_RULE, bedsUsable ? BedRule.CAN_SLEEP_WHEN_DARK : BedRule.EXPLODES);
+            attributes.set(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, respawnAnchorsUsable);
+            attributes.set(EnvironmentAttributes.CAN_START_RAID, hasRaids);
             final DimensionType dimensionType =
                 new DimensionType(fixedTime == null ? OptionalLong.empty() : OptionalLong.of(fixedTime.asTicks().ticks()),
-                    hasSkylight, hasCeiling, scorching, natural, coordinateMultiplier,
-                    bedsUsable, respawnAnchorsUsable,
+                    hasSkylight,
+                    hasCeiling,
+                    natural, coordinateMultiplier,
                     floor, height, logicalHeight,
                     ((TagBridge<Block>) infiniburn).bridge$asVanillaTag(),
                     (ResourceLocation) (Object) effect.key(),
                     ambientLighting,
-                    Optional.empty(),
-                    new DimensionType.MonsterSettings(piglinSafe, hasRaids, monsterSpawnLightTest, monsterSpawnBlockLightLimit));
+                    new DimensionType.MonsterSettings(monsterSpawnLightTest, monsterSpawnBlockLightLimit),
+                    attributes.build()
+                    );
             if ((Object) dimensionType instanceof DimensionTypeBridge bridge) {
                 bridge.bridge$decorateData(spongeData);
             }

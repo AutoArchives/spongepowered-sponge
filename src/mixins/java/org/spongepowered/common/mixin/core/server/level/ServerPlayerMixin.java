@@ -898,29 +898,21 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Inject(method = "startSleepInBed", at = @At(value = "RETURN"), cancellable = true)
     private void impl$onReturnSleep(final BlockPos param0, final CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
         final Either<Player.BedSleepingProblem, Unit> returnValue = cir.getReturnValue();
-        if (returnValue.left().isPresent()) {
-            switch (returnValue.left().get()) {
-
-                case NOT_POSSIBLE_HERE:
-                case TOO_FAR_AWAY:
-                case NOT_POSSIBLE_NOW:
-                case OBSTRUCTED:
-                case NOT_SAFE:
-                    final Cause currentCause = PhaseTracker.getInstance().currentCause();
-                    final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
-                    if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) this))) {
-                        final Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
-                            this.shadow$awardStat(Stats.SLEEP_IN_BED);
-                            CriteriaTriggers.SLEPT_IN_BED.trigger((net.minecraft.server.level.ServerPlayer) (Object) this);
-                        });
-                        ((ServerLevel) this.shadow$level()).updateSleepingPlayerList();
-                        cir.setReturnValue(var5);
-                    }
-                    break;
-                case OTHER_PROBLEM: // ignore
-                    break;
+        returnValue.ifLeft(problem -> {
+            if (problem.message() == null) {
+                return;
             }
-        }
+            final Cause currentCause = PhaseTracker.getInstance().currentCause();
+            final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
+            if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) this))) {
+                final Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
+                    this.shadow$awardStat(Stats.SLEEP_IN_BED);
+                    CriteriaTriggers.SLEPT_IN_BED.trigger((net.minecraft.server.level.ServerPlayer) (Object) this);
+                });
+                ((ServerLevel) this.shadow$level()).updateSleepingPlayerList();
+                cir.setReturnValue(var5);
+            }
+        });
     }
 
     @Override
@@ -1056,7 +1048,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     /**
      * Fixes <a href="https://bugs.mojang.com/browse/MC/issues/MC-302672">MC-302672</a>
      */
-    @WrapOperation(method =  "onEffectAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
+    @WrapOperation(method = "onEffectAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
     private void impl$onEffectAdded(ServerGamePacketListenerImpl instance, Packet packet, Operation<Void> original) {
         if (instance == null) {
             return;
