@@ -119,4 +119,9 @@ public abstract class MinecraftServerMixin_Test extends ReentrantBlockableEventL
             this.waitUntilNextTick();
         }
     }
+
+    @Override
+    public boolean bridge$insideTestEnvironment() {
+        return true;
+    }
 }

@@ -22,32 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.mixin.core.server.commands;
+package org.spongepowered.neoforge.mixin.core.network.protocol.common;
 
-import net.minecraft.server.commands.SpreadPlayersCommand;
-import net.minecraft.world.entity.Entity;
-import net.neoforged.neoforge.event.EventHooks;
-import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.MovementTypes;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.network.channel.ChannelUtils;
 
-@Mixin(SpreadPlayersCommand.class)
-public abstract class SpreadPlayersCommandMixin_Neo {
+import java.util.ArrayList;
+import java.util.List;
 
-    @Redirect(method = "setPlayerPositions", at = @At(
-        value = "INVOKE",
-        target = "Lnet/neoforged/neoforge/event/EventHooks;onEntityTeleportSpreadPlayersCommand(Lnet/minecraft/world/entity/Entity;DDD)Lnet/neoforged/neoforge/event/entity/EntityTeleportEvent$SpreadPlayersCommand;"
-    ))
-    private static EntityTeleportEvent.SpreadPlayersCommand vanilla$createCauseFrameForTeleport(Entity entity, double targetX, double targetY, double targetZ) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
+@SuppressWarnings({"rawtypes", "unchecked"})
+@Mixin(ServerboundCustomPayloadPacket.class)
+public abstract class ServerboundCustomPayloadPacketMixin_Neo {
 
-            return EventHooks.onEntityTeleportSpreadPlayersCommand(entity, targetX, targetY, targetZ);
-        }
+    // @formatter: off
+    @Shadow @Final private static int MAX_PAYLOAD_SIZE;
+    // @formatter: on
+
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList([Ljava/lang/Object;)Ljava/util/ArrayList;"), remap = false)
+    private static ArrayList neo$registerCustomPacketPayloads(final Object[] registrations) {
+        final ArrayList allRegistrations = new ArrayList<>(List.of(registrations));
+        allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ServerboundCustomPayloadPacketMixin_Neo.MAX_PAYLOAD_SIZE));
+        return allRegistrations;
     }
 }

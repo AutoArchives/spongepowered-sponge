@@ -22,32 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.server.commands;
+package org.spongepowered.common.mixin.core.server.commands;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.commands.SpreadPlayersCommand;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.EntityTeleportEvent;
+import net.minecraft.world.entity.Relative;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
+import java.util.Set;
+
 @Mixin(SpreadPlayersCommand.class)
-public abstract class SpreadPlayersCommandMixin_Forge {
+public abstract class SpreadPlayersCommandMixin {
 
-    @Redirect(method = "setPlayerPositions", at = @At(
-        value = "INVOKE",
-        target = "Lnet/minecraftforge/event/ForgeEventFactory;onEntityTeleportSpreadPlayersCommand(Lnet/minecraft/world/entity/Entity;DDD)Lnet/minecraftforge/event/entity/EntityTeleportEvent$SpreadPlayersCommand;"
-    ))
-    private static EntityTeleportEvent.SpreadPlayersCommand vanilla$createCauseFrameForTeleport(Entity entity, double targetX, double targetY, double targetZ) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+    @WrapOperation(method = "setPlayerPositions", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FFZ)Z"))
+    private static boolean vanilla$createCauseFrameForTeleport(
+        final Entity instance, final ServerLevel level, final double x, final double y, final double z,
+        final Set<Relative> relativeMovements, final float yRot, final float xRot, final boolean setCamera, final Operation<Boolean> original) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getWorldInstance(instance.level()).pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
-
-            return ForgeEventFactory.onEntityTeleportSpreadPlayersCommand(entity, targetX, targetY, targetZ);
+            return original.call(instance, level, x, y, z, relativeMovements, yRot, xRot, setCamera);
         }
     }
 }

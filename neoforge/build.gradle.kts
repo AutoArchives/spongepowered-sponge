@@ -306,10 +306,11 @@ tasks {
     }
 
     val servicesShadowJar by register("servicesShadowJar", ShadowJar::class) {
-        group = "shadow"
+        group = "build"
         archiveClassifier.set("services")
 
         mergeServiceFiles()
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         configurations = listOf(serviceShadedLibrariesConfig.get())
         exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "**/module-info.class")
 
@@ -330,10 +331,10 @@ tasks {
     }
 
     shadowJar {
-        group = "shadow"
         archiveClassifier.set("mod")
 
         mergeServiceFiles()
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         configurations = listOf(gameShadedLibrariesConfig.get())
 
         manifest {
@@ -389,6 +390,7 @@ tasks {
         jvmArgs("-Dsponge.test.args=" + runServer.get().args!!.joinToString(" "))
         jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
         jvmArgs("-Djunit.platform.launcher.interceptors.enabled=true")
+        jvmArgs("-Djunit.jupiter.extensions.autodetection.enabled=true")
         workingDir = layout.buildDirectory.dir("test-run").get().asFile
 
         doFirst {

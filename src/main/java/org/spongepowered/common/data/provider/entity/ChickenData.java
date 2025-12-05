@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.animal.Chicken;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.ChickenVariant;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -47,6 +49,13 @@ public final class ChickenData {
                             }
                             h.eggTime = ticks;
                             return true;
+                        })
+                    .create(Keys.CHICKEN_VARIANT)
+                        .get(h -> (ChickenVariant) (Object) h.getVariant().value())
+                        .set((h, v) -> {
+                            final var holder = h.level().registryAccess().lookupOrThrow(Registries.CHICKEN_VARIANT)
+                                .wrapAsHolder((net.minecraft.world.entity.animal.ChickenVariant) (Object) v);
+                            h.setVariant(holder);
                         });
     }
     // @formatter:on

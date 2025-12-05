@@ -77,8 +77,9 @@ public final class SpongeTicketTypeBuilder<T> implements TicketType.Builder<T> {
         if (this.comparator == null) {
             this.comparator = (v1, v2) -> 0;
         }
-        // This will load and simulate, but not persist nor keep the dimension active.
-        final var flag = 1 << 2 & 1 << 4;
+        final var flag = net.minecraft.server.level.TicketType.FLAG_LOADING
+            | net.minecraft.server.level.TicketType.FLAG_SIMULATION
+            | net.minecraft.server.level.TicketType.FLAG_KEEP_DIMENSION_ACTIVE;
         final var timeout = this.lifetime.isInfinite() ? Constants.ChunkTicket.INFINITE_TIMEOUT : this.lifetime.ticks();
         return (TicketType<T>) (Object) new net.minecraft.server.level.TicketType(timeout,flag);
     }

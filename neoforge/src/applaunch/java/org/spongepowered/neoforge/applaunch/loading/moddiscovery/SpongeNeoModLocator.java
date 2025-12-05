@@ -24,7 +24,6 @@
  */
 package org.spongepowered.neoforge.applaunch.loading.moddiscovery;
 
-import net.neoforged.fml.classloading.SecureJar;
 import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
@@ -84,7 +83,7 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
                     } catch (Exception ignored) {}
                     if (modFile == null) {
                         // fallback to game library
-                        modFile = IModFile.create(SecureJar.from(jarContents), JarModsDotTomlModFileReader::manifestParser, IModFile.Type.GAMELIBRARY, attributes);
+                        modFile = IModFile.create(jarContents, JarModsDotTomlModFileReader::manifestParser, IModFile.Type.GAMELIBRARY, attributes);
                     }
                     pipeline.addModFile(modFile);
                 }

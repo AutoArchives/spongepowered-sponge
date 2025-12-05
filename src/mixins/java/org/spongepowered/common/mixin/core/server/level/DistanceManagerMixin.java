@@ -62,7 +62,7 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
         final var bridgeTicket = (TicketBridge) ticket;
         final var tickets = this.ticketStorage.getTickets(bridgeTicket.bridge$chunkPosition());
         if (tickets != null && tickets.contains(nativeTicket)) {
-            return nativeTicket.isTimedOut();
+            return !nativeTicket.isTimedOut();
         }
         return false;
     }

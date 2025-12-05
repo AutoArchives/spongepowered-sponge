@@ -24,28 +24,14 @@
  */
 package org.spongepowered.common.hooks;
 
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
 /**
  * Event hooks for when there is no specific event translation between Sponge
  * and the platform.
  */
 public interface EventHooks {
-
-    default ChangeEntityWorldEvent.Pre callChangeEntityWorldEventPre(final Entity entity, final ServerLevel toWorld) {
-        final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getInstance().currentCause(),
-            (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) entity.level(),
-            (org.spongepowered.api.world.server.ServerWorld) toWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld);
-        SpongeCommon.post(event);
-        return event;
-    }
 
     default boolean callPlayerDestruction(ServerPlayer serverPlayer, DamageSource cause) {
         return false;

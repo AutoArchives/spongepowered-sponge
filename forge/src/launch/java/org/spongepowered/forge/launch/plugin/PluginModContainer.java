@@ -25,7 +25,8 @@
 package org.spongepowered.forge.launch.plugin;
 
 import com.google.inject.Injector;
-import net.minecraftforge.eventbus.internal.Event;
+import net.minecraftforge.eventbus.api.bus.BusGroup;
+import net.minecraftforge.eventbus.api.bus.EventBus;
 import net.minecraftforge.fml.Logging;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
@@ -38,6 +39,7 @@ import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.common.inject.plugin.PluginGuice;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.metadata.model.PluginDependency;
@@ -49,6 +51,7 @@ public final class PluginModContainer extends ModContainer {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private final ModFileScanData scanResults;
+    private final BusGroup eventBusGroup;
     private Object modInstance;
     private final Class<?> modClass;
     private final CountDownLatch initializationLock;
@@ -58,6 +61,7 @@ public final class PluginModContainer extends ModContainer {
         LOGGER.debug(Logging.LOADING, "Creating PluginModContainer instance for {}", className);
         this.scanResults = modFileScanResults;
         this.activityMap.put(ModLoadingStage.CONSTRUCT, this::constructPlugin);
+        this.eventBusGroup = BusGroup.create("modBusFor" + info.getModId());
         this.contextExtension = () -> null;
         this.initializationLock = new CountDownLatch(1);
 
@@ -70,14 +74,6 @@ public final class PluginModContainer extends ModContainer {
             throw new ModLoadingException(info, ModLoadingStage.CONSTRUCT, "fml.modloading.failedtoloadmodclass", e);
         }
     }
-
-    @Override
-    public void dispatchConfigEvent(IConfigEvent event) {
-    }
-
-//    private void onEventFailed(IEventBus iEventBus, Event event, IEventListener[] iEventListeners, int i, Throwable throwable) {
-//        LOGGER.error(new EventBusErrorMessage(event, i, iEventListeners, throwable));
-//    }
 
     private void constructPlugin() {
         try {
@@ -100,7 +96,7 @@ public final class PluginModContainer extends ModContainer {
             final Injector pluginInjector = PluginGuice.create(pluginContainer, this.modClass, Launch.instance().lifecycle().platformInjector());
             this.modInstance = pluginInjector.getInstance(this.modClass);
             pluginContainer.setInjector(pluginInjector);
-//            ((ForgeEventManager) MinecraftForge.EVENT_BUS).registerListeners(pluginContainer, this.modInstance);
+            Sponge.eventManager().registerListeners(pluginContainer, this.modInstance);
 
             LOGGER.trace(Logging.LOADING, "Loaded plugin instance {} of type {}", getModId(), this.modClass.getName());
 
@@ -130,14 +126,21 @@ public final class PluginModContainer extends ModContainer {
         return this.modInstance;
     }
 
-    protected <T extends Event & IModBusEvent> void acceptEvent(final T e) {
+    @Override
+    protected <T extends IModBusEvent> void acceptEvent(final T e) {
         try {
             LOGGER.trace(Logging.LOADING, "Firing event for modid {} : {}", this.getModId(), e);
+            IModBusEvent.getBus(this.eventBusGroup, (Class<T>) e.getClass()).post(e);
             LOGGER.trace(Logging.LOADING, "Fired event for modid {} : {}", this.getModId(), e);
         } catch (Throwable t) {
             LOGGER.error(Logging.LOADING, "Caught exception during event {} dispatch for modid {}", e, this.getModId(), t);
             throw new ModLoadingException(this.modInfo, this.modLoadingStage, "fml.modloading.errorduringevent", t);
         }
+    }
+
+    @Override
+    public void dispatchConfigEvent(final IConfigEvent event) {
+        EventBus.create(this.eventBusGroup, event.self().getClass()).post(event.self());
     }
 
     private void waitForInitialization() {

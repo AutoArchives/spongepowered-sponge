@@ -290,7 +290,8 @@ public final class SpongeRegistryLoader {
                 MovementTypes.ENTITY_TELEPORT,
                 MovementTypes.NATURAL,
                 MovementTypes.PLUGIN,
-                MovementTypes.PORTAL
+                MovementTypes.PORTAL,
+                MovementTypes.SPECTATOR
         )));
     }
 

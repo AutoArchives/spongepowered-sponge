@@ -18,17 +18,15 @@ description = "{{ description }}"
 
 [[dependencies.spongeneo]]
 modId="neoforge"
-mandatory=true
+type="required"
 versionRange="[{{ neoForgeVersion }},)"
 ordering="AFTER"
-side="BOTH"
 
 [[dependencies.spongeneo]]
 modId="sponge"
-mandatory=true
+type="required"
 versionRange="[{{ version }}]"
 ordering="AFTER"
-side="BOTH"
 
 
 [[mods]]
@@ -42,10 +40,9 @@ description="The SpongeAPI implementation targeting vanilla Minecraft and 3rd pa
 
 [[dependencies.sponge]]
 modId="spongeapi"
-mandatory=true
+type="required"
 versionRange="[{{ apiVersion }},)"
 ordering="AFTER"
-side="BOTH"
 
 
 [[mods]]
@@ -57,6 +54,11 @@ credits="SpongePowered and Contributors"
 authors="SpongePowered"
 description="A Minecraft plugin API"
 
+
 ["lithium:options"]
 "mixin.world.tick_scheduler"=false
 "mixin.collections.entity_filtering"=false
+
+[[dependencies.spongeneo]]
+modId="adventure_platform_neoforge"
+type="incompatible"

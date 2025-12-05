@@ -24,16 +24,18 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import com.mojang.serialization.DynamicOps;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SignText;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
@@ -68,16 +70,24 @@ public final class SignItemStackData {
                                 .toList();
                         })
                         .set((h, v) -> {
-                            final GsonComponentSerializer gcs = GsonComponentSerializer.gson();
                             final CompoundTag tag = new CompoundTag();
                             tag.putString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
-                            for (int i = 0; i < 4; i++) {
-                                final @Nullable Component line = v.size() > i ? v.get(i) : Component.empty();
-                                if (line == null) {
-                                    throw new IllegalArgumentException("A null line was given at index " + i);
+                            DynamicOps<Tag> $$2 = SpongeCommon.vanillaRegistryAccess().createSerializationContext(NbtOps.INSTANCE);
+                            final var text = new SignText();
+                            for (int i = 0; i < v.size(); ++i) {
+                                if (i > 3) {
+                                    break;
                                 }
-                                tag.putString("Text" + (i + 1), gcs.serialize(line));
+                                final var translated = SpongeAdventure.asVanilla(v.get(i));
+                                if (translated == null) {
+                                    continue;
+                                }
+                                text.setMessage(i, translated);
                             }
+                            SignText.DIRECT_CODEC.encodeStart($$2, text)
+                                .resultOrPartial(SpongeCommon.logger()::error)
+                                .ifPresent($$1x -> tag.put("front_text", $$1x));
+
                             h.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(BlockEntityType.SIGN, tag));
                         })
                         .delete(h -> h.remove(DataComponents.BLOCK_ENTITY_DATA));

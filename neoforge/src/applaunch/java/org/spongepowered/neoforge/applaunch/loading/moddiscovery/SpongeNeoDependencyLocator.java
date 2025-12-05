@@ -24,7 +24,7 @@
  */
 package org.spongepowered.neoforge.applaunch.loading.moddiscovery;
 
-import net.neoforged.fml.classloading.SecureJar;
+import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.moddiscovery.readers.JarModsDotTomlModFileReader;
 import net.neoforged.neoforgespi.locating.IDependencyLocator;
@@ -71,9 +71,9 @@ public class SpongeNeoDependencyLocator implements IDependencyLocator {
             final Path path = library.file();
             SpongeNeoDependencyLocator.LOGGER.debug("Proposing jar {} as a game library", path);
 
-            final SecureJar jar;
+            final JarContents jar;
             try {
-                jar = SecureJar.from(path);
+                jar = JarContents.ofPath(path);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to create jar from " + path, e);
             }
