@@ -32,6 +32,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ChangeWorldBorderEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -82,7 +83,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
     }
 
     @Inject(method = "lerpSizeBetween", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onLerping(final double initial, final double target, final long milliseconds, final CallbackInfo ci) {
+    private void impl$onLerping(final double initial, final double target, final long milliseconds, final long delay, final CallbackInfo ci) {
         if (this.impl$fireEvent) {
             final Supplier<org.spongepowered.api.world.border.WorldBorder> proposed =
                 () -> new SpongeWorldBorderBuilder().from(this)
@@ -190,7 +191,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
     @Override
     public org.spongepowered.api.world.border.@Nullable WorldBorder bridge$applyFrom(final org.spongepowered.api.world.border.WorldBorder worldBorder) {
         if (!this.impl$fireEvent) {
-            ((WorldBorder) (Object) this).applySettings((WorldBorder.Settings) (Object) worldBorder);
+            this.impl$applySettings((WorldBorder.Settings) (Object) worldBorder);
             return worldBorder;
         }
 
@@ -208,9 +209,24 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
         }
 
         this.impl$fireEvent = false;
-        ((WorldBorder) (Object) this).applySettings((WorldBorder.Settings) (Object) toSet);
+        this.impl$applySettings((WorldBorder.Settings) (Object) worldBorder);
         this.impl$fireEvent = true;
         return toSet;
+    }
+
+    @Unique
+    private void impl$applySettings(WorldBorder.Settings worldBorder) {
+        ((WorldBorder) (Object) this).setCenter(worldBorder.centerX(), worldBorder.centerZ());
+        ((WorldBorder) (Object) this).setDamagePerBlock(worldBorder.damagePerBlock());
+        ((WorldBorder) (Object) this).setSafeZone(worldBorder.safeZone());
+        ((WorldBorder) (Object) this).setWarningBlocks(worldBorder.warningBlocks());
+        ((WorldBorder) (Object) this).setWarningTime(worldBorder.warningTime());
+        if (worldBorder.lerpTime() > 0L) {
+            // TODO - figure out how to get the appropriate game time
+            ((WorldBorder) (Object) this).lerpSizeBetween(worldBorder.size(), worldBorder.lerpTarget(), worldBorder.lerpTime(), SpongeCommon.server().overworld().getGameTime());
+        } else {
+            ((WorldBorder) (Object) this).setSize(worldBorder.size());
+        }
     }
 
 }

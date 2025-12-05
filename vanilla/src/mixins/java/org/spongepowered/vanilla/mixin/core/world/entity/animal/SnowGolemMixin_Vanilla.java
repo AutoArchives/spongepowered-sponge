@@ -26,7 +26,8 @@ package org.spongepowered.vanilla.mixin.core.world.entity.animal;
 
 
 import net.minecraft.world.entity.animal.SnowGolem;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRule;
+import net.minecraft.world.level.gamerules.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -36,8 +37,8 @@ import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 public abstract class SnowGolemMixin_Vanilla {
 
     @Redirect(method = "aiStep()V", at = @At(
-        value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"))
-    private boolean impl$checkCanGrief(final GameRules gameRules, final GameRules.Key<GameRules.BooleanValue> key) {
-        return gameRules.getBoolean(key) && ((GrieferBridge) this).bridge$canGrief();
+        value = "INVOKE", target = "Lnet/minecraft/world/level/gamerules/GameRules;get(Lnet/minecraft/world/level/gamerules/GameRule;)Ljava/lang/Object;"))
+    private Object impl$checkCanGrief(final GameRules gameRules, final GameRule rule) {
+        return (Boolean) gameRules.get(rule) && ((GrieferBridge) this).bridge$canGrief();
     }
 }

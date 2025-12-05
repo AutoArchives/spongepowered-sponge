@@ -47,12 +47,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
@@ -291,7 +291,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
         } else if (server.isSingleplayer()) {
             level.setSpawnSettings(difficulty != Difficulty.PEACEFUL);
         } else {
-            level.setSpawnSettings(server.getWorldData().getGameRules().getBoolean(GameRules.RULE_SPAWN_MONSTERS));
+            level.setSpawnSettings(server.getWorldData().getGameRules().get(GameRules.SPAWN_MONSTERS));
         }
 
         level.players().forEach(player -> player.connection.send(new ClientboundChangeDifficultyPacket(difficulty, isLocked)));

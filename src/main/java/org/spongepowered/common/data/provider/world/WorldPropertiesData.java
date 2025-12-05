@@ -25,9 +25,9 @@
 package org.spongepowered.common.data.provider.world;
 
 import net.minecraft.core.GlobalPos;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -88,7 +88,7 @@ public final class WorldPropertiesData {
                     .create(Keys.WORLD_TYPE)
                         .get(h -> (WorldType) (Object) h.bridge$dimensionType())
                     .create(Keys.PVP)
-                        .get(h -> h.bridge$pvp().orElseGet(() -> SpongeCommon.server().getWorldData().getGameRules().getBoolean(GameRules.RULE_PVP)))
+                        .get(h -> h.bridge$pvp().orElseGet(() -> SpongeCommon.server().getWorldData().getGameRules().get(GameRules.PVP)))
                     .create(Keys.SERIALIZATION_BEHAVIOR)
                         .get(h -> h.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC))
                     .create(Keys.VIEW_DISTANCE)

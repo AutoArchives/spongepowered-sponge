@@ -24,39 +24,23 @@
  */
 package org.spongepowered.vanilla.generator.world.level;
 
-import com.google.common.base.CaseFormat;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.GameRules;
 import org.spongepowered.vanilla.generator.Context;
 import org.spongepowered.vanilla.generator.Generator;
-import org.spongepowered.vanilla.generator.MapEntriesValidator;
 import org.spongepowered.vanilla.generator.RegistryEntriesGenerator;
 import org.spongepowered.vanilla.generator.RegistryEntriesValidator;
 import org.spongepowered.vanilla.generator.RegistryScope;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class LevelDataRegistries {
 
     public static List<Generator> levelDataRegistries(final Context context) {
         return List.<Generator>of(
-            new MapEntriesValidator<>(
+            new RegistryEntriesValidator<>(
                 "world.gamerule",
                 "GameRules",
-                GameRules.class,
-                "GAME_RULE_TYPES",
-                map -> {
-                    final Map<ResourceLocation, Object> out = new HashMap<>(map.size());
-                    map.forEach((BiConsumer<Object, Object>) (k, v) -> {
-                        var key = (GameRules.Key<?>) k;
-                        out.put(ResourceLocation.fromNamespaceAndPath("sponge", CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.getId())), v);
-                    });
-                    return out;
-                }
+                Registries.GAME_RULE
             ),
             new RegistryEntriesGenerator<>(
                 "map.decoration",

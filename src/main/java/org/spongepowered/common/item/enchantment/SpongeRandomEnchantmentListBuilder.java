@@ -26,7 +26,6 @@ package org.spongepowered.common.item.enchantment;
 
 
 import com.google.common.collect.Lists;
-import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.util.RandomSource;
@@ -119,7 +118,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
 
             while (randomIn.nextInt(50) <= this.level)
             {
-                EnchantmentHelper.filterCompatibleEnchantments(list1, Util.lastOf(list));
+                EnchantmentHelper.filterCompatibleEnchantments(list1, list.getLast());
 
                 if (list1.isEmpty())
                 {

@@ -907,7 +907,15 @@ public class SpongeWorldManager implements WorldManager {
         this.worlds.put(registryKey, world);
 
         // Ensure that the world border is registered.
-        levelData.getLegacyWorldBorderSettings().ifPresent(world.getWorldBorder()::applySettings);
+        levelData.getLegacyWorldBorderSettings().ifPresent(legacy -> {
+            final var border = world.getWorldBorder();
+            border.setSize(legacy.size());
+            border.setCenter(legacy.centerX(), legacy.centerZ());
+            border.setSafeZone(legacy.safeZone());
+            border.setDamagePerBlock(legacy.damagePerBlock());
+            border.setWarningTime(legacy.warningTime());
+            border.setWarningBlocks(legacy.warningBlocks());
+        });
         PlatformHooks.INSTANCE.getWorldHooks().postLoadWorld(world);
         return world;
     }

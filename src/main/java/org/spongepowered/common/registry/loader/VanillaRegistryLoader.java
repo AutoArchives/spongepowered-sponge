@@ -111,7 +111,6 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.common.accessor.world.entity.boss.enderdragon.phases.EnderDragonPhaseAccessor;
-import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
@@ -161,7 +160,6 @@ public final class VanillaRegistryLoader {
         }
 
         this.naming(RegistryTypes.ARMOR_MATERIAL, materials.keySet().toArray(new ArmorMaterial[]{}), materials);
-        this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
         this.holder.createRegistry(RegistryTypes.ITEM_TIER, VanillaRegistryLoader.itemTier());
     }
 

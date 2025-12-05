@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRuleMap;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ServerLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -39,8 +40,8 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
-import org.spongepowered.common.accessor.world.level.GameRules_ValueAccessor;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
@@ -88,14 +89,9 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     @Override
     default <V> V gameRule(GameRule<V> gameRule) {
-        final GameRules.Value<?> value = this.shadow$getGameRules().getRule((GameRules.Key<?>) (Object) Objects.requireNonNull(gameRule,
+        final var value = this.shadow$getGameRules().get((net.minecraft.world.level.gamerules.GameRule<?>) (Object) Objects.requireNonNull(gameRule,
             "gameRule"));
-        if (value instanceof GameRules.BooleanValue) {
-            return (V) Boolean.valueOf(((GameRules.BooleanValue) value).get());
-        } else if (value instanceof GameRules.IntegerValue) {
-            return (V) Integer.valueOf(((GameRules.IntegerValue) value).get());
-        }
-        return null;
+        return (V) value;
     }
 
     @Override
@@ -103,31 +99,17 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
         Objects.requireNonNull(gameRule, "gameRule");
         Objects.requireNonNull(value, "value");
 
-        final GameRules.Value<?> mValue = this.shadow$getGameRules().getRule((GameRules.Key<?>) (Object) gameRule);
-        ((GameRules_ValueAccessor) mValue).invoker$deserialize(value.toString());
+        this.shadow$getGameRules().set((net.minecraft.world.level.gamerules.GameRule<V>) (Object) gameRule, value, SpongeCommon.server());
     }
 
     @Override
     default Map<GameRule<?>, ?> gameRules() {
-        final Map<GameRules.Key<?>, GameRules.Value<?>> rules =
-            ((GameRulesAccessor) this.shadow$getGameRules()).accessor$rules();
-
+        final GameRuleMap rules =  ((GameRulesAccessor) this.shadow$getGameRules()).accessor$rules();
         final Map<GameRule<?>, Object> apiRules = new HashMap<>();
-        for (final Map.Entry<GameRules.Key<?>, GameRules.Value<?>> rule : rules.entrySet()) {
-            final GameRule<?> key = (GameRule<?>) (Object) rule.getKey();
-            final GameRules.Value<?> mValue = rule.getValue();
-            Object value = null;
-            if (mValue instanceof GameRules.BooleanValue) {
-                value = ((GameRules.BooleanValue) mValue).get();
-            } else if (mValue instanceof GameRules.IntegerValue) {
-                value = ((GameRules.IntegerValue) mValue).get();
-            }
-
-            if (value != null) {
-                apiRules.put(key, value);
-            }
+        for (final var rule : rules.keySet()) {
+            final GameRule<?> key = (GameRule<?>) (Object) rule;
+            apiRules.put(key, rules.get(rule));
         }
-
         return apiRules;
     }
 

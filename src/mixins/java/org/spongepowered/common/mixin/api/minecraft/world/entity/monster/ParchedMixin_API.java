@@ -22,16 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
-import com.mojang.serialization.DataResult;
-import net.minecraft.world.level.gamerules.GameRule;
+import org.spongepowered.api.entity.living.monster.skeleton.Parched;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(GameRule.class)
-public interface GameRules_ValueAccessor {
-
-    @Invoker("deserialize") DataResult<?> invoker$deserialize(final String serialized);
+@Mixin(net.minecraft.world.entity.monster.Parched.class)
+public abstract class ParchedMixin_API extends AbstractSkeletonMixin_API implements Parched {
 
 }

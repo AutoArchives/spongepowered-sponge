@@ -65,10 +65,10 @@ import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.scores.PlayerTeam;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -295,7 +295,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     public boolean bridge$keepInventory() {
-        return Objects.requireNonNullElseGet(this.impl$keepInventory, () -> this.shadow$level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY));
+        return Objects.requireNonNullElseGet(this.impl$keepInventory, () -> this.shadow$level().getGameRules().get(GameRules.KEEP_INVENTORY));
     }
 
     @Override
@@ -450,19 +450,19 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @ModifyExpressionValue(
         method = "die",
         at = @At(
-            value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"
+            value = "INVOKE", target = "Lnet/minecraft/world/level/gamerules/GameRules;get(Lnet/minecraft/world/level/gamerules/GameRule;)Ljava/lang/Object;"
         ),
         slice = @Slice(
             from = @At("HEAD"),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;getDeathMessage()Lnet/minecraft/network/chat/Component;")
         )
     )
-    private boolean impl$onlySendMessageIfEventCallsForIt(
-        boolean gameRules,
+    private Object impl$onlySendMessageIfEventCallsForIt(
+        Object gameRules,
         @Share("sponge-event") LocalRef<DestructEntityEvent.@Nullable Death> event
     ) {
         final var spongeEvent = event.get();
-        return gameRules && (spongeEvent == null || !spongeEvent.isMessageCancelled());
+        return (Boolean) gameRules && (spongeEvent == null || !spongeEvent.isMessageCancelled());
     }
 
     @ModifyExpressionValue(
@@ -526,10 +526,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @ModifyExpressionValue(
         method = "restoreFrom",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z")
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/gamerules/GameRules;get(Lnet/minecraft/world/level/gamerules/GameRule;)Ljava/lang/Object;")
     )
-    private boolean tracker$useKeepFromBridge(
-        boolean original,
+    private Object tracker$useKeepFromBridge(
+        Object original,
         net.minecraft.server.level.ServerPlayer corpse,
         boolean wonGame
     ) {

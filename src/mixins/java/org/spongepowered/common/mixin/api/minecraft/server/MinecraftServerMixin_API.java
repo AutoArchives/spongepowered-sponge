@@ -41,7 +41,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
@@ -248,17 +248,17 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public boolean isPVPEnabled() {
-        return this.worldData.getGameRules().getBoolean(GameRules.RULE_PVP);
+        return this.worldData.getGameRules().get(GameRules.PVP);
     }
 
     @Override
     public boolean areCommandBlocksEnabled() {
-        return this.worldData.getGameRules().getBoolean(GameRules.RULE_COMMAND_BLOCKS_ENABLED);
+        return this.worldData.getGameRules().get(GameRules.COMMAND_BLOCKS_WORK);
     }
 
     @Override
     public boolean isMonsterSpawnsEnabled() {
-        return this.worldData.getGameRules().getBoolean(GameRules.RULE_SPAWN_MONSTERS);
+        return this.worldData.getGameRules().get(GameRules.SPAWN_MONSTERS);
     }
 
     @Override
@@ -271,7 +271,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
      */
     @Override
     public boolean isMultiWorldEnabled() {
-        return this.isSingleplayer() || ((Object) this instanceof DedicatedServer ds) && ds.getWorldData().getGameRules().getBoolean(GameRules.RULE_ALLOW_NETHER);
+        return this.isSingleplayer() || ((Object) this instanceof DedicatedServer ds) && ds.getWorldData().getGameRules().get(GameRules.ALLOW_ENTERING_NETHER_USING_PORTALS);
     }
 
     @Override

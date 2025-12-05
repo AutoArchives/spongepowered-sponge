@@ -51,7 +51,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ServerChunkCacheAccessor;
-import org.spongepowered.common.accessor.world.level.chunk.storage.ChunkStorageAccessor;
+import org.spongepowered.common.accessor.world.level.chunk.storage.SimpleRegionStorageAccessor;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.DistanceManagerBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
@@ -85,7 +85,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setIOWorkerDimension(final CallbackInfo ci) {
-        ((IOWorkerBridge) ((ChunkStorageAccessor) this).accessor$worker()).bridge$setDimension(SpongeIOWorkerType.CHUNK, this.level.dimension());
+        ((IOWorkerBridge) ((SimpleRegionStorageAccessor) this).accessor$worker()).bridge$setDimension(SpongeIOWorkerType.CHUNK, this.level.dimension());
     }
 
     @Redirect(method = "save",

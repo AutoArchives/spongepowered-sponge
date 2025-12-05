@@ -95,7 +95,7 @@ public final class BiomeData {
                         return Color.ofRgb(value);
                     })
                     .create(Keys.WATER_COLOR)
-                        .get(h -> Color.ofRgb(h.getSpecialEffects().getWaterColor()))
+                        .get(h -> Color.ofRgb(h.getSpecialEffects().waterColor()))
                     .create(Keys.WATER_FOG_COLOR)
                     .get(h -> {
                         final var value = h.getAttributes().applyModifier(EnvironmentAttributes.WATER_FOG_COLOR, EnvironmentAttributes.WATER_FOG_COLOR.defaultValue());
@@ -107,11 +107,11 @@ public final class BiomeData {
                         return Color.ofRgb(value);
                     })
                     .create(Keys.FOLIAGE_COLOR)
-                        .get(h -> h.getSpecialEffects().getFoliageColorOverride().map(Color::ofRgb).orElse(null))
+                        .get(h -> h.getSpecialEffects().foliageColorOverride().map(Color::ofRgb).orElse(null))
                     .create(Keys.GRASS_COLOR)
-                        .get(h -> h.getSpecialEffects().getGrassColorOverride().map(Color::ofRgb).orElse(null))
+                        .get(h -> h.getSpecialEffects().grassColorOverride().map(Color::ofRgb).orElse(null))
                     .create(Keys.GRASS_COLOR_MODIFIER)
-                        .get(h -> (GrassColorModifier) (Object) h.getSpecialEffects().getGrassColorModifier())
+                        .get(h -> (GrassColorModifier) (Object) h.getSpecialEffects().grassColorModifier())
                     .create(Keys.BACKGROUND_MUSIC)
                         .get(h -> {
                             final var value = h.getAttributes().applyModifier(EnvironmentAttributes.BACKGROUND_MUSIC, EnvironmentAttributes.BACKGROUND_MUSIC.defaultValue());

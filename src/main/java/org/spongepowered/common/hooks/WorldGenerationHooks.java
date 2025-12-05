@@ -25,6 +25,7 @@
 package org.spongepowered.common.hooks;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.DataFixer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
@@ -34,19 +35,20 @@ import java.util.List;
 
 public interface WorldGenerationHooks {
 
-    default LegacyStructureDataHandler createLegacyStructureDataUtil(final ResourceKey<Level> dimensionType, final DimensionDataStorage savedData) {
+    default LegacyStructureDataHandler createLegacyStructureDataUtil(final ResourceKey<Level> dimensionType, final DimensionDataStorage savedData, final DataFixer fixer) {
         if (dimensionType == Level.OVERWORLD) {
             return new LegacyStructureDataHandler(
                 savedData,
                 ImmutableList.of("Monument", "Stronghold", "Village", "Mineshaft", "Temple", "Mansion"),
-                ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument")
+                ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument"),
+                fixer
             );
         } else if (dimensionType == Level.NETHER) {
             final List<String> keys = ImmutableList.of("Fortress");
-            return new LegacyStructureDataHandler(savedData, keys, keys);
+            return new LegacyStructureDataHandler(savedData, keys, keys, fixer);
         } else if (dimensionType == Level.END) {
             final List<String> keys = ImmutableList.of("EndCity");
-            return new LegacyStructureDataHandler(savedData, keys, keys);
+            return new LegacyStructureDataHandler(savedData, keys, keys, fixer);
         } else {
             throw new RuntimeException(String.format("Unknown dimension type : %s", dimensionType));
         }
