@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.world.entity.projectile.hurtingprojectile;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
+import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

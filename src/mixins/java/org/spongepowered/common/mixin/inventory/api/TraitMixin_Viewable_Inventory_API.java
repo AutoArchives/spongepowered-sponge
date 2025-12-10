@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.inventory.api;
 
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.npc.ClientSideMerchant;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.minecart.AbstractMinecartContainer;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
