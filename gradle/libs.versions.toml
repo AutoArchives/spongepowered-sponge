@@ -11,7 +11,7 @@ mixin = "0.8.7"
 mixinextras = "0.5.0"
 modlauncher = "10.2.2"
 securemodules = "2.2.22"
-fancymodloader = "10.0.21"
+fancymodloader = "10.0.32"
 jarjar = "0.3.26"
 guava = "32.1.2-jre"
 mockito = "5.11.0"
@@ -75,4 +75,4 @@ indra-licenserSpotless = { id = "net.kyori.indra.licenser.spotless", version = "
 shadow = { id = "com.gradleup.shadow", version = "9.0.2" }
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
 forgeGradle = { id = "net.minecraftforge.gradle", version = "6.0.35" }
-modDevGradle = { id = "net.neoforged.moddev", version = "2.0.107" }
+modDevGradle = { id = "net.neoforged.moddev", version = "2.0.123" }
