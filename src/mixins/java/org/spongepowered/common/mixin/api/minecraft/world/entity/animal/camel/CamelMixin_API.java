@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.camel;
 
 import net.minecraft.world.entity.animal.camel.Camel;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.horse.AbstractHorseMixin_API;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.equine.AbstractHorseMixin_API;
 
 @Mixin(Camel.class)
 public abstract class CamelMixin_API extends AbstractHorseMixin_API implements org.spongepowered.api.entity.living.animal.camel.Camel {

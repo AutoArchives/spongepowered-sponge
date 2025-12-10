@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.entity.animal.cow.Cow;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.CowVariant;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -43,7 +43,7 @@ public final class CowData {
                         .get(h -> (CowVariant) (Object) h.getVariant().value())
                         .set((h, v) -> {
                             final var holder = h.level().registryAccess().lookupOrThrow(Registries.COW_VARIANT)
-                                .wrapAsHolder((net.minecraft.world.entity.animal.CowVariant) (Object) v);
+                                .wrapAsHolder((net.minecraft.world.entity.animal.cow.CowVariant) (Object) v);
                             h.setVariant(holder);
                         });
     }

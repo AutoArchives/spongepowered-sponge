@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.ai.behavior;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.HarvestFarmland;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -42,7 +42,7 @@ public abstract class HarvestFarmlandMixin {
      * would fail in forge environments. This changes the injection to a predictable
      * place where we still can forcibly call things but still cancel as needed.
      */
-    @Inject(method = "canStillUse(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/npc/Villager;J)Z", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "canStillUse(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/npc/villager/Villager;J)Z", at = @At(value = "HEAD"), cancellable = true)
     private void onCanGrief(ServerLevel level, Villager owner, long $$2, CallbackInfoReturnable<Boolean> cir) {
         if (!((GrieferBridge) owner).bridge$canGrief()) {
             cir.setReturnValue(false);

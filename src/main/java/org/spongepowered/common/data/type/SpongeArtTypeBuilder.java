@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.type;
 
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.world.entity.decoration.painting.PaintingVariant;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.ArtType;

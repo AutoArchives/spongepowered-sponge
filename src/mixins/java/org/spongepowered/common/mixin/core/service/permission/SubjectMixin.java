@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.service.permission;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.rcon.RconConsoleSource;
-import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
+import net.minecraft.world.entity.vehicle.minecart.MinecartCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.permission.Subject;

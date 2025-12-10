@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.monster.SpellcasterIllager;
+import net.minecraft.world.entity.monster.illager.SpellcasterIllager;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.SpellType;
-import org.spongepowered.common.accessor.world.entity.monster.SpellcasterIllagerAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.illager.SpellcasterIllagerAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class SpellcastingIllagerData {

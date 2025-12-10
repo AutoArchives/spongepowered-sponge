@@ -43,7 +43,7 @@ import java.util.Set;
 public abstract class EnderDragonMixin_API extends MobMixin_API implements EnderDragon {
 
     // @formatter:off
-    @Shadow @Final private net.minecraft.world.entity.boss.EnderDragonPart[] subEntities;
+    @Shadow @Final private net.minecraft.world.entity.boss.enderdragon.EnderDragonPart[] subEntities;
     @Shadow @Final private EnderDragonPhaseManager phaseManager;
     // @formatter:on
 
@@ -51,7 +51,7 @@ public abstract class EnderDragonMixin_API extends MobMixin_API implements Ender
     public Set<EnderDragonPart> parts() {
         Builder<EnderDragonPart> builder = ImmutableSet.builder();
 
-        for (net.minecraft.world.entity.boss.EnderDragonPart part : this.subEntities) {
+        for (net.minecraft.world.entity.boss.enderdragon.EnderDragonPart part : this.subEntities) {
             builder.add((EnderDragonPart) part);
         }
 

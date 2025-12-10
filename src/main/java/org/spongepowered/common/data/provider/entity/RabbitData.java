@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.Rabbit;
+import net.minecraft.world.entity.animal.rabbit.Rabbit;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.RabbitType;
-import org.spongepowered.common.accessor.world.entity.animal.RabbitAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.rabbit.RabbitAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class RabbitData {

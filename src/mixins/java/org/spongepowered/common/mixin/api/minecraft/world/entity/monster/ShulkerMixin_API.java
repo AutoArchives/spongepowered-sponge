@@ -32,7 +32,7 @@ import org.spongepowered.api.entity.living.golem.Shulker;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileUtil;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.AbstractGolemMixin_API;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.golem.AbstractGolemMixin_API;
 
 import java.util.Objects;
 import java.util.Optional;

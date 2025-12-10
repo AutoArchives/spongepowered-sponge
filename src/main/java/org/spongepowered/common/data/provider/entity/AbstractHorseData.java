@@ -25,9 +25,9 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.EntityReference;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.animal.horse.AbstractHorseAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.equine.AbstractHorseAccessor;
 import org.spongepowered.common.bridge.world.entity.animal.horse.AbstractHorseBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 

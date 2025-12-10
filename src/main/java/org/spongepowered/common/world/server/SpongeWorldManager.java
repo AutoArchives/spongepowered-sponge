@@ -45,7 +45,7 @@ import net.minecraft.util.TimeUtil;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
-import net.minecraft.world.entity.npc.WanderingTraderSpawner;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;

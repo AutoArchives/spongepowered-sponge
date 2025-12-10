@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.entity.monster.ZombieVillager;
-import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.monster.zombie.ZombieVillager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.api.data.type.VillagerType;
@@ -54,7 +54,7 @@ public final class ZombieVillagerData {
                     .create(Keys.VILLAGER_TYPE)
                         .get(h -> (VillagerType) (Object) h.getVillagerData().type())
                         .set((h, v) -> {
-                            final var villagerType = SpongeCommon.vanillaRegistry(Registries.VILLAGER_TYPE).wrapAsHolder((net.minecraft.world.entity.npc.VillagerType) (Object) v);
+                            final var villagerType = SpongeCommon.vanillaRegistry(Registries.VILLAGER_TYPE).wrapAsHolder((net.minecraft.world.entity.npc.villager.VillagerType) (Object) v);
                             h.setVillagerData(h.getVillagerData().withType(villagerType));
                         });
     }

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity.ai.goal;
 
 import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import org.spongepowered.api.entity.living.animal.horse.HorseLike;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -51,7 +51,7 @@ public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {
         method = "tick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;tameWithName(Lnet/minecraft/world/entity/player/Player;)Z"
+            target = "Lnet/minecraft/world/entity/animal/equine/AbstractHorse;tameWithName(Lnet/minecraft/world/entity/player/Player;)Z"
         ),
         cancellable = true
     )
@@ -68,7 +68,7 @@ public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {
         method = "tick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;ejectPassengers()V"
+            target = "Lnet/minecraft/world/entity/animal/equine/AbstractHorse;ejectPassengers()V"
         ),
         cancellable = true
     )

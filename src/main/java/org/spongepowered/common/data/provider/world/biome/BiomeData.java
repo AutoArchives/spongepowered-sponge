@@ -115,12 +115,12 @@ public final class BiomeData {
                     .create(Keys.BACKGROUND_MUSIC)
                         .get(h -> {
                             final var value = h.getAttributes().applyModifier(EnvironmentAttributes.BACKGROUND_MUSIC, EnvironmentAttributes.BACKGROUND_MUSIC.defaultValue());
-                            return (SoundConfig.BackgroundMusic) (Object) value;
+                            return (SoundConfig.BackgroundMusic) (Object) value.defaultMusic().orElse(null);
                         })
                     .create(Keys.AMBIENT_ADDITIONAL_SOUND)
                         .get(h -> {
                             final var value = h.getAttributes().applyModifier(EnvironmentAttributes.AMBIENT_SOUNDS, EnvironmentAttributes.AMBIENT_SOUNDS.defaultValue());
-                            return (SoundConfig.Additional) (Object) value;
+                            return (SoundConfig.Additional) (Object) value.additions().stream().findFirst().orElse(null);
                         })
                     .create(Keys.AMBIENT_MOOD)
                         .get(h -> h.getAttributes().applyModifier(EnvironmentAttributes.AMBIENT_SOUNDS, AmbientSounds.EMPTY).mood().map(SoundConfig.Mood.class::cast).orElse(null))

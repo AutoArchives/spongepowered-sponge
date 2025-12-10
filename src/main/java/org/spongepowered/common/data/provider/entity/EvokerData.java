@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.animal.Sheep;
-import org.spongepowered.common.accessor.world.entity.monster.EvokerAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.illager.EvokerAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class EvokerData {

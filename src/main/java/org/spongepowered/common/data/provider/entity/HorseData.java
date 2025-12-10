@@ -25,13 +25,13 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.MappedRegistry;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.accessor.world.entity.animal.horse.HorseAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.equine.HorseAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class HorseData {

@@ -26,12 +26,12 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.common.accessor.entity.vehicle.AbstractMinecartAccessor;
+import org.spongepowered.common.accessor.entity.vehicle.minecart.AbstractMinecartAccessor;
 import org.spongepowered.common.bridge.world.entity.vehicle.AbstractMinecartBridge;
 import org.spongepowered.common.data.ByteToBooleanContentUpdater;
 import org.spongepowered.common.data.SpongeDataManager;

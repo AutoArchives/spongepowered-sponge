@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.vehicle.MinecartFurnaceAccessor;
+import org.spongepowered.common.accessor.world.entity.vehicle.minecart.MinecartFurnaceAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class FurnaceMinecartData {

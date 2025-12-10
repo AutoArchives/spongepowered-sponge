@@ -40,7 +40,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -214,7 +214,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         method = "openHorseInventory",
         at = @At(
             value = "NEW",
-            target = "(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/animal/horse/AbstractHorse;I)Lnet/minecraft/world/inventory/HorseInventoryMenu;"
+            target = "(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/animal/equine/AbstractHorse;I)Lnet/minecraft/world/inventory/HorseInventoryMenu;"
         )
     )
     private HorseInventoryMenu impl$transactHorseInventoryMenuCreationWithEffect(

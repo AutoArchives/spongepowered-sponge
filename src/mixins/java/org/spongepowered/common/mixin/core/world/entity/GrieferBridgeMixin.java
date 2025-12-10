@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.world.entity;
 
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.LargeFireball;
-import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball;
+import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
+import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;

@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.projectile.AbstractThrownPotion;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import org.apache.commons.lang3.stream.Streams;
 import org.spongepowered.api.data.Keys;

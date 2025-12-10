@@ -25,9 +25,9 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import org.spongepowered.api.data.Keys;
@@ -35,7 +35,7 @@ import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.api.data.type.VillagerType;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.entity.npc.AbstractVillagerAccessor;
+import org.spongepowered.common.accessor.world.entity.npc.villager.AbstractVillagerAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -80,7 +80,7 @@ public final class VillagerData {
                         .get(h -> (VillagerType) (Object) h.getVillagerData().type())
                         .set((h, v) -> {
                             final var villagerType = SpongeCommon.vanillaRegistry(Registries.VILLAGER_TYPE)
-                                .wrapAsHolder((net.minecraft.world.entity.npc.VillagerType) (Object) v);
+                                .wrapAsHolder((net.minecraft.world.entity.npc.villager.VillagerType) (Object) v);
                             h.setVillagerData(h.getVillagerData().withType(villagerType));
                         })
                     .create(Keys.IS_UNHAPPY)
