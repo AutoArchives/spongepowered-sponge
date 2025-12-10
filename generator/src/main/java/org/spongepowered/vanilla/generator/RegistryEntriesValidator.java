@@ -85,7 +85,7 @@ public class RegistryEntriesValidator<V> implements Generator {
 
     @Override
     public String name() {
-        return "elements of registry " + this.registry.location();
+        return "elements of registry " + this.registry.identifier();
     }
 
     @Override
@@ -98,7 +98,7 @@ public class RegistryEntriesValidator<V> implements Generator {
 
         Registry<V> registry = ctx.registries().lookup(this.registry).orElse(null);
         if (registry == null) {
-            registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.location())
+            registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.identifier())
                 .orElseThrow(() -> new IllegalArgumentException("Unknown registry " + this.registry));
         }
 

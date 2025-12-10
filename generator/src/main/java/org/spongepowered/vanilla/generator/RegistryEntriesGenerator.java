@@ -109,7 +109,7 @@ public class RegistryEntriesGenerator<V> implements Generator {
 
     @Override
     public String name() {
-        return "elements of registry " + this.registry.location();
+        return "elements of registry " + this.registry.identifier();
     }
 
     @Override
@@ -122,7 +122,7 @@ public class RegistryEntriesGenerator<V> implements Generator {
         clazz.addAnnotation(Types.suppressWarnings("unused"));
 
         final RegistryScope scopeType;
-        Registry<V> registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.location()).map(Holder.Reference::value).orElse(null);
+        Registry<V> registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.identifier()).map(Holder.Reference::value).orElse(null);
         if (registry == null) {
             registry = ctx.registries().lookup(this.registry).orElse(null);
             if (registry == null) {
