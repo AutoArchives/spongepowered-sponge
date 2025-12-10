@@ -58,7 +58,7 @@ public abstract class ForgeRegistryMixin_Forge<V> {
     @Inject(method = "add(ILnet/minecraft/resources/Identifier;Ljava/lang/Object;Ljava/lang/String;)I", at = @At("TAIL"))
     public void forge$writeToParent(final int id, final Identifier key, final V value, final String owner, final CallbackInfoReturnable<Integer> cir) {
         final ResourceKey root = (ResourceKey) (Object) this.key.registry();
-        final ResourceKey location = (ResourceKey) (Object) this.key.location();
+        final var location = (ResourceKey) (Object) this.key.identifier();
 
         if (!this.forge$warnedIfNoParent && this.forge$parents.isEmpty()) {
             // We only care about minecraft namespaced registries, as that is what we've got parents for.

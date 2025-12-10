@@ -206,8 +206,8 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
     }
 
     @WrapWithCondition(method = "attack",
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;playServerSideSound(Lnet/minecraft/sounds/SoundEvent;)V"))
+        slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;playServerSideSound(Lnet/minecraft/sounds/SoundEvent;)V"))
     private boolean attack$preventSound(Player instance, SoundEvent soundEvent) {
         final SpongeAttackTracker tracker = this.attack$tracker();
         return tracker == null || !tracker.postEvent().isCancelled();
@@ -220,9 +220,17 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         this.attack$trackers.removeLast();
     }
 
-    @WrapOperation(method = "doSweepAttack",
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;")),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;distanceToSqr(Lnet/minecraft/world/entity/Entity;)D"))
+    @WrapOperation(method = {
+        "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;F)V",
+        // NeoForge changes where this gets invoked in a new method, so we add it as a target
+        "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;FLnet/minecraft/world/phys/AABB;)V"
+    },
+        slice = @Slice(from = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"
+        )),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;distanceToSqr(Lnet/minecraft/world/entity/Entity;)D"),
+        require = 1
+    )
     private double sweepAttack$fireEvents(final Player self, final Entity sweepTarget, final Operation<Double> operation) {
         final double distanceSquared = operation.call(self, sweepTarget);
         if (!(distanceSquared < this.attack$interactionRangeSquared())) {
@@ -271,16 +279,27 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         return distanceSquared;
     }
 
-    @WrapOperation(method = "doSweepAttack",
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;")),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
+    @WrapOperation(method = {
+        "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;F)V",
+        // NeoForge changes where this gets invoked in a new method, so we add it as a target
+        "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;FLnet/minecraft/world/phys/AABB;)V"
+    },
+        require = 1,
+        slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;")),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
     private float sweepAttack$cancelEnchantedDamage(final Player self, final Entity sweepTarget, final float damage, final DamageSource source, final Operation<Float> operation) {
         return damage; // We already did it above
     }
 
-    @WrapOperation(method = "doSweepAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDD)V"), slice = @Slice(
+    @WrapOperation(method = {
+        "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;F)V",
+        // NeoForge changes where this gets invoked in a new method, so we add it as a target
+        "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;FLnet/minecraft/world/phys/AABB;)V"
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDD)V"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"),
-        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;doPostAttackEffects(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;)V")))
+        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;doPostAttackEffects(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;)V")),
+        require = 1
+    )
     private void sweepAttack$knockbackModifier(
         final LivingEntity sweepTarget, double modifier, final double dirX, final double dirZ, final Operation<Void> operation) {
         final SpongeAttackTracker sweepTracker = this.attack$tracker();
@@ -290,8 +309,18 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         operation.call(sweepTarget, modifier, dirX, dirZ);
     }
 
-    @WrapOperation(method = "doSweepAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"),
-        slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;")))
+    @WrapOperation(method = {
+        "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;F)V",
+        // NeoForge changes where this gets invoked in a new method, so we add it as a target
+        "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;FLnet/minecraft/world/phys/AABB;)V"
+    }, at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/world/entity/LivingEntity;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"
+    ),
+        slice = @Slice(from = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"
+        )),
+        require = 1
+    )
     private boolean sweepAttack$finalDamage(
         final LivingEntity sweepTarget, final ServerLevel level, final DamageSource source, float damage,
         final Operation<Boolean> operation) {
