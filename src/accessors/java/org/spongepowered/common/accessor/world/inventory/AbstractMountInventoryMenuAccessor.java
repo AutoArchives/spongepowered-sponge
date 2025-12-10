@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.accessor.world.inventory;
 
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.inventory.HorseInventoryMenu;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.inventory.AbstractMountInventoryMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(HorseInventoryMenu.class)
-public interface HorseInventoryMenuAccessor {
+@Mixin(AbstractMountInventoryMenu.class)
+public interface AbstractMountInventoryMenuAccessor {
 
-    @Accessor("horse") AbstractHorse accessor$horse();
+    @Accessor("mount") LivingEntity accessor$mount();
 
 }

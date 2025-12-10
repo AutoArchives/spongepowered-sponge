@@ -140,7 +140,7 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
     }
 
     @Inject(method = "attack",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;makeSound(Lnet/minecraft/sounds/SoundEvent;)V"), slice = @Slice(
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;playServerSideSound(Lnet/minecraft/sounds/SoundEvent;)V"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z", ordinal = 0),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;getAttackDamageBonus(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F")))
     private void attack$captureStrongSprint(final Entity target, final CallbackInfo ci) {

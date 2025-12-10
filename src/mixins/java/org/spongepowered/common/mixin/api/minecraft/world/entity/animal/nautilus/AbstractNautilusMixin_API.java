@@ -24,17 +24,24 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.nautilus;
 
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.animal.nautilus.AbstractNautilus;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.NautilusLike;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.TamableAnimalMixin_API;
 
 import java.util.Set;
 
 @Mixin(AbstractNautilus.class)
 public abstract class AbstractNautilusMixin_API extends TamableAnimalMixin_API implements NautilusLike {
+
+    @Shadow protected SimpleContainer inventory;
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
@@ -46,5 +53,11 @@ public abstract class AbstractNautilusMixin_API extends TamableAnimalMixin_API i
         this.getValue(Keys.OWNER).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
+    }
+
+
+    @Override
+    public CarriedInventory<? extends Carrier> inventory() {
+        return InventoryUtil.carriedWrapperInventory(this.inventory, this);
     }
 }

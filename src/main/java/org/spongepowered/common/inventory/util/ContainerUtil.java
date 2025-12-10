@@ -49,11 +49,11 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.inventory.AbstractContainerMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.AbstractFurnaceMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.AbstractMountInventoryMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.BeaconMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.BrewingStandMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.DispenserMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.HopperMenuAccessor;
-import org.spongepowered.common.accessor.world.inventory.HorseInventoryMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.ItemCombinerMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.MerchantMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.ResultSlotAccessor;
@@ -291,8 +291,8 @@ public final class ContainerUtil {
             return ContainerUtil.carrierOrNull(((BrewingStandMenuAccessor) container).accessor$brewingStand());
         } else if (container instanceof BeaconMenu) {
             return new SpongeBlockEntityCarrier(((BeaconMenuAccessor) container).accessor$access().evaluate(Level::getBlockEntity).orElse(null), container);
-        } else if (container instanceof HorseInventoryMenuAccessor) {
-            return (Carrier) ((HorseInventoryMenuAccessor) container).accessor$horse();
+        } else if (container instanceof AbstractMountInventoryMenuAccessor) {
+            return (Carrier) ((AbstractMountInventoryMenuAccessor) container).accessor$mount();
         } else if (container instanceof MerchantMenuAccessor && ((MerchantMenuAccessor) container).accessor$trader() instanceof Carrier) {
             return (Carrier) ((MerchantMenuAccessor) container).accessor$trader();
         } else if (container instanceof ItemCombinerMenuAccessor) {

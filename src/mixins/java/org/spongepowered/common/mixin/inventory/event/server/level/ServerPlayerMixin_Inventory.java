@@ -29,7 +29,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Cancellable;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
+import net.minecraft.network.protocol.game.ClientboundMountScreenOpenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -226,7 +226,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             ci.cancel();
             return menu;
         }
-        this.connection.send(new ClientboundHorseScreenOpenPacket(menu.containerId, $$4, $$3.getId()));
+        this.connection.send(new ClientboundMountScreenOpenPacket(menu.containerId, $$4, $$3.getId()));
         return menu;
     }
 

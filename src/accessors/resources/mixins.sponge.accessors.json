@@ -138,7 +138,7 @@
     "world.inventory.BrewingStandMenuAccessor",
     "world.inventory.DispenserMenuAccessor",
     "world.inventory.HopperMenuAccessor",
-    "world.inventory.HorseInventoryMenuAccessor",
+    "world.inventory.AbstractMountInventoryMenuAccessor",
     "world.inventory.ItemCombinerMenuAccessor",
     "world.inventory.MerchantMenuAccessor",
     "world.inventory.ResultSlotAccessor",
