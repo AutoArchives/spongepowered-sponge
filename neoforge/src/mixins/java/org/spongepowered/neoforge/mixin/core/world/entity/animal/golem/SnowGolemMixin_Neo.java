@@ -22,32 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.mixin.core.world.entity.vehicle;
+package org.spongepowered.neoforge.mixin.core.world.entity.animal.golem;
 
-import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.AbstractBoat;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.animal.golem.SnowGolem;
+import net.neoforged.neoforge.event.EventHooks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.entity.vehicle.AbstractBoatBridge;
+import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 
-@Mixin(AbstractBoat.class)
-public abstract class AbstractBoatMixin_Neo implements AbstractBoatBridge {
+@Mixin(SnowGolem.class)
+public abstract class SnowGolemMixin_Neo {
 
-    @Redirect(method = "getGroundFriction", at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/state/BlockState;getFriction(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)F")
-    )
-    private float neo$getBlockFrictionIfBoatIsNotOverridingMovingOnLand(BlockState caller, LevelReader level, BlockPos pos, Entity entity) {
-        final boolean movesOnLand = this.bridge$getMoveOnLand();
-        final float friction = caller.getFriction(level, pos, entity);
-        if (movesOnLand && friction == 0.6f) {
-            return Blocks.ICE.getFriction(caller, level, pos, entity);
+    @Redirect(method = "aiStep()V", at = @At(
+        value = "INVOKE", target = "Lnet/neoforged/neoforge/event/EventHooks;canEntityGrief(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)Z"))
+    private boolean impl$checkCanGrief(ServerLevel level, Entity entity) {
+        if (!((GrieferBridge) this).bridge$canGrief()) {
+            return false;
         }
-        return friction;
+        return EventHooks.canEntityGrief(level, entity);
     }
 }

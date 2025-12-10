@@ -26,7 +26,7 @@ package org.spongepowered.neoforge.applaunch.plugin;
 
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion;
+import net.neoforged.neoforge.common.NeoForgeVersion;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.config.LaunchConfig;
 import org.spongepowered.common.applaunch.config.TokenReplacement;
