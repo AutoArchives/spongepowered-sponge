@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.Parrot;
+import net.minecraft.world.entity.animal.parrot.Parrot;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ParrotType;
-import org.spongepowered.common.accessor.world.entity.animal.ParrotAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.parrot.ParrotAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class ParrotData {

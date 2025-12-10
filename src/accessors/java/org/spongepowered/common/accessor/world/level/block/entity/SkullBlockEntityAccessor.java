@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(SkullBlockEntity.class)
 public interface SkullBlockEntityAccessor {
 
-    @Accessor("noteBlockSound") void accessor$noteBlockSound(final ResourceLocation location);
+    @Accessor("noteBlockSound") void accessor$noteBlockSound(final Identifier location);
 
-    @Accessor("noteBlockSound") ResourceLocation accessor$noteBlockSound();
+    @Accessor("noteBlockSound") Identifier accessor$noteBlockSound();
 }

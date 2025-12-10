@@ -25,10 +25,10 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.EntityReference;
-import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.fox.Fox;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.FoxType;
-import org.spongepowered.common.accessor.world.entity.animal.FoxAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.fox.FoxAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.Optional;

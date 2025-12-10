@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.tags;
 
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -45,12 +45,12 @@ public abstract class TagKeyMixin_API<T> implements Tag<T> {
 
     // @formatter:off
     @Shadow @Final private net.minecraft.resources.ResourceKey<? extends Registry<T>> registry;
-    @Shadow @Final private ResourceLocation location;
+    @Shadow @Final private Identifier location;
     // @formatter:on
 
     @Override
     public RegistryType<T> registry() {
-        return RegistryType.of((ResourceKey) (Object) this.registry.registry(), (ResourceKey) (Object) this.registry.location());
+        return RegistryType.of((ResourceKey) (Object) this.registry.registry(), (ResourceKey) (Object) this.registry.identifier());
     }
 
     @Override

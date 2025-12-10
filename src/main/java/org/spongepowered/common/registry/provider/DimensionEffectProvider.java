@@ -26,6 +26,7 @@ package org.spongepowered.common.registry.provider;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldTypeEffect;
@@ -37,27 +38,27 @@ public final class DimensionEffectProvider {
 
     public static DimensionEffectProvider INSTANCE = new DimensionEffectProvider();
 
-    private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.OVERWORLD_EFFECTS);
-    private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.NETHER_EFFECTS);
-    private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.END_EFFECTS);
+    private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.OVERWORLD);
+    private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.NETHER);
+    private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.END);
 
     static {
-        DimensionEffectProvider.INSTANCE.register(OVERWORLD.key(), OVERWORLD);
-        DimensionEffectProvider.INSTANCE.register(NETHER.key(), NETHER);
-        DimensionEffectProvider.INSTANCE.register(END.key(), END);
+        DimensionEffectProvider.INSTANCE.register(DimensionType.Skybox.OVERWORLD, OVERWORLD);
+        DimensionEffectProvider.INSTANCE.register(DimensionType.Skybox.NONE, NETHER);
+        DimensionEffectProvider.INSTANCE.register(DimensionType.Skybox.END, END);
     }
 
-    private final Map<ResourceKey, WorldTypeEffect> mappings;
+    private final Map<DimensionType.Skybox, WorldTypeEffect> mappings;
 
     private DimensionEffectProvider() {
         this.mappings = new Object2ObjectOpenHashMap<>();
     }
 
-    public @Nullable WorldTypeEffect get(final ResourceKey key) {
+    public @Nullable WorldTypeEffect get(final DimensionType.Skybox key) {
         return this.mappings.get(key);
     }
 
-    public void register(final ResourceKey key, final WorldTypeEffect effect) {
+    public void register(final DimensionType.Skybox key, final WorldTypeEffect effect) {
         this.mappings.put(key, effect);
     }
 }

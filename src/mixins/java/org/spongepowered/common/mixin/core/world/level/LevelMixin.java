@@ -28,27 +28,14 @@ import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
-import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.decoration.HangingEntity;
-import net.minecraft.world.entity.decoration.Painting;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.projectile.ThrownEnderpearl;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -58,12 +45,9 @@ import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -73,13 +57,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.entity.MobAccessor;
-import org.spongepowered.common.accessor.world.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
-import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.math.vector.Vector3d;
@@ -105,7 +85,6 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Shadow public abstract net.minecraft.resources.ResourceKey<Level> shadow$dimension();
     @Shadow public abstract DimensionType shadow$dimensionType();
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos p_175726_1_);
-    @Shadow public abstract DifficultyInstance shadow$getCurrentDifficultyAt(BlockPos p_175649_1_);
     @Shadow public abstract boolean shadow$isRaining();
     @Shadow public abstract net.minecraft.world.level.block.entity.@Nullable BlockEntity shadow$getBlockEntity(BlockPos p_175625_1_);
     @Shadow public abstract RegistryAccess shadow$registryAccess();
@@ -185,74 +164,6 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         }
 
         return (E) createdEntity;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <E extends org.spongepowered.api.entity.Entity> E bridge$createEntity(final EntityType<E> type, final Vector3d position, final boolean naturally) throws IllegalArgumentException, IllegalStateException {
-        if (type == net.minecraft.world.entity.EntityType.PLAYER) {
-            // Unable to construct these
-            throw new IllegalArgumentException("A Player cannot be created by the API!");
-        }
-
-        net.minecraft.world.entity.Entity entity = null;
-        final double x = position.x();
-        final double y = position.y();
-        final double z = position.z();
-        final net.minecraft.world.level.Level thisWorld = (net.minecraft.world.level.Level) (Object) this;
-        // Not all entities have a single World parameter as their constructor
-        if (type == net.minecraft.world.entity.EntityType.LIGHTNING_BOLT) {
-            entity = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(thisWorld, EntitySpawnReason.EVENT);
-            entity.snapTo(x, y, z);
-            ((LightningBolt) entity).setVisualOnly(false);
-        }
-        // TODO - archetypes should solve the problem of calling the correct constructor
-        if (type == net.minecraft.world.entity.EntityType.ENDER_PEARL) {
-            final ArmorStand tempEntity = new ArmorStand(thisWorld, x, y, z);
-            tempEntity.setPos(tempEntity.getX(), tempEntity.getY() - tempEntity.getEyeHeight(), tempEntity.getZ());
-            entity = new ThrownEnderpearl(thisWorld, tempEntity, Items.ENDER_PEARL.getDefaultInstance());
-            ((EnderPearl) entity).offer(Keys.SHOOTER, UnknownProjectileSource.UNKNOWN);
-        }
-        // Some entities need to have non-null fields (and the easiest way to
-        // set them is to use the more specialised constructor).
-        if (type == net.minecraft.world.entity.EntityType.FALLING_BLOCK) {
-            entity = FallingBlockEntityAccessor.invoker$new(thisWorld, x, y, z, Blocks.SAND.defaultBlockState());
-        }
-        if (type == net.minecraft.world.entity.EntityType.ITEM) {
-            entity = new ItemEntity(thisWorld, x, y, z, new ItemStack(Blocks.STONE));
-        }
-
-        if (entity == null) {
-            final ResourceKey key = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getKey((net.minecraft.world.entity.EntityType<?>) type);
-            try {
-                entity = ((net.minecraft.world.entity.EntityType) type).create(thisWorld, EntitySpawnReason.EVENT);
-                entity.snapTo(x, y, z);
-            } catch (final Exception e) {
-                throw new RuntimeException("There was an issue attempting to construct " + key, e);
-            }
-        }
-
-        // TODO - replace this with an actual check
-
-        if (entity instanceof HangingEntity) {
-            if (!((HangingEntity) entity).survives()) {
-                throw new IllegalArgumentException("Hanging entity does not survive at the given position: " + position);
-            }
-        }
-
-        if (naturally && entity instanceof Mob) {
-            // Adding the default equipment
-            final DifficultyInstance difficulty = this.shadow$getCurrentDifficultyAt(new BlockPos((int) x, (int) y, (int) z));
-            ((MobAccessor) entity).invoker$populateDefaultEquipmentSlots(this.random, difficulty);
-        }
-
-        if (entity instanceof Painting) {
-            // This is default when art is null when reading from NBT, could
-            // choose a random art instead?
-            // TODO ? ((Painting) entity).motive = Motive.KEBAB;
-        }
-
-        return (E) entity;
     }
 
     @Inject(method = {

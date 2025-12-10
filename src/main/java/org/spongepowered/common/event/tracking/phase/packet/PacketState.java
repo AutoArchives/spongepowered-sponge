@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
@@ -93,7 +93,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     @Override
     public Supplier<ResourceKey> attemptWorldKey(final P context) {
-        final ResourceLocation worldKey = context.packetPlayer.level().dimension().location();
+        final Identifier worldKey = context.packetPlayer.level().dimension().identifier();
         return () -> (ResourceKey) (Object) worldKey;
     }
 

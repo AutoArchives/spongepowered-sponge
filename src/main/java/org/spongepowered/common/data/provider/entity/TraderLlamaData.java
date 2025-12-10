@@ -28,7 +28,7 @@ import net.minecraft.world.entity.Mob;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.accessor.world.entity.MobAccessor;
-import org.spongepowered.common.accessor.world.entity.animal.horse.TraderLlamaAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.equine.TraderLlamaAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 

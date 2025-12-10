@@ -62,26 +62,26 @@ public final class SpongeJigsawPoolBuilder implements JigsawPool.Builder {
 
     @Override
     public JigsawPool.Builder name(final ResourceKey name) {
-// TODO            this.name = (ResourceLocation) (Object) name;
+// TODO            this.name = (Identifier) (Object) name;
         return this;
     }
 
     @Override
     public JigsawPool.Builder fallback(final RegistryReference<JigsawPool> fallback) {
-// TODO            this.fallback = (ResourceLocation) (Object) fallback.location();
+// TODO            this.fallback = (Identifier) (Object) fallback.location();
         return this;
     }
 
     @Override
     public JigsawPool.Builder fallback(final JigsawPool fallback) {
-// TODO            this.fallback = (ResourceLocation) (Object) fallback.key();
+// TODO            this.fallback = (Identifier) (Object) fallback.key();
         return this;
     }
 
     @Override
     public JigsawPool.Builder reset() {
         // TODO this.name = null;
-        // TODO this.fallback = new ResourceLocation("empty");
+        // TODO this.fallback = new Identifier("empty");
         this.templates = new ArrayList<>();
         return this;
     }

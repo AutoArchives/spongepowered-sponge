@@ -26,7 +26,7 @@ package org.spongepowered.vanilla.server.packs;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
@@ -82,7 +82,7 @@ public final class PluginPackResources extends AbstractPackResources {
     }
 
     @Override
-    public IoSupplier<InputStream> getResource(final PackType type, final ResourceLocation loc) {
+    public IoSupplier<InputStream> getResource(final PackType type, final Identifier loc) {
         return this.getResource(String.format(Locale.ROOT, "%s/%s/%s", type.getDirectory(), loc.getNamespace(), loc.getPath()));
     }
 
@@ -105,9 +105,9 @@ public final class PluginPackResources extends AbstractPackResources {
     }
 
     @Nullable
-    private ResourceLocation convertResourcePath(final String namespace, final Path resourcePath) {
+    private Identifier convertResourcePath(final String namespace, final Path resourcePath) {
         final String path = resourcePath.toString();
-        final ResourceLocation location = ResourceLocation.tryBuild(namespace, path);
+        final Identifier location = Identifier.tryBuild(namespace, path);
         if (location == null)
             LOGGER.warn("Invalid path in plugin pack: {}:{}, ignoring", namespace, path);
         return location;

@@ -89,7 +89,7 @@ public abstract class CampfireBlockEntityMixin {
             final ItemStackSnapshot stack = ItemStackUtil.snapshotOf(mixinSelf.items.get(i));
             final RecipeHolder<?> recipe = mixinSelf.impl$cookingRecipe[i];
             final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (Campfire) self, stack, Optional.empty(),
-                    Optional.ofNullable(recipe).map(r -> (CookingRecipe) r.value()), Optional.ofNullable(recipe).map(r -> (ResourceKey) (Object) r.id().location()));
+                    Optional.ofNullable(recipe).map(r -> (CookingRecipe) r.value()), Optional.ofNullable(recipe).map(r -> (ResourceKey) (Object) r.id().identifier()));
             SpongeCommon.post(event);
             if (event.isCancelled()) {
                 mixinSelf.cookingProgress[i]--;
@@ -109,7 +109,7 @@ public abstract class CampfireBlockEntityMixin {
         final SlotTransaction transaction = new SlotTransaction(((Campfire) self).inventory().slot(i).get(), ItemStackUtil.snapshotOf(itemStack1), ItemStackSnapshot.empty());
         final RecipeHolder<?> recipe = mixinSelf.impl$cookingRecipe[i];
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, (Campfire) self,
-            Optional.empty(), Optional.ofNullable(recipe).map(r -> (CookingRecipe) r.value()), Optional.ofNullable(recipe).map(r -> (ResourceKey) (Object) r.id().location()),
+            Optional.empty(), Optional.ofNullable(recipe).map(r -> (CookingRecipe) r.value()), Optional.ofNullable(recipe).map(r -> (ResourceKey) (Object) r.id().identifier()),
             Collections.singletonList(transaction));
         SpongeCommon.post(event);
         mixinSelf.impl$cookingRecipe[i] = null;

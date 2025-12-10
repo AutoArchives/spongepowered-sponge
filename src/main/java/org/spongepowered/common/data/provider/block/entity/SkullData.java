@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.block.entity;
 
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.spongepowered.api.ResourceKey;
@@ -64,7 +64,7 @@ public final class SkullData {
                 .asMutable(SkullBlockEntityAccessor.class)
                     .create(Keys.NOTE_BLOCK_SOUND)
                         .get(h -> (ResourceKey) (Object) h.accessor$noteBlockSound())
-                        .set((h, v) -> h.accessor$noteBlockSound((ResourceLocation) (Object) v))
+                        .set((h, v) -> h.accessor$noteBlockSound((Identifier) (Object) v))
                         .delete(h -> h.accessor$noteBlockSound(null))
         ;
     }

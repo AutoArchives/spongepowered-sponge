@@ -58,7 +58,7 @@ public abstract class EnderDragonMixin extends MobMixin {
         slice = @Slice(
             from = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/world/level/GameRules;RULE_MOBGRIEFING:Lnet/minecraft/world/level/GameRules$Key;"
+                target = "Lnet/minecraft/world/level/gamerules/GameRules;MOB_GRIEFING:Lnet/minecraft/world/level/gamerules/GameRule;"
             ),
             to = @At(
                 value = "INVOKE",

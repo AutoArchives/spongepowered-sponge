@@ -35,7 +35,7 @@ import org.spongepowered.vanilla.mixin.core.world.entity.LivingEntityMixin_Vanil
 public abstract class PlayerMixin_Vanilla_Damage extends LivingEntityMixin_Vanilla_Damage {
 
     @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), argsOnly = true, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"),
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/Identifier;I)V"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")))
     private float damage$firePostEvent_Player(final float damage) {
         return this.damage$firePostEvent(damage);

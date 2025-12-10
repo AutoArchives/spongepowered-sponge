@@ -49,7 +49,7 @@ public final class PerWorldBorderListener implements BorderChangeListener {
     }
 
     @Override
-    public void onLerpSize(final WorldBorder border, final double oldSize, final double newSize, final long time) {
+    public void onLerpSize(final WorldBorder border, final double oldSize, final double newSize, final long time, final long endTime) {
         this.sendWorldBorderActionPacket(new ClientboundSetBorderLerpSizePacket(border));
     }
 

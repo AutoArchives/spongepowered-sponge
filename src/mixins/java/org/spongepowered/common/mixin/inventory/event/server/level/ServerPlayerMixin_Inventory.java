@@ -29,7 +29,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Cancellable;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
+import net.minecraft.network.protocol.game.ClientboundMountScreenOpenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,7 +40,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -62,7 +62,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
@@ -121,17 +120,17 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         }
     }
 
-    @Inject(method = "drop(Z)Z",
+    @Inject(method = "drop(Z)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;removeFromSelected(Z)Lnet/minecraft/world/item/ItemStack;"))
-    protected void impl$beforeRemoveItem(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
+    protected void impl$beforeRemoveItem(final boolean param0, final CallbackInfo cir) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         this.inventory$effectTransactor = transactor.logDropFromPlayerInventory((ServerPlayer) (Object) this, param0);
     }
 
-    @Inject(method = "drop(Z)Z",
+    @Inject(method = "drop(Z)V",
             at = @At(value = "RETURN"))
-    protected void impl$onPlayerDrop(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
+    protected void impl$onPlayerDrop(final boolean param0, final CallbackInfo cir) {
         try (final EffectTransactor ignored = this.inventory$effectTransactor) {
             this.containerMenu.broadcastChanges(); // for capture
         } finally {
@@ -215,7 +214,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         method = "openHorseInventory",
         at = @At(
             value = "NEW",
-            target = "(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/animal/horse/AbstractHorse;I)Lnet/minecraft/world/inventory/HorseInventoryMenu;"
+            target = "(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/animal/equine/AbstractHorse;I)Lnet/minecraft/world/inventory/HorseInventoryMenu;"
         )
     )
     private HorseInventoryMenu impl$transactHorseInventoryMenuCreationWithEffect(
@@ -227,7 +226,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             ci.cancel();
             return menu;
         }
-        this.connection.send(new ClientboundHorseScreenOpenPacket(menu.containerId, $$4, $$3.getId()));
+        this.connection.send(new ClientboundMountScreenOpenPacket(menu.containerId, $$4, $$3.getId()));
         return menu;
     }
 

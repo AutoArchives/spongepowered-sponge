@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.vehicle.AbstractBoat;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
+import net.minecraft.world.entity.vehicle.boat.Boat;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.common.accessor.world.entity.vehicle.AbstractBoatAccessor;
+import org.spongepowered.common.accessor.world.entity.vehicle.boat.AbstractBoatAccessor;
 import org.spongepowered.common.bridge.world.entity.vehicle.AbstractBoatBridge;
 import org.spongepowered.common.data.ByteToBooleanContentUpdater;
 import org.spongepowered.common.data.SpongeDataManager;

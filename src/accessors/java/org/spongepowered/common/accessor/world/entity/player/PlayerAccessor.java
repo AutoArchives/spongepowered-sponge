@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.entity.player;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -51,7 +52,7 @@ public interface PlayerAccessor {
     @Accessor("DATA_SHOULDER_PARROT_RIGHT") static EntityDataAccessor<OptionalInt> accessor$DATA_SHOULDER_RIGHT() {
         throw new UntransformedAccessorError();
     }
-    @Invoker("getPermissionLevel") int invoker$getPermissionLevel();
+    @Invoker("permissions") PermissionSet invoker$permissions();
 
     @Accessor("sleepCounter") void accessor$sleepCounter(final int sleepCounter);
 

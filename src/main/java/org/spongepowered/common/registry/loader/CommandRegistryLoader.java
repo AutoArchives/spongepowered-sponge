@@ -40,7 +40,7 @@ import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.TimeArgument;
 import net.minecraft.commands.arguments.UuidArgument;
@@ -60,7 +60,7 @@ import net.minecraft.commands.synchronization.brigadier.IntegerArgumentInfo;
 import net.minecraft.commands.synchronization.brigadier.LongArgumentInfo;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec2;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -164,7 +164,7 @@ public final class CommandRegistryLoader {
             l.add(ResourceKeyedValueParameters.PLAYER, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer((CommandSourceStack) cause)));
             l.add(ResourceKeyedValueParameters.PLUGIN, SpongePluginContainerValueParameter::new);
             l.add(ResourceKeyedValueParameters.REMAINING_JOINED_STRINGS, k -> ClientNativeArgumentParser.createIdentity(k, StringArgumentType.greedyString()));
-            l.add(ResourceKeyedValueParameters.RESOURCE_KEY, k -> ClientNativeArgumentParser.createConverter(k, ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation));
+            l.add(ResourceKeyedValueParameters.RESOURCE_KEY, k -> ClientNativeArgumentParser.createConverter(k, IdentifierArgument.id(), (reader, cause, Identifier) -> (ResourceKey) (Object) Identifier));
             l.add(ResourceKeyedValueParameters.ROTATION, k -> ClientNativeArgumentParser.createConverter(k, RotationArgument.rotation(), (reader, cause, coords) -> {
                 final Vec2 rotation = coords.getRotation((CommandSourceStack) cause);
                 return new Vector3d(rotation.x, rotation.y, 0);
@@ -212,7 +212,7 @@ public final class CommandRegistryLoader {
             l.add(ClientCompletionTypes.SNBT, k -> new SpongeClientCompletionType(CompoundTagArgument.compoundTag()));
             l.add(ClientCompletionTypes.NONE, k -> SpongeClientCompletionType.NONE);
             l.add(ClientCompletionTypes.REMAINING_JOINED_STRINGS, k -> new SpongeClientCompletionType(StringArgumentType.greedyString()));
-            l.add(ClientCompletionTypes.RESOURCE_KEY, k -> new SpongeClientCompletionType(ResourceLocationArgument.id()));
+            l.add(ClientCompletionTypes.RESOURCE_KEY, k -> new SpongeClientCompletionType(IdentifierArgument.id()));
             l.add(ClientCompletionTypes.STRING, k -> new SpongeClientCompletionType(StringArgumentType.string()));
             l.add(ClientCompletionTypes.WHOLE_NUMBER, k -> new SpongeClientCompletionType(LongArgumentType.longArg()));
         });
@@ -296,7 +296,7 @@ public final class CommandRegistryLoader {
     // Helper
 
     static ArgumentType<?> argumentTypeFromKey(ResourceKey key, CommandBuildContext ctx) {
-        final ArgumentTypeInfo<?,?> argumentTypeInfo = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getValue((ResourceLocation) (Object) key);
+        final ArgumentTypeInfo<?,?> argumentTypeInfo = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getValue((Identifier) (Object) key);
         if (argumentTypeInfo instanceof SingletonArgumentInfo<?> s) {
             return s.unpack(null).instantiate(ctx);
         }

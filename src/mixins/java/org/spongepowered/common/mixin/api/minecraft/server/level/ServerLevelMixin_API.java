@@ -183,7 +183,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public ResourceKey key() {
-        return (ResourceKey) (Object) this.shadow$dimension().location();
+        return (ResourceKey) (Object) this.shadow$dimension().identifier();
     }
 
     @Override
@@ -336,6 +336,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         return this.api$chunkLayout;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public WorldBorder setBorder(final WorldBorder border) {
 

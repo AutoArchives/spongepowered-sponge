@@ -26,7 +26,7 @@ package org.spongepowered.forge.hook;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.network.ForgePayload;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.hooks.ChannelHooks;
@@ -46,6 +46,6 @@ public final class ForgeChannelHooks implements ChannelHooks {
     @Override
     public CustomPacketPayload createRegisterPayload(final Set<ResourceKey> channels) {
         final FriendlyByteBuf payload = (FriendlyByteBuf) RegisterChannelUtil.encodePayload(channels);
-        return new ForgePayload((ResourceLocation) (Object) Constants.Channels.REGISTER_KEY, null, b -> b.writeBytes(payload));
+        return new ForgePayload((Identifier) (Object) Constants.Channels.REGISTER_KEY, null, b -> b.writeBytes(payload));
     }
 }

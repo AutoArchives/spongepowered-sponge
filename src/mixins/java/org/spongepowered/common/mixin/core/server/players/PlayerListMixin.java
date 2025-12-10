@@ -46,8 +46,8 @@ import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.bossevents.CustomBossEvents;
@@ -605,7 +605,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 return;
             }
 
-            boundChatType = ChatType.bind(ResourceKey.create(Registries.CHAT_TYPE, (ResourceLocation) (Object) event.chatType().location()),
+            boundChatType = ChatType.bind(ResourceKey.create(Registries.CHAT_TYPE, (Identifier) (Object) event.chatType().location()),
                 this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender()));
 
             if (event.target().isPresent()) {

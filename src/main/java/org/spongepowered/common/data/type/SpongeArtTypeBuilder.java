@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.type;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.decoration.painting.PaintingVariant;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.ArtType;
@@ -38,7 +38,7 @@ public final class SpongeArtTypeBuilder implements ArtType.Builder {
 
     private int width;
     private int height;
-    @Nullable private ResourceLocation assetId;
+    @Nullable private Identifier assetId;
 
     public SpongeArtTypeBuilder() {
         this.reset();
@@ -53,7 +53,7 @@ public final class SpongeArtTypeBuilder implements ArtType.Builder {
 
     @Override
     public ArtType.Builder asset(final ResourceKey assetId) {
-        this.assetId = (ResourceLocation) (Object) assetId;
+        this.assetId = (Identifier) (Object) assetId;
         return this;
     }
 

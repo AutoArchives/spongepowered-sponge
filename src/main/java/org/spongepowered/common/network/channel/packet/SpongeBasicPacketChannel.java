@@ -26,7 +26,7 @@ package org.spongepowered.common.network.channel.packet;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.ClientSideConnection;
@@ -93,8 +93,8 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
 
             final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
                                                                                                                @Override
-                                                                                                               public ResourceLocation id() {
-                                                                                                                   return (ResourceLocation) (Object) Constants.Channels.FML_LOGIN_WRAPPER_CHANNEL;
+                                                                                                               public Identifier id() {
+                                                                                                                   return (Identifier) (Object) Constants.Channels.FML_LOGIN_WRAPPER_CHANNEL;
                                                                                                                }
 
                                                                                                                @Override
@@ -139,8 +139,8 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
 
             final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
                                                                                                                @Override
-                                                                                                               public ResourceLocation id() {
-                                                                                                                   return (ResourceLocation) (Object) key;
+                                                                                                               public Identifier id() {
+                                                                                                                   return (Identifier) (Object) key;
                                                                                                                }
 
                                                                                                                @Override

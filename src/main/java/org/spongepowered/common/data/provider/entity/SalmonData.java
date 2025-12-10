@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.entity.animal.Salmon;
+import net.minecraft.world.entity.animal.fish.Salmon;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 

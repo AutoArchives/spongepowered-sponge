@@ -48,7 +48,7 @@ public abstract class PlayerDataStorageMixin {
 
     @Inject(method = "save",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/Util;safeReplaceFile(Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/nio/file/Path;)V",
+            target = "Lnet/minecraft/util/Util;safeReplaceFile(Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/nio/file/Path;)V",
             shift = At.Shift.AFTER))
     private void impl$saveSpongePlayerData(final Player player, final CallbackInfo callbackInfo) {
         ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().deleteLegacyPlayerData((ServerPlayer) player);

@@ -105,7 +105,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         Launch.instance().lifecycle().callStoppingEngineEvent(this);
     }
 
-    @Redirect(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;singleplayerServer:Lnet/minecraft/client/server/IntegratedServer;", opcode =
+    @Redirect(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;singleplayerServer:Lnet/minecraft/client/server/IntegratedServer;", opcode =
             Opcodes.PUTFIELD))
     private void impl$storeTemporaryServerRef(Minecraft minecraft, IntegratedServer server) {
         ((MinecraftBridge) minecraft).bridge$setTemporaryIntegratedServer(this.singleplayerServer);
@@ -121,7 +121,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         }
     }
 
-    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
+    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;shutdownExecutors()V"))
     private void impl$callStoppedGame(final CallbackInfo ci) {
         Launch.instance().lifecycle().callStoppedGameEvent();
     }

@@ -28,6 +28,7 @@ package org.spongepowered.common.service.server.permission;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Singleton;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.server.players.ServerOpList;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
@@ -67,7 +68,7 @@ public final class SpongePermissionService implements PermissionService {
     private final SpongeSubjectCollection defaultCollection;
     private final SpongeSubject defaultData;
 
-    public SpongePermissionService(final Game game, final int functionsPermissionLevel) {
+    public SpongePermissionService(final Game game, final PermissionLevel functionsPermissionLevel) {
         this.game = game;
         this.subjects.put(SpongePermissionService.SUBJECTS_DEFAULT, (this.defaultCollection = this.newCollection(SpongePermissionService.SUBJECTS_DEFAULT)));
         this.subjects.put(PermissionService.SUBJECTS_USER, new UserCollection(this));
@@ -75,11 +76,11 @@ public final class SpongePermissionService implements PermissionService {
 
         this.subjects.put(PermissionService.SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(
             PermissionService.SUBJECTS_COMMAND_BLOCK, this,
-                s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(2).asSubjectReference())));
+                s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(PermissionLevel.GAMEMASTERS).asSubjectReference())));
 
         this.subjects.put(PermissionService.SUBJECTS_SYSTEM, new DataFactoryCollection(
             PermissionService.SUBJECTS_SYSTEM, this,
-                s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(4).asSubjectReference())
+                s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(PermissionLevel.ALL).asSubjectReference())
 //                , s -> {
 //                    if (s.equals("Server")) {
 //                        return SpongeImpl.game().getServer().getConsole();
@@ -101,12 +102,12 @@ public final class SpongePermissionService implements PermissionService {
         return SpongeCommon.server().getPlayerList().getOps();
     }
 
-    static int getServerOpLevel() {
-        return SpongeCommon.server().operatorUserPermissionLevel();
+    static PermissionLevel getServerOpLevel() {
+        return SpongeCommon.server().operatorUserPermissions().level();
     }
 
-    public Subject getGroupForOpLevel(final int level) {
-        return this.groupSubjects().get("op_" + level);
+    public Subject getGroupForOpLevel(final PermissionLevel level) {
+        return this.groupSubjects().get("op_" + level.ordinal());
     }
 
     @Override

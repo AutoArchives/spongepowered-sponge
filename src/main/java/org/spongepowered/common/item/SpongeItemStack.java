@@ -35,8 +35,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -193,7 +193,7 @@ public final class SpongeItemStack {
             Objects.requireNonNull(blockSnapshot, "The snapshot was null!");
             this.reset();
             final BlockType blockType = blockSnapshot.state().type();
-            final ResourceLocation blockTypeKey = SpongeCommon.vanillaRegistry(Registries.BLOCK).getKey((Block) blockType);
+            final Identifier blockTypeKey = SpongeCommon.vanillaRegistry(Registries.BLOCK).getKey((Block) blockType);
             final Optional<ItemType> itemType = blockType.item();
             this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockTypeKey)));
             this.quantity(1);
@@ -201,7 +201,7 @@ public final class SpongeItemStack {
                 sbs.getCompound().ifPresent(compoundTag -> {
                     final var blockEntityTypes = SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE);
                     final var blockEntityType = compoundTag.getString("id")
-                        .map(ResourceLocation::parse)
+                        .map(Identifier::parse)
                         .flatMap(blockEntityTypes::getOptional);
                     blockEntityType.ifPresent(beType -> {
                         TypedEntityData<BlockEntityType<?>> data = TypedEntityData.of(beType, compoundTag);
@@ -227,7 +227,7 @@ public final class SpongeItemStack {
         public ItemStack.Builder fromBlockState(final BlockState blockState) {
             Objects.requireNonNull(blockState, "blockState");
             final BlockType blockType = blockState.type();
-            final ResourceLocation blockTypeKey = SpongeCommon.vanillaRegistry(Registries.BLOCK).getKey((Block) blockType);
+            final Identifier blockTypeKey = SpongeCommon.vanillaRegistry(Registries.BLOCK).getKey((Block) blockType);
             this.itemType(blockType.item().orElseThrow(() -> new IllegalArgumentException("Missing valid ItemType for BlockType: " + blockTypeKey)));
             blockState.getValues().forEach(this::add);
             return this;
@@ -282,7 +282,7 @@ public final class SpongeItemStack {
 
     @NotNull
     public static DataContainer getDataContainer(final net.minecraft.world.item.ItemStack mcStack) {
-        final ResourceLocation key = BuiltInRegistries.ITEM.getKey(mcStack.getItem());
+        final Identifier key = BuiltInRegistries.ITEM.getKey(mcStack.getItem());
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, ((ItemStack) (Object) mcStack).contentVersion())
             .set(Constants.ItemStack.TYPE, key)

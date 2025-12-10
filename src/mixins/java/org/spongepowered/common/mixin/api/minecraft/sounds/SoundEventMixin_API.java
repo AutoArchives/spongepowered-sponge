@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.sounds;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class SoundEventMixin_API implements SoundType {
 
     //@formatter:off
-    @Shadow @Final private ResourceLocation location;
+    @Shadow @Final private Identifier location;
     //@formatter:on
 
     @Override

@@ -25,7 +25,7 @@
 package org.spongepowered.common.serialization;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.stream.IntStream;

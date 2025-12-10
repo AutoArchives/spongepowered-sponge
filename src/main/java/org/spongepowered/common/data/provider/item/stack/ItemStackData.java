@@ -28,7 +28,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.StringUtil;
@@ -206,7 +206,7 @@ public final class ItemStackData {
                         .delete(h -> h.remove(DataComponents.MAX_STACK_SIZE))
                     .create(Keys.MODEL)
                         .get(stack -> (ResourceKey) (Object) stack.get(DataComponents.ITEM_MODEL))
-                        .set((stack, model) -> stack.set(DataComponents.ITEM_MODEL, (ResourceLocation) (Object) model))
+                        .set((stack, model) -> stack.set(DataComponents.ITEM_MODEL, (Identifier) (Object) model))
                     .create(Keys.ITEM_DURABILITY)
                         .get(stack -> stack.getMaxDamage() - stack.getDamageValue())
                         .set((stack, durability) -> stack.setDamageValue(stack.getMaxDamage() - durability))
@@ -298,7 +298,7 @@ public final class ItemStackData {
                             if (resist == null) {
                                 return false;
                             }
-                            return resist.types().location().equals(DamageTypes.IN_FIRE.location());
+                            return resist.types().location().equals(DamageTypes.IN_FIRE.identifier());
                         })
                         .set((h, value) -> {
                             if (value) {
@@ -333,7 +333,7 @@ public final class ItemStackData {
                                 h.remove(DataComponents.USE_COOLDOWN);
                                 return;
                             }
-                            h.set(DataComponents.USE_COOLDOWN, new UseCooldown(1, Optional.of((ResourceLocation) (Object) value)));
+                            h.set(DataComponents.USE_COOLDOWN, new UseCooldown(1, Optional.of((Identifier) (Object) value)));
                         })
                         .deleteAndGet(ItemStackData::deleteAndTransactUseCooldown)
                     .create(Keys.COOLDOWN)
@@ -371,7 +371,7 @@ public final class ItemStackData {
                         .deleteAndGet(ItemStackData::deleteAndTransactUseCooldown)
                     .create(Keys.TOOLTIP_STYLE)
                         .get(h -> (ResourceKey) (Object) h.get(DataComponents.TOOLTIP_STYLE))
-                        .set((h, v) -> h.set(DataComponents.TOOLTIP_STYLE, (ResourceLocation) (Object) v))
+                        .set((h, v) -> h.set(DataComponents.TOOLTIP_STYLE, (Identifier) (Object) v))
                         .delete(h -> h.remove(DataComponents.TOOLTIP_STYLE))
                     .create(Keys.WEAPON_DAMAGE_PER_ATTACK)
                         .get(h -> {

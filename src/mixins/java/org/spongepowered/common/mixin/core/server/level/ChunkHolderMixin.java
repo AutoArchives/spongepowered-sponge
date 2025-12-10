@@ -66,7 +66,7 @@ abstract class ChunkHolderMixin extends GenerationChunkHolderMixin {
                 if (ShouldFire.CHUNK_EVENT_LOAD) {
                     final Vector3i chunkPos = VecHelper.toVector3i(chunk.getPos());
                     final ChunkEvent.Load event = SpongeEventFactory.createChunkEventLoad(PhaseTracker.getInstance().currentCause(),
-                        (WorldChunk) chunk, chunkPos, (ResourceKey) (Object) chunk.getLevel().dimension().location());
+                        (WorldChunk) chunk, chunkPos, (ResourceKey) (Object) chunk.getLevel().dimension().identifier());
                     SpongeCommon.post(event);
                 }
             });
@@ -78,7 +78,7 @@ abstract class ChunkHolderMixin extends GenerationChunkHolderMixin {
         if (this.impl$loadedChunk != null && ShouldFire.CHUNK_EVENT_UNLOAD_PRE) {
             final Vector3i chunkPos = VecHelper.toVector3i(this.impl$loadedChunk.getPos());
             final ChunkEvent.Unload event = SpongeEventFactory.createChunkEventUnloadPre(PhaseTracker.getInstance().currentCause(),
-                (WorldChunk) this.impl$loadedChunk, chunkPos, (ResourceKey) (Object) this.impl$loadedChunk.getLevel().dimension().location());
+                (WorldChunk) this.impl$loadedChunk, chunkPos, (ResourceKey) (Object) this.impl$loadedChunk.getLevel().dimension().identifier());
             SpongeCommon.post(event);
         }
     }
@@ -88,7 +88,7 @@ abstract class ChunkHolderMixin extends GenerationChunkHolderMixin {
         if (this.impl$loadedChunk != null && ShouldFire.CHUNK_EVENT_UNLOAD_POST) {
             final Vector3i chunkPos = VecHelper.toVector3i(this.impl$loadedChunk.getPos());
             final ChunkEvent.Unload event = SpongeEventFactory.createChunkEventUnloadPost(PhaseTracker.getInstance().currentCause(), chunkPos,
-                (ResourceKey) (Object) this.impl$loadedChunk.getLevel().dimension().location());
+                (ResourceKey) (Object) this.impl$loadedChunk.getLevel().dimension().identifier());
             SpongeCommon.post(event);
         }
         this.impl$loadedChunk = null;

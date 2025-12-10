@@ -177,7 +177,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         final @Nullable ServerLevel level = this.shadow$getLevel(SpongeWorldManager.createRegistryKey(k));
         if (level != null) {
             if (log) {
-                MinecraftServerMixin.LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().location());
+                MinecraftServerMixin.LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().identifier());
             }
             level.save(null, false, level.noSave);
             return true;
@@ -231,7 +231,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         target = "(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;ZJLjava/util/List;ZLnet/minecraft/world/RandomSequences;)Lnet/minecraft/server/level/ServerLevel;"
     ), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;getValue(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"),
-        to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;readScoreboard(Lnet/minecraft/world/level/storage/DimensionDataStorage;)V")
+        to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;getDataStorage()Lnet/minecraft/world/level/storage/DimensionDataStorage;")
     ))
     private void impl$onCreateDefaultLevel(final CallbackInfo ci, @Local final ServerLevelData levelData, @Local final LevelStem levelStem) {
         ((PrimaryLevelDataBridge) levelData).bridge$populateFromLevelStem(levelStem);
@@ -412,7 +412,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             // Sponge end
 
             if (autoSave.log) {
-                LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().location());
+                LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().identifier());
             }
 
             level.save(null, flush, level.noSave && !isForced);

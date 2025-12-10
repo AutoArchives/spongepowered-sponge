@@ -25,22 +25,19 @@
 package org.spongepowered.common.data.provider.world;
 
 import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.attribute.BedRule;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.tag.Tag;
-import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Range;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
-import org.spongepowered.common.util.SpongeMinecraftDayTime;
-
-import java.util.OptionalLong;
 
 public final class WorldTypeData {
 
@@ -54,9 +51,9 @@ public final class WorldTypeData {
                     .create(Keys.WORLD_TYPE_EFFECT)
                         .get(WorldTypeData::worldTypeEffect)
                     .create(Keys.SCORCHING)
-                        .get(DimensionType::ultraWarm)
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.WATER_EVAPORATES, false))
                     .create(Keys.NATURAL_WORLD_TYPE)
-                        .get(DimensionType::natural)
+                        .get(d -> d.attributes().contains(EnvironmentAttributes.BED_RULE))
                     .create(Keys.COORDINATE_MULTIPLIER)
                         .get(DimensionType::coordinateScale)
                     .create(Keys.HAS_SKYLIGHT)
@@ -64,17 +61,17 @@ public final class WorldTypeData {
                     .create(Keys.HAS_CEILING)
                         .get(DimensionType::hasCeiling)
                     .create(Keys.PIGLIN_SAFE)
-                        .get(DimensionType::piglinSafe)
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.NETHER_PORTAL_SPAWNS_PIGLINS, false))
                     .create(Keys.BEDS_USABLE)
-                        .get(DimensionType::bedWorks)
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.BED_RULE, BedRule.CAN_SLEEP_WHEN_DARK).explodes())
                     .create(Keys.RESPAWN_ANCHOR_USABLE)
-                        .get(DimensionType::respawnAnchorWorks)
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, false))
                     .create(Keys.INFINIBURN)
                         .get(dimensionType -> (Tag<BlockType>) (Object) dimensionType.infiniburn())
                     .create(Keys.WORLD_FLOOR)
                         .get(DimensionType::minY)
                     .create(Keys.HAS_RAIDS)
-                        .get(DimensionType::hasRaids)
+                        .get(d -> d.attributes().applyModifier(EnvironmentAttributes.CAN_START_RAID, true))
                     .create(Keys.WORLD_HEIGHT)
                         .get(DimensionType::height)
                     .create(Keys.WORLD_LOGICAL_HEIGHT)
@@ -86,8 +83,6 @@ public final class WorldTypeData {
                 .asImmutable(DimensionTypeAccessor.class)
                     .create(Keys.AMBIENT_LIGHTING)
                         .get(DimensionTypeAccessor::accessor$ambientLight)
-                    .create(Keys.FIXED_TIME)
-                        .get(WorldTypeData::fixedTime)
                 .asImmutable(DimensionTypeBridge.class)
                     .create(Keys.CREATE_DRAGON_FIGHT)
                         .get(DimensionTypeBridge::bridge$createDragonFight)
@@ -101,20 +96,11 @@ public final class WorldTypeData {
     }
 
     private static WorldTypeEffect worldTypeEffect(final DimensionType type) {
-        final var key = (ResourceKey) (Object) type.effectsLocation();
-        @Nullable final WorldTypeEffect effect = DimensionEffectProvider.INSTANCE.get(key);
+        @Nullable final WorldTypeEffect effect = DimensionEffectProvider.INSTANCE.get(type.skybox());
         if (effect == null) {
-            throw new IllegalStateException(String.format("The effect '%s' has not been registered!", key));
+            throw new IllegalStateException(String.format("The effect '%s' has not been registered!", type.skybox()));
         }
         return effect;
     }
 
-    @Nullable
-    private static MinecraftDayTime fixedTime(final DimensionTypeAccessor accessor) {
-        final OptionalLong fixedTime = accessor.accessor$fixedTime();
-        if (!fixedTime.isPresent()) {
-            return null;
-        }
-        return new SpongeMinecraftDayTime(fixedTime.getAsLong());
-    }
 }

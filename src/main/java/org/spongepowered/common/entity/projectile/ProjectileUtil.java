@@ -28,18 +28,18 @@ import com.google.common.collect.Maps;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.FishingHook;
-import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
-import net.minecraft.world.entity.projectile.ThrownEgg;
-import net.minecraft.world.entity.projectile.ThrownEnderpearl;
-import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
-import net.minecraft.world.entity.projectile.ThrownLingeringPotion;
-import net.minecraft.world.entity.projectile.ThrownSplashPotion;
+import net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEgg;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownExperienceBottle;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownLingeringPotion;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
@@ -179,7 +179,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Arrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final var arrow = new net.minecraft.world.entity.projectile.Arrow(source.level(), source, new ItemStack(this.item), source.getWeaponItem());
+                final var arrow = new net.minecraft.world.entity.projectile.arrow.Arrow(source.level(), source, new ItemStack(this.item), source.getWeaponItem());
                 arrow.shoot(source.getXRot(), source.getYRot(), 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Arrow) arrow);
             }
@@ -189,7 +189,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<SpectralArrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final var arrow = new net.minecraft.world.entity.projectile.SpectralArrow(source.level(), source, new ItemStack(this.item), source.getWeaponItem());
+                final var arrow = new net.minecraft.world.entity.projectile.arrow.SpectralArrow(source.level(), source, new ItemStack(this.item), source.getWeaponItem());
                 arrow.shoot(source.getXRot(), source.getYRot(), 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (SpectralArrow) arrow);
             }
@@ -209,7 +209,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<SmallFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final var fireball = new net.minecraft.world.entity.projectile.SmallFireball(source.level(), source, lookVec.scale(4));
+                final var fireball = new net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball(source.level(), source, lookVec.scale(4));
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (SmallFireball) fireball);
             }
@@ -227,7 +227,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Snowball> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.world.entity.projectile.Snowball snowball = new net.minecraft.world.entity.projectile.Snowball(
+                final var snowball = new net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball(
                     source.level(), source, new ItemStack(Items.SNOWBALL));
                 snowball.shoot(source.getXRot(), source.getYRot(), 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Snowball) snowball);
@@ -285,7 +285,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<WitherSkull> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final var skull = new net.minecraft.world.entity.projectile.WitherSkull(source.level(), source, lookVec.scale(4));
+                final var skull = new net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull(source.level(), source, lookVec.scale(4));
                 skull.setPos(skull.getX(), skull.getY() + source.getEyeHeight(), skull.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (WitherSkull) skull);
             }
@@ -350,7 +350,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<DragonFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final var fireball = new net.minecraft.world.entity.projectile.DragonFireball(source.level(), source, lookVec.scale(4));
+                final var fireball = new net.minecraft.world.entity.projectile.hurtingprojectile.DragonFireball(source.level(), source, lookVec.scale(4));
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (DragonFireball) fireball);
             }

@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.monster.VindicatorAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.illager.VindicatorAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class VindicatorData {

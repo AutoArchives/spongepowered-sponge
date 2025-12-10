@@ -85,13 +85,13 @@ public final class SpongeBiomeAttributesFactory implements BiomeAttributes.Facto
             ImmutableList.Builder<Pair<Climate.ParameterPoint, net.minecraft.resources.ResourceKey<net.minecraft.world.level.biome.Biome>>> list = ImmutableList.builder();
             ((OverworldBiomeBuilderAccessor) (Object) new OverworldBiomeBuilder()).accessor$addBiomes(list::add);
             for (final var pair : list.build()) {
-                DEFAULT_ATTRIBUTES.put((ResourceKey) (Object) pair.getSecond().location(), (BiomeAttributes) (Object) pair.getFirst());
+                DEFAULT_ATTRIBUTES.put((ResourceKey) (Object) pair.getSecond().identifier(), (BiomeAttributes) (Object) pair.getFirst());
             }
             // MultiNoiseBiomeSource.Preset#NETHER
-            DEFAULT_ATTRIBUTES.put((ResourceKey) (Object) Biomes.SOUL_SAND_VALLEY.location(), (BiomeAttributes) (Object) Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
-            DEFAULT_ATTRIBUTES.put((ResourceKey) (Object) Biomes.CRIMSON_FOREST.location(), (BiomeAttributes) (Object) Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
-            DEFAULT_ATTRIBUTES.put((ResourceKey) (Object) Biomes.WARPED_FOREST.location(), (BiomeAttributes) (Object) Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F));
-            DEFAULT_ATTRIBUTES.put((ResourceKey) (Object) Biomes.BASALT_DELTAS.location(), (BiomeAttributes) (Object) Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F));
+            DEFAULT_ATTRIBUTES.put((ResourceKey) (Object) Biomes.SOUL_SAND_VALLEY.identifier(), (BiomeAttributes) (Object) Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+            DEFAULT_ATTRIBUTES.put((ResourceKey) (Object) Biomes.CRIMSON_FOREST.identifier(), (BiomeAttributes) (Object) Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+            DEFAULT_ATTRIBUTES.put((ResourceKey) (Object) Biomes.WARPED_FOREST.identifier(), (BiomeAttributes) (Object) Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F));
+            DEFAULT_ATTRIBUTES.put((ResourceKey) (Object) Biomes.BASALT_DELTAS.identifier(), (BiomeAttributes) (Object) Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F));
         }
         return Optional.ofNullable(SpongeBiomeAttributesFactory.DEFAULT_ATTRIBUTES.get(biome.location()));
     }

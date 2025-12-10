@@ -80,7 +80,7 @@ public class CraftingPreviewTransaction extends ContainerBasedTransaction {
         final CraftItemEvent.Preview event = SpongeEventFactory.createCraftItemEventPreview(currentCause,
                 ContainerUtil.fromNative(this.menu), this.craftingInventory, new Transaction<>(cursor, cursor), previewTransaction,
                 recipe.map(RecipeHolder::value).map(CraftingRecipe.class::cast),
-                recipe.map(r -> (ResourceKey) (Object) r.id().location()),
+                recipe.map(r -> (ResourceKey) (Object) r.id().identifier()),
                 Optional.empty(), slotTransactions);
         return Optional.of(event);
     }

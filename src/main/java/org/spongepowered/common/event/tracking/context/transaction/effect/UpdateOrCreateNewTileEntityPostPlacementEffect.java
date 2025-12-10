@@ -61,7 +61,7 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
              var maybeNewTileEntity = chunk.getBlockEntity(oldState.pos(), LevelChunk.EntityCreationType.CHECK);
             if (maybeNewTileEntity != null && !maybeNewTileEntity.isValidBlockState(newState)) {
                 LevelChunkAccessor.accessor$LOGGER().warn(
-                    "Found mismatched block entity @ {}: type = {}, state = {}", pos, maybeNewTileEntity.getType().builtInRegistryHolder().key().location(), newState
+                    "Found mismatched block entity @ {}: type = {}, state = {}", pos, maybeNewTileEntity.getType().builtInRegistryHolder().key().identifier(), newState
                 );
                 chunk.removeBlockEntity(pos);
                 maybeNewTileEntity = null;

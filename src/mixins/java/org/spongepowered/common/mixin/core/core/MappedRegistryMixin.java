@@ -31,7 +31,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
@@ -73,7 +73,7 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     @Shadow private boolean frozen;
     @Shadow @Final private ObjectList<Holder.Reference<T>> byId;
     @Shadow @Final private Reference2IntMap<T> toId;
-    @Shadow @Final private Map<ResourceLocation, Holder.Reference<T>> byLocation;
+    @Shadow @Final private Map<Identifier, Holder.Reference<T>> byLocation;
     @Shadow @Final private Map<net.minecraft.resources.ResourceKey<T>, Holder.Reference<T>> byKey;
     @Shadow @Final private Map<T, Holder.Reference<T>> byValue;
     @Shadow @Final private Map<net.minecraft.resources.ResourceKey<T>, RegistrationInfo> registrationInfos;
@@ -108,7 +108,7 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     private void impl$setType(final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> key,
             final Lifecycle lifecycle, boolean $$2, final CallbackInfo ci) {
         this.impl$type = new SpongeRegistryType<T>((ResourceKey) (Object) ((ResourceKeyAccessor) key).accessor$registryName(),
-                (ResourceKey) (Object) key.location());
+                (ResourceKey) (Object) key.identifier());
     }
 
 
@@ -118,9 +118,9 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
 
         final net.minecraft.resources.ResourceKey<? extends Registry<T>> resourceKey = ((MappedRegistry<T>) (Object) this).key();
         final ResourceKey root = (ResourceKey) (Object) ((ResourceKeyAccessor<T>) resourceKey).accessor$registryName();
-        final ResourceKey location = (ResourceKey) (Object) resourceKey.location();
+        final ResourceKey location = (ResourceKey) (Object) resourceKey.identifier();
         this.bridge$register(new SpongeRegistryEntry<>(new SpongeRegistryType<>(root, location),
-                (ResourceKey) (Object) $$0.location(), $$1));
+                (ResourceKey) (Object) $$0.identifier(), $$1));
     }
 
     @Override
@@ -157,10 +157,10 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
         for (int i = id; i < this.byId.size(); i++) {
             this.toId.put(this.byId.get(i).value(), i);
         }
-        this.byLocation.remove(key.location());
+        this.byLocation.remove(key.identifier());
         this.byValue.remove(value.value());
         this.registrationInfos.remove(key);
-        this.impl$entries.remove((ResourceKey) (Object) key.location());
+        this.impl$entries.remove((ResourceKey) (Object) key.identifier());
     }
 
     @Inject(method = "freeze", at = @At(value = "FIELD", target = "Lnet/minecraft/core/MappedRegistry;frozen:Z", opcode = Opcodes.PUTFIELD))
@@ -195,7 +195,7 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     private void impl$appendRegister(final Supplier<InitialRegistryData<T>> supplier) {
         supplier.get().forEach((vk, vi, vv) ->
             this.shadow$register(
-                net.minecraft.resources.ResourceKey.create(this.key, (ResourceLocation) (Object) vk),
+                net.minecraft.resources.ResourceKey.create(this.key, (Identifier) (Object) vk),
                 vv,
                 RegistrationInfo.BUILT_IN
             ));

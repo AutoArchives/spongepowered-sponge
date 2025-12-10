@@ -27,6 +27,7 @@ package org.spongepowered.common.service.server;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import io.leangen.geantyref.TypeToken;
+import net.minecraft.server.permissions.PermissionLevel;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
@@ -51,9 +52,9 @@ import java.util.Optional;
 
 public final class SpongeServerScopedServiceProvider extends SpongeServiceProvider implements ServiceProvider.ServerScoped {
 
-    private final int functionsPermissionLevel;
+    private final PermissionLevel functionsPermissionLevel;
 
-    public SpongeServerScopedServiceProvider(final Game game, final Injector injector, final int functionsPermissionLevel) {
+    public SpongeServerScopedServiceProvider(final Game game, final Injector injector, final PermissionLevel functionsPermissionLevel) {
         super(game, injector);
         this.functionsPermissionLevel = functionsPermissionLevel;
     }

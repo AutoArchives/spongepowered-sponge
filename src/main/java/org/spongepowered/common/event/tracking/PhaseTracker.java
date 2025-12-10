@@ -29,7 +29,7 @@ import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
@@ -179,9 +179,9 @@ public final class PhaseTracker implements CauseStackManager {
                                                    .map(BlockEntity::getType)
                                                    .orElse(null);
                 if (type != null) {
-                    @Nullable ResourceLocation id = BlockEntityType.getKey(type);
+                    @Nullable Identifier id = BlockEntityType.getKey(type);
                     if (id == null) {
-                        id = ResourceLocation.parse(source.getClass().getCanonicalName());
+                        id = Identifier.parse(source.getClass().getCanonicalName());
                     }
                     final Map<String, Boolean> autoFixedTiles = trackerConfig.autoFixNullSourceBlockProvidingBlockEntities;
                     final boolean contained = autoFixedTiles.containsKey(type.toString());

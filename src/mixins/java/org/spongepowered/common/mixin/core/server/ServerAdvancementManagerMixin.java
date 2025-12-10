@@ -29,7 +29,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementNode;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -59,7 +59,7 @@ public abstract class ServerAdvancementManagerMixin {
 
     @SuppressWarnings({"unchecked"})
     @WrapMethod(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V")
-    private void impl$onApply(final Map<ResourceLocation, Advancement> $$0, final ResourceManager $$1, final ProfilerFiller $$2, final Operation<Void> original) {
+    private void impl$onApply(final Map<Identifier, Advancement> $$0, final ResourceManager $$1, final ProfilerFiller $$2, final Operation<Void> original) {
         final RegistryHolderLogic registryHolder = ((SpongeRegistryHolder) $$1).registryHolder();
         final Registry<Advancement> registry = (Registry<Advancement>) (Object) registryHolder.registry(RegistryTypes.ADVANCEMENT);
         $$0.forEach((k, v) -> registry.register((ResourceKey) (Object) k, v));
@@ -70,7 +70,7 @@ public abstract class ServerAdvancementManagerMixin {
     @WrapOperation(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/TreeNodePosition;run(Lnet/minecraft/advancements/AdvancementNode;)V"))
     private void impl$onLayout(final AdvancementNode instance, final Operation<Void> original,
-            final Map<ResourceLocation, Advancement> $$0, final ResourceManager $$1, final ProfilerFiller $$2) {
+            final Map<Identifier, Advancement> $$0, final ResourceManager $$1, final ProfilerFiller $$2) {
         original.call(instance);
 
         final Cause cause = PhaseTracker.getInstance().currentCause();

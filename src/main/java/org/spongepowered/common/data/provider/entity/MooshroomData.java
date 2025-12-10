@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.MushroomCow;
+import net.minecraft.world.entity.animal.cow.MushroomCow;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.MooshroomType;
-import org.spongepowered.common.accessor.world.entity.animal.MooshroomAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.cow.MooshroomAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class MooshroomData {

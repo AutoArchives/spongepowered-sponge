@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import net.minecraft.world.entity.ItemSteerable;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import org.spongepowered.asm.mixin.Mixin;
 
 // TODO - the interface is gone, but the premise of being able to use the saddle

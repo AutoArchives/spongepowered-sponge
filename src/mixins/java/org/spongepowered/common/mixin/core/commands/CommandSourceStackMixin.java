@@ -32,6 +32,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.util.TaskChainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
@@ -54,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.commands.CommandSourceStackAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
@@ -68,11 +70,12 @@ import java.util.function.Supplier;
 public abstract class CommandSourceStackMixin implements CommandSourceStackBridge {
 
 
+    //@formatter:off
     @Shadow @Final private CommandSource source;
     @Shadow @Final @Mutable private Vec3 worldPosition;
     @Shadow @Final @Mutable private Vec2 rotation;
     @Shadow @Final @Mutable private ServerLevel level;
-    @Shadow @Final @Mutable private int permissionLevel;
+    @Shadow @Final @Mutable private PermissionSet permissions;
 
     @Shadow @Final private Component displayName;
     @Shadow @Final private String textName;
@@ -85,33 +88,35 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     @Shadow @Final private CommandSigningContext signingContext;
 
     @Shadow @Final private TaskChainer chatMessageChainer;
+    //@formatter:on
+
     private Cause impl$cause;
     @Nullable private Supplier<String> impl$potentialPermissionNode = null;
     private @Nullable PermissionService impl$permissionService;
 
-    @Inject(method = "<init>(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;ILjava/lang/String;Lnet/minecraft/network/chat/Component;Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/entity/Entity;ZLnet/minecraft/commands/CommandResultCallback;Lnet/minecraft/commands/arguments/EntityAnchorArgument$Anchor;Lnet/minecraft/commands/CommandSigningContext;Lnet/minecraft/util/TaskChainer;)V",
-            at = @At("RETURN"))
+    @Inject(method = "<init>(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/permissions/PermissionSet;Ljava/lang/String;Lnet/minecraft/network/chat/Component;Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/entity/Entity;ZLnet/minecraft/commands/CommandResultCallback;Lnet/minecraft/commands/arguments/EntityAnchorArgument$Anchor;Lnet/minecraft/commands/CommandSigningContext;Lnet/minecraft/util/TaskChainer;)V",
+        at = @At("RETURN"))
     private void impl$setCauseOnConstruction(
-            final CommandSource $$0,
-            final Vec3 $$1,
-            final Vec2 $$2,
-            final ServerLevel $$3,
-            final int $$4,
-            final String $$5,
-            final Component $$6,
-            final MinecraftServer $$7,
-            final Entity $$8,
-            final boolean $$9,
-            final CommandResultCallback $$10,
-            final EntityAnchorArgument.Anchor $$11,
-            final CommandSigningContext $$12,
-            final TaskChainer $$13,
-            final CallbackInfo ci
+        final CommandSource $$0,
+        final Vec3 $$1,
+        final Vec2 $$2,
+        final ServerLevel $$3,
+        final PermissionSet permissionLevel,
+        final String $$5,
+        final Component $$6,
+        final MinecraftServer $$7,
+        final Entity $$8,
+        final boolean $$9,
+        final CommandResultCallback $$10,
+        final EntityAnchorArgument.Anchor $$11,
+        final CommandSigningContext $$12,
+        final TaskChainer $$13,
+        final CallbackInfo ci
     ) {
         this.impl$cause = PhaseTracker.getInstance().currentCause();
         final EventContext context = this.impl$cause.context();
 
-        context.get(EventContextKeys.LOCATION).ifPresent(x ->{
+        context.get(EventContextKeys.LOCATION).ifPresent(x -> {
             this.worldPosition = VecHelper.toVanillaVector3d(x.position());
             this.level = (ServerLevel) x.world();
         });
@@ -119,11 +124,25 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
         context.get(EventContextKeys.ROTATION).ifPresent(x -> this.rotation = new Vec2((float) x.x(), (float) x.y()));
         context.get(EventContextKeys.SUBJECT).ifPresent(x -> {
             if (x instanceof PlayerAccessor pa) {
-                this.permissionLevel = pa.invoker$getPermissionLevel();
+                this.permissions = pa.invoker$permissions();
             } else if (x instanceof MinecraftServer ms && !ms.isSingleplayer()) {
-                this.permissionLevel = 4;
+                this.permissions = PermissionSet.ALL_PERMISSIONS;
             }
         });
+        this.permissions = (incoming) -> {
+            if (this.impl$potentialPermissionNode != null) {
+                final var opLevel = SpongeCommon.server().operatorUserPermissions().level();
+                final String perm = this.impl$potentialPermissionNode.get();
+                // This will register the permission with the first op level we retrieve.
+                if (this.impl$permissionService != null) {
+                    SpongePermissions.registerPermission(this.impl$permissionService, perm, opLevel);
+                } else if (Sponge.isServerAvailable()) {
+                    SpongePermissions.registerPermission(Sponge.server().serviceProvider().permissionService(), perm, opLevel);
+                }
+                return ((CommandCause) this).hasPermission(perm);
+            }
+            return permissionLevel.hasPermission(incoming);
+        };
     }
 
     /*
@@ -132,15 +151,15 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
      * FIRST. That way, we don't overwrite any changes we then need to make.
      */
     @Inject(method = {
-            "withEntity",
-            "withPosition",
-            "withRotation(Lnet/minecraft/world/phys/Vec2;)Lnet/minecraft/commands/CommandSourceStack;",
-            "withCallback(Lnet/minecraft/commands/CommandResultCallback;)Lnet/minecraft/commands/CommandSourceStack;",
-            "withSuppressedOutput",
-            "withPermission",
-            "withMaximumPermission",
-            "withAnchor",
-            "withLevel"
+        "withEntity",
+        "withPosition",
+        "withRotation(Lnet/minecraft/world/phys/Vec2;)Lnet/minecraft/commands/CommandSourceStack;",
+        "withCallback(Lnet/minecraft/commands/CommandResultCallback;)Lnet/minecraft/commands/CommandSourceStack;",
+        "withSuppressedOutput",
+        "withPermission",
+        "withMaximumPermission",
+        "withAnchor",
+        "withLevel"
     }, at = @At("RETURN"))
     private void impl$copyPermissionOnCopy(final CallbackInfoReturnable<CommandSourceStack> cir) {
         if (cir.getReturnValue() != (Object) this) {
@@ -154,8 +173,8 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     @Override
     public CommandCause bridge$withCurrentCause() {
         // Cause is set in ctor.
-        final CommandCause instance = (CommandCause) CommandSourceStackAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel,
-                this.textName, this.displayName, this.server, this.entity, this.silent, this.resultCallback, this.anchor, this.signingContext, this.chatMessageChainer);
+        final CommandCause instance = (CommandCause) CommandSourceStackAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissions,
+            this.textName, this.displayName, this.server, this.entity, this.silent, this.resultCallback, this.anchor, this.signingContext, this.chatMessageChainer);
         ((CommandSourceStackBridge) instance).bridge$permissionService(this.impl$permissionService);
         return instance;
     }
@@ -174,9 +193,9 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     private void impl$updateCauseOnWithWorld(final ServerLevel serverWorld, final CallbackInfoReturnable<CommandSourceStack> cir) {
         if (cir.getReturnValue() != (Object) this) {
             final ServerLocation location = this.impl$cause.context().get(EventContextKeys.LOCATION)
-                    .map(x -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld, x.position()))
-                    .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld,
-                            VecHelper.toVector3d(cir.getReturnValue().getPosition())));
+                .map(x -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld, x.position()))
+                .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld,
+                    VecHelper.toVector3d(cir.getReturnValue().getPosition())));
             ((CommandSourceStackBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION, location));
         }
     }
@@ -186,8 +205,8 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
         if (cir.getReturnValue() != (Object) this) {
             final org.spongepowered.math.vector.Vector3d position = VecHelper.toVector3d(pos);
             final ServerLocation location = this.impl$cause.context().get(EventContextKeys.LOCATION)
-                    .map(x -> ServerLocation.of(x.world(), position))
-                    .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) cir.getReturnValue().getLevel(), position));
+                .map(x -> ServerLocation.of(x.world(), position))
+                .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) cir.getReturnValue().getLevel(), position));
             ((CommandSourceStackBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION, location));
         }
     }
@@ -198,21 +217,6 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
             final org.spongepowered.math.vector.Vector3d rot = new org.spongepowered.math.vector.Vector3d(rotation.x, rotation.y, 0); // no roll
             ((CommandSourceStackBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.ROTATION, rot));
         }
-    }
-
-    @Inject(method = "hasPermission", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$checkPermission(final int opLevel, final CallbackInfoReturnable<Boolean> cir) {
-        if (this.impl$potentialPermissionNode != null) {
-            final String perm = this.impl$potentialPermissionNode.get();
-            // This will register the permission with the first op level we retrieve.
-            if (this.impl$permissionService != null) {
-                SpongePermissions.registerPermission(this.impl$permissionService, perm, opLevel);
-            } else if (Sponge.isServerAvailable()) {
-                SpongePermissions.registerPermission(Sponge.server().serviceProvider().permissionService(), perm, opLevel);
-            }
-            cir.setReturnValue(((CommandCause) this).hasPermission(perm));
-        }
-        // fall through to the op level check if we haven't set a permission node.
     }
 
     @Override

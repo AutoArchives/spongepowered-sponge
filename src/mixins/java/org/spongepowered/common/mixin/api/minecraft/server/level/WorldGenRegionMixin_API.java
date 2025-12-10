@@ -70,7 +70,7 @@ public abstract class WorldGenRegionMixin_API implements GenerationRegion {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$getWorldKeyOnConstruction(final ServerLevel $$0, final StaticCache2D $$1, final ChunkStep $$2, final ChunkAccess $$3,
             final CallbackInfo ci) {
-        this.api$serverWorldKey = (ResourceKey) (Object) $$0.dimension().location();
+        this.api$serverWorldKey = (ResourceKey) (Object) $$0.dimension().identifier();
     }
 
     @Override

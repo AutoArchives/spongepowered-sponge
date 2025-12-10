@@ -40,7 +40,7 @@ import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerBossEvent;
@@ -244,7 +244,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Override
     public AdvancementProgress progress(final org.spongepowered.api.advancement.Advancement advancement) {
         Objects.requireNonNull(advancement, "advancement");
-        final AdvancementHolder holder = new AdvancementHolder((ResourceLocation) (Object) advancement.key(RegistryTypes.ADVANCEMENT), (Advancement) (Object) advancement);
+        final AdvancementHolder holder = new AdvancementHolder((Identifier) (Object) advancement.key(RegistryTypes.ADVANCEMENT), (Advancement) (Object) advancement);
         return (AdvancementProgress) this.advancements.getOrStartProgress(holder);
     }
 

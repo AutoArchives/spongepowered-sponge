@@ -61,14 +61,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Relative;
-import net.minecraft.world.entity.animal.AbstractFish;
+import net.minecraft.world.entity.animal.fish.AbstractFish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.scores.PlayerTeam;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -295,7 +295,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     public boolean bridge$keepInventory() {
-        return Objects.requireNonNullElseGet(this.impl$keepInventory, () -> this.shadow$level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY));
+        return Objects.requireNonNullElseGet(this.impl$keepInventory, () -> this.shadow$level().getGameRules().get(GameRules.KEEP_INVENTORY));
     }
 
     @Override
@@ -450,19 +450,19 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @ModifyExpressionValue(
         method = "die",
         at = @At(
-            value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"
+            value = "INVOKE", target = "Lnet/minecraft/world/level/gamerules/GameRules;get(Lnet/minecraft/world/level/gamerules/GameRule;)Ljava/lang/Object;"
         ),
         slice = @Slice(
             from = @At("HEAD"),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;getDeathMessage()Lnet/minecraft/network/chat/Component;")
         )
     )
-    private boolean impl$onlySendMessageIfEventCallsForIt(
-        boolean gameRules,
+    private Object impl$onlySendMessageIfEventCallsForIt(
+        Object gameRules,
         @Share("sponge-event") LocalRef<DestructEntityEvent.@Nullable Death> event
     ) {
         final var spongeEvent = event.get();
-        return gameRules && (spongeEvent == null || !spongeEvent.isMessageCancelled());
+        return (Boolean) gameRules && (spongeEvent == null || !spongeEvent.isMessageCancelled());
     }
 
     @ModifyExpressionValue(
@@ -526,10 +526,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @ModifyExpressionValue(
         method = "restoreFrom",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z")
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/gamerules/GameRules;get(Lnet/minecraft/world/level/gamerules/GameRule;)Ljava/lang/Object;")
     )
-    private boolean tracker$useKeepFromBridge(
-        boolean original,
+    private Object tracker$useKeepFromBridge(
+        Object original,
         net.minecraft.server.level.ServerPlayer corpse,
         boolean wonGame
     ) {
@@ -668,29 +668,21 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Inject(method = "startSleepInBed", at = @At(value = "RETURN"), cancellable = true)
     private void impl$onReturnSleep(final BlockPos param0, final CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
         final Either<Player.BedSleepingProblem, Unit> returnValue = cir.getReturnValue();
-        if (returnValue.left().isPresent()) {
-            switch (returnValue.left().get()) {
-
-                case NOT_POSSIBLE_HERE:
-                case TOO_FAR_AWAY:
-                case NOT_POSSIBLE_NOW:
-                case OBSTRUCTED:
-                case NOT_SAFE:
-                    final Cause currentCause = PhaseTracker.getInstance().currentCause();
-                    final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
-                    if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) this))) {
-                        final Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
-                            this.shadow$awardStat(Stats.SLEEP_IN_BED);
-                            CriteriaTriggers.SLEPT_IN_BED.trigger((net.minecraft.server.level.ServerPlayer) (Object) this);
-                        });
-                        ((ServerLevel) this.shadow$level()).updateSleepingPlayerList();
-                        cir.setReturnValue(var5);
-                    }
-                    break;
-                case OTHER_PROBLEM: // ignore
-                    break;
+        returnValue.ifLeft(problem -> {
+            if (problem.message() == null) {
+                return;
             }
-        }
+            final Cause currentCause = PhaseTracker.getInstance().currentCause();
+            final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
+            if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) this))) {
+                final Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
+                    this.shadow$awardStat(Stats.SLEEP_IN_BED);
+                    CriteriaTriggers.SLEPT_IN_BED.trigger((net.minecraft.server.level.ServerPlayer) (Object) this);
+                });
+                ((ServerLevel) this.shadow$level()).updateSleepingPlayerList();
+                cir.setReturnValue(var5);
+            }
+        });
     }
 
     @Override
@@ -812,5 +804,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Redirect(method = "saveParentVehicle", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hasExactlyOnePlayerPassenger()Z"))
     private boolean impl$skipUnserializableRootVehicle(final Entity instance) {
         return instance.hasExactlyOnePlayerPassenger() && !((TransientBridge) instance).bridge$isTransient();
+    }
+
+    /**
+     * Fixes <a href="https://bugs.mojang.com/browse/MC/issues/MC-302672">MC-302672</a>
+     */
+    @WrapOperation(method = "onEffectAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
+    private void impl$onEffectAdded(ServerGamePacketListenerImpl instance, Packet packet, Operation<Void> original) {
+        if (instance == null) {
+            return;
+        }
+        original.call(instance, packet);
     }
 }

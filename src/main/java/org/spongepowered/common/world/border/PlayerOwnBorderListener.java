@@ -51,7 +51,7 @@ public final class PlayerOwnBorderListener implements BorderChangeListener {
     }
 
     @Override
-    public void onLerpSize(final WorldBorder border, final double oldSize, final double newSize, final long time) {
+    public void onLerpSize(WorldBorder border, double oldSize, double newSize, long time, long var8) {
         this.sendBorderPacket(new ClientboundSetBorderLerpSizePacket(border));
     }
 

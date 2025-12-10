@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.plugin.entityactivation;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -36,21 +36,21 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ambient.AmbientCreature;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.entity.animal.sheep.Sheep;
-import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
-import net.minecraft.world.entity.decoration.Painting;
+import net.minecraft.world.entity.decoration.painting.Painting;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.EntitySection;
 import net.minecraft.world.level.entity.EntitySectionStorage;
@@ -153,7 +153,7 @@ public final class EntityActivationRange {
         final EntityActivationRangeCategory config = configAdapter.get().entityActivationRange;
 
         final EntityTypeBridge type = (EntityTypeBridge) entity.getType();
-        final ResourceLocation key = EntityType.getKey(entity.getType());
+        final Identifier key = EntityType.getKey(entity.getType());
         final byte activationType = spongeEntity.activation$getActivationType();
         final String activationTypeName = EntityActivationRange.activationTypeMappings.getOrDefault(activationType, "misc");
         if (!type.bridge$isActivationRangeInitialized()) {
@@ -409,7 +409,7 @@ public final class EntityActivationRange {
     }
 
     public static void addEntityToConfig(
-        final boolean autoPopulate, final ResourceLocation key, final byte activationType, final String activationTypeName
+        final boolean autoPopulate, final Identifier key, final byte activationType, final String activationTypeName
     ) {
         final InheritableConfigHandle<GlobalConfig> globalConfig = SpongeGameConfigs.getGlobalInheritable();
         final EntityActivationRangeCategory activationConfig = globalConfig.get().entityActivationRange;

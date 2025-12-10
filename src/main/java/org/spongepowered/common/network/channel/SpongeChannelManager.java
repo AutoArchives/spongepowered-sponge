@@ -31,7 +31,7 @@ import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -172,8 +172,8 @@ public final class SpongeChannelManager implements ChannelManager {
 
         final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
             @Override
-            public ResourceLocation id() {
-                return (ResourceLocation) (Object) Constants.Channels.SPONGE_CLIENT_TYPE;
+            public Identifier id() {
+                return (Identifier) (Object) Constants.Channels.SPONGE_CLIENT_TYPE;
             }
 
             @Override
@@ -217,8 +217,8 @@ public final class SpongeChannelManager implements ChannelManager {
         final Consumer<FriendlyByteBuf> consumer = this.encodeChannelRegistry();
         final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
                                                                             @Override
-                                                                            public ResourceLocation id() {
-                                                                                return (ResourceLocation) (Object) Constants.Channels.SPONGE_CHANNEL_REGISTRY;
+                                                                            public Identifier id() {
+                                                                                return (Identifier) (Object) Constants.Channels.SPONGE_CHANNEL_REGISTRY;
                                                                             }
 
                                                                             @Override
@@ -288,7 +288,7 @@ public final class SpongeChannelManager implements ChannelManager {
         }
     }
 
-    public boolean handlePlayPayload(final EngineConnection connection, final EngineConnectionState state, final ResourceLocation channelKey, final Consumer<FriendlyByteBuf> payload) {
+    public boolean handlePlayPayload(final EngineConnection connection, final EngineConnectionState state, final Identifier channelKey, final Consumer<FriendlyByteBuf> payload) {
         final ChannelBuf buf = this.bufferAllocator.buffer();
         payload.accept((FriendlyByteBuf) buf);
 
@@ -334,7 +334,7 @@ public final class SpongeChannelManager implements ChannelManager {
         }
     }
 
-    public boolean handleLoginRequestPayload(final EngineConnection connection, final EngineConnectionState state, final ResourceLocation channelKey, final int transactionId, final Consumer<FriendlyByteBuf> payload) {
+    public boolean handleLoginRequestPayload(final EngineConnection connection, final EngineConnectionState state, final Identifier channelKey, final int transactionId, final Consumer<FriendlyByteBuf> payload) {
         // Server -> Client request
         final ChannelBuf buf = this.bufferAllocator.buffer();
         payload.accept((FriendlyByteBuf) buf);

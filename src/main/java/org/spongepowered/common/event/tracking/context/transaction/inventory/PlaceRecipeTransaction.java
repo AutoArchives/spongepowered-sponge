@@ -77,13 +77,13 @@ public class PlaceRecipeTransaction extends ContainerBasedTransaction {
             event = SpongeEventFactory.createClickContainerEventRecipeAll(cause, (Container) this.menu,
                     this.craftingInventory, cursorTransaction, preview,
                     Optional.of(this.recipe).map(RecipeHolder::value).map(CraftingRecipe.class::cast),
-                    Optional.of(this.recipe).map(r -> (ResourceKey) (Object) r.id().location()),
+                    Optional.of(this.recipe).map(r -> (ResourceKey) (Object) r.id().identifier()),
                     Optional.empty(), slotTransactions);
         } else {
             event = SpongeEventFactory.createClickContainerEventRecipeSingle(cause, (Container) this.menu,
                     this.craftingInventory, cursorTransaction, preview,
                     Optional.of(this.recipe).map(RecipeHolder::value).map(CraftingRecipe.class::cast),
-                    Optional.of(this.recipe).map(r -> (ResourceKey) (Object) r.id().location()),
+                    Optional.of(this.recipe).map(r -> (ResourceKey) (Object) r.id().identifier()),
                     Optional.empty(), slotTransactions);
         }
         return Optional.of(event);

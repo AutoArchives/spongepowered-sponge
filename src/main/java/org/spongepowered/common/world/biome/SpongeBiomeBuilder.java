@@ -27,9 +27,14 @@ package org.spongepowered.common.world.biome;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.attribute.AmbientAdditionsSettings;
+import net.minecraft.world.attribute.AmbientMoodSettings;
+import net.minecraft.world.attribute.AmbientParticle;
+import net.minecraft.world.attribute.AmbientSounds;
+import net.minecraft.world.attribute.BackgroundMusic;
+import net.minecraft.world.attribute.EnvironmentAttributeMap;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.biome.AmbientAdditionsSettings;
-import net.minecraft.world.level.biome.AmbientParticleSettings;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.MobSpawnSettings;
@@ -117,19 +122,22 @@ public final class SpongeBiomeBuilder implements Biome.Builder {
         final Map<DecorationStep, List<PlacedFeature>> features = this.manipulator.getOrElse(Keys.FEATURES, Map.of());
         final List<Carver> carvers = this.manipulator.getOrElse(Keys.CARVERS, List.of());
 
+        final var attributes = EnvironmentAttributeMap.builder();
+        attributes.set(EnvironmentAttributes.FOG_COLOR, fogColor.rgb())
+            .set(EnvironmentAttributes.WATER_FOG_COLOR, waterFogColor.rgb())
+            .set(EnvironmentAttributes.SKY_COLOR, skyColor.rgb());
         final BiomeSpecialEffects.Builder effectsBuilder = new BiomeSpecialEffects.Builder()
-            .fogColor(fogColor.rgb())
             .waterColor(waterColor.rgb())
-            .waterFogColor(waterFogColor.rgb())
-            .skyColor(skyColor.rgb())
             .grassColorModifier((BiomeSpecialEffects.GrassColorModifier) (Object) grassColorModifier);
         foliageColor.ifPresent(c -> effectsBuilder.foliageColorOverride(c.rgb()));
         grassColor.ifPresent(c -> effectsBuilder.grassColorOverride(c.rgb()));
-        particleSettings.ifPresent(ps -> effectsBuilder.ambientParticle((AmbientParticleSettings) ps));
-        ambientSound.ifPresent(s -> effectsBuilder.ambientLoopSound(Holder.direct((SoundEvent) (Object) s)));
-        ambientMood.ifPresent(m -> effectsBuilder.ambientMoodSound((net.minecraft.world.level.biome.AmbientMoodSettings) m));
-        additionalSound.ifPresent(s -> effectsBuilder.ambientAdditionsSound((AmbientAdditionsSettings) s));
-        backgroundMusic.ifPresent(m -> effectsBuilder.backgroundMusic((Music) (Object) m));
+        final var vanillaAmbientSound = new AmbientSounds(
+            ambientSound.map(SoundEvent.class::cast).map(Holder::direct),
+            ambientMood.map(AmbientMoodSettings.class::cast),
+            additionalSound.map(AmbientAdditionsSettings.class::cast).map(List::of).orElse(List.of()));
+        attributes.set(EnvironmentAttributes.AMBIENT_SOUNDS, vanillaAmbientSound);
+
+        backgroundMusic.ifPresent(m -> attributes.set(EnvironmentAttributes.BACKGROUND_MUSIC, new BackgroundMusic((Music) (Object) m)));
 
         final MobSpawnSettings.Builder spawnerBuilder = new MobSpawnSettings.Builder()
             .creatureGenerationProbability(spawnChance.floatValue());
@@ -152,7 +160,11 @@ public final class SpongeBiomeBuilder implements Biome.Builder {
             .temperatureAdjustment((net.minecraft.world.level.biome.Biome.TemperatureModifier) (Object) temperatureModifier)
             .specialEffects(effectsBuilder.build())
             .mobSpawnSettings(spawnerBuilder.build())
-            .generationSettings(generationBuilder.build());
+            .generationSettings(generationBuilder.build())
+            .putAttributes(attributes.build())
+            ;
+        particleSettings.ifPresent(ps -> vanillaBuilder.setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES, List.of((AmbientParticle) (Object) ps)));
+
         return (Biome) (Object) vanillaBuilder.build();
     }
 }

@@ -25,17 +25,12 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.audience.MessageType;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseCommandBlock;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 
 import javax.annotation.Nullable;
@@ -44,24 +39,8 @@ import javax.annotation.Nullable;
 public abstract class BaseCommandBlockMixin implements CommandSourceProviderBridge, Audience {
 
     // @formatter:off
-    @Shadow public abstract CommandSourceStack createCommandSourceStack(CommandSource var1);
-    @Shadow @Nullable protected abstract BaseCommandBlock.CloseableCommandBlockSource shadow$createSource();
+    @Shadow public abstract CommandSourceStack createCommandSourceStack(ServerLevel level, CommandSource var1);
+    @Shadow @Nullable protected abstract BaseCommandBlock.CloseableCommandBlockSource shadow$createSource(ServerLevel level);
     // @formatter:on
 
-
-
-    @Override
-    public CommandSourceStack bridge$getCommandSource(final Cause cause) {
-        return this.createCommandSourceStack(this.shadow$createSource());
-    }
-
-    @Override
-    @SuppressWarnings({"deprecation", "UnstableApiUsage"})
-    public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
-        final var source = this.shadow$createSource();
-        if (source == null) {
-            return;
-        }
-        source.sendSystemMessage(SpongeAdventure.asVanilla(message));
-    }
 }

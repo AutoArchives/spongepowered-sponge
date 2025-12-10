@@ -26,7 +26,7 @@ package org.spongepowered.common.entity;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.entity.Entity;
@@ -183,9 +183,9 @@ public final class EntityUtil {
 
     public static EntityArchetype toArchetype(final SpawnData logic) {
         final var tag = logic.entityToSpawn();
-        final var resourceLocation = tag.getString(Constants.Entity.ENTITY_TYPE_ID);
+        final var identifier = tag.getString(Constants.Entity.ENTITY_TYPE_ID);
         final var entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
-        final var type = resourceLocation.flatMap(location -> entityTypeRegistry.getOptional(ResourceLocation.parse(location)))
+        final var type = identifier.flatMap(location -> entityTypeRegistry.getOptional(Identifier.parse(location)))
             .map(org.spongepowered.api.entity.EntityType.class::cast)
             .orElse(EntityTypes.PIG.get());
 
@@ -211,11 +211,11 @@ public final class EntityUtil {
 
         for (final var weightedEntity : spawnData.unwrap()) {
             final CompoundTag nbt = weightedEntity.value().entityToSpawn();
-            final Optional<String> resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
-            if (resourceLocation.isEmpty()) {
+            final Optional<String> identifier = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
+            if (identifier.isEmpty()) {
                 continue;
             }
-            final var mcType = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getOptional(ResourceLocation.parse(resourceLocation.get()));
+            final var mcType = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getOptional(Identifier.parse(identifier.get()));
             final var type = mcType.map(org.spongepowered.api.entity.EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
             final EntityArchetype archetype = SpongeEntityArchetypeBuilder.pooled()

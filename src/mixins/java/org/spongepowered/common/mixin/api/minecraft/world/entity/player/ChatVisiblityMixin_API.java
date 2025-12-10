@@ -29,17 +29,18 @@ import net.minecraft.world.entity.player.ChatVisiblity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(ChatVisiblity.class)
 public abstract class ChatVisiblityMixin_API implements org.spongepowered.api.entity.living.player.chat.ChatVisibility {
 
     // @formatter:off
-    @Shadow @Final private String key;
+    @Shadow @Final private net.minecraft.network.chat.Component caption;
     // @formatter:on
 
     @Override
     public Component asComponent() {
-        return Component.translatable(this.key);
+        return SpongeAdventure.asAdventure(this.caption);
     }
 
     @Override

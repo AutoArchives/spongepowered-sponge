@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.level.BlockGetter;
@@ -177,14 +178,20 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
 
     @Override
     public double regionalDifficultyFactor() {
+        if (!(this.level instanceof ServerLevel sl)) {
+            return 0;
+        }
         return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(),
-                this.inhabitedTime().ticks(), this.level.getMoonBrightness()).getEffectiveDifficulty();
+                this.inhabitedTime().ticks(), sl.getMoonBrightness(sl.getRespawnData().pos())).getEffectiveDifficulty();
     }
 
     @Override
     public double regionalDifficultyPercentage() {
+        if (!(this.level instanceof ServerLevel sl)) {
+            return 0;
+        }
         return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(),
-                this.inhabitedTime().ticks(), this.level.getMoonBrightness()).getSpecialMultiplier();
+                this.inhabitedTime().ticks(), sl.getMoonBrightness(sl.getRespawnData().pos())).getSpecialMultiplier();
     }
 
     @Override

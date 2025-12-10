@@ -25,7 +25,7 @@
 package org.spongepowered.common.hooks;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.boss.EnderDragonPart;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
 
 public interface EntityHooks {
 

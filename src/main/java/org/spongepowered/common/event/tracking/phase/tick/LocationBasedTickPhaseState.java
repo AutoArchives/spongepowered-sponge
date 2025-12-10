@@ -108,7 +108,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     public Supplier<ResourceKey> attemptWorldKey(final T context) {
         return MemoizedSupplier.memoize(() -> {
             final World<@NonNull ?, @NonNull ?> world = this.getLocatableBlockSourceFromContext(context).world();
-            return (ResourceKey) (Object) ((Level) world).dimension().location();
+            return (ResourceKey) (Object) ((Level) world).dimension().identifier();
         });
     }
 

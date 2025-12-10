@@ -27,7 +27,7 @@ package org.spongepowered.common.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.block.Blocks;
@@ -283,7 +283,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
         return Optional.of(SpongeBlockEntityArchetypeBuilder.pooled()
                 .state(this.state())
-                .blockEntity((BlockEntityType) SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).getOptional(ResourceLocation.tryParse(blockEntityID)).orElse(null))
+                .blockEntity((BlockEntityType) SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).getOptional(Identifier.tryParse(blockEntityID)).orElse(null))
                 .blockEntityData(NBTTranslator.INSTANCE.translate(compound))
                 .build());
     }

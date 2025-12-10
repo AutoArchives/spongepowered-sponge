@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.inventory.impl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AbstractFurnaceMenu;
+import net.minecraft.world.inventory.AbstractMountInventoryMenu;
 import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.inventory.BrewingStandMenu;
 import net.minecraft.world.inventory.ChestMenu;
@@ -34,7 +35,6 @@ import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.DispenserMenu;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.inventory.HopperMenu;
-import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.ItemCombinerMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -60,7 +60,7 @@ import java.util.function.Predicate;
         ItemCombinerMenu.class,
         BrewingStandMenu.class,
         BeaconMenu.class,
-        HorseInventoryMenu.class,
+        AbstractMountInventoryMenu.class,
         MerchantMenu.class,
         InventoryMenu.class,
         CraftingMenu.class

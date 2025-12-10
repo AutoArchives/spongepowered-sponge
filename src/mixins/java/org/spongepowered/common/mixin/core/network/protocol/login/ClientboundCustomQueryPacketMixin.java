@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.network.protocol.login;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +44,7 @@ public abstract class ClientboundCustomQueryPacketMixin {
     // @formatter: on
 
     @Inject(method = "readPayload", at = @At("HEAD"), cancellable = true)
-    private static void impl$onReadUnknownPayload(final ResourceLocation $$0, final FriendlyByteBuf $$1, final CallbackInfoReturnable<CustomQueryPayload> cir) {
+    private static void impl$onReadUnknownPayload(final Identifier $$0, final FriendlyByteBuf $$1, final CallbackInfoReturnable<CustomQueryPayload> cir) {
         final int readableBytes = $$1.readableBytes();
         if (readableBytes >= 0 && readableBytes <= ClientboundCustomQueryPacketMixin.MAX_PAYLOAD_SIZE) {
             final var payload = $$1.readBytes(readableBytes);

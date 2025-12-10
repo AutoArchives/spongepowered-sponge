@@ -60,6 +60,6 @@ public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCra
     @Override
     public RunAroundLikeCrazyGoal build(HorseLike owner) {
         Objects.requireNonNull(owner);
-        return (RunAroundLikeCrazyGoal) new net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal((net.minecraft.world.entity.animal.horse.Horse) owner, this.speed);
+        return (RunAroundLikeCrazyGoal) new net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal((net.minecraft.world.entity.animal.equine.Horse) owner, this.speed);
     }
 }

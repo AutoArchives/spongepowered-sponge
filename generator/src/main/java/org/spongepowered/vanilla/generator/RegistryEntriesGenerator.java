@@ -31,8 +31,8 @@ import com.squareup.javapoet.TypeName;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureElement;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
@@ -109,7 +109,7 @@ public class RegistryEntriesGenerator<V> implements Generator {
 
     @Override
     public String name() {
-        return "elements of registry " + this.registry.location();
+        return "elements of registry " + this.registry.identifier();
     }
 
     @Override
@@ -122,7 +122,7 @@ public class RegistryEntriesGenerator<V> implements Generator {
         clazz.addAnnotation(Types.suppressWarnings("unused"));
 
         final RegistryScope scopeType;
-        Registry<V> registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.location()).map(Holder.Reference::value).orElse(null);
+        Registry<V> registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.identifier()).map(Holder.Reference::value).orElse(null);
         if (registry == null) {
             registry = ctx.registries().lookup(this.registry).orElse(null);
             if (registry == null) {
@@ -152,7 +152,7 @@ public class RegistryEntriesGenerator<V> implements Generator {
         ctx.compilationUnit(this.relativePackageName, this.targetClassSimpleName);
     }
 
-    private FieldSpec makeField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod, final ResourceLocation element, @Nullable final FeatureFlagSet featureFlagSet) {
+    private FieldSpec makeField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod, final Identifier element, @Nullable final FeatureFlagSet featureFlagSet) {
 
         final FieldSpec.Builder builder =
                 FieldSpec.builder(fieldType, Types.keyToFieldName(element.getPath()), Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)

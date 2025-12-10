@@ -49,7 +49,7 @@ import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -143,7 +143,7 @@ public final class ViewerPacketUtil {
 
     public static ClientboundStopSoundPacket stopSound(final SoundStop stop) {
         Objects.requireNonNull(stop, "stop");
-        final @Nullable ResourceLocation sound = SpongeAdventure.asVanillaLocation(stop.sound());
+        final @Nullable Identifier sound = SpongeAdventure.asVanillaLocation(stop.sound());
         final @Nullable SoundSource source = SpongeAdventure.asVanillaNullable(stop.source());
         return new ClientboundStopSoundPacket(sound, source);
     }
@@ -219,7 +219,7 @@ public final class ViewerPacketUtil {
     }
 
     private static Holder<SoundEvent> resolveEvent(final @NonNull Sound sound) {
-        final ResourceLocation soundKey = SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name());
+        final Identifier soundKey = SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name());
         final var soundEventRegistry = SpongeCommon.vanillaRegistry(Registries.SOUND_EVENT);
         final SoundEvent event = soundEventRegistry.getOptional(soundKey)
                 .orElseGet(() -> SoundEvent.createVariableRangeEvent(soundKey));

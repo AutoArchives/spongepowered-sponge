@@ -24,20 +24,16 @@
  */
 package org.spongepowered.common.accessor.world.level;
 
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRuleMap;
+import net.minecraft.world.level.gamerules.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.Map;
 
 @Mixin(GameRules.class)
 public interface GameRulesAccessor {
 
-    @Accessor("rules") Map<GameRules.Key<?>, GameRules.Value<?>> accessor$rules();
+    @Accessor("rules") GameRuleMap accessor$rules();
 
-    @Accessor("GAME_RULE_TYPES") static Map<GameRules.Key<?>, GameRules.Type<?>> accessor$GAME_RULE_TYPES() {
-        throw new UntransformedAccessorError();
-    }
 
 }

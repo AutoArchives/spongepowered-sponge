@@ -28,7 +28,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -125,7 +125,7 @@ public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
         final byte rot = this.getByteFromContainer(container, Constants.Map.DECORATION_ROTATION);
 
 
-        final var mcType = BuiltInRegistries.MAP_DECORATION_TYPE.getValue((ResourceLocation) (Object) type);
+        final var mcType = BuiltInRegistries.MAP_DECORATION_TYPE.getValue((Identifier) (Object) type);
         if (mcType == null) {
             throw new IllegalStateException("Missing a MapDecorationType, could not find one for Minecraft's MapDecoration.Type: " + type);
         }

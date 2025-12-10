@@ -26,13 +26,13 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.PigVariant;
+import net.minecraft.world.entity.animal.pig.Pig;
+import net.minecraft.world.entity.animal.pig.PigVariant;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PigType;
-import org.spongepowered.common.accessor.world.entity.animal.PigAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.pig.PigAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class PigData {

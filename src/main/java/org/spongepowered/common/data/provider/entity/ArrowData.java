@@ -25,13 +25,13 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.alchemy.PotionContents;
 import org.apache.commons.lang3.stream.Streams;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.common.accessor.world.entity.projectile.ArrowAccessor;
+import org.spongepowered.common.accessor.world.entity.projectile.arrow.ArrowAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.List;

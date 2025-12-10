@@ -58,7 +58,7 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
         return this.impl$createDragonFight;
     }
 
-    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ExtraCodecs;catchDecoderException(Lcom/mojang/serialization/Codec;)Lcom/mojang/serialization/Codec;"))
+    @Redirect(method = "createDirectCodec", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ExtraCodecs;catchDecoderException(Lcom/mojang/serialization/Codec;)Lcom/mojang/serialization/Codec;"))
     private static Codec<DimensionType> impl$onWrapCodec(final Codec<DimensionType> codec) {
         return ExtraCodecs.catchDecoderException(SpongeDimensionTypes.injectCodec(codec));
     }

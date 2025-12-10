@@ -41,11 +41,11 @@ public class SpongeScoreFormatFactory implements ScoreFormat.Factory {
 
     @Override
     public ScoreFormat fixed(final Component component) {
-        return (ScoreFormat) new FixedFormat(SpongeAdventure.asVanilla(component));
+        return (ScoreFormat) (Object) new FixedFormat(SpongeAdventure.asVanilla(component));
     }
 
     @Override
     public ScoreFormat styled(final Style style) {
-        return (ScoreFormat) new StyledFormat(SpongeAdventure.asVanilla(style));
+        return (ScoreFormat) (Object) new StyledFormat(SpongeAdventure.asVanilla(style));
     }
 }

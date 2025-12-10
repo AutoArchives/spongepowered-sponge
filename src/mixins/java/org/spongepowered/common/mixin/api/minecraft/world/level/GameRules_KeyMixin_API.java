@@ -24,49 +24,42 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRuleType;
 import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 
 import java.lang.reflect.Type;
 
-@Mixin(GameRules.Key.class)
-public class GameRules_KeyMixin_API<T> implements GameRule<T> {
+@Mixin(net.minecraft.world.level.gamerules.GameRule.class)
+@Implements(@Interface(iface = GameRule.class, prefix = "api$"))
+public abstract class GameRules_KeyMixin_API<T> implements GameRule<T> {
 
-    @Shadow @Final private String id;
+    @Shadow public abstract String shadow$id();
+
+    @Shadow private @Final GameRuleType gameRuleType;
+    @Shadow @Final private T defaultValue;
 
     @Override
     public String name() {
-        return this.id;
+        return this.shadow$id();
     }
 
     @Override
     public Type valueType() {
-        final GameRules.Type<?> type = GameRulesAccessor.accessor$GAME_RULE_TYPES().get(this);
-        final GameRules.Value<?> value = type.createRule();
-        if (value instanceof GameRules.BooleanValue) {
-            return Boolean.class;
-        }
-        if (value instanceof GameRules.IntegerValue) {
-            return Integer.class;
-        }
-        throw new IllegalStateException("Unexpected GameRule.Value implementation " + value.getClass().getName());
+        return switch (this.gameRuleType) {
+            case INT ->  Integer.class;
+            case BOOL -> Boolean.class;
+            default -> throw new IllegalStateException("Unexpected GameRuleType " + this.gameRuleType);
+        };
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public T defaultValue() {
-        final GameRules.Type<?> type = GameRulesAccessor.accessor$GAME_RULE_TYPES().get(this);
-        final GameRules.Value<?> value = type.createRule();
-        if (value instanceof GameRules.BooleanValue) {
-            return (T) (Object)((GameRules.BooleanValue) value).get();
-        }
-        if (value instanceof GameRules.IntegerValue) {
-            return (T)(Object)((GameRules.IntegerValue) value).get();
-        }
-        throw new IllegalStateException("Unexpected GameRule.Value implementation " + value.getClass().getName());
+    @Intrinsic
+    public T api$defaultValue() {
+        return this.defaultValue;
     }
 }

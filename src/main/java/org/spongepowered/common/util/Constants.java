@@ -32,9 +32,8 @@ import com.google.common.collect.HashBiMap;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.serialization.Codec;
-import net.minecraft.Util;
 import net.minecraft.commands.arguments.CompoundTagArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
@@ -42,6 +41,8 @@ import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ChunkLevel;
 import net.minecraft.server.level.FullChunkStatus;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.level.Level;
@@ -399,11 +400,11 @@ public final class Constants {
 
         public static final String SELECTOR_PERMISSION = "minecraft.selector";
         public static final String COMMAND_BLOCK_PERMISSION = "minecraft.commandblock";
-        public static final int COMMAND_BLOCK_LEVEL = 2;
-        public static final int SELECTOR_LEVEL = 2;
+        public static final PermissionLevel COMMAND_BLOCK_LEVEL = PermissionLevel.GAMEMASTERS;
+        public static final PermissionLevel SELECTOR_LEVEL = PermissionLevel.GAMEMASTERS;
         public static final String SPONGE_HELP_PERMISSION = "sponge.command.help";
         public static final String DEBUG_HOVER_STACKTRACE = "sponge.debug.hover-stacktrace";
-        public static final int SPONGE_HELP_LEVEL = 0;
+        public static final PermissionLevel SPONGE_HELP_LEVEL = PermissionLevel.ALL;
     }
 
     /**
@@ -1376,7 +1377,7 @@ public final class Constants {
         public static final ArgumentType<?> STANDARD_STRING_ARGUMENT_TYPE = StringArgumentType.string();
         public static final ArgumentType<?> GREEDY_STRING_ARGUMENT_TYPE = StringArgumentType.greedyString();
         public static final ArgumentType<?> NBT_ARGUMENT_TYPE = CompoundTagArgument.compoundTag();
-        public static final ResourceLocationArgument RESOURCE_LOCATION_TYPE = ResourceLocationArgument.id();
+        public static final IdentifierArgument RESOURCE_LOCATION_TYPE = IdentifierArgument.id();
         public static final String COMMAND_BLOCK_COMMAND = "";
         public static final String SELECTOR_COMMAND = "@";
         public static final String SPONGE_HELP_COMMAND = "sponge:help";

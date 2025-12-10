@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.adventure;
 
 import net.kyori.adventure.key.Key;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,6 +40,6 @@ public interface KeyMixin {
      */
     @Overwrite
     static @NonNull Key key(final @NonNull String namespace, final @NonNull String value) {
-        return (ResourceKey) (Object) ResourceLocation.fromNamespaceAndPath(namespace, value);
+        return (ResourceKey) (Object) Identifier.fromNamespaceAndPath(namespace, value);
     }
 }

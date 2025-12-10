@@ -33,8 +33,8 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -81,13 +81,13 @@ public abstract class RecipeManagerMixin {
     @WrapOperation(method = "prepare(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)Lnet/minecraft/world/item/crafting/RecipeMap;",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/SimpleJsonResourceReloadListener;scanDirectory(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/resources/FileToIdConverter;Lcom/mojang/serialization/DynamicOps;Lcom/mojang/serialization/Codec;Ljava/util/Map;)V"))
     private void impl$onPrepare(final ResourceManager $$0, final FileToIdConverter $$1, final DynamicOps<JsonElement> $$2, final Codec<Recipe<?>> $$3,
-            final Map<ResourceLocation, Recipe<?>> $$4, final Operation<Void> original) {
-        SortedMap<ResourceLocation, Recipe<?>> result = new TreeMap<>();
+            final Map<Identifier, Recipe<?>> $$4, final Operation<Void> original) {
+        SortedMap<Identifier, Recipe<?>> result = new TreeMap<>();
         original.call($$0, $$1, $$2, $$3, result);
         final RegistryHolderLogic registryHolder = ((SpongeRegistryHolder) $$0).registryHolder();
         final Registry<Recipe<?>> registry = (Registry<Recipe<?>>) (Object) registryHolder.registry(RegistryTypes.RECIPE);
         result.forEach((k, v) -> registry.register((org.spongepowered.api.ResourceKey) (Object) k, v));
         Launch.instance().lifecycle().processServerRegistries((RegistryHolder) $$0, Stream.of(registry));
-        registry.streamEntries().forEach(e -> $$4.put((ResourceLocation) (Object) e.key(), e.value()));
+        registry.streamEntries().forEach(e -> $$4.put((Identifier) (Object) e.key(), e.value()));
     }
 }

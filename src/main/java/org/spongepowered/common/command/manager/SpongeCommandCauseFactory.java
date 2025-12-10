@@ -28,6 +28,8 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -58,9 +60,9 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
             final CommandSource iCommandSource =
                     cause.first(CommandSource.class).orElseGet(() -> SpongeCommon.game().systemSubject());
             final CommandSourceStack commandSource;
-            if (iCommandSource instanceof CommandSourceProviderBridge) {
+            if (iCommandSource instanceof CommandSourceProviderBridge cspb) {
                 // We know about this one so we can create it using the factory method on the source.
-                commandSource = ((CommandSourceProviderBridge) iCommandSource).bridge$getCommandSource(cause);
+                commandSource = cspb.bridge$getCommandSource(cause);
             } else {
                 // try to create a command cause from the given ICommandSource, but as Mojang did not see fit to
                 // put any identifying characteristics on the object, we have to go it alone...
@@ -88,7 +90,7 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
                         context.get(EventContextKeys.LOCATION).map(x -> (ServerLevel) x.world())
                                 .orElseGet(() -> locatable == null ? SpongeCommon.server().getLevel(Level.OVERWORLD) :
                                         (ServerLevel) locatable.serverLocation().world()),
-                        4,
+                        LevelBasedPermissionSet.forLevel(PermissionLevel.OWNERS),
                         name,
                         displayName,
                         SpongeCommon.server(),

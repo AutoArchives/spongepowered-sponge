@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ServerItemCooldowns;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -50,11 +50,11 @@ public abstract class ServerItemCooldownsMixin extends ItemCooldownsMixin {
     // @formmater:off
     @Shadow @Final private net.minecraft.server.level.ServerPlayer player;
 
-    @Shadow protected abstract void shadow$onCooldownStarted(ResourceLocation group, int ticksIn);
+    @Shadow protected abstract void shadow$onCooldownStarted(Identifier group, int ticksIn);
     // @formmater:on
 
     @Override
-    protected int impl$throwSetCooldownEvent(final ResourceLocation group, final int ticks) {
+    protected int impl$throwSetCooldownEvent(final Identifier group, final int ticks) {
         if (ticks == 0) {
             return 0;
         }
@@ -71,7 +71,7 @@ public abstract class ServerItemCooldownsMixin extends ItemCooldownsMixin {
     }
 
     @Override
-    protected void impl$throwEndCooldownEvent(final ResourceLocation group) {
+    protected void impl$throwEndCooldownEvent(final Identifier group) {
         final CooldownEvent.End event = SpongeEventFactory.createCooldownEventEnd(PhaseTracker.getInstance().currentCause(),
             (ResourceKey) (Object) group, (ServerPlayer) this.player);
         Sponge.eventManager().post(event);

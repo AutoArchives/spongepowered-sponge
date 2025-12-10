@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.Pufferfish;
+import net.minecraft.world.entity.animal.fish.Pufferfish;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.animal.PufferfishAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.fish.PufferfishAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class PufferfishData {

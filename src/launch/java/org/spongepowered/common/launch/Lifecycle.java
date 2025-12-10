@@ -26,6 +26,7 @@ package org.spongepowered.common.launch;
 
 import com.google.inject.Injector;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
@@ -66,7 +67,7 @@ public interface Lifecycle {
 
     void establishGameServices();
 
-    void establishServerServices(ResourceManager resourceManager, int functionsPermissionLevel);
+    void establishServerServices(ResourceManager resourceManager, PermissionLevel functionsPermissionLevel);
 
     void establishServerFeatures();
 

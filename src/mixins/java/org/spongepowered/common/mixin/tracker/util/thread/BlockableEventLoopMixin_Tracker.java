@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.tracker.util.thread;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.util.thread.BlockableEventLoop;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
@@ -35,23 +36,23 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 @Mixin(BlockableEventLoop.class)
 public abstract class BlockableEventLoopMixin_Tracker<R extends Runnable> {
 
-    @Redirect(method = "execute",
+    @WrapOperation(method = "doRunTask",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/lang/Runnable;run()V",
                     remap = false))
-    private void tracker$callOnMainThreadWithPhaseState(final Runnable runnable) {
+    private void tracker$callOnMainThreadWithPhaseState(Runnable instance, Operation<Void> original) {
         // This method can be called async while server is stopping
         // TODO find why this cause a runaway phase during shutdown of the test server
         if (this.tracker$isServerAndIsServerStopped()/* && !PlatformHooks.INSTANCE.getGeneralHooks().onServerThread() */) {
-            runnable.run();
+            original.call(instance);
             return;
         }
 
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.getInstance())
-                .source(runnable)) {
+                .source(instance)) {
             context.buildAndSwitch();
-            runnable.run();
+             original.call(instance);
         }
     }
 

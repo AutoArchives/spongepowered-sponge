@@ -41,7 +41,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
@@ -125,9 +125,6 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Shadow public abstract void shadow$halt(boolean p_71263_1_);
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
     @Shadow public abstract boolean shadow$isHardcore();
-    @Shadow public abstract boolean shadow$isPvpAllowed();
-    @Shadow public abstract boolean shadow$isCommandBlockEnabled();
-    @Shadow protected abstract boolean shadow$isSpawningMonsters();
     @Shadow public abstract Commands shadow$getCommands();
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow public abstract net.minecraft.server.packs.resources.ResourceManager shadow$getResourceManager();
@@ -251,17 +248,17 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public boolean isPVPEnabled() {
-        return this.shadow$isPvpAllowed();
+        return this.worldData.getGameRules().get(GameRules.PVP);
     }
 
     @Override
     public boolean areCommandBlocksEnabled() {
-        return this.shadow$isCommandBlockEnabled();
+        return this.worldData.getGameRules().get(GameRules.COMMAND_BLOCKS_WORK);
     }
 
     @Override
     public boolean isMonsterSpawnsEnabled() {
-        return this.shadow$isSpawningMonsters();
+        return this.worldData.getGameRules().get(GameRules.SPAWN_MONSTERS);
     }
 
     @Override
@@ -274,7 +271,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
      */
     @Override
     public boolean isMultiWorldEnabled() {
-        return this.isSingleplayer() || ((Object) this instanceof DedicatedServer ds) && ds.getGameRules().getBoolean(GameRules.RULE_ALLOW_NETHER);
+        return this.isSingleplayer() || ((Object) this instanceof DedicatedServer ds) && ds.getWorldData().getGameRules().get(GameRules.ALLOW_ENTERING_NETHER_USING_PORTALS);
     }
 
     @Override

@@ -35,6 +35,7 @@ import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.ReloadableServerRegistries;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.flag.FeatureFlagSet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -55,9 +56,12 @@ public abstract class ReloadableServerResourcesMixin {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @ModifyExpressionValue(method = "loadResources", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ReloadableServerRegistries;reload(Lnet/minecraft/core/LayeredRegistryAccess;Ljava/util/List;Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"))
-    private static CompletableFuture<ReloadableServerRegistries.LoadResult> impl$onLoadResources(final CompletableFuture<ReloadableServerRegistries.LoadResult> original,
-            final ResourceManager $$0, final LayeredRegistryAccess<RegistryLayer> $$1, final List<Registry.PendingTags<?>> $$2,
-            final FeatureFlagSet $$3, final Commands.CommandSelection $$4, final int $$5, final Executor $$6, final Executor $$7) {
+    private static CompletableFuture<ReloadableServerRegistries.LoadResult> impl$onLoadResources(
+        final CompletableFuture<ReloadableServerRegistries.LoadResult> original, final ResourceManager $$0,
+        final LayeredRegistryAccess<RegistryLayer> $$1, final List<Registry.PendingTags<?>> $$2,
+        final FeatureFlagSet $$3, final Commands.CommandSelection $$4, final PermissionSet $$5,
+        final Executor $$6, final Executor $$7
+    ) {
         return original.thenApply(r -> {
             final SpongeRegistryHolder spongeRegistryHolder = (SpongeRegistryHolder) $$0;
             spongeRegistryHolder.setRootMinecraftRegistry(r.layers().compositeAccess());
@@ -81,9 +85,12 @@ public abstract class ReloadableServerResourcesMixin {
     }
 
     @ModifyReturnValue(method = "loadResources", at = @At(value = "RETURN"))
-    private static CompletableFuture<ReloadableServerResources> impl$onLoaded(final CompletableFuture<ReloadableServerResources> original,
-            final ResourceManager $$0, final LayeredRegistryAccess<RegistryLayer> $$1, final List<Registry.PendingTags<?>> $$2,
-            final FeatureFlagSet $$3, final Commands.CommandSelection $$4, final int $$5, final Executor $$6, final Executor $$7) {
+    private static CompletableFuture<ReloadableServerResources> impl$onLoaded(
+        final CompletableFuture<ReloadableServerResources> original, final ResourceManager $$0,
+        final LayeredRegistryAccess<RegistryLayer> $$1, final List<Registry.PendingTags<?>> $$2,
+        final FeatureFlagSet $$3, final Commands.CommandSelection $$4, final PermissionSet $$5,
+        final Executor $$6, final Executor $$7
+    ) {
         return original.thenApply(r -> {
             Launch.instance().lifecycle().endEstablishServerRegistries((RegistryHolder) $$0);
             return r;

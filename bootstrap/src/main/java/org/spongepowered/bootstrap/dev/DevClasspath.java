@@ -58,6 +58,7 @@ public class DevClasspath {
 
         final AtomicBoolean hasAPISourceSet = new AtomicBoolean(false);
 
+        boolean skipMixinExtras = false;
         for (final String str : cp) {
             final Path path = Paths.get(str);
             if (!Files.exists(path)) {
@@ -96,6 +97,9 @@ public class DevClasspath {
                             }
                             break;
                         case "", "vanilla", "forge", "neoforge":
+                            if ("forge".equals(projectName)) {
+                                skipMixinExtras = true;
+                            }
                             final WeightedPath weightedPath = new WeightedPath(projectName.isEmpty() ? 1 : 2, path);
                             switch (sourceSet.name()) {
                                 case "applaunchConfig":
@@ -132,6 +136,14 @@ public class DevClasspath {
                 }
                 continue;
             }
+            // We need to skip mixinextras-common in Forge's UserDev mode as this will cause duplicate module
+            // errors with JPMS.
+            if (fileName.startsWith("mixinextras-common") && skipMixinExtras) {
+                if (Bootstrap.DEBUG) {
+                    System.out.println("Ignored: " + path);
+                }
+                continue;
+            }
 
             if (bootNames.contains(fileName) || fileName.startsWith("org.jacoco.core-") || fileName.startsWith("mockito-") || fileName.startsWith("objenesis-")) {
                 if (Bootstrap.DEBUG) {
@@ -158,7 +170,7 @@ public class DevClasspath {
         final List<Path[]> classpath = new ArrayList<>();
 
         for (final Path lib : bootLibs) {
-            classpath.add(new Path[] { lib });
+            classpath.add(new Path[]{lib});
         }
 
         for (final List<WeightedPath> sourceSets : bootUnions.values()) {

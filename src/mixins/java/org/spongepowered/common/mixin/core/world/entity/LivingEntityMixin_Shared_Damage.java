@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
@@ -65,8 +65,8 @@ public abstract class LivingEntityMixin_Shared_Damage implements TrackedDamageBr
         return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }
 
-    @WrapWithCondition(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"))
-    private boolean damage$skipAbsorptionStat(final ServerPlayer self, final ResourceLocation stat, final int amount) {
+    @WrapWithCondition(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/Identifier;I)V"))
+    private boolean damage$skipAbsorptionStat(final ServerPlayer self, final Identifier stat, final int amount) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }

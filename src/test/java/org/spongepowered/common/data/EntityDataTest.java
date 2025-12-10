@@ -184,8 +184,8 @@ public final class EntityDataTest {
         final Entity zombifiedPiglin = this.location.createEntity(EntityTypes.ZOMBIFIED_PIGLIN.get());
         final Entity pig = this.location.createEntity(EntityTypes.PIG.get());
 
-        DataTest.checkGetData(zombifiedPiglin, Keys.ANGER_LEVEL, 0);
-        DataTest.checkOfferData(zombifiedPiglin, Keys.ANGER_LEVEL, 10);
+        DataTest.checkGetData(zombifiedPiglin, Keys.ANGER_LEVEL, 0l);
+        DataTest.checkOfferData(zombifiedPiglin, Keys.ANGER_LEVEL, 10l);
         DataTest.checkOfferData(zombifiedPiglin, Keys.TARGET_ENTITY, pig);
     }
 

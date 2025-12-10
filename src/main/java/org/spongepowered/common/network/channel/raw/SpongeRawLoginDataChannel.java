@@ -27,7 +27,7 @@ package org.spongepowered.common.network.channel.raw;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionState;
@@ -170,8 +170,8 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
         final ResourceKey id = this.parent.key();
         final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
             @Override
-            public ResourceLocation id() {
-                return (ResourceLocation) (Object) id;
+            public Identifier id() {
+                return (Identifier) (Object) id;
             }
 
             @Override

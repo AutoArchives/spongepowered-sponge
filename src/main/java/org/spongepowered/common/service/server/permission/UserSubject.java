@@ -25,6 +25,8 @@
 package org.spongepowered.common.service.server.permission;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.ServerOpListEntry;
 import org.spongepowered.api.Sponge;
@@ -59,18 +61,18 @@ public class UserSubject extends SpongeSubject {
 
             @Override
             public void setParent(final SubjectReference parent) {
-                final int opLevel;
+                final PermissionLevel opLevel;
                 if (parent == null) {
-                    opLevel = 0;
+                    opLevel = PermissionLevel.ALL;
                 } else {
                     if (!(parent.resolve().join() instanceof OpLevelCollection.OpLevelSubject)) {
                         return;
                     }
                     opLevel = ((OpLevelCollection.OpLevelSubject) parent).opLevel();
                 }
-                if (opLevel > 0) {
+                if (opLevel.isEqualOrHigherThan(PermissionLevel.ALL)) {
                     // TODO: Should bypassesPlayerLimit be true or false?
-                    SpongePermissionService.getOps().add(new ServerOpListEntry(UserSubject.this.nameAndId, opLevel, false));
+                    SpongePermissionService.getOps().add(new ServerOpListEntry(UserSubject.this.nameAndId, LevelBasedPermissionSet.forLevel(opLevel), false));
                 } else {
                     SpongePermissionService.getOps().remove(UserSubject.this.nameAndId);
                 }
@@ -99,16 +101,16 @@ public class UserSubject extends SpongeSubject {
         return Sponge.server().player(this.player.id());
     }
 
-    int getOpLevel() {
+    PermissionLevel getOpLevel() {
         Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
 
         // Query op level from server ops list based on player's game profile
         final ServerOpListEntry entry = SpongePermissionService.getOps().get(this.nameAndId);
         if (entry == null) {
             // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
-            return SpongeCommon.server().getPlayerList().isOp(this.nameAndId) ? SpongeCommon.server().operatorUserPermissionLevel() : 0;
+            return SpongeCommon.server().getPlayerList().isOp(this.nameAndId) ? SpongeCommon.server().operatorUserPermissions().level() : PermissionLevel.ALL;
         } else {
-            return entry.getLevel();
+            return entry.permissions().level();
         }
     }
 
@@ -136,7 +138,7 @@ public class UserSubject extends SpongeSubject {
         if (ret == Tristate.UNDEFINED) {
             ret = this.dataPermissionValue(this.collection.getService().defaults().subjectData(), permission);
         }
-        if (ret == Tristate.UNDEFINED && this.getOpLevel() >= SpongePermissionService.getServerOpLevel()) {
+        if (ret == Tristate.UNDEFINED && this.getOpLevel().compareTo(SpongePermissionService.getServerOpLevel()) >= 0) {
             ret = Tristate.TRUE;
         }
         return ret;

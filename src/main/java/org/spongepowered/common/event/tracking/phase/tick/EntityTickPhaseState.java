@@ -115,7 +115,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 throw new IllegalStateException("attempting a world key on the client???");
             };
         }
-        return () -> (ResourceKey) (Object) entity.level().dimension().location();
+        return () -> (ResourceKey) (Object) entity.level().dimension().identifier();
     }
 
     @Override

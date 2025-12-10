@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.effect.sound;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.common.accessor.sounds.SoundEventAccessor;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -33,6 +33,6 @@ public final class SpongeSoundBuilder extends AbstractResourceKeyedBuilder<Sound
 
     @Override
     public SoundType build0() {
-        return (SoundType) (Object) SoundEventAccessor.accessor$createVariableRangeEvent((ResourceLocation) (Object) this.key);
+        return (SoundType) (Object) SoundEventAccessor.accessor$createVariableRangeEvent((Identifier) (Object) this.key);
     }
 }

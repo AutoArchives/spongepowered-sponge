@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.server.permission;
 
+import net.minecraft.server.permissions.PermissionLevel;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
@@ -41,7 +42,7 @@ public final class SpongePermissions {
     private SpongePermissions() {
     }
 
-    public static void populateNonCommandPermissions(final SubjectData data, final BiFunction<Integer, String, Boolean> testPermission) {
+    public static void populateNonCommandPermissions(final SubjectData data, final BiFunction<PermissionLevel, String, Boolean> testPermission) {
         if (testPermission.apply(Constants.Permissions.COMMAND_BLOCK_LEVEL, Constants.Command.COMMAND_BLOCK_COMMAND)) {
             data.setPermission(SubjectData.GLOBAL_CONTEXT, Constants.Permissions.COMMAND_BLOCK_PERMISSION, Tristate.TRUE);
         }
@@ -56,9 +57,9 @@ public final class SpongePermissions {
         }
     }
 
-    public static void registerPermission(final PermissionService service, final String permissionNode, final int opLevel) {
+    public static void registerPermission(final PermissionService service, final String permissionNode, final PermissionLevel opLevel) {
         if (SpongePermissions.REGISTERED_PERMISSIONS.add(permissionNode)) {
-            if (opLevel == 0) {
+            if (opLevel == PermissionLevel.ALL) {
                 // register as a default permission
                  service.defaults()
                         .transientSubjectData()

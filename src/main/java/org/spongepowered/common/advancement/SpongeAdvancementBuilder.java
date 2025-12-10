@@ -29,7 +29,7 @@ import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
@@ -48,7 +48,7 @@ import java.util.Optional;
 
 public final class SpongeAdvancementBuilder implements Advancement.Builder.RootStep {
 
-    private @Nullable ResourceLocation parent;
+    private @Nullable Identifier parent;
     private AdvancementCriterion criterion;
     private @Nullable DisplayInfo displayInfo;
     private @Nullable ClientAsset backgroundPath;
@@ -59,7 +59,7 @@ public final class SpongeAdvancementBuilder implements Advancement.Builder.RootS
 
     @Override
     public Advancement.Builder parent(final ResourceKey parent) {
-        this.parent = (ResourceLocation) (Object) parent;
+        this.parent = (Identifier) (Object) parent;
         this.backgroundPath = null;
         return this;
     }
@@ -72,7 +72,7 @@ public final class SpongeAdvancementBuilder implements Advancement.Builder.RootS
 
     @Override
     public Advancement.Builder background(final ResourceKey backgroundPath) {
-        this.backgroundPath = new ClientAsset.ResourceTexture((ResourceLocation) (Object) backgroundPath);
+        this.backgroundPath = new ClientAsset.ResourceTexture((Identifier) (Object) backgroundPath);
         return this;
     }
 
@@ -91,7 +91,7 @@ public final class SpongeAdvancementBuilder implements Advancement.Builder.RootS
 
     @Override
     public Advancement.Builder from(final Advancement value) {
-        this.parent = (ResourceLocation) (Object) value.parent().orElse(null);
+        this.parent = (Identifier) (Object) value.parent().orElse(null);
         this.criterion = value.criterion();
         this.displayInfo = value.displayInfo().orElse(null);
         this.backgroundPath = ((net.minecraft.advancements.Advancement) (Object) value).display()

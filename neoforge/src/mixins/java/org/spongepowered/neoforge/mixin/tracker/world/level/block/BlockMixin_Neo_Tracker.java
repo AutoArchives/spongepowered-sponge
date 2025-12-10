@@ -25,7 +25,7 @@
 package org.spongepowered.neoforge.mixin.tracker.world.level.block;
 
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,7 +42,7 @@ public abstract class BlockMixin_Neo_Tracker extends BlockBehaviorMixin_Neo_Trac
     //@formatter:on
 
     @Override
-    protected void forgeTracker$initializeTrackingState(CallbackInfoReturnable<ResourceLocation> cir) {
+    protected void forgeTracker$initializeTrackingState(CallbackInfoReturnable<Identifier> cir) {
         // TODO Not the best check but the tracker options only matter during block ticks...
         if (this.isRandomlyTicking(this.defaultBlockState())) {
             this.bridge$refreshTrackerStates();

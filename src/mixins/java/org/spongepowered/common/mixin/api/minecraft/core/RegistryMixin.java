@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.core;
 
 import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
@@ -44,15 +44,15 @@ public interface RegistryMixin<T> extends org.spongepowered.api.registry.Registr
 
     @Shadow ResourceKey<? extends Registry<T>> shadow$key();
 
-    @Shadow @Nullable ResourceLocation shadow$getKey(T object);
+    @Shadow @Nullable Identifier shadow$getKey(T object);
 
-    @Shadow Optional<T> shadow$getOptional(@org.jetbrains.annotations.Nullable ResourceLocation arg);
+    @Shadow Optional<T> shadow$getOptional(@org.jetbrains.annotations.Nullable Identifier arg);
 
-    @Shadow @Nullable T shadow$getValue(@org.jetbrains.annotations.Nullable ResourceLocation arg);
+    @Shadow @Nullable T shadow$getValue(@org.jetbrains.annotations.Nullable Identifier arg);
 
     @Override
     default RegistryType<T> type() {
-        return RegistryType.of((org.spongepowered.api.ResourceKey) (Object) this.shadow$key().registry(), (org.spongepowered.api.ResourceKey) (Object) this.shadow$key().location());
+        return RegistryType.of((org.spongepowered.api.ResourceKey) (Object) this.shadow$key().registry(), (org.spongepowered.api.ResourceKey) (Object) this.shadow$key().identifier());
     }
 
     @Override
@@ -67,18 +67,18 @@ public interface RegistryMixin<T> extends org.spongepowered.api.registry.Registr
 
     @Override
     default <V extends T> Optional<RegistryEntry<V>> findEntry(final org.spongepowered.api.ResourceKey key) {
-        return this.shadow$getOptional((ResourceLocation) (Object) Objects.requireNonNull(key, "key")).map(e ->
+        return this.shadow$getOptional((Identifier) (Object) Objects.requireNonNull(key, "key")).map(e ->
             new SpongeRegistryEntry<>((RegistryType<V>) this.type(), key, (V) e));
     }
 
     @Override
     default <V extends T> Optional<V> findValue(final org.spongepowered.api.ResourceKey key) {
-        return (Optional<V>) this.shadow$getOptional((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
+        return (Optional<V>) this.shadow$getOptional((Identifier) (Object) Objects.requireNonNull(key, "key"));
     }
 
     @Override
     default <V extends T> V value(final org.spongepowered.api.ResourceKey key) {
-        final V value = (V) this.shadow$getValue((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
+        final V value = (V) this.shadow$getValue((Identifier) (Object) Objects.requireNonNull(key, "key"));
         if (value != null) {
             return value;
         }

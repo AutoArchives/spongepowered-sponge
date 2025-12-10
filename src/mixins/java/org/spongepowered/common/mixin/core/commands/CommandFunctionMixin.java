@@ -29,7 +29,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.ExecutionCommandSource;
 import net.minecraft.commands.functions.CommandFunction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -45,7 +45,7 @@ public interface CommandFunctionMixin {
 
     @WrapMethod(method = "fromLines")
     private static <T extends ExecutionCommandSource<T>> CommandFunction<T> impl$onFromLines(
-        final ResourceLocation $$0, final CommandDispatcher<T> $$1, final T $$2, final List<String> $$3, final Operation<CommandFunction<T>> original) {
+        final Identifier $$0, final CommandDispatcher<T> $$1, final T $$2, final List<String> $$3, final Operation<CommandFunction<T>> original) {
         if ($$1 instanceof final DelegatingCommandDispatcher delegatingCommandDispatcher) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.pushCause(delegatingCommandDispatcher.permissionService().newSubjectReference(PermissionService.SUBJECTS_FUNCTION, $$0.toString()).resolve().join());

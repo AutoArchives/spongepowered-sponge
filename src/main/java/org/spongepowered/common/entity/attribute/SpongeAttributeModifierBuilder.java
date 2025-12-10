@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity.attribute;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
@@ -35,14 +35,14 @@ public final class SpongeAttributeModifierBuilder implements AttributeModifier.B
     // Use a random id
     private AttributeOperation operation;
     private double amount;
-    private ResourceLocation key;
+    private Identifier key;
 
     public SpongeAttributeModifierBuilder() {
     }
 
     @Override
     public AttributeModifier.Builder key(final ResourceKey key) {
-        this.key = (ResourceLocation) (Object) key;
+        this.key = (Identifier) (Object) key;
         return this;
     }
 

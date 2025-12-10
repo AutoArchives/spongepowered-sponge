@@ -27,7 +27,6 @@ package org.spongepowered.vanilla.generator;
 import com.github.javaparser.utils.Log;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.commands.Commands.CommandSelection;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.LayeredRegistryAccess;
@@ -42,7 +41,9 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.tags.TagLoader;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.vanilla.generator.item.ItemRegistries;
 import org.spongepowered.vanilla.generator.world.TagRegistries;
@@ -151,7 +152,7 @@ public final class GeneratorMain {
             pendingTags,
             packRepository.getRequestedFeatureFlags(),
             CommandSelection.ALL,
-            2, // functionPermissionLevel
+            LevelBasedPermissionSet.ALL_PERMISSIONS, // functionPermissionLevel
             Util.backgroundExecutor(), // prepareExecutor
             Runnable::run // applyExecutor
         ).whenComplete((result, ex) -> {

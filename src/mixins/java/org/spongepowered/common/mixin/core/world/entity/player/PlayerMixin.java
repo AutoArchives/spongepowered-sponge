@@ -29,8 +29,9 @@ import com.mojang.datafixers.util.Either;
 import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Unit;
@@ -38,6 +39,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Player.BedSleepingProblem;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -95,17 +97,18 @@ public abstract class PlayerMixin extends AvatarMixin implements PlayerBridge, G
     @Shadow @Final public InventoryMenu inventoryMenu;
     @Shadow @Final @Mutable private GameProfile gameProfile;
     @Shadow public abstract boolean shadow$isSpectator();
-    @Shadow protected abstract int shadow$getPermissionLevel();
     @Shadow public abstract int shadow$getXpNeededForNextLevel();
     @Shadow public abstract FoodData shadow$getFoodData();
     @Shadow public abstract boolean shadow$isCreative();
     @Shadow public abstract String shadow$getScoreboardName();
-    @Shadow public abstract void shadow$awardStat(ResourceLocation stat);
+    @Shadow public abstract void shadow$awardStat(Identifier stat);
     @Shadow public abstract Inventory shadow$getInventory();
+    @Shadow public abstract PermissionSet shadow$permissions();
     @Shadow public Either<BedSleepingProblem, Unit> shadow$startSleepInBed(final BlockPos param0) {
         return null; // Shadowed
     }
     // @formatter: on
+
 
     private boolean impl$affectsSpawning = true;
     protected final boolean impl$isFake = this.bridge$isFakePlayer();
@@ -222,12 +225,12 @@ public abstract class PlayerMixin extends AvatarMixin implements PlayerBridge, G
         this.shadow$level().playSound(player, x, y, z, sound, category, volume, pitch);
     }
 
-    @Redirect(method = "canUseGameMasterBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getPermissionLevel()I"))
-    private int impl$checkPermissionForCommandBlock(final net.minecraft.world.entity.player.Player playerEntity) {
+    @Redirect(method = "canUseGameMasterBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;permissions()Lnet/minecraft/server/permissions/PermissionSet;"))
+    private PermissionSet impl$checkPermissionForCommandBlock(final Player playerEntity) {
         if (this instanceof Subject) {
-            return ((Subject) this).hasPermission(Constants.Permissions.COMMAND_BLOCK_PERMISSION) ? Constants.Permissions.COMMAND_BLOCK_LEVEL : 0;
+            return ((Subject) this).hasPermission(Constants.Permissions.COMMAND_BLOCK_PERMISSION) ? PermissionSet.ALL_PERMISSIONS : PermissionSet.NO_PERMISSIONS;
         } else {
-            return this.shadow$getPermissionLevel();
+            return this.shadow$permissions();
         }
     }
 

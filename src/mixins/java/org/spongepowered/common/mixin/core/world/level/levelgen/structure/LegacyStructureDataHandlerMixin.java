@@ -24,14 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.world.level.levelgen.structure;
 
+import com.mojang.datafixers.DataFixer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.storage.LegacyTagFixer;
 import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.hooks.PlatformHooks;
+
+import java.util.function.Supplier;
 
 @Mixin(LegacyStructureDataHandler.class)
 public abstract class LegacyStructureDataHandlerMixin {
@@ -41,7 +44,11 @@ public abstract class LegacyStructureDataHandlerMixin {
      * @reason Allow the platform to determine how to create the legacy structure data updater
      */
     @Overwrite
-    public static LegacyStructureDataHandler getLegacyStructureHandler(final ResourceKey<Level> dimension, final @Nullable DimensionDataStorage savedData) {
-        return PlatformHooks.INSTANCE.getWorldGenerationHooks().createLegacyStructureDataUtil(dimension, savedData);
+    public static Supplier<LegacyTagFixer> getLegacyTagFixer(
+        final ResourceKey<Level> dimension,
+        final Supplier<DimensionDataStorage> savedData,
+        final DataFixer fixer
+    ) {
+        return () -> PlatformHooks.INSTANCE.getWorldGenerationHooks().createLegacyStructureDataUtil(dimension, savedData.get(), fixer);
     }
 }

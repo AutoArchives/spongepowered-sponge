@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import org.apache.logging.log4j.Level;
@@ -152,7 +152,7 @@ public final class PhasePrinter {
     }
 
     static void printNullSourceBlockWithTile(
-            final BlockPos pos, final Block blockIn, final BlockPos otherPos, final ResourceLocation type, final boolean useTile,
+            final BlockPos pos, final Block blockIn, final BlockPos otherPos, final Identifier type, final boolean useTile,
             final NullPointerException e) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block on TileEntity!").centre().hr()

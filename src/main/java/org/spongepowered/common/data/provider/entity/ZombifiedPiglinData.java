@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.monster.ZombifiedPiglinAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.zombie.ZombifiedPiglinAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.SplittableRandom;
@@ -42,7 +42,7 @@ public final class ZombifiedPiglinData {
                     .create(Keys.ANGER_LEVEL)
                         .get(ZombifiedPiglinAccessor::accessor$remainingPersistentAngerTime)
                         .set(ZombifiedPiglinAccessor::accessor$remainingPersistentAngerTime)
-                        .resetOnDelete(400 + new SplittableRandom().nextInt(400));
+                        .resetOnDelete(() -> (long)(400 + new SplittableRandom().nextInt(400)));
     }
     // @formatter:on
 }

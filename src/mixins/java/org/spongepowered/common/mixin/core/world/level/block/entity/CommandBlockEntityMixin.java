@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import org.spongepowered.api.event.Cause;
@@ -33,15 +34,18 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.BaseCommandBlockAccessor;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
 // TODO: dualspiral - should this go on the child CommandBlockLogic?
 @Mixin(CommandBlockEntity.class)
-public abstract class CommandBlockEntityMixin implements SubjectBridge, CommandSourceProviderBridge {
+public abstract class CommandBlockEntityMixin extends BlockEntityMixin implements SubjectBridge, CommandSourceProviderBridge {
 
+    // @formatter:off
     @Shadow @Final private BaseCommandBlock commandBlock;
+    // @formatter:on
 
     @Override
     public String bridge$getSubjectCollectionIdentifier() {
@@ -55,7 +59,13 @@ public abstract class CommandBlockEntityMixin implements SubjectBridge, CommandS
 
     @Override
     public CommandSourceStack bridge$getCommandSource(final Cause cause) {
-        return this.commandBlock.createCommandSourceStack((((BaseCommandBlockAccessor) this.commandBlock).invoker$createSource()));
+        if (this.level instanceof ServerLevel sl) {
+            return this.commandBlock.createCommandSourceStack(sl, (((BaseCommandBlockAccessor) this.commandBlock).invoker$createSource(sl)));
+        }
+        return this.commandBlock.createCommandSourceStack(
+            SpongeCommon.server().overworld(),
+            (((BaseCommandBlockAccessor) this.commandBlock).invoker$createSource(SpongeCommon.server().overworld()))
+        );
     }
 
 }

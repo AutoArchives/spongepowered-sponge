@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.accessor.world.level;
 
-import net.minecraft.world.level.GameRules;
+import com.mojang.serialization.DataResult;
+import net.minecraft.world.level.gamerules.GameRule;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(GameRules.Value.class)
+@Mixin(GameRule.class)
 public interface GameRules_ValueAccessor {
 
-    @Invoker("deserialize") void invoker$deserialize(final String serialized);
+    @Invoker("deserialize") DataResult<?> invoker$deserialize(final String serialized);
 
 }

@@ -42,8 +42,8 @@ import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
@@ -52,6 +52,7 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
@@ -67,7 +68,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
@@ -291,7 +291,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
         } else if (server.isSingleplayer()) {
             level.setSpawnSettings(difficulty != Difficulty.PEACEFUL);
         } else {
-            level.setSpawnSettings(((MinecraftServerAccessor) server).invoker$isSpawningMonsters());
+            level.setSpawnSettings(server.getWorldData().getGameRules().get(GameRules.SPAWN_MONSTERS));
         }
 
         level.players().forEach(player -> player.connection.send(new ClientboundChangeDifficultyPacket(difficulty, isLocked)));
@@ -312,7 +312,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     public void bridge$readSpongeLevelData(final Dynamic<Tag> dynamic) {
         dynamic.get(Constants.Sponge.Data.V2.SPONGE_DATA).get().ifSuccess(v2 -> {
             v2.get(Constants.Sponge.World.UNIQUE_ID).read(UUIDUtil.CODEC).result().ifPresent(this.impl$spongeData::setUniqueId);
-            v2.get(Constants.Sponge.World.WORLD_KEY).read(ResourceLocation.CODEC).result()
+            v2.get(Constants.Sponge.World.WORLD_KEY).read(Identifier.CODEC).result()
                 .map(org.spongepowered.api.ResourceKey.class::cast).ifPresent(this.impl$spongeData::setKey);
 
             v2.get(Constants.Map.MAP_UUID_INDEX).readMap(Codec.STRING, UUIDUtil.CODEC).result().ifPresent(value -> {
@@ -399,7 +399,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
             .listElements()
             .collect(Collectors.toMap(Holder.Reference::key, Holder.Reference::value));
         if (this.impl$dimensionType != null && this.impl$chunkGenerator != null) {
-            dimensions.computeIfAbsent(ResourceKey.create(Registries.LEVEL_STEM, (ResourceLocation) (Object) this.impl$spongeData.key()),
+            dimensions.computeIfAbsent(ResourceKey.create(Registries.LEVEL_STEM, (Identifier) (Object) this.impl$spongeData.key()),
                 $ -> new LevelStem($$2.lookupOrThrow(Registries.DIMENSION_TYPE).wrapAsHolder(this.impl$dimensionType), this.impl$chunkGenerator));
         }
         return WorldGenSettings.encode($$0, $$1, new WorldDimensions(dimensions));

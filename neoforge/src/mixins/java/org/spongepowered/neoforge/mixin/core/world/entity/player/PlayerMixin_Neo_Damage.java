@@ -63,7 +63,7 @@ public abstract class PlayerMixin_Neo_Damage extends LivingEntityMixin_Neo_Damag
     }
 
     @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), ordinal = 3, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"),
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/Identifier;I)V"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")))
     private float damage$firePostEvent_Player(final float damage) {
         return this.damage$firePostEvent(damage);

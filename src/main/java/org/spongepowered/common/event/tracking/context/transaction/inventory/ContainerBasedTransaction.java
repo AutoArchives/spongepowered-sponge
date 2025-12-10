@@ -273,7 +273,7 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
                     SpongeEventFactory.createCraftItemEventCraft(PhaseTracker.getInstance().currentCause(),
                             ContainerUtil.fromNative(this.menu), craftedItem, this.craftingInventory, event.cursorTransaction(),
                             Optional.ofNullable(this.onTakeRecipe).map(r -> (CraftingRecipe) r.value()),
-                            Optional.ofNullable(this.onTakeRecipe).map(r -> (ResourceKey) (Object) r.id().location()),
+                            Optional.ofNullable(this.onTakeRecipe).map(r -> (ResourceKey) (Object) r.id().identifier()),
                             Optional.of(this.craftingInventory.result()), event.transactions());
             SpongeCommon.post(craftEvent);
             this.handleEventResults(player, craftEvent);
@@ -290,7 +290,7 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
             final SlotTransaction previewTransaction = this.getPreviewTransaction(this.craftingInventory.result(), event.transactions());
             final var recipe = sp.level().recipeAccess().getRecipeFor(RecipeType.CRAFTING, this.craftingContainer.asCraftInput(), player.level());
             final CraftItemEvent.Preview previewEvent = SpongeEventFactory.createCraftItemEventPreview(event.cause(), (Container) this.menu, this.craftingInventory, event.cursorTransaction(), previewTransaction,
-                    recipe.map(RecipeHolder::value).map(CraftingRecipe.class::cast), recipe.map(r -> (ResourceKey) (Object) r.id().location()), Optional.empty(), event.transactions());
+                    recipe.map(RecipeHolder::value).map(CraftingRecipe.class::cast), recipe.map(r -> (ResourceKey) (Object) r.id().identifier()), Optional.empty(), event.transactions());
             SpongeCommon.post(previewEvent);
             this.handleEventResults(player, previewEvent);
 

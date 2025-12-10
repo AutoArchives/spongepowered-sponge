@@ -29,7 +29,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -38,7 +37,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerChunkCache;
@@ -48,13 +47,24 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Util;
 import net.minecraft.util.random.WeightedList;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.entity.decoration.painting.Painting;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerExplosion;
@@ -85,6 +95,8 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -108,6 +120,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.entity.MobAccessor;
+import org.spongepowered.common.accessor.world.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
@@ -118,6 +132,7 @@ import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -129,6 +144,7 @@ import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.world.server.SpongeServerLevelData;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
@@ -153,6 +169,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow @Nullable private EndDragonFight dragonFight;
     @Shadow @Final List<ServerPlayer> players;
 
+    @Shadow public abstract DifficultyInstance shadow$getCurrentDifficultyAt(BlockPos p_175649_1_);
     // @formatter:on
 
 
@@ -292,7 +309,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         ParticleOptions particleData = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.AIR.defaultBlockState()); // "no" particle
         particleData = packet.explosionParticle();
         // TODO control sound in API
-        var soundEvent = Holder.direct(new SoundEvent(ResourceLocation.parse("sponge:none"), Optional.of(0f))); // "no" sound
+        var soundEvent = Holder.direct(new SoundEvent(Identifier.parse("sponge:none"), Optional.of(0f))); // "no" sound
         soundEvent = packet.explosionSound();
         // TODO apiExplosion.shouldPlaySmoke() is not initialized correctly
         var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), packet.playerKnockback(), particleData, soundEvent, packet.blockParticles());
@@ -567,4 +584,74 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         // Weather is per world in Sponge.
         instance.broadcastAll(packet, this.shadow$dimension());
     }
+
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <E extends org.spongepowered.api.entity.Entity> E bridge$createEntity(final EntityType<E> type, final Vector3d position, final boolean naturally) throws IllegalArgumentException, IllegalStateException {
+        if (type == net.minecraft.world.entity.EntityType.PLAYER) {
+            // Unable to construct these
+            throw new IllegalArgumentException("A Player cannot be created by the API!");
+        }
+
+        net.minecraft.world.entity.Entity entity = null;
+        final double x = position.x();
+        final double y = position.y();
+        final double z = position.z();
+        final net.minecraft.world.level.Level thisWorld = (net.minecraft.world.level.Level) (Object) this;
+        // Not all entities have a single World parameter as their constructor
+        if (type == net.minecraft.world.entity.EntityType.LIGHTNING_BOLT) {
+            entity = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(thisWorld, EntitySpawnReason.EVENT);
+            entity.snapTo(x, y, z);
+            ((LightningBolt) entity).setVisualOnly(false);
+        }
+        // TODO - archetypes should solve the problem of calling the correct constructor
+        if (type == net.minecraft.world.entity.EntityType.ENDER_PEARL) {
+            final ArmorStand tempEntity = new ArmorStand(thisWorld, x, y, z);
+            tempEntity.setPos(tempEntity.getX(), tempEntity.getY() - tempEntity.getEyeHeight(), tempEntity.getZ());
+            entity = new ThrownEnderpearl(thisWorld, tempEntity, Items.ENDER_PEARL.getDefaultInstance());
+            ((EnderPearl) entity).offer(Keys.SHOOTER, UnknownProjectileSource.UNKNOWN);
+        }
+        // Some entities need to have non-null fields (and the easiest way to
+        // set them is to use the more specialised constructor).
+        if (type == net.minecraft.world.entity.EntityType.FALLING_BLOCK) {
+            entity = FallingBlockEntityAccessor.invoker$new(thisWorld, x, y, z, Blocks.SAND.defaultBlockState());
+        }
+        if (type == net.minecraft.world.entity.EntityType.ITEM) {
+            entity = new ItemEntity(thisWorld, x, y, z, new ItemStack(Blocks.STONE));
+        }
+
+        if (entity == null) {
+            final ResourceKey key = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getKey((net.minecraft.world.entity.EntityType<?>) type);
+            try {
+                entity = ((net.minecraft.world.entity.EntityType) type).create(thisWorld, EntitySpawnReason.EVENT);
+                entity.snapTo(x, y, z);
+            } catch (final Exception e) {
+                throw new RuntimeException("There was an issue attempting to construct " + key, e);
+            }
+        }
+
+        // TODO - replace this with an actual check
+
+        if (entity instanceof HangingEntity) {
+            if (!((HangingEntity) entity).survives()) {
+                throw new IllegalArgumentException("Hanging entity does not survive at the given position: " + position);
+            }
+        }
+
+        if (naturally && entity instanceof Mob) {
+            // Adding the default equipment
+            final DifficultyInstance difficulty = this.shadow$getCurrentDifficultyAt(new BlockPos((int) x, (int) y, (int) z));
+            ((MobAccessor) entity).invoker$populateDefaultEquipmentSlots(this.random, difficulty);
+        }
+
+        if (entity instanceof Painting) {
+            // This is default when art is null when reading from NBT, could
+            // choose a random art instead?
+            // TODO ? ((Painting) entity).motive = Motive.KEBAB;
+        }
+
+        return (E) entity;
+    }
+
 }

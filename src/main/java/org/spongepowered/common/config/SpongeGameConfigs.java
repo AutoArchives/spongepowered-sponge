@@ -130,13 +130,13 @@ public final class SpongeGameConfigs {
         }
     }
 
-    @SuppressWarnings("EqualsBetweenInconvertibleTypes") // ResourceKey is ResourceLocation
+    @SuppressWarnings("EqualsBetweenInconvertibleTypes") // ResourceKey is Identifier
     private static @Nullable String getLegacyDimensionAndName(final ResourceKey world) {
-        if (world.equals(Level.OVERWORLD.location())) {
+        if (world.equals(Level.OVERWORLD.identifier())) {
             return "overworld/world";
-        } else if (world.equals(Level.END.location())) {
+        } else if (world.equals(Level.END.identifier())) {
             return "the_end/DIM1";
-        } else if (world.equals(Level.NETHER.location())) {
+        } else if (world.equals(Level.NETHER.identifier())) {
             return "nether/DIM-1";
         }
         return null;

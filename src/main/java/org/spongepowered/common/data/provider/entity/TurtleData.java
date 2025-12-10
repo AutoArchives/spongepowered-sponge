@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.Turtle;
+import net.minecraft.world.entity.animal.turtle.Turtle;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.entity.animal.TurtleAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.turtle.TurtleAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
 

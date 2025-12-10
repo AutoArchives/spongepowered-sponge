@@ -68,7 +68,7 @@ final class WorldTickState extends TickPhaseState<WorldTickState.WorldTickContex
     public Supplier<ResourceKey> attemptWorldKey(
         final WorldTickContext context
     ) {
-        return () -> (ResourceKey) (Object) Objects.requireNonNull(context.serverWorld.get(), "ServerWorld reference lost during tick").dimension().location();
+        return () -> (ResourceKey) (Object) Objects.requireNonNull(context.serverWorld.get(), "ServerWorld reference lost during tick").dimension().identifier();
     }
 
     public static class WorldTickContext extends TickContext<WorldTickContext> {

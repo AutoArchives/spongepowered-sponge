@@ -241,7 +241,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @Override
     public Context context() {
         if (this.api$context == null) {
-            this.api$context = new Context(Context.WORLD_KEY, this.shadow$dimension().location().toString());
+            this.api$context = new Context(Context.WORLD_KEY, this.shadow$dimension().identifier().toString());
         }
         return this.api$context;
     }

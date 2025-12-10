@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.Dolphin;
+import net.minecraft.world.entity.animal.dolphin.Dolphin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.asm.mixin.Mixin;

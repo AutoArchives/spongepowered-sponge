@@ -26,20 +26,16 @@ package org.spongepowered.common.network.packet;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ClientConnectionState;
 import org.spongepowered.api.network.EngineConnectionStates;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.client.multiplayer.ClientLevelAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
@@ -99,9 +95,6 @@ public final class SpongePacketHandler {
                     if (world == null) {
                         return;
                     }
-
-                    final DimensionType dimensionType = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).getValue(packet.dimensionLogic);
-                    ((ClientLevelAccessor) world).accessor$effects(DimensionSpecialEffects.forType(dimensionType));
                 }
         );
     }

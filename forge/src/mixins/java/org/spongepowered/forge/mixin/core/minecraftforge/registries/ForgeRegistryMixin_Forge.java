@@ -26,7 +26,7 @@ package org.spongepowered.forge.mixin.core.minecraftforge.registries;
 
 import com.google.common.collect.Maps;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import org.spongepowered.api.ResourceKey;
@@ -55,10 +55,10 @@ public abstract class ForgeRegistryMixin_Forge<V> {
     private final Map<ResourceKey, RegistryBridge<V>> forge$parents = Maps.newHashMap();
     private boolean forge$warnedIfNoParent;
 
-    @Inject(method = "add(ILnet/minecraft/resources/ResourceLocation;Ljava/lang/Object;Ljava/lang/String;)I", at = @At("TAIL"))
-    public void forge$writeToParent(final int id, final ResourceLocation key, final V value, final String owner, final CallbackInfoReturnable<Integer> cir) {
+    @Inject(method = "add(ILnet/minecraft/resources/Identifier;Ljava/lang/Object;Ljava/lang/String;)I", at = @At("TAIL"))
+    public void forge$writeToParent(final int id, final Identifier key, final V value, final String owner, final CallbackInfoReturnable<Integer> cir) {
         final ResourceKey root = (ResourceKey) (Object) this.key.registry();
-        final ResourceKey location = (ResourceKey) (Object) this.key.location();
+        final var location = (ResourceKey) (Object) this.key.identifier();
 
         if (!this.forge$warnedIfNoParent && this.forge$parents.isEmpty()) {
             // We only care about minecraft namespaced registries, as that is what we've got parents for.

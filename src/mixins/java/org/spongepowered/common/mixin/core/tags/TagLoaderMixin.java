@@ -30,7 +30,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagLoader;
@@ -69,20 +69,20 @@ public abstract class TagLoaderMixin<T> implements TagLoaderBridge<T> {
     private @MonotonicNonNull RegistryType<?> impl$registryType;
     private @MonotonicNonNull Map<ResourceKey, SpongePluginTagModifier<?>> impl$modifiers;
 
-    private ResourceLocation impl$buildingTagKey;
+    private Identifier impl$buildingTagKey;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "load", at = @At("TAIL"))
-    private void impl$onLoad(final ResourceManager $$0, final CallbackInfoReturnable<Map<ResourceLocation, List<TagLoader.EntryWithSource>>> cir) {
+    private void impl$onLoad(final ResourceManager $$0, final CallbackInfoReturnable<Map<Identifier, List<TagLoader.EntryWithSource>>> cir) {
         final SpongePluginTags tags = ((ResourceManagerBridge) $$0).bridge$pluginProvidedTags();
         tags.get(this.impl$registryType).ifPresent(m -> {
             this.impl$modifiers = (Map) m;
             m.forEach((tagKey, modifiers) -> {
-                final List<TagLoader.EntryWithSource> entries = cir.getReturnValue().computeIfAbsent((ResourceLocation) (Object) tagKey, $ -> new ArrayList<>());
+                final List<TagLoader.EntryWithSource> entries = cir.getReturnValue().computeIfAbsent((Identifier) (Object) tagKey, $ -> new ArrayList<>());
                 modifiers.append().forEach((k, v) -> {
                     final TagLoader.EntryWithSource entry = new TagLoader.EntryWithSource(k.tag()
-                        ? TagEntry.optionalTag((ResourceLocation) (Object) k.key())
-                        : TagEntry.optionalElement((ResourceLocation) (Object) k.key()), "sponge");
+                        ? TagEntry.optionalTag((Identifier) (Object) k.key())
+                        : TagEntry.optionalElement((Identifier) (Object) k.key()), "sponge");
                     ((TagLoader_EntryWithSourceBridge) (Object) entry).bridge$predicates((Set) v);
                     entries.add(entry);
                 });
@@ -126,7 +126,7 @@ public abstract class TagLoaderMixin<T> implements TagLoaderBridge<T> {
 
                     final Tag tag = Tag.of(this.impl$registryType, (ResourceKey) (Object) ((TagEntryAccessor) e.entry()).accessor$id());
                     for (final T value : values) {
-                        final ResourceKey key = (ResourceKey) (Object) ((Holder.Reference<?>) value).key().location();
+                        final ResourceKey key = (ResourceKey) (Object) ((Holder.Reference<?>) value).key().identifier();
                         final DefaultedRegistryReference reference = RegistryKey.of(this.impl$registryType, key).asDefaultedReference(Sponge::game);
                         for (final SpongePluginTagPredicate<?> predicate : filters) {
                             if (predicate.apply(reference, tag) == Tristate.TRUE) {
@@ -148,7 +148,7 @@ public abstract class TagLoaderMixin<T> implements TagLoaderBridge<T> {
         } else if (((TagEntryAccessor) instance).accessor$tag()) {
             final Tag tag = Tag.of(this.impl$registryType, (ResourceKey) (Object) ((TagEntryAccessor) instance).accessor$id());
             return original.accept(instance, lookup, i -> {
-                final ResourceKey key = (ResourceKey) (Object) ((Holder.Reference<?>) i).key().location();
+                final ResourceKey key = (ResourceKey) (Object) ((Holder.Reference<?>) i).key().identifier();
                 final DefaultedRegistryReference reference = RegistryKey.of(this.impl$registryType, key).asDefaultedReference(Sponge::game);
                 for (final SpongePluginTagPredicate<?> predicate : modifier.filters()) {
                     if (predicate.apply(reference, tag) == Tristate.FALSE) {
@@ -208,11 +208,11 @@ public abstract class TagLoaderMixin<T> implements TagLoaderBridge<T> {
     @Override
     public void bridge$registryKey(final net.minecraft.resources.ResourceKey<? extends Registry<?>> registryKey) {
         this.impl$registryType =
-            RegistryType.of((ResourceKey) (Object) registryKey.registry(), (ResourceKey) (Object) registryKey.location());
+            RegistryType.of((ResourceKey) (Object) registryKey.registry(), (ResourceKey) (Object) registryKey.identifier());
     }
 
     @Override
-    public void bridge$buildingTagKey(final @Nullable ResourceLocation key) {
+    public void bridge$buildingTagKey(final @Nullable Identifier key) {
         this.impl$buildingTagKey = key;
     }
 }

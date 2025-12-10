@@ -24,7 +24,7 @@
  */
 package org.spongepowered.forge.mixin.core.minecraftforge.registries;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +39,7 @@ public class RegistryManagerMixin_Forge {
 
     @SuppressWarnings("UnstableApiUsage")
     @Inject(method = "takeSnapshot", at = @At("RETURN"))
-    public void forge$dontSendSpongeDataToClient(boolean savingToDisc, CallbackInfoReturnable<Map<ResourceLocation, ForgeRegistry.Snapshot>> cir) {
+    public void forge$dontSendSpongeDataToClient(boolean savingToDisc, CallbackInfoReturnable<Map<Identifier, ForgeRegistry.Snapshot>> cir) {
         if (savingToDisc) {
             return;
         }

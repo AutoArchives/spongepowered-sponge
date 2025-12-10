@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
@@ -50,7 +50,7 @@ public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {
 
     // @formatter:off
     @Shadow @Final private Map<Item, ?> cooldowns;
-    @Shadow public abstract ResourceLocation shadow$getCooldownGroup(final ItemStack $$0);
+    @Shadow public abstract Identifier shadow$getCooldownGroup(final ItemStack $$0);
 
     // @formatter:on
 
@@ -58,7 +58,7 @@ public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {
     private int impl$lastSetCooldownResult;
 
     @Inject(
-            method = "addCooldown(Lnet/minecraft/resources/ResourceLocation;I)V",
+            method = "addCooldown(Lnet/minecraft/resources/Identifier;I)V",
             at = @At(
                     value = "HEAD",
                     remap = false
@@ -66,7 +66,7 @@ public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {
             locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true
     )
-    private void impl$throwEventOnSetAndTrackResult(final ResourceLocation group, final int ticks, final CallbackInfo ci) {
+    private void impl$throwEventOnSetAndTrackResult(final Identifier group, final int ticks, final CallbackInfo ci) {
         this.impl$lastSetCooldownResult = this.impl$throwSetCooldownEvent(group, ticks);
         if (this.impl$lastSetCooldownResult == Constants.Sponge.Entity.Player.ITEM_COOLDOWN_CANCELLED) {
             ci.cancel();
@@ -74,7 +74,7 @@ public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {
     }
 
     @ModifyVariable(
-            method = "addCooldown(Lnet/minecraft/resources/ResourceLocation;I)V",
+            method = "addCooldown(Lnet/minecraft/resources/Identifier;I)V",
             at = @At(
                     value = "HEAD",
                     remap = false
@@ -86,16 +86,16 @@ public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Map$Entry;getKey()Ljava/lang/Object;", remap = false))
-    private Object onTick(final Map.Entry<ResourceLocation, ?> entry) {
+    private Object onTick(final Map.Entry<Identifier, ?> entry) {
         this.impl$throwEndCooldownEvent(entry.getKey());
         return entry.getKey();
     }
 
-    protected int impl$throwSetCooldownEvent(final ResourceLocation group, final int ticks) {
+    protected int impl$throwSetCooldownEvent(final Identifier group, final int ticks) {
         return 0;
     }
 
-    protected void impl$throwEndCooldownEvent(final ResourceLocation group) {
+    protected void impl$throwEndCooldownEvent(final Identifier group) {
 
     }
 
@@ -106,7 +106,7 @@ public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {
 
     @Inject(method = "getCooldownPercent", at = @At("HEAD"), cancellable = true)
     private void impl$getCooldownPercentInfiniteCooldown(final ItemStack $$0, final float $$1, final CallbackInfoReturnable<Float> cir) {
-        ResourceLocation $$2 = this.shadow$getCooldownGroup($$0);
+        Identifier $$2 = this.shadow$getCooldownGroup($$0);
         final ItemCooldowns_CooldownInstanceAccessor cooldown = (ItemCooldowns_CooldownInstanceAccessor) this.cooldowns.get($$0);
         if (cooldown != null && cooldown.accessor$endTime() == cooldown.accessor$startTime() - 1) {
             cir.setReturnValue(1.0F);
