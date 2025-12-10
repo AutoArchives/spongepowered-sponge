@@ -136,7 +136,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
             if (ShouldFire.CHUNK_EVENT_BLOCKS_SAVE_PRE) {
                 final Vector3i chunkPos = VecHelper.toVector3i(var1.getPos());
                 final ChunkEvent.Blocks.Save.Pre postSave = SpongeEventFactory.createChunkEventBlocksSavePre(PhaseTracker.getInstance().currentCause(),
-                    ((BlockChunk) var1), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
+                    ((BlockChunk) var1), chunkPos, (ResourceKey) (Object) this.level.dimension().identifier());
                 SpongeCommon.post(postSave);
                 if (postSave.isCancelled()) {
                     cir.setReturnValue(false);

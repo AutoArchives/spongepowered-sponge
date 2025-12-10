@@ -32,16 +32,16 @@ public final class SpongeDefaultWorldKeysFactory implements DefaultWorldKeys.Fac
 
     @Override
     public ResourceKey defaultWorld() {
-        return (ResourceKey) (Object) Level.OVERWORLD.location();
+        return (ResourceKey) (Object) Level.OVERWORLD.identifier();
     }
 
     @Override
     public ResourceKey theNether() {
-        return (ResourceKey) (Object) Level.NETHER.location();
+        return (ResourceKey) (Object) Level.NETHER.identifier();
     }
 
     @Override
     public ResourceKey theEnd() {
-        return (ResourceKey) (Object) Level.END.location();
+        return (ResourceKey) (Object) Level.END.identifier();
     }
 }

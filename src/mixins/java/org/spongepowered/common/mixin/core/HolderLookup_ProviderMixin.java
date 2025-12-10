@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -54,7 +54,7 @@ public interface HolderLookup_ProviderMixin extends RegistryHolder {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     default <T> Optional<Registry<T>> findRegistry(final RegistryType<T> type) {
-        return (Optional) this.shadow$lookup(ResourceKeyAccessor.invoker$create((ResourceLocation) (Object) type.root(), (ResourceLocation) (Object) type.location()));
+        return (Optional) this.shadow$lookup(ResourceKeyAccessor.invoker$create((Identifier) (Object) type.root(), (Identifier) (Object) type.location()));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -101,14 +101,14 @@ public abstract class AdvancementNodeMixin_API implements AdvancementTree {
 
     @Override
     public Optional<TreeLayoutElement> layoutElement(final ResourceKey advancementKey) {
-        return this.impl$element(((ResourceLocation) (Object) advancementKey));
+        return this.impl$element(((Identifier) (Object) advancementKey));
     }
 
-    private Optional<TreeLayoutElement> impl$element(final ResourceLocation loc) {
+    private Optional<TreeLayoutElement> impl$element(final Identifier loc) {
         return this.impl$findElementInfo((AdvancementNode) (Object) this, loc).map(TreeLayoutElement.class::cast);
     }
 
-    private Optional<DisplayInfo> impl$findElementInfo(AdvancementNode node, ResourceLocation key) {
+    private Optional<DisplayInfo> impl$findElementInfo(AdvancementNode node, Identifier key) {
         if (node.holder().id().equals(key)) {
             return node.advancement().display();
         }

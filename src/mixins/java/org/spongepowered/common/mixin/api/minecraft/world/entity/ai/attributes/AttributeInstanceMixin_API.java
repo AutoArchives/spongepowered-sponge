@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.attributes;
 
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.attribute.Attribute;
@@ -59,11 +59,11 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
     @Shadow public abstract double shadow$getValue();
     @Shadow protected abstract void shadow$addModifier(net.minecraft.world.entity.ai.attributes.AttributeModifier modifier);
     @Shadow public abstract void shadow$removeModifier(net.minecraft.world.entity.ai.attributes.AttributeModifier modifier);
-    @Shadow public abstract boolean shadow$removeModifier(ResourceLocation $$0);
+    @Shadow public abstract boolean shadow$removeModifier(Identifier $$0);
     @Shadow abstract Map<UUID, net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getModifiers(net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation p_225504_1_);
     @Shadow public abstract Set<net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getModifiers();
-    @Shadow public abstract boolean shadow$hasModifier(final ResourceLocation $$0);
-    @Shadow @Nullable public abstract net.minecraft.world.entity.ai.attributes.AttributeModifier shadow$getModifier(final ResourceLocation $$0);
+    @Shadow public abstract boolean shadow$hasModifier(final Identifier $$0);
+    @Shadow @Nullable public abstract net.minecraft.world.entity.ai.attributes.AttributeModifier shadow$getModifier(final Identifier $$0);
 
     // @formatter:on
 
@@ -99,7 +99,7 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
 
     @Override
     public boolean hasModifier(final AttributeModifier modifier) {
-        return this.shadow$hasModifier((ResourceLocation) (Object) modifier.key());
+        return this.shadow$hasModifier((Identifier) (Object) modifier.key());
     }
 
     @Override
@@ -114,12 +114,12 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
 
     @Override
     public void removeModifier(ResourceKey key) {
-        this.shadow$removeModifier((ResourceLocation) (Object) key);
+        this.shadow$removeModifier((Identifier) (Object) key);
     }
 
     @Override
     public Optional<AttributeModifier> modifier(final ResourceKey key) {
-        return Optional.ofNullable((AttributeModifier) (Object) this.shadow$getModifier((ResourceLocation) (Object) Objects.requireNonNull(key, "uniqueId")));
+        return Optional.ofNullable((AttributeModifier) (Object) this.shadow$getModifier((Identifier) (Object) Objects.requireNonNull(key, "uniqueId")));
     }
 
 }

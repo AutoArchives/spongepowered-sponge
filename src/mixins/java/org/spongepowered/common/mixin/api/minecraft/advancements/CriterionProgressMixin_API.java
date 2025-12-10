@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.advancements;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriterionProgress;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -65,7 +65,7 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
             return this.obtained;
         }
         final AdvancementProgress advancementProgress = ((CriterionProgressBridge) this).bridge$getAdvancementProgress();
-        final ResourceLocation key = ((AdvancementProgressBridge) advancementProgress).bridge$getAdvancementKey();
+        final Identifier key = ((AdvancementProgressBridge) advancementProgress).bridge$getAdvancementKey();
         final org.spongepowered.api.advancement.Advancement advancement = advancementProgress.advancement();
         final AdvancementHolder holder = new AdvancementHolder(key, (Advancement) (Object) advancement);
         ((AdvancementProgressBridge) advancementProgress).bridge$getPlayerAdvancements().award(holder, this.criterion().name());
@@ -79,7 +79,7 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
         }
         final Instant instant = this.obtained;
         final AdvancementProgress advancementProgress = ((CriterionProgressBridge) this).bridge$getAdvancementProgress();
-        final ResourceLocation key = ((AdvancementProgressBridge) advancementProgress).bridge$getAdvancementKey();
+        final Identifier key = ((AdvancementProgressBridge) advancementProgress).bridge$getAdvancementKey();
         final org.spongepowered.api.advancement.Advancement advancement = advancementProgress.advancement();
         final AdvancementHolder holder = new AdvancementHolder(key, (Advancement) (Object) advancement);
         ((AdvancementProgressBridge) advancementProgress).bridge$getPlayerAdvancements().revoke(holder, this.criterion().name());

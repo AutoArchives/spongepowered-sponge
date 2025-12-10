@@ -26,7 +26,7 @@ package org.spongepowered.common.world.generation.config.noise;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.SurfaceRuleData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.placement.CaveSurface;
@@ -109,7 +109,7 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
     @Override
     public SurfaceRule.Condition biome(final List<RegistryReference<Biome>> biomes) {
         final var stream = biomes.stream()
-                .map(r -> net.minecraft.resources.ResourceKey.create(Registries.BIOME, ((ResourceLocation) (Object) r.location())));
+                .map(r -> net.minecraft.resources.ResourceKey.create(Registries.BIOME, ((Identifier) (Object) r.location())));
         final net.minecraft.resources.ResourceKey<net.minecraft.world.level.biome.Biome>[] keys = stream.toArray(net.minecraft.resources.ResourceKey[]::new);
         return (SurfaceRule.Condition) SurfaceRules.isBiome(keys);
     }
@@ -193,7 +193,7 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule.Condition noiseThreshold(final RegistryReference<Noise> noise, final double min, final double max) {
-        final net.minecraft.resources.ResourceKey<NormalNoise.NoiseParameters> key = net.minecraft.resources.ResourceKey.create(Registries.NOISE, ((ResourceLocation) (Object) noise.location()));
+        final net.minecraft.resources.ResourceKey<NormalNoise.NoiseParameters> key = net.minecraft.resources.ResourceKey.create(Registries.NOISE, ((Identifier) (Object) noise.location()));
         return (SurfaceRule.Condition) SurfaceRules.noiseCondition(key, min, max);
     }
 

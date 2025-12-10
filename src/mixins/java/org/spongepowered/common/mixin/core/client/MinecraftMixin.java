@@ -121,7 +121,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         }
     }
 
-    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
+    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;shutdownExecutors()V"))
     private void impl$callStoppedGame(final CallbackInfo ci) {
         Launch.instance().lifecycle().callStoppedGameEvent();
     }

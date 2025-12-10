@@ -27,7 +27,7 @@ package org.spongepowered.vanilla.generator;
 import com.github.javaparser.utils.Log;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.commands.Commands.CommandSelection;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.LayeredRegistryAccess;

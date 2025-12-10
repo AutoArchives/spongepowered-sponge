@@ -587,7 +587,7 @@ public final class SpongeRegistryLoader {
 
     public static RegistryLoader<FlatGeneratorConfig> flatGeneratorConfig(RegistryHolder registryAccess) {
         final RegistryType<FlatLevelGeneratorPreset> registryType = RegistryType.of(
-            (ResourceKey) (Object) Registries.FLAT_LEVEL_GENERATOR_PRESET.registry(), (ResourceKey) (Object) Registries.FLAT_LEVEL_GENERATOR_PRESET.location());
+            (ResourceKey) (Object) Registries.FLAT_LEVEL_GENERATOR_PRESET.registry(), (ResourceKey) (Object) Registries.FLAT_LEVEL_GENERATOR_PRESET.identifier());
         final Registry<FlatLevelGeneratorPreset> registry = registryAccess.registry(registryType);
         return RegistryLoader.of(l ->
             registry.streamEntries().forEach(e ->

@@ -34,7 +34,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -87,11 +87,11 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
         final ArgumentReader.Immutable state = reader.immutable();
         ServerWorld serverWorld;
         try {
-            final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
+            final ResourceKey Identifier = reader.parseResourceKey("minecraft");
             serverWorld = SpongeCommon.game().server().worldManager()
-                    .world(resourceLocation)
+                    .world(Identifier)
                     .orElseThrow(() -> reader.createException(
-                            Component.text("Could not get world with key \"" + resourceLocation + "\"")));
+                            Component.text("Could not get world with key \"" + Identifier + "\"")));
         } catch (final ArgumentParseException e) {
             final Optional<ServerLocation> location = cause.location();
             if (location.isPresent()) {
@@ -127,7 +127,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
             final Consumer<CommandNode<CommandSourceStack>> redirectionNodes,
             final boolean allowCustomSuggestionsOnTheFirstElement) {
 
-        final RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> firstNode =
+        final RequiredArgumentBuilder<CommandSourceStack, Identifier> firstNode =
                 RequiredArgumentBuilder.argument(key, Constants.Command.RESOURCE_LOCATION_TYPE);
         if (allowCustomSuggestionsOnTheFirstElement) {
             firstNode.suggests((context, builder) -> {

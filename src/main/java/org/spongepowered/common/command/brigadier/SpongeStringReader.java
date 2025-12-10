@@ -30,7 +30,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -147,12 +147,12 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
 
     @Override
     public ResourceKey parseResourceKey() throws ArgumentParseException {
-        return this.readResourceLocation(null);
+        return this.readIdentifier(null);
     }
 
     @Override
     public ResourceKey parseResourceKey(final @NonNull String defaultNamespace) throws ArgumentParseException {
-        return this.readResourceLocation(defaultNamespace);
+        return this.readIdentifier(defaultNamespace);
     }
 
     @Override
@@ -244,10 +244,10 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         return new ArgumentParseException(errorMessage, inner, this.input(), this.getCursor());
     }
 
-    private ResourceKey readResourceLocation(final @Nullable String defaultNamespace) throws ArgumentParseException {
+    private ResourceKey readIdentifier(final @Nullable String defaultNamespace) throws ArgumentParseException {
         final int i = this.getCursor();
 
-        while (this.canRead() && ResourceLocation.isAllowedInResourceLocation(this.peek())) {
+        while (this.canRead() && Identifier.isAllowedInIdentifier(this.peek())) {
             this.skip();
         }
 

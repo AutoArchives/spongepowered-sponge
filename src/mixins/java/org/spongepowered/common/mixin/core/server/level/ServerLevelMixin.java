@@ -29,7 +29,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -38,7 +37,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerChunkCache;
@@ -48,6 +47,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Util;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.RandomSequences;
@@ -309,7 +309,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         ParticleOptions particleData = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.AIR.defaultBlockState()); // "no" particle
         particleData = packet.explosionParticle();
         // TODO control sound in API
-        var soundEvent = Holder.direct(new SoundEvent(ResourceLocation.parse("sponge:none"), Optional.of(0f))); // "no" sound
+        var soundEvent = Holder.direct(new SoundEvent(Identifier.parse("sponge:none"), Optional.of(0f))); // "no" sound
         soundEvent = packet.explosionSound();
         // TODO apiExplosion.shouldPlaySmoke() is not initialized correctly
         var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), packet.playerKnockback(), particleData, soundEvent, packet.blockParticles());

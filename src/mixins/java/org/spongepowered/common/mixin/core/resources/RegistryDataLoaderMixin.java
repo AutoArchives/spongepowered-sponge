@@ -30,10 +30,10 @@ import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ChatTypeDecoration;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.api.adventure.ChatTypes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,8 +58,8 @@ public class RegistryDataLoaderMixin {
     {
         if (Registries.CHAT_TYPE.equals($$2.key())) {
             final ChatTypeDecoration narration = ChatTypeDecoration.withSender("chat.type.text.narrate");
-            $$2.register(ResourceKey.create($$2.key(), (ResourceLocation) (Object) ChatTypes.CUSTOM_CHAT.location()), (E) new ChatType(ChatTypeDecoration.withSender("%s%s"), narration), RegistrationInfo.BUILT_IN);
-            $$2.register(ResourceKey.create($$2.key(), (ResourceLocation) (Object) ChatTypes.CUSTOM_MESSAGE.location()), (E) new ChatType(ChatTypeDecoration.teamMessage("%s%s%s"), narration), RegistrationInfo.BUILT_IN);
+            $$2.register(ResourceKey.create($$2.key(), (Identifier) (Object) ChatTypes.CUSTOM_CHAT.location()), (E) new ChatType(ChatTypeDecoration.withSender("%s%s"), narration), RegistrationInfo.BUILT_IN);
+            $$2.register(ResourceKey.create($$2.key(), (Identifier) (Object) ChatTypes.CUSTOM_MESSAGE.location()), (E) new ChatType(ChatTypeDecoration.teamMessage("%s%s%s"), narration), RegistrationInfo.BUILT_IN);
         }
     }
 

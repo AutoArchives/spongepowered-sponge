@@ -25,8 +25,8 @@
 package org.spongepowered.common.bridge.tags;
 
 import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagLoader;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,7 +38,7 @@ public interface TagLoaderBridge<T> {
 
     void bridge$registryKey(ResourceKey<? extends Registry<?>> registryKey);
 
-    void bridge$buildingTagKey(@Nullable ResourceLocation key);
+    void bridge$buildingTagKey(@Nullable Identifier key);
 
     default boolean bridge$isAdd(final TagLoader.EntryWithSource entry) {
         return true;

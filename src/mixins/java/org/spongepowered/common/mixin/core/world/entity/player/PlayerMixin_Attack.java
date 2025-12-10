@@ -77,8 +77,12 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         return this.attack$trackers.peekLast();
     }
 
-    @ModifyVariable(method = "attack", at = @At("LOAD"),
-        slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F", ordinal = 0)))
+    @ModifyVariable(
+        method = "attack(Lnet/minecraft/world/entity/Entity;)V",
+        ordinal = 1,
+        at = @At(value = "LOAD", ordinal = 0),
+        slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"))
+    )
     private float attack$firePreEvent(final float damage, @Local(argsOnly = true) final Entity target, @Local final DamageSource source, @Local final ItemStack weapon, final @Cancellable CallbackInfo ci) {
         final SpongeAttackTracker tracker = SpongeAttackTracker.callAttackPreEvent((org.spongepowered.api.entity.Entity) target, source, damage, weapon);
         if (tracker == null) {
@@ -203,7 +207,7 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
 
     @WrapWithCondition(method = "attack",
             slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;makeSound(Lnet/minecraft/sounds/SoundEvent;)V"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;playServerSideSound(Lnet/minecraft/sounds/SoundEvent;)V"))
     private boolean attack$preventSound(Player instance, SoundEvent soundEvent) {
         final SpongeAttackTracker tracker = this.attack$tracker();
         return tracker == null || !tracker.postEvent().isCancelled();

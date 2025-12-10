@@ -33,7 +33,7 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
@@ -74,7 +74,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
 
     @SuppressWarnings({"ConstantConditions"})
     @Inject(method = "<init>(Ljava/util/Optional;Ljava/util/Optional;Lnet/minecraft/advancements/AdvancementRewards;Ljava/util/Map;Lnet/minecraft/advancements/AdvancementRequirements;Z)V", at = @At("RETURN"))
-    private void impl$setUpSpongeFields(final Optional<ResourceLocation> parent, final Optional<DisplayInfo> displayInfo, final AdvancementRewards $$2,
+    private void impl$setUpSpongeFields(final Optional<Identifier> parent, final Optional<DisplayInfo> displayInfo, final AdvancementRewards $$2,
             final  Map<String, Criterion<?>> criteria, final AdvancementRequirements requirements, final boolean sendsTelemetryEvent, final CallbackInfo ci) {
         displayInfo.ifPresent(info -> ((DisplayInfoBridge) info).bridge$setAdvancement((org.spongepowered.api.advancement.Advancement) this));
     }

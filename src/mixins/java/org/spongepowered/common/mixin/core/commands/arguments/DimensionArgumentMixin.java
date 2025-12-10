@@ -26,17 +26,17 @@ package org.spongepowered.common.mixin.core.commands.arguments;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import net.minecraft.commands.arguments.DimensionArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.commands.arguments.IdentifierArgument;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
 
 @Mixin(DimensionArgument.class)
-public abstract class DimensionArgumentMixin implements CompletionsArgumentTypeBridge<ResourceLocation>  {
+public abstract class DimensionArgumentMixin implements CompletionsArgumentTypeBridge<Identifier>  {
 
     @Override
-    public ArgumentType<ResourceLocation> bridge$clientSideCompletionType() {
-        return ResourceLocationArgument.id();
+    public ArgumentType<Identifier> bridge$clientSideCompletionType() {
+        return IdentifierArgument.id();
     }
 
 }

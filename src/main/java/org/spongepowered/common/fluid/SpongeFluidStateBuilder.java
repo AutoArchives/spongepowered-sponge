@@ -32,7 +32,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
@@ -126,7 +126,7 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
 
     private Fluid readFluid(final StringReader reader) throws CommandSyntaxException {
         final int cursor = reader.getCursor();
-        final ResourceLocation fluidKey = ResourceLocation.read(reader);
+        final Identifier fluidKey = Identifier.read(reader);
         final Registry<Fluid> fluidRegistry = SpongeCommon.vanillaRegistry(Registries.FLUID);
         return fluidRegistry.getOptional(fluidKey).orElseThrow(() -> {
             reader.setCursor(cursor);

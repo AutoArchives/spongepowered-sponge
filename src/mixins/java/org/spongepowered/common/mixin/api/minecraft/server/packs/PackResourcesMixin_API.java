@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server.packs;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -55,7 +55,7 @@ public interface PackResourcesMixin_API extends PackContents {
 
     // @formatter:off
     @Shadow String shadow$packId();
-    @Shadow IoSupplier<InputStream> shadow$getResource(net.minecraft.server.packs.PackType var1, ResourceLocation var2) throws IOException;
+    @Shadow IoSupplier<InputStream> shadow$getResource(net.minecraft.server.packs.PackType var1, Identifier var2) throws IOException;
     @Shadow Set<String> shadow$getNamespaces(net.minecraft.server.packs.PackType var1);
     @Shadow void shadow$listResources(net.minecraft.server.packs.PackType var1, String var2, String var3, PackResources.ResourceOutput var4);
 
@@ -83,7 +83,7 @@ public interface PackResourcesMixin_API extends PackContents {
     @Nullable
     default Resource api$createResource(final PackType root, final ResourcePath path) throws IOException {
         final net.minecraft.server.packs.PackType packType = (net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root");
-        final ResourceLocation loc = (ResourceLocation) (Object) Objects.requireNonNull(path, "path").key();
+        final Identifier loc = (Identifier) (Object) Objects.requireNonNull(path, "path").key();
         final IoSupplier<InputStream> ioSupplier = this.shadow$getResource(packType, loc);
         return new SpongeResource(path, ioSupplier.get());
     }
@@ -93,7 +93,7 @@ public interface PackResourcesMixin_API extends PackContents {
         Objects.requireNonNull(filter, "filter");
         final net.minecraft.server.packs.PackType packType = (net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root");
 
-        final Collection<ResourceLocation> resources = new HashSet<>();
+        final Collection<Identifier> resources = new HashSet<>();
         this.shadow$listResources(packType, Objects.requireNonNull(namespace, "namespace"),
                 Objects.requireNonNull(prefix, "prefix"), (loc, stream) -> {
                     if (filter.test((ResourceKey) (Object) loc)) {
@@ -110,7 +110,7 @@ public interface PackResourcesMixin_API extends PackContents {
     default boolean exists(final PackType root, final ResourcePath path) {
         try {
             final net.minecraft.server.packs.PackType packType = (net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root");
-            final ResourceLocation loc = (ResourceLocation) (Object) Objects.requireNonNull(path, "path").key();
+            final Identifier loc = (Identifier) (Object) Objects.requireNonNull(path, "path").key();
             final IoSupplier<InputStream> ioSupplier = this.shadow$getResource(packType, loc);
             return ioSupplier != null;
         } catch (IOException ignored) {

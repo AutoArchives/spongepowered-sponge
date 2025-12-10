@@ -29,7 +29,7 @@ import com.mojang.datafixers.util.Either;
 import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.sounds.SoundEvent;
@@ -101,7 +101,7 @@ public abstract class PlayerMixin extends AvatarMixin implements PlayerBridge, G
     @Shadow public abstract FoodData shadow$getFoodData();
     @Shadow public abstract boolean shadow$isCreative();
     @Shadow public abstract String shadow$getScoreboardName();
-    @Shadow public abstract void shadow$awardStat(ResourceLocation stat);
+    @Shadow public abstract void shadow$awardStat(Identifier stat);
     @Shadow public abstract Inventory shadow$getInventory();
     @Shadow public abstract PermissionSet shadow$permissions();
     @Shadow public Either<BedSleepingProblem, Unit> shadow$startSleepInBed(final BlockPos param0) {

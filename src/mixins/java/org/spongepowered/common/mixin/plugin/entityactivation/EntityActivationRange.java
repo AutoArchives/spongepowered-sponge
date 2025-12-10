@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.plugin.entityactivation;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -153,7 +153,7 @@ public final class EntityActivationRange {
         final EntityActivationRangeCategory config = configAdapter.get().entityActivationRange;
 
         final EntityTypeBridge type = (EntityTypeBridge) entity.getType();
-        final ResourceLocation key = EntityType.getKey(entity.getType());
+        final Identifier key = EntityType.getKey(entity.getType());
         final byte activationType = spongeEntity.activation$getActivationType();
         final String activationTypeName = EntityActivationRange.activationTypeMappings.getOrDefault(activationType, "misc");
         if (!type.bridge$isActivationRangeInitialized()) {
@@ -409,7 +409,7 @@ public final class EntityActivationRange {
     }
 
     public static void addEntityToConfig(
-        final boolean autoPopulate, final ResourceLocation key, final byte activationType, final String activationTypeName
+        final boolean autoPopulate, final Identifier key, final byte activationType, final String activationTypeName
     ) {
         final InheritableConfigHandle<GlobalConfig> globalConfig = SpongeGameConfigs.getGlobalInheritable();
         final EntityActivationRangeCategory activationConfig = globalConfig.get().entityActivationRange;

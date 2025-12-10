@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.resources;
 
 import net.kyori.adventure.key.Key;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -34,12 +34,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ResourceLocation.class)
+@Mixin(Identifier.class)
 @Implements(value = {
       @Interface(iface = Key.class, prefix = "adventure$", remap = Remap.NONE),
       @Interface(iface = ResourceKey.class, prefix = "resourceKey$", remap = Remap.NONE)
 })
-public abstract class ResourceLocationMixin_API {
+public abstract class IdentifierMixin_API {
 
     // @formatter:off
     @Shadow public abstract String shadow$getNamespace();
@@ -48,7 +48,7 @@ public abstract class ResourceLocationMixin_API {
 
     /**
      * @author MrHell228 - October 6th, 2025
-     * @reason Delegate synthetic method to #compareTo(Key) to avoid CCE in case Key is not a ResourceLocation
+     * @reason Delegate synthetic method to #compareTo(Key) to avoid CCE in case Key is not a Identifier
      */
     @Overwrite
     public int compareTo(final Object obj) {

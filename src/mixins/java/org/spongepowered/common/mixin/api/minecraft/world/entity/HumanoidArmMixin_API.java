@@ -30,16 +30,17 @@ import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(HumanoidArm.class)
 public abstract class HumanoidArmMixin_API implements HandPreference {
 
     // @formatter:off
-    @Shadow @Final private String translationKey;
+    @Shadow @Final private net.minecraft.network.chat.Component caption;
     // @formatter:on
 
     @Override
     public Component asComponent() {
-        return Component.translatable(this.translationKey);
+        return SpongeAdventure.asAdventure(this.caption);
     }
 }

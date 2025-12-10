@@ -77,7 +77,7 @@ public abstract class EntityStorageMixin {
         final Vector3i chunkPos = VecHelper.toVector3i($$0x);
         final SpongeEntityChunk entities = new SpongeEntityChunk(this.level, chunkPos, cir.getReturnValue().getEntities().collect(Collectors.toList()));
         final ChunkEvent.Entities.Load loadEvent = SpongeEventFactory.createChunkEventEntitiesLoad(PhaseTracker.getInstance().currentCause(),
-                entities, chunkPos, (ResourceKey) (Object) this.level.dimension().location());
+                entities, chunkPos, (ResourceKey) (Object) this.level.dimension().identifier());
 
         SpongeCommon.post(loadEvent);
 
@@ -94,7 +94,7 @@ public abstract class EntityStorageMixin {
 
         final SpongeEntityChunk entities = new SpongeEntityChunk(this.level, chunkPos, $$0.getEntities().collect(Collectors.toList()));
         final ChunkEvent.Entities.Save.Pre saveEvent = SpongeEventFactory.createChunkEventEntitiesSavePre(PhaseTracker.getInstance().currentCause(),
-                entities, chunkPos, (ResourceKey) (Object) this.level.dimension().location());
+                entities, chunkPos, (ResourceKey) (Object) this.level.dimension().identifier());
 
         if (SpongeCommon.post(saveEvent)) {
             return null;

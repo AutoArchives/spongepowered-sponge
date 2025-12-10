@@ -28,7 +28,7 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.MappedRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
@@ -156,7 +156,7 @@ public final class VanillaRegistryLoader {
             ArmorMaterials.TURTLE_SCUTE,ArmorMaterials.NETHERITE, ArmorMaterials.ARMADILLO_SCUTE, ArmorMaterials.COPPER,
         };
         for (final ArmorMaterial armorMaterial : knownMaterials) {
-            materials.put(armorMaterial, armorMaterial.assetId().location().toString());
+            materials.put(armorMaterial, armorMaterial.assetId().identifier().toString());
         }
 
         this.naming(RegistryTypes.ARMOR_MATERIAL, materials.keySet().toArray(new ArmorMaterial[]{}), materials);
@@ -340,7 +340,7 @@ public final class VanillaRegistryLoader {
                 // To address Vanilla shortcomings, some mods will manually prefix their modid onto values they put into Vanilla registry-like
                 // registrars. We need to account for that possibility
                 if (rawId.contains(":")) {
-                    map.put((ResourceKey) (Object) ResourceLocation.parse(rawId), (A) value.getKey());
+                    map.put((ResourceKey) (Object) Identifier.parse(rawId), (A) value.getKey());
                 } else {
                     map.put(ResourceKey.sponge(rawId), (A) value.getKey());
                 }

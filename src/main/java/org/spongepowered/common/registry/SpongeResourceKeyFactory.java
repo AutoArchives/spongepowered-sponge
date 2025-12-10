@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.registry;
 
-import net.minecraft.ResourceLocationException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.IdentifierException;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -34,9 +34,9 @@ public final class SpongeResourceKeyFactory implements ResourceKey.Factory {
     @Override
     public ResourceKey of(final String namespace, final String value) {
         try {
-            final ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(namespace, value);
-            return (ResourceKey) (Object) resourceLocation;
-        } catch (ResourceLocationException e) {
+            final Identifier id = Identifier.fromNamespaceAndPath(namespace, value);
+            return (ResourceKey) (Object) id;
+        } catch (IdentifierException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -44,9 +44,9 @@ public final class SpongeResourceKeyFactory implements ResourceKey.Factory {
     @Override
     public ResourceKey of(final PluginContainer plugin, final String value) {
         try {
-            final ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(plugin.metadata().id(), value);
-            return (ResourceKey) (Object) resourceLocation;
-        } catch (ResourceLocationException e) {
+            final Identifier id = Identifier.fromNamespaceAndPath(plugin.metadata().id(), value);
+            return (ResourceKey) (Object) id;
+        } catch (IdentifierException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -54,9 +54,9 @@ public final class SpongeResourceKeyFactory implements ResourceKey.Factory {
     @Override
     public ResourceKey resolve(final String formatted) {
         try {
-            final ResourceLocation resourceLocation = ResourceLocation.parse(formatted);
-            return (ResourceKey) (Object) resourceLocation;
-        } catch (ResourceLocationException e) {
+            final Identifier id = Identifier.parse(formatted);
+            return (ResourceKey) (Object) id;
+        } catch (IdentifierException e) {
             throw new IllegalStateException(e);
         }
     }

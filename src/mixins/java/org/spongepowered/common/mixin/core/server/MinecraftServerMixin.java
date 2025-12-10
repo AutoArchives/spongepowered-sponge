@@ -177,7 +177,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         final @Nullable ServerLevel level = this.shadow$getLevel(SpongeWorldManager.createRegistryKey(k));
         if (level != null) {
             if (log) {
-                MinecraftServerMixin.LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().location());
+                MinecraftServerMixin.LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().identifier());
             }
             level.save(null, false, level.noSave);
             return true;
@@ -412,7 +412,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             // Sponge end
 
             if (autoSave.log) {
-                LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().location());
+                LOGGER.info("Saving chunks for level '{}'/{}", level, level.dimension().identifier());
             }
 
             level.save(null, flush, level.noSave && !isForced);

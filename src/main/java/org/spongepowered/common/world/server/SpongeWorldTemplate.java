@@ -28,7 +28,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -50,8 +50,8 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem) {
             .create(r -> r
                     .group(
                             SpongeAdventure.STRING_CODEC.optionalFieldOf("display_name").forGetter(v -> Optional.ofNullable(v.displayName)),
-                            ResourceLocation.CODEC.optionalFieldOf("game_mode").forGetter(v -> Optional.ofNullable(v.gameMode).map(t -> ResourceLocation.fromNamespaceAndPath("sponge", t.getName()))),
-                            ResourceLocation.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty).map(t -> ResourceLocation.fromNamespaceAndPath("sponge", t.getKey()))),
+                            Identifier.CODEC.optionalFieldOf("game_mode").forGetter(v -> Optional.ofNullable(v.gameMode).map(t -> Identifier.fromNamespaceAndPath("sponge", t.getName()))),
+                            Identifier.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty).map(t -> Identifier.fromNamespaceAndPath("sponge", t.getKey()))),
                             EnumCodec.create(SerializationBehavior.class).optionalFieldOf("serialization_behavior")
                                     .forGetter(v -> Optional.ofNullable(v.serializationBehavior)),
                             Codec.INT.optionalFieldOf("view_distance").forGetter(v -> Optional.ofNullable(v.viewDistance)),

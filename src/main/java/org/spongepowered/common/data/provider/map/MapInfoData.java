@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.map;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.ResourceKey;
@@ -92,10 +92,10 @@ public final class MapInfoData {
 							return null;
 						}
 
-						return (ResourceKey) (Object) mapData.dimension.location();
+						return (ResourceKey) (Object) mapData.dimension.identifier();
 					})
 					.set((mapData, key) -> {
-						((MapItemSavedDataAccessor) mapData).accessor$dimension(net.minecraft.resources.ResourceKey.create(Registries.DIMENSION, (ResourceLocation) (Object) key));
+						((MapItemSavedDataAccessor) mapData).accessor$dimension(net.minecraft.resources.ResourceKey.create(Registries.DIMENSION, (Identifier) (Object) key));
 						mapData.setDirty();
 					})
 			.asMutable(MapItemSavedDataBridge.class)

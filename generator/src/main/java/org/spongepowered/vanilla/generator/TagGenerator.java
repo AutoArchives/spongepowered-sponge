@@ -31,8 +31,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 
 import java.io.IOException;
@@ -109,7 +109,7 @@ public final class TagGenerator implements Generator {
         ctx.compilationUnit(this.relativePackageName, this.targetClassSimpleName);
     }
 
-    private FieldSpec makeField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod, final ResourceLocation element) {
+    private FieldSpec makeField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod, final Identifier element) {
         return FieldSpec.builder(fieldType, Types.keyToFieldName(element.getPath()), Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer("$L.$N($L)", ownType, factoryMethod, Types.resourceKey(element))
                 .build();

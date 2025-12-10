@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.item;
 
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
@@ -53,13 +53,13 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
     @Shadow public abstract boolean shadow$isOnCooldown(ItemStack stack);
     @Shadow public abstract float shadow$getCooldownPercent(ItemStack stack, float partialTicks);
     @Shadow public abstract void shadow$addCooldown(final ItemStack stack, final int ticks);
-    @Shadow public abstract void shadow$addCooldown(final ResourceLocation group, final int ticks);
-    @Shadow @Final private Map<ResourceLocation, ItemCooldowns_CooldownInstanceAccessor> cooldowns;
+    @Shadow public abstract void shadow$addCooldown(final Identifier group, final int ticks);
+    @Shadow @Final private Map<Identifier, ItemCooldowns_CooldownInstanceAccessor> cooldowns;
 
     // @formatter:on
 
 
-    @Shadow public abstract ResourceLocation getCooldownGroup(final ItemStack $$0);
+    @Shadow public abstract Identifier getCooldownGroup(final ItemStack $$0);
 
     @Override
     public boolean hasCooldown(final org.spongepowered.api.item.inventory.ItemStack stack) {
@@ -77,7 +77,7 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
     }
 
     private float impl$getCooldownPercent(final Object group) {
-        final var cooldown = this.cooldowns.get((ResourceLocation) group);
+        final var cooldown = this.cooldowns.get((Identifier) group);
         if (cooldown != null) {
             float $$4 = (float)(cooldown.accessor$endTime() - cooldown.accessor$startTime());
             float $$5 = (float)cooldown.accessor$endTime() - ((float)this.tickCount);
@@ -117,7 +117,7 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
     @Override
     public boolean setCooldown(final ResourceKey group, final Ticks ticks) {
         Objects.requireNonNull(group, "group cannot be null!");
-        this.shadow$addCooldown((ResourceLocation) (Object) group, SpongeTicks.toSaturatedIntOrInfinite(ticks));
+        this.shadow$addCooldown((Identifier) (Object) group, SpongeTicks.toSaturatedIntOrInfinite(ticks));
         return ((ItemCooldownsBridge) this).bridge$getSetCooldownResult();
     }
     @Override

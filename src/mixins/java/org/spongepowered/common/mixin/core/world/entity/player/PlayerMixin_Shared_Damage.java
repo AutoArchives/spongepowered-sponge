@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity.player;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,10 +53,10 @@ public abstract class PlayerMixin_Shared_Damage extends LivingEntityMixin_Damage
         return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }
 
-    @WrapWithCondition(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"), slice = @Slice(
+    @WrapWithCondition(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/Identifier;I)V"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")))
-    private boolean damage$skipAbsorptionStat(final Player self, final ResourceLocation stat, final int amount) {
+    private boolean damage$skipAbsorptionStat(final Player self, final Identifier stat, final int amount) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }

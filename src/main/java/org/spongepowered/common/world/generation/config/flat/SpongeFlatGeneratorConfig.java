@@ -30,8 +30,8 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.placement.MiscOverworldPlacements;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
@@ -142,7 +142,7 @@ public final class SpongeFlatGeneratorConfig {
             final HolderLookup.RegistryLookup<PlacedFeature> placedFeatureRegistryLookup = SpongeCommon.vanillaRegistry(Registries.PLACED_FEATURE);
 
             final Holder.Reference<Biome> biome =
-                    biomeRegistry.getOrThrow(ResourceKey.create(Registries.BIOME, (ResourceLocation) (Object) this.biome.location()));
+                    biomeRegistry.getOrThrow(ResourceKey.create(Registries.BIOME, (Identifier) (Object) this.biome.location()));
             return (FlatGeneratorConfig) FlatLevelGeneratorSettingsAccessor.invoker$new(
                     this.structureSets == null ? Optional.empty() : Optional.of(HolderSet.direct((Function) Holder::direct, this.structureSets)),
                     (List<FlatLayerInfo>) (Object) this.layers,

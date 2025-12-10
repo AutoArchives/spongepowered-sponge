@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge;
 
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.common.config.tracker.NamespacedCategory;
 import org.spongepowered.common.config.tracker.TrackerCategory;
 
@@ -38,7 +38,7 @@ public interface RegistryBackedTrackableBridge<T> extends TrackableBridge {
     void bridge$saveTrackerConfig();
 
     default void bridge$refreshTrackerStates() {
-        final ResourceLocation key = this.bridge$trackerRegistryBacking().getKey((T) (Object) this);
+        final Identifier key = this.bridge$trackerRegistryBacking().getKey((T) (Object) this);
         final String namespace = key.getNamespace();
         final String path = key.getPath();
         final NamespacedCategory namespacedCategory = this.bridge$trackerCategory().namespacedOrCreate(namespace);

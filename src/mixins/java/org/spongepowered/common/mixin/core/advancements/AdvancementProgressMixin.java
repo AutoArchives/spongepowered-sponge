@@ -28,7 +28,7 @@ package org.spongepowered.common.mixin.core.advancements;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.AdvancementRequirements;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.PlayerAdvancements;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -81,7 +81,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
     // @formatter:on
 
     @Nullable private Map<String, ImplementationBackedCriterionProgress> impl$progressMap;
-    @Nullable private ResourceLocation impl$advancementKey;
+    @Nullable private Identifier impl$advancementKey;
     @Nullable private PlayerAdvancements impl$playerAdvancements;
 
     @Override
@@ -97,7 +97,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
     }
 
     @Override
-    public ResourceLocation bridge$getAdvancementKey() {
+    public Identifier bridge$getAdvancementKey() {
         Preconditions.checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
         return this.impl$advancementKey;
     }
@@ -116,7 +116,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
     }
 
     @Override
-    public void bridge$setAdvancementId(ResourceLocation key) {
+    public void bridge$setAdvancementId(Identifier key) {
         Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         this.impl$advancementKey = key;
     }

@@ -22,17 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.effect.sound;
+package org.spongepowered.common.data.provider.world;
 
-import net.minecraft.resources.Identifier;
-import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.common.accessor.sounds.SoundEventAccessor;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+public class ServerLevelDataProvider {
 
-public final class SpongeSoundBuilder extends AbstractResourceKeyedBuilder<SoundType, SoundType.Builder> implements SoundType.Builder {
-
-    @Override
-    public SoundType build0() {
-        return (SoundType) (Object) SoundEventAccessor.accessor$createVariableRangeEvent((Identifier) (Object) this.key);
-    }
 }

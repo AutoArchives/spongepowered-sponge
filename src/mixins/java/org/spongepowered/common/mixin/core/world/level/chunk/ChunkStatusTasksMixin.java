@@ -101,7 +101,7 @@ public abstract class ChunkStatusTasksMixin {
         final Vector3i chunkPos = VecHelper.toVector3i(levelChunk.getPos());
         if (ShouldFire.CHUNK_EVENT_BLOCKS_LOAD) {
             final ChunkEvent.Blocks.Load loadEvent = SpongeEventFactory.createChunkEventBlocksLoad(PhaseTracker.getInstance().currentCause(),
-                    ((BlockChunk) levelChunk), chunkPos, (ResourceKey) (Object) levelChunk.getLevel().dimension().location());
+                    ((BlockChunk) levelChunk), chunkPos, (ResourceKey) (Object) levelChunk.getLevel().dimension().identifier());
             SpongeCommon.post(loadEvent);
         }
 

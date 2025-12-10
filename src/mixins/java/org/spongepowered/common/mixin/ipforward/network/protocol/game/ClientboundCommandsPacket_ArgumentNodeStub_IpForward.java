@@ -29,7 +29,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -59,7 +59,7 @@ public final class ClientboundCommandsPacket_ArgumentNodeStub_IpForward {
     @Inject(method = "serializeCap(Lnet/minecraft/network/FriendlyByteBuf;Lnet/minecraft/commands/synchronization/ArgumentTypeInfo;Lnet/minecraft/commands/synchronization/ArgumentTypeInfo$Template;)V", at = @At("HEAD"), cancellable = true)
     private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void ipForward$onSerializeCap(
         final FriendlyByteBuf buf, final ArgumentTypeInfo<A, T> $$1, final ArgumentTypeInfo.Template<A> $$2, final CallbackInfo ci) {
-        final @Nullable ResourceLocation key = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getKey($$1);
+        final @Nullable Identifier key = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getKey($$1);
         if (key == null || ClientboundCommandsPacket_ArgumentNodeStub_IpForward.ipForward$isVanillaArgument(key)) {
             return;
         }
@@ -75,7 +75,7 @@ public final class ClientboundCommandsPacket_ArgumentNodeStub_IpForward {
         buf.writeBytes(commandData);
     }
 
-    private static boolean ipForward$isVanillaArgument(final ResourceLocation key) {
+    private static boolean ipForward$isVanillaArgument(final Identifier key) {
         return switch (key.getNamespace()) {
             case "brigadier" -> true;
             case "minecraft" -> switch (key.getPath()) {

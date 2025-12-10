@@ -29,8 +29,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
 import net.minecraft.world.level.biome.Climate.ParameterList;
@@ -114,6 +114,6 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     }
 
     private Holder<Biome> biomeHolder(final RegistryReference<org.spongepowered.api.world.biome.Biome> biome) {
-        return this.registry().getOrThrow(ResourceKey.create(Registries.BIOME, (ResourceLocation) (Object) biome.location()));
+        return this.registry().getOrThrow(ResourceKey.create(Registries.BIOME, (Identifier) (Object) biome.location()));
     }
 }

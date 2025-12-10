@@ -25,7 +25,7 @@
 package org.spongepowered.vanilla.generator.world.entities;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -205,7 +205,7 @@ public class EntityRegistries {
                 "EntityTypes",
                 Registries.ENTITY_TYPE,
                 $ -> true,
-                Set.of(ResourceLocation.fromNamespaceAndPath("sponge", "human")) // Sponge's Human type is an extra addition
+                Set.of(Identifier.fromNamespaceAndPath("sponge", "human")) // Sponge's Human type is an extra addition
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",

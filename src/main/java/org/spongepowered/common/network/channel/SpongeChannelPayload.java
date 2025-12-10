@@ -30,12 +30,12 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
 import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
 
-public record SpongeChannelPayload(@Nullable Type<? extends CustomPacketPayload> type, @Nullable ResourceLocation id, Consumer<FriendlyByteBuf> consumer) implements CustomPacketPayload, CustomQueryPayload, CustomQueryAnswerPayload {
+public record SpongeChannelPayload(@Nullable Type<? extends CustomPacketPayload> type, @Nullable Identifier id, Consumer<FriendlyByteBuf> consumer) implements CustomPacketPayload, CustomQueryPayload, CustomQueryAnswerPayload {
 
     public static StreamCodec<FriendlyByteBuf, SpongeChannelPayload> streamCodec(final Type<? extends CustomPacketPayload> type, final int maxPayloadSize) {
         return CustomPacketPayload.codec(
@@ -59,7 +59,7 @@ public record SpongeChannelPayload(@Nullable Type<? extends CustomPacketPayload>
     }
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return this.id;
     }
 
@@ -67,7 +67,7 @@ public record SpongeChannelPayload(@Nullable Type<? extends CustomPacketPayload>
         return new SpongeChannelPayload(type, type.id(), consumer);
     }
 
-    public static SpongeChannelPayload fromId(final ResourceLocation id, final Consumer<FriendlyByteBuf> consumer) {
+    public static SpongeChannelPayload fromId(final Identifier id, final Consumer<FriendlyByteBuf> consumer) {
         return new SpongeChannelPayload(null, id, consumer);
     }
 

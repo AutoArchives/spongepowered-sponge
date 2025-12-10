@@ -74,7 +74,7 @@ public abstract class GenerationChunkHolderMixin {
         final Vector3i chunkPos = VecHelper.toVector3i(chunk.getPos());
         final ChunkEvent.Generated event = SpongeEventFactory.createChunkEventGenerated(
                 PhaseTracker.getInstance().currentCause(), chunkPos,
-                (ResourceKey) (Object) chunk.getLevel().dimension().location()
+                (ResourceKey) (Object) chunk.getLevel().dimension().identifier()
         );
         SpongeCommon.post(event);
     }

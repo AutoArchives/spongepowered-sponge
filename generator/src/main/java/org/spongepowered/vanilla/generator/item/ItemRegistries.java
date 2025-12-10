@@ -25,7 +25,7 @@
 package org.spongepowered.vanilla.generator.item;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
@@ -134,7 +134,7 @@ public class ItemRegistries {
                 "data.type",
                 "ArmorMaterials",
                 ArmorMaterials.class,
-                (s) -> ResourceLocation.withDefaultNamespace(s.toLowerCase(Locale.ROOT))
+                (s) -> Identifier.withDefaultNamespace(s.toLowerCase(Locale.ROOT))
             )
         );
     }

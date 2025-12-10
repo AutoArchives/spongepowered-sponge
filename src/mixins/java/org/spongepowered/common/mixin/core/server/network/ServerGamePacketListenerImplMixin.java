@@ -423,7 +423,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         }
     }
 
-    @Inject(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;drop(Z)Z"))
+    @Inject(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;drop(Z)V"))
     public void impl$dropItem(final ServerboundPlayerActionPacket p_147345_1_, final CallbackInfo ci) {
         this.impl$ignorePackets++;
     }

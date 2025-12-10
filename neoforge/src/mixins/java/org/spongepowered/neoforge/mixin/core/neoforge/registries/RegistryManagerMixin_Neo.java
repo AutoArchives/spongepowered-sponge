@@ -24,7 +24,7 @@
  */
 package org.spongepowered.neoforge.mixin.core.neoforge.registries;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.registries.RegistryManager;
 import net.neoforged.neoforge.registries.RegistrySnapshot;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +40,7 @@ import java.util.Map;
 public class RegistryManagerMixin_Neo {
 
     @Inject(method = "takeSnapshot", at = @At("RETURN"))
-    private static void neo$dontSendSpongeDataToClient(RegistryManager.SnapshotType snapshotType, CallbackInfoReturnable<Map<ResourceLocation, RegistrySnapshot>> cir) {
+    private static void neo$dontSendSpongeDataToClient(RegistryManager.SnapshotType snapshotType, CallbackInfoReturnable<Map<Identifier, RegistrySnapshot>> cir) {
         if (snapshotType != RegistryManager.SnapshotType.SYNC_TO_CLIENT) {
             return;
         }

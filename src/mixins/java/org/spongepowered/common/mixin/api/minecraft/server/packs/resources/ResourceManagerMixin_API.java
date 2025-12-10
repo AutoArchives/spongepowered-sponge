@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server.packs.resources;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.spongepowered.api.ResourceKey;
@@ -49,13 +49,13 @@ import java.util.stream.Stream;
 public interface ResourceManagerMixin_API extends org.spongepowered.api.resource.ResourceManager {
 
     // @formatter:off
-    @Shadow List<net.minecraft.server.packs.resources.Resource> shadow$getResourceStack(ResourceLocation var1);
-    @Shadow Map<ResourceLocation, net.minecraft.server.packs.resources.Resource> shadow$listResources(String var1, Predicate<ResourceLocation> var2);
+    @Shadow List<net.minecraft.server.packs.resources.Resource> shadow$getResourceStack(Identifier var1);
+    @Shadow Map<Identifier, net.minecraft.server.packs.resources.Resource> shadow$listResources(String var1, Predicate<Identifier> var2);
     // @formatter:on
 
     @Override
     default Resource load(final ResourcePath path) throws IOException {
-        final ResourceLocation loc = (ResourceLocation) (Object) Objects.requireNonNull(path, "path").key();
+        final Identifier loc = (Identifier) (Object) Objects.requireNonNull(path, "path").key();
         final net.minecraft.server.packs.resources.Resource resource = ((ResourceProvider) this).getResourceOrThrow(loc);
         // TODO pass optional up to API?
         return new SpongeResource(resource, path);
@@ -63,7 +63,7 @@ public interface ResourceManagerMixin_API extends org.spongepowered.api.resource
 
     @Override
     default Stream<Resource> streamAll(final ResourcePath path) {
-        final ResourceLocation loc = (ResourceLocation) (Object) Objects.requireNonNull(path, "path").key();
+        final Identifier loc = (Identifier) (Object) Objects.requireNonNull(path, "path").key();
         return (Stream<Resource>) (Object) this.shadow$getResourceStack(loc).stream();
     }
 
@@ -72,7 +72,7 @@ public interface ResourceManagerMixin_API extends org.spongepowered.api.resource
         Objects.requireNonNull(pathPrefix, "pathPrefix");
         Objects.requireNonNull(pathFilter, "pathFilter");
 
-        final Set<ResourceLocation> mapped = this.shadow$listResources(pathPrefix, loc -> pathFilter.test(loc.getPath())).keySet(); // TODO check filter
+        final Set<Identifier> mapped = this.shadow$listResources(pathPrefix, loc -> pathFilter.test(loc.getPath())).keySet(); // TODO check filter
         return mapped.stream()
             .map(r -> new SpongeResourcePath((ResourceKey) (Object) r))
             .collect(Collectors.toList());

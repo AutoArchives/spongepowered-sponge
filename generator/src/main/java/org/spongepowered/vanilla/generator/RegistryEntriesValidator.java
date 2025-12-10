@@ -39,8 +39,8 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class RegistryEntriesValidator<V> implements Generator {
     private final String targetClassSimpleName;
     private final ResourceKey<? extends Registry<V>> registry;
     private final Predicate<V> filter;
-    private final Set<ResourceLocation> extraEntries;
+    private final Set<Identifier> extraEntries;
 
     public RegistryEntriesValidator(
         final String targetRelativePackage,
@@ -74,7 +74,7 @@ public class RegistryEntriesValidator<V> implements Generator {
         final String targetClassSimpleName,
         final ResourceKey<? extends Registry<V>> registry,
         final Predicate<V> filter,
-        final Set<ResourceLocation> extraEntries
+        final Set<Identifier> extraEntries
     ) {
         this.relativePackageName = targetRelativePackage;
         this.targetClassSimpleName = targetClassSimpleName;
@@ -107,7 +107,7 @@ public class RegistryEntriesValidator<V> implements Generator {
         // Find index of first field member
         // Take out all field members from the members list
         final var members = primaryTypeDeclaration.getMembers();
-        final var fields = new HashMap<ResourceLocation, FieldDeclaration>();
+        final var fields = new HashMap<Identifier, FieldDeclaration>();
         int lastNonFieldIndex = -1;
         for (final var it = members.listIterator(); it.hasNext();) {
             final var node = it.next();
@@ -123,11 +123,11 @@ public class RegistryEntriesValidator<V> implements Generator {
         }
 
         // Now, iterate the registry, discovering which fields were added and removed
-        final var added = new HashSet<ResourceLocation>();
+        final var added = new HashSet<Identifier>();
         final var processedFields = new ArrayList<FieldDeclaration>(registry.keySet().size());
-        final Set<ResourceLocation> allKeys = new HashSet<>(registry.keySet());
+        final Set<Identifier> allKeys = new HashSet<>(registry.keySet());
         allKeys.addAll(this.extraEntries);
-        for (final ResourceLocation key : allKeys) {
+        for (final Identifier key : allKeys) {
             if (!this.filter.test(registry.getValue(key))) {
                 continue;
             }
@@ -154,36 +154,36 @@ public class RegistryEntriesValidator<V> implements Generator {
     }
 
     // Attempt to get a resource location from the field by parsing its initializer
-    private ResourceLocation extractFieldIdentifier(final FieldDeclaration declaration) {
+    private Identifier extractFieldIdentifier(final FieldDeclaration declaration) {
         if (declaration.getVariables().isEmpty()) {
             throw new IllegalStateException("No variables for " + declaration);
         }
         final VariableDeclarator var = declaration.getVariable(0);
         final Expression initializer = var.getInitializer().orElse(null);
         if (!(initializer instanceof MethodCallExpr) || ((MethodCallExpr) initializer).getArguments().size() != 1) {
-            return ResourceLocation.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
+            return Identifier.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
         final Expression argument = ((MethodCallExpr) initializer).getArgument(0);
         if (!(argument instanceof final MethodCallExpr keyInitializer)
                 || keyInitializer.getArguments().size() < 1) {
-            return ResourceLocation.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
+            return Identifier.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
         if (keyInitializer.getArguments().size() == 1) { // method name as namespace
-            return ResourceLocation.fromNamespaceAndPath(keyInitializer.getNameAsString(), keyInitializer.getArgument(0).asStringLiteralExpr().asString());
+            return Identifier.fromNamespaceAndPath(keyInitializer.getNameAsString(), keyInitializer.getArgument(0).asStringLiteralExpr().asString());
         } else if (keyInitializer.getArguments().size() == 2) { // (namespace, path)
-            return ResourceLocation.fromNamespaceAndPath(
+            return Identifier.fromNamespaceAndPath(
                 keyInitializer.getArgument(0).asStringLiteralExpr().asString(),
                 keyInitializer.getArgument(1).asStringLiteralExpr().asString()
             );
         } else {
-            return ResourceLocation.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
+            return Identifier.parse(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
     }
 
-    private FieldDeclaration makeField(final String ownType, final String factoryMethod, final ResourceLocation element) {
+    private FieldDeclaration makeField(final String ownType, final String factoryMethod, final Identifier element) {
         final FieldDeclaration fieldDeclaration = new FieldDeclaration();
         final VariableDeclarator variable = new VariableDeclarator(StaticJavaParser.parseType("DefaultedRegistryReference<FixMe>"), Types.keyToFieldName(element.getPath()));
         fieldDeclaration.getVariables().add(variable);
@@ -192,7 +192,7 @@ public class RegistryEntriesValidator<V> implements Generator {
         return fieldDeclaration;
     }
 
-    public static MethodCallExpr resourceKey(final ResourceLocation location) {
+    public static MethodCallExpr resourceKey(final Identifier location) {
         Objects.requireNonNull(location, "location");
         final var resourceKey = new NameExpr("ResourceKey");
         return switch (location.getNamespace()) {

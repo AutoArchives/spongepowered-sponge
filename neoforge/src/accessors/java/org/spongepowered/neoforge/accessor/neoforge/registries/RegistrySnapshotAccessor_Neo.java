@@ -25,7 +25,7 @@
 package org.spongepowered.neoforge.accessor.neoforge.registries;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.registries.RegistrySnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -34,5 +34,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface RegistrySnapshotAccessor_Neo {
 
     @Accessor("ids")
-    Int2ObjectSortedMap<ResourceLocation> accessor$ids();
+    Int2ObjectSortedMap<Identifier> accessor$ids();
 }

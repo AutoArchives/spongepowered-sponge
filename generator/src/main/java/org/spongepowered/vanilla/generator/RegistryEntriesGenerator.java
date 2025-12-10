@@ -31,8 +31,8 @@ import com.squareup.javapoet.TypeName;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureElement;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
@@ -152,7 +152,7 @@ public class RegistryEntriesGenerator<V> implements Generator {
         ctx.compilationUnit(this.relativePackageName, this.targetClassSimpleName);
     }
 
-    private FieldSpec makeField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod, final ResourceLocation element, @Nullable final FeatureFlagSet featureFlagSet) {
+    private FieldSpec makeField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod, final Identifier element, @Nullable final FeatureFlagSet featureFlagSet) {
 
         final FieldSpec.Builder builder =
                 FieldSpec.builder(fieldType, Types.keyToFieldName(element.getPath()), Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)

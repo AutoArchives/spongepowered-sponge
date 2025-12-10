@@ -28,7 +28,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.network.NetworkRegistry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -49,7 +49,7 @@ public abstract class ClientboundCustomPayloadPacketMixin_Forge {
     // @formatter: on
 
     @Inject(method = { "lambda$static$0", "lambda$static$2" }, at = @At("HEAD"), cancellable = true)
-    private static void forge$getSpongeCustomPacketPayload(final ResourceLocation channelKey, final CallbackInfoReturnable<StreamCodec<FriendlyByteBuf, ? extends CustomPacketPayload>> cir) {
+    private static void forge$getSpongeCustomPacketPayload(final Identifier channelKey, final CallbackInfoReturnable<StreamCodec<FriendlyByteBuf, ? extends CustomPacketPayload>> cir) {
         if (NetworkRegistry.findTarget(channelKey) != null) {
             return;
         }

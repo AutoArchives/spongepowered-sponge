@@ -30,19 +30,19 @@ import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.LevelLoadListener;
 import net.minecraft.server.level.progress.LoggingLevelLoadListener;
 import net.minecraft.util.TimeUtil;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
 import net.minecraft.world.entity.npc.WanderingTraderSpawner;
@@ -308,7 +308,7 @@ public class SpongeWorldManager implements WorldManager {
         try {
             world = this.createLevel(registryKey, levelData.stem(), storageSource, levelData.data());
         } catch (final Exception e) {
-            return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", registryKey.location()), e));
+            return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", registryKey.identifier()), e));
         }
 
         return SpongeCommon.asyncScheduler().submit(() -> this.prepareLevel(world)).thenApply(w -> {
@@ -615,7 +615,7 @@ public class SpongeWorldManager implements WorldManager {
         final ServerLevel loadedWorld = this.worlds.get(registryKey);
         if (loadedWorld != null) {
             if (!loadedWorld.getPlayers(p -> true).isEmpty()) {
-                return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location())));
+                return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.identifier())));
             }
 
             final boolean disableLevelSaving = loadedWorld.noSave;
@@ -675,7 +675,7 @@ public class SpongeWorldManager implements WorldManager {
         final net.minecraft.resources.ResourceKey<Level> registryKey = level.dimension();
 
         if (!level.getPlayers(p -> true).isEmpty()) {
-            return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location())));
+            return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.identifier())));
         }
 
         // We first tell the world to save without flushing
@@ -684,10 +684,10 @@ public class SpongeWorldManager implements WorldManager {
 
         return ((IOWorkerBridge) level.getChunkSource().chunkMap.chunkScanner()).bridge$onIdle().thenComposeAsync($ -> {
             if (!level.getPlayers(p -> true).isEmpty()) {
-                return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location())));
+                return CompletableFuture.failedFuture(new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.identifier())));
             }
 
-            SpongeCommon.logger().info("Unloading world '{}'", registryKey.location());
+            SpongeCommon.logger().info("Unloading world '{}'", registryKey.identifier());
 
             final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getInstance().currentCause(), (ServerWorld) level);
             SpongeCommon.post(unloadWorldEvent);
@@ -783,21 +783,21 @@ public class SpongeWorldManager implements WorldManager {
 
     private Optional<LevelDataLoadResult> loadLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey,
             final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation) throws IOException {
-        try (final LevelStorageSource.LevelStorageAccess storageSource = this.createLevelStorageAccess((ResourceKey) (Object) registryKey.location())) {
+        try (final LevelStorageSource.LevelStorageAccess storageSource = this.createLevelStorageAccess((ResourceKey) (Object) registryKey.identifier())) {
             return this.loadLevelData(storageSource, registryKey, loadOperation);
         }
     }
 
     private Optional<LevelDataLoadResult> loadLevelData(final LevelStorageSource.LevelStorageAccess storageSource,
             final net.minecraft.resources.ResourceKey<Level> registryKey, final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation) {
-        return this.initializeLevelDataOptional((ResourceKey) (Object) registryKey.location(), () ->
+        return this.initializeLevelDataOptional((ResourceKey) (Object) registryKey.identifier(), () ->
             Optional.ofNullable(this.loadLevelTag(storageSource))
                 .map(t -> this.readLevelData(registryKey, t, loadOperation)));
     }
 
     private LevelDataLoadResult loadLevelData(final LevelStorageSource.LevelStorageAccess storageSource,
             final net.minecraft.resources.ResourceKey<Level> registryKey, final Supplier<LevelDataLoadResult> defaultSupplier) {
-        return this.initializeLevelData((ResourceKey) (Object) registryKey.location(), () ->
+        return this.initializeLevelData((ResourceKey) (Object) registryKey.identifier(), () ->
             Optional.ofNullable(this.loadLevelTag(storageSource))
                 .map(t -> this.readLevelData(registryKey, t, null))
                 .orElseGet(defaultSupplier));
@@ -863,7 +863,7 @@ public class SpongeWorldManager implements WorldManager {
     private LevelDataLoadResult createLevelData(final net.minecraft.resources.ResourceKey<Level> registryKey, final WorldArchetype archetype) {
         final LevelStem levelStem = (LevelStem) (Object) archetype.type();
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        final LevelSettings levelSettings = this.createLevelSettings(defaultLevelData, this.getDirectoryName((ResourceKey) (Object) registryKey.location()));
+        final LevelSettings levelSettings = this.createLevelSettings(defaultLevelData, this.getDirectoryName((ResourceKey) (Object) registryKey.identifier()));
         return new LevelDataLoadResult(
             new PrimaryLevelData(levelSettings, (WorldOptions) archetype.generationConfig().orElse((WorldGenerationConfig) defaultLevelData.worldGenOptions()),
                 SpongeWorldManager.specialWorldProperty(levelStem), Lifecycle.stable()), levelStem);
@@ -886,7 +886,7 @@ public class SpongeWorldManager implements WorldManager {
         final LevelStorageSource.LevelStorageAccess storageSource,
         final PrimaryLevelData levelData) {
 
-        final ResourceKey worldKey = (ResourceKey) (Object) registryKey.location();
+        final ResourceKey worldKey = (ResourceKey) (Object) registryKey.identifier();
 
         MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}'", worldKey);
 
@@ -955,7 +955,7 @@ public class SpongeWorldManager implements WorldManager {
                         ((MinecraftServerAccessor) this.server).invoker$setupDebugLevel(worldData);
                     }
                 } catch (final Throwable throwable) {
-                    final CrashReport crashReport = CrashReport.forThrowable(throwable, "Exception initializing world '" + level.dimension().location()  + "'");
+                    final CrashReport crashReport = CrashReport.forThrowable(throwable, "Exception initializing world '" + level.dimension().identifier()  + "'");
                     try {
                         level.fillReportDetails(crashReport);
                     } catch (final Throwable ignore) {
@@ -982,7 +982,7 @@ public class SpongeWorldManager implements WorldManager {
      * Same as loadSpawnChunks but async and without listener.
      */
     private CompletableFuture<ServerLevel> loadSpawnChunksAsync(final ServerLevel level) {
-        MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for dimension {}", level.dimension().location());
+        MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for dimension {}", level.dimension().identifier());
 
         final ServerChunkCache chunkSource = level.getChunkSource();
         final var respawnData = level.getRespawnData();
@@ -994,7 +994,7 @@ public class SpongeWorldManager implements WorldManager {
                 Sponge.server().scheduler().submit(Task.builder().plugin(Launch.instance().platformPlugin()).execute(() -> generationFuture.complete(level)).build());
                 // Notify the future that we are done
                 task.cancel(); // And cancel this task
-                MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for dimension {}", level.dimension().location());
+                MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for dimension {}", level.dimension().identifier());
             }).interval(10, TimeUnit.MILLISECONDS).build()
         );
 
@@ -1008,7 +1008,7 @@ public class SpongeWorldManager implements WorldManager {
      * Mimic MinecraftServer#prepareLevels
      */
     private void loadSpawnChunks(final ServerLevel level) {
-        MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for dimension {}", level.dimension().location());
+        MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for dimension {}", level.dimension().identifier());
 
         final var respawnData = level.getRespawnData();
         final ServerChunkCache chunkSource = level.getChunkSource();
@@ -1038,7 +1038,7 @@ public class SpongeWorldManager implements WorldManager {
     }
 
     public static net.minecraft.resources.ResourceKey<Level> createRegistryKey(final ResourceKey key) {
-        return net.minecraft.resources.ResourceKey.create(Registries.DIMENSION, (ResourceLocation) (Object) key);
+        return net.minecraft.resources.ResourceKey.create(Registries.DIMENSION, (Identifier) (Object) key);
     }
 
     private String getDirectoryName(final ResourceKey key) {

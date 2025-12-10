@@ -25,7 +25,7 @@
 package org.spongepowered.common.network.packet;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
@@ -33,7 +33,7 @@ import org.spongepowered.common.SpongeCommon;
 
 public final class ChangeViewerEnvironmentPacket implements Packet {
 
-    public ResourceLocation dimensionLogic;
+    public Identifier dimensionLogic;
 
     public ChangeViewerEnvironmentPacket() {
     }
@@ -44,7 +44,7 @@ public final class ChangeViewerEnvironmentPacket implements Packet {
 
     @Override
     public void read(final ChannelBuf buf) {
-        this.dimensionLogic = ResourceLocation.parse(buf.readString());
+        this.dimensionLogic = Identifier.parse(buf.readString());
     }
 
     @Override

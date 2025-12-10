@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world.server;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.HolderSet;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.attribute.BedRule;
 import net.minecraft.world.attribute.EnvironmentAttributeMap;
@@ -48,7 +48,6 @@ import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 
-import java.util.OptionalLong;
 
 public final class SpongeWorldTypeBuilder implements WorldType.Builder {
 
@@ -114,17 +113,22 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
             attributes.set(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, respawnAnchorsUsable);
             attributes.set(EnvironmentAttributes.CAN_START_RAID, hasRaids);
             final DimensionType dimensionType =
-                new DimensionType(fixedTime == null ? OptionalLong.empty() : OptionalLong.of(fixedTime.asTicks().ticks()),
+                new DimensionType(
+                    fixedTime != null,
                     hasSkylight,
                     hasCeiling,
-                    natural, coordinateMultiplier,
-                    floor, height, logicalHeight,
+                    coordinateMultiplier,
+                    floor,
+                    height,
+                    logicalHeight,
                     ((TagBridge<Block>) infiniburn).bridge$asVanillaTag(),
-                    (ResourceLocation) (Object) effect.key(),
                     ambientLighting,
                     new DimensionType.MonsterSettings(monsterSpawnLightTest, monsterSpawnBlockLightLimit),
-                    attributes.build()
-                    );
+                    DimensionType.Skybox.OVERWORLD,
+                    DimensionType.CardinalLightType.DEFAULT,
+                    attributes.build(),
+                    HolderSet.empty()
+                );
             if ((Object) dimensionType instanceof DimensionTypeBridge bridge) {
                 bridge.bridge$decorateData(spongeData);
             }

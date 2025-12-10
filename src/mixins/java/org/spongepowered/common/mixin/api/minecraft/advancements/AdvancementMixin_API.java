@@ -30,7 +30,7 @@ import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -49,7 +49,7 @@ import java.util.Optional;
 @Mixin(Advancement.class)
 public abstract class AdvancementMixin_API implements org.spongepowered.api.advancement.Advancement {
 
-   @Shadow @Final private Optional<ResourceLocation> parent;
+   @Shadow @Final private Optional<Identifier> parent;
    @Shadow @Final private Optional<DisplayInfo> display;
    @Shadow @Final private AdvancementRewards rewards;
    @Shadow @Final private Map<String, Criterion<?>> criteria;

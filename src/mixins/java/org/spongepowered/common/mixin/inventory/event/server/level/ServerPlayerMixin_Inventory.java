@@ -62,7 +62,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
@@ -121,17 +120,17 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         }
     }
 
-    @Inject(method = "drop(Z)Z",
+    @Inject(method = "drop(Z)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;removeFromSelected(Z)Lnet/minecraft/world/item/ItemStack;"))
-    protected void impl$beforeRemoveItem(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
+    protected void impl$beforeRemoveItem(final boolean param0, final CallbackInfo cir) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.shadow$level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         this.inventory$effectTransactor = transactor.logDropFromPlayerInventory((ServerPlayer) (Object) this, param0);
     }
 
-    @Inject(method = "drop(Z)Z",
+    @Inject(method = "drop(Z)V",
             at = @At(value = "RETURN"))
-    protected void impl$onPlayerDrop(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
+    protected void impl$onPlayerDrop(final boolean param0, final CallbackInfo cir) {
         try (final EffectTransactor ignored = this.inventory$effectTransactor) {
             this.containerMenu.broadcastChanges(); // for capture
         } finally {

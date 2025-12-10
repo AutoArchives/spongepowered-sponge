@@ -25,7 +25,7 @@
 package org.spongepowered.forge.mixin.tracker.world.level.block.state;
 
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,6 +46,6 @@ public abstract class BlockBehaviorMixin_Forge_Tracker {
             remap = false
         )
     )
-    protected void forgeTracker$initializeTrackingState(CallbackInfoReturnable<ResourceLocation> cir) {
+    protected void forgeTracker$initializeTrackingState(CallbackInfoReturnable<Identifier> cir) {
     }
 }

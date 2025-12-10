@@ -25,8 +25,8 @@
 package org.spongepowered.common.registry;
 
 
-import net.minecraft.ResourceLocationException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.IdentifierException;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.util.Preconditions;
 
@@ -57,9 +57,9 @@ public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
         Preconditions.checkState(this.value != null, "Value cannot be empty");
 
         try {
-            final ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(this.namespace, this.value);
-            return (ResourceKey) (Object) resourceLocation;
-        } catch (ResourceLocationException e) {
+            final Identifier id = Identifier.fromNamespaceAndPath(this.namespace, this.value);
+            return (ResourceKey) (Object) id;
+        } catch (IdentifierException e) {
             throw new IllegalStateException(e);
         }
     }

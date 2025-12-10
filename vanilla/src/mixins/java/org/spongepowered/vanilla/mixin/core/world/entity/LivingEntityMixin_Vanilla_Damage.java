@@ -42,7 +42,7 @@ import org.spongepowered.common.bridge.world.entity.TrackedDamageBridge;
 public abstract class LivingEntityMixin_Vanilla_Damage implements TrackedDamageBridge {
 
     @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), argsOnly = true, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"),
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/Identifier;I)V"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getCombatTracker()Lnet/minecraft/world/damagesource/CombatTracker;")))
     private float damage$firePostEvent_Living(final float damage) {
         return this.damage$firePostEvent(damage);

@@ -220,7 +220,7 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
 
     @ModifyVariable(method = "getDamageAfterMagicAbsorb", at = @At("STORE"), argsOnly = true, slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getEffect(Lnet/minecraft/core/Holder;)Lnet/minecraft/world/effect/MobEffectInstance;"),
-        to = @At(value = "FIELD", target = "Lnet/minecraft/stats/Stats;DAMAGE_RESISTED:Lnet/minecraft/resources/ResourceLocation;")))
+        to = @At(value = "FIELD", target = "Lnet/minecraft/stats/Stats;DAMAGE_RESISTED:Lnet/minecraft/resources/Identifier;")))
     private float damage$modifyAfterDefensivePotionEffect(final float damage) {
         final SpongeDamageTracker tracker = this.damage$tracker();
         return tracker == null ? damage : tracker.endStep(DamageStepTypes.DEFENSIVE_POTION_EFFECT, damage);

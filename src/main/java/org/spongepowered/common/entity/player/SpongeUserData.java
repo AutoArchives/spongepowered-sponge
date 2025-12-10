@@ -31,7 +31,7 @@ import net.minecraft.core.Rotations;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -121,7 +121,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
 
-    private ResourceKey worldKey = (ResourceKey) (Object) Level.OVERWORLD.location();
+    private ResourceKey worldKey = (ResourceKey) (Object) Level.OVERWORLD.identifier();
     private double x;
     private double y;
     private double z;
@@ -229,7 +229,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         this.reset();
         this.compound = compound;
 
-        compound.read(Constants.Sponge.World.WORLD_KEY, ResourceLocation.CODEC)
+        compound.read(Constants.Sponge.World.WORLD_KEY, Identifier.CODEC)
             .ifPresent(key -> this.worldKey = (ResourceKey) (Object) key);
 
         final var rotation = compound.read(Constants.Entity.ENTITY_ROTATION, Rotations.CODEC).orElse(new Rotations(0, 0, 0));

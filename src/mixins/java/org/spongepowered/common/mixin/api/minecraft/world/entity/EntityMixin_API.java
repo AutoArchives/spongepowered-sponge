@@ -30,7 +30,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
@@ -351,7 +351,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public HoverEvent<HoverEvent.ShowEntity> asHoverEvent(final UnaryOperator<HoverEvent.ShowEntity> op) {
         final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
-        final ResourceLocation entityTypeKey = entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type());
+        final Identifier entityTypeKey = entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type());
         return HoverEvent.showEntity(op.apply(HoverEvent.ShowEntity.showEntity((Key) (Object) entityTypeKey, this.uniqueId(), this.displayName().get())));
     }
 

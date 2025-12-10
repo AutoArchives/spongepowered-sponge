@@ -84,8 +84,8 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.chat.contents.data.BlockDataSource;
 import net.minecraft.network.chat.contents.data.EntityDataSource;
 import net.minecraft.network.chat.contents.data.StorageDataSource;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
@@ -223,7 +223,7 @@ public final class SpongeAdventure {
     // -------------
 
     // org.spongepowered.common.mixin.core.adventure.KeyMixin
-    public static Key asAdventure(final ResourceLocation key) {
+    public static Key asAdventure(final Identifier key) {
         return (Key) (Object) key;
     }
 
@@ -520,7 +520,7 @@ public final class SpongeAdventure {
                 final var stack = si.item();
                 final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
                 yield HoverEvent.showItem(
-                    SpongeAdventure.asAdventure(stack.getItemHolder().unwrap().map(ResourceKey::location, itemRegistry::getKey)),
+                    SpongeAdventure.asAdventure(stack.getItemHolder().unwrap().map(ResourceKey::identifier, itemRegistry::getKey)),
                     stack.getCount(),
                     SpongeAdventure.asAdventure(stack.getComponentsPatch())
                 );
@@ -785,7 +785,7 @@ public final class SpongeAdventure {
 
         Map<Key, DataComponentValue> map = new HashMap<>();
         components.entrySet().forEach(entry -> {
-            final ResourceLocation key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(entry.getKey());
+            final Identifier key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(entry.getKey());
             map.put(SpongeAdventure.asAdventure(key), new SpongeDataComponentValue<>(entry.getValue()));
         });
         return map;
@@ -805,18 +805,18 @@ public final class SpongeAdventure {
 
     // Key
 
-    public static ResourceLocation asVanilla(final Key key) {
-        if ((Object) key instanceof ResourceLocation) {
-            return (ResourceLocation) (Object) key;
+    public static Identifier asVanilla(final Key key) {
+        if ((Object) key instanceof Identifier) {
+            return (Identifier) (Object) key;
         }
-        return ResourceLocation.fromNamespaceAndPath(key.namespace(), key.value());
+        return Identifier.fromNamespaceAndPath(key.namespace(), key.value());
     }
 
-    public static @Nullable ResourceLocation asVanillaLocation(final @Nullable Key key) {
+    public static @Nullable Identifier asVanillaLocation(final @Nullable Key key) {
         if (key == null) {
             return null;
         }
-        return ResourceLocation.fromNamespaceAndPath(key.namespace(), key.value());
+        return Identifier.fromNamespaceAndPath(key.namespace(), key.value());
     }
 
     public static @Nullable FontDescription asVanillaFontDescription(final @Nullable Key key) {

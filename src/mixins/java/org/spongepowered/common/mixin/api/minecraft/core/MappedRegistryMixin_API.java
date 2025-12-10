@@ -28,7 +28,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.Registry;
@@ -57,7 +57,7 @@ public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
 
     @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> shadow$key();
 
-    private ResourceLocation impl$getKey(final T value) {
+    private Identifier impl$getKey(final T value) {
         return ((net.minecraft.core.Registry) this).getKey(value);
     }
 
@@ -78,7 +78,7 @@ public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
     public ResourceKey valueKey(final T value) {
         Objects.requireNonNull(value, "value");
 
-        final ResourceLocation key = this.impl$getKey(value);
+        final Identifier key = this.impl$getKey(value);
         if (key == null) {
             throw new IllegalStateException(String.format("No key was found for '%s'!", value));
         }
@@ -155,7 +155,7 @@ public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
         Objects.requireNonNull(value, "value");
 
         if (this.isDynamic()) {
-            final net.minecraft.resources.ResourceKey<T> mcKey = net.minecraft.resources.ResourceKey.create(this.shadow$key(), (ResourceLocation) (Object) key);
+            final net.minecraft.resources.ResourceKey<T> mcKey = net.minecraft.resources.ResourceKey.create(this.shadow$key(), (Identifier) (Object) key);
             this.shadow$register(mcKey, value, RegistrationInfo.BUILT_IN);
             return ((RegistryBridge) this).bridge$get(key);
         }

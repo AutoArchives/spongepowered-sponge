@@ -27,7 +27,7 @@ package org.spongepowered.forge.mixin.core.tags;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagLoader;
 import org.spongepowered.asm.mixin.Mixin;
@@ -56,7 +56,7 @@ public abstract class TagLoaderMixin_Forge<T> implements TagLoaderBridge<T> {
     }
 
     @Inject(method = "lambda$build$6", at = @At("HEAD"))
-    private void forge$onStartBuildingTag(final TagEntry.Lookup<T> $$0x, final Map<ResourceLocation, Collection<T>> $$1x, final ResourceLocation $$2x,
+    private void forge$onStartBuildingTag(final TagEntry.Lookup<T> $$0x, final Map<Identifier, Collection<T>> $$1x, final Identifier $$2x,
             final @Coerce Object $$3x, final CallbackInfo ci) {
         this.bridge$buildingTagKey($$2x);
     }

@@ -67,7 +67,7 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
         Objects.requireNonNull(key);
         // TODO - figure out how to do this better
         for (var entry : ((RecipeMapAccessor) this.recipes).accessor$byKey().entrySet()) {
-            if (entry.getKey().location().equals(key)) {
+            if (entry.getKey().identifier().equals(key)) {
                 return Optional.of(entry.getValue()).map(RecipeHolder::value).map(Recipe.class::cast);
             }
         }

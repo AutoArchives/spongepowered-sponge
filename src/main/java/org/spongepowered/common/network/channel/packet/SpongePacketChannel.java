@@ -26,7 +26,7 @@ package org.spongepowered.common.network.channel.packet;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
@@ -122,8 +122,8 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                 final ResourceKey key = this.key();
                 mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
                     @Override
-                    public ResourceLocation id() {
-                        return (ResourceLocation) (Object) key;
+                    public Identifier id() {
+                        return (Identifier) (Object) key;
                     }
 
                     @Override
@@ -187,8 +187,8 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                     final ResourceKey key = this.key();
                     mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
                         @Override
-                        public ResourceLocation id() {
-                            return (ResourceLocation) (Object) key;
+                        public Identifier id() {
+                            return (Identifier) (Object) key;
                         }
 
                         @Override
@@ -216,8 +216,8 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                     final ResourceKey key = this.key();
                     mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
                         @Override
-                        public ResourceLocation id() {
-                            return (ResourceLocation) (Object) key;
+                        public Identifier id() {
+                            return (Identifier) (Object) key;
                         }
 
                         @Override
@@ -269,8 +269,8 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                 final ResourceKey key = this.key();
                 mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
                     @Override
-                    public ResourceLocation id() {
-                        return (ResourceLocation) (Object) key;
+                    public Identifier id() {
+                        return (Identifier) (Object) key;
                     }
 
                     @Override

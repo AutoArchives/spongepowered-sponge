@@ -93,7 +93,7 @@ public abstract class EnchantmentContainerMixin_Inventory {
 
     // enchantItem lambda
     @Inject(method = "lambda$clickMenuButton$1", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/ResourceLocation;)V"), require = 1)
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/Identifier;)V"), require = 1)
     private void impl$afterEnchantItem(final ItemStack itemstack, final int id, final Player playerIn, final int i, final ItemStack itemstack1, final Level arg5, final BlockPos arg6, final CallbackInfo ci) {
         final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(this.enchantSlots.getItem(0));
         final ItemStackSnapshot newLapis = ItemStackUtil.snapshotOf(this.enchantSlots.getItem(1));

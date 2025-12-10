@@ -32,7 +32,7 @@ import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.DependencySorter;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
@@ -66,11 +66,11 @@ public final class RegistryHolderLogic implements RegistryHolder, HolderLookup.P
         this.roots.put(
             RegistryRoots.MINECRAFT,
             new MappedRegistry<>(
-                net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
+                net.minecraft.resources.ResourceKey.createRegistryKey((Identifier) (Object) RegistryRoots.MINECRAFT),
                 Lifecycle.experimental()
             )
         );
-        final ResourceLocation sponge = (ResourceLocation) (Object) RegistryRoots.SPONGE;
+        final Identifier sponge = (Identifier) (Object) RegistryRoots.SPONGE;
         this.roots.put(
             (ResourceKey) (Object) sponge,
             new MappedRegistry<>(
@@ -106,7 +106,7 @@ public final class RegistryHolderLogic implements RegistryHolder, HolderLookup.P
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void setRootMinecraftRegistry(final RegistryAccess registryAccess) {
         final MappedRegistry rootRegistry = new MappedRegistry<>(
-            net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
+            net.minecraft.resources.ResourceKey.createRegistryKey((Identifier) (Object) RegistryRoots.MINECRAFT),
             Lifecycle.experimental()
         );
         registryAccess.registries().forEach(r -> rootRegistry.register(r.key(), r.value(), RegistrationInfo.BUILT_IN));
@@ -190,18 +190,18 @@ public final class RegistryHolderLogic implements RegistryHolder, HolderLookup.P
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
         }
-        var registry = root.getValue((ResourceLocation) (Object) type.location());
+        var registry = root.getValue((Identifier) (Object) type.location());
         final boolean exists = registry != null;
         if (exists) {
             throw new DuplicateRegistrationException(String.format("Registry '%s' in root '%s' has already been defined", type.location(), type.root()));
         }
         final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>> key;
         if (Registries.ROOT_REGISTRY_NAME.equals(type.root())) {
-            key = net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) type.location());
+            key = net.minecraft.resources.ResourceKey.createRegistryKey((Identifier) (Object) type.location());
         } else {
             key = ResourceKeyAccessor.invoker$create(
-                    (ResourceLocation) (Object) RegistryRoots.SPONGE,
-                    (ResourceLocation) (Object) type.location()
+                    (Identifier) (Object) RegistryRoots.SPONGE,
+                    (Identifier) (Object) type.location()
             );
         }
         registry = registrySupplier.apply(key);
@@ -210,7 +210,7 @@ public final class RegistryHolderLogic implements RegistryHolder, HolderLookup.P
             final MappedRegistry<T> mr = (MappedRegistry<T>) registry;
             defaultValues.forEach((vk, vi, vv) -> {
                 mr.register(
-                    net.minecraft.resources.ResourceKey.create(key, (ResourceLocation) (Object) vk),
+                    net.minecraft.resources.ResourceKey.create(key, (Identifier) (Object) vk),
                     vv,
                     RegistrationInfo.BUILT_IN
                 );
@@ -256,13 +256,13 @@ public final class RegistryHolderLogic implements RegistryHolder, HolderLookup.P
     @Override
     public Stream<net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<?>>> listRegistryKeys() {
         return this.streamRegistries().map(k ->
-            ResourceKeyAccessor.invoker$create((ResourceLocation) (Object) k.type().root(), (ResourceLocation) (Object) k.type().location()));
+            ResourceKeyAccessor.invoker$create((Identifier) (Object) k.type().root(), (Identifier) (Object) k.type().location()));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T> Optional<? extends HolderLookup.RegistryLookup<T>> lookup(
             final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<? extends T>> resourceKey) {
-        return (Optional) this.findRegistry(RegistryType.of((ResourceKey) (Object) resourceKey.registry(), (ResourceKey) (Object) resourceKey.location()));
+        return (Optional) this.findRegistry(RegistryType.of((ResourceKey) (Object) resourceKey.registry(), (ResourceKey) (Object) resourceKey.identifier()));
     }
 }

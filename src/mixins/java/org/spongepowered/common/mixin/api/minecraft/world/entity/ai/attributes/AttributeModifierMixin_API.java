@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.attributes;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
@@ -39,7 +39,7 @@ public abstract class AttributeModifierMixin_API implements AttributeModifier {
     // @formatter:off
     @Shadow @Final private double amount;
     @Shadow @Final private Operation operation;
-    @Shadow @Final private ResourceLocation id;
+    @Shadow @Final private Identifier id;
 
     // @formatter:on
 

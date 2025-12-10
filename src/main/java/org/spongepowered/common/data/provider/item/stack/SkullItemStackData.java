@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PlayerHeadItem;
 import net.minecraft.world.item.component.ResolvableProfile;
@@ -56,7 +56,7 @@ public final class SkullItemStackData {
                         .supports(h -> h.getItem() instanceof PlayerHeadItem)
                 .create(Keys.NOTE_BLOCK_SOUND)
                     .get(h -> (ResourceKey) (Object) h.get(DataComponents.NOTE_BLOCK_SOUND))
-                    .set((h, v) -> h.set(DataComponents.NOTE_BLOCK_SOUND, (ResourceLocation) (Object) v))
+                    .set((h, v) -> h.set(DataComponents.NOTE_BLOCK_SOUND, (Identifier) (Object) v))
                     .delete(h -> h.remove(DataComponents.NOTE_BLOCK_SOUND))
         ;
     }

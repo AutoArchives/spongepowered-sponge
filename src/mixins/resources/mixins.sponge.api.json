@@ -42,7 +42,7 @@
     "minecraft.network.protocol.status.ServerStatus_PlayersMixin_API",
     "minecraft.network.protocol.status.ServerStatus_VersionMixin_API",
     "minecraft.network.protocol.status.ServerStatusMixin_API",
-    "minecraft.resources.ResourceLocationMixin_API",
+    "minecraft.resources.IdentifierMixin_API",
     "minecraft.server.MinecraftServerMixin_API",
     "minecraft.server.ServerScoreboardMixin_API",
     "minecraft.server.level.ChunkMapMixin_API",

@@ -31,7 +31,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -111,7 +111,7 @@ final class Types {
         };
     }
 
-    public static CodeBlock resourceKey(final ResourceLocation location) {
+    public static CodeBlock resourceKey(final Identifier location) {
         Objects.requireNonNull(location, "location");
         return Types.resourceKey(location.getNamespace(), location.getPath());
     }

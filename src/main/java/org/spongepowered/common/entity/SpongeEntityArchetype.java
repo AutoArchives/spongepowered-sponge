@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -134,7 +134,7 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
         final org.spongepowered.api.world.server.ServerWorld spongeWorld = location.world();
         final ServerLevel level = (ServerLevel) spongeWorld;
 
-        final ResourceLocation key = net.minecraft.world.entity.EntityType.getKey((net.minecraft.world.entity.EntityType<?>) this.type);
+        final Identifier key = net.minecraft.world.entity.EntityType.getKey((net.minecraft.world.entity.EntityType<?>) this.type);
         if (key == null) {
             return Optional.empty();
         }
