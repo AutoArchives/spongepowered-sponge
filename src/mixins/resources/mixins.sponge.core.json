@@ -34,6 +34,7 @@
     "item.EmptyMapItemMixin",
     "item.ThrowableInaccurateItemMixin",
     "item.YeetableInaccurateItemMixin",
+    "nbt.CompoundTagMixin",
     "network.ConnectionMixin",
     "network.PacketEncoderMixin",
     "network.chat.Component_SerializerMixin",
