@@ -33,7 +33,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 
 @Mixin(ServerChunkCache.class)
@@ -41,6 +43,7 @@ public abstract class ServerChunkCacheMixin {
 
     // @formatter:off
     @Shadow @Final private ServerLevel level;
+    @Shadow @Final private ServerChunkCache.MainThreadExecutor mainThreadProcessor;
     // @formatter:on
 
     @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ChunkMap;saveAllChunks(Z)V"))
@@ -50,5 +53,10 @@ public abstract class ServerChunkCacheMixin {
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
             ((ChunkMapAccessor) chunkManager).invoker$saveAllChunks(flush);
         }
+    }
+
+    @Inject(method = "close", at = @At("TAIL"))
+    private void impl$onClose(final CallbackInfo ci) {
+        this.mainThreadProcessor.close();
     }
 }
