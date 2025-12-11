@@ -25,7 +25,6 @@
 package org.spongepowered.bootstrap.neoforge;
 
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.startup.Entrypoint;
 import net.neoforged.fml.startup.FatalStartupException;
 import org.spongepowered.bootstrap.dev.DevClasspath;
@@ -38,13 +37,13 @@ public class TestServer extends Entrypoint {
         DevClasspath.resolve();
 
         // Do not close the loader until tests are done
-        final FMLLoader loader = Entrypoint.startup(args, true, Dist.DEDICATED_SERVER, true);
+        final StartupResult startup = Entrypoint.startup(args, true, Dist.DEDICATED_SERVER, true);
 
-        final MethodHandle main = Entrypoint.createMainMethodCallable(loader, "net.minecraft.server.Main");
+        final MethodHandle main = Entrypoint.createMainMethodCallable(startup, "net.minecraft.server.Main");
         try {
-            main.invokeExact(loader.getProgramArgs().getArguments());
+            main.invokeExact(startup.loader().getProgramArgs().getArguments());
         } catch (Throwable e) {
-            throw new FatalStartupException("Failed to invoke main", e);
+            throw new FatalStartupException("Failed to invoke main", startup.startupArgs(), e);
         }
     }
 }
