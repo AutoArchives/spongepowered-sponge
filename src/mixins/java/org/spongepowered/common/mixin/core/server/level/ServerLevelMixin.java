@@ -163,6 +163,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
+    private boolean impl$closed = false;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$onInit(
@@ -216,7 +217,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Override
     public boolean bridge$isLoaded() {
-        if (((LevelBridge) this).bridge$isFake()) {
+        if (((LevelBridge) this).bridge$isFake() || this.impl$closed) {
             return false;
         }
 
@@ -580,5 +581,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private void impl$broadcastAllCurrentDimensionOnly(final PlayerList instance, final Packet<?> $$0) {
         //Weather, game rules and spawns are per world in Sponge.
         instance.broadcastAll($$0, this.shadow$dimension());
+    }
+
+    @Inject(method = "close", at = @At("HEAD"))
+    private void impl$onClose(final CallbackInfo ci) {
+        this.impl$closed = true;
     }
 }

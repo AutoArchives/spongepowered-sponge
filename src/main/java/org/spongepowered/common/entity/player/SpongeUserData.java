@@ -229,7 +229,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         this.reset();
         this.compound = compound;
 
-        compound.read(Constants.Sponge.World.WORLD_KEY, ResourceLocation.CODEC)
+        compound.read(Constants.Sponge.World.DIMENSION, ResourceLocation.CODEC)
             .ifPresent(key -> this.worldKey = (ResourceKey) (Object) key);
 
         final var rotation = compound.read(Constants.Entity.ENTITY_ROTATION, Rotations.CODEC).orElse(new Rotations(0, 0, 0));
@@ -248,7 +248,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     public void writeCompound(final CompoundTag compound) {
         final var holder = SpongeCommon.scopedHolder();
         final var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, holder);
-        output.putString(Constants.Sponge.World.WORLD_KEY, this.worldKey.formatted());
+        output.putString(Constants.Sponge.World.DIMENSION, this.worldKey.formatted());
 
         this.loadInventory();
         this.loadEnderInventory();
