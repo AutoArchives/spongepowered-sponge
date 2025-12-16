@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.core.world.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -708,25 +710,24 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    @Redirect(
+    @WrapOperation(
             method = "move",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/Block;stepOn(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/Entity;)V"
             )
     )
-    private void impl$onStepOnCollide(final Block block, final Level world, final BlockPos pos, final BlockState state, final Entity entity) {
+    private void impl$onStepOnCollide(final Block block, final Level world, final BlockPos pos, final BlockState state, final Entity entity, final Operation<Void> original) {
         if (!ShouldFire.COLLIDE_BLOCK_EVENT_STEP_ON || world.isClientSide) {
-            block.stepOn(world, pos, state, entity);
+            original.call(block, world, pos, state, entity);
             return;
         }
 
         final org.spongepowered.api.util.Direction dir = org.spongepowered.api.util.Direction.NONE;
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, dir, SpongeCommonEventFactory.CollisionType.STEP_ON)) {
-            block.stepOn(world, pos, state, entity);
+            original.call(block, world, pos, state, entity);
             this.impl$lastCollidedBlockPos = pos;
         }
-
     }
 
     @Redirect(method = "checkInsideBlocks",
