@@ -43,7 +43,6 @@ import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.tags.TagLoader;
-import net.minecraft.util.Util;
 import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.vanilla.generator.item.ItemRegistries;
 import org.spongepowered.vanilla.generator.world.TagRegistries;
