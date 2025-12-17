@@ -47,7 +47,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
@@ -116,18 +115,10 @@ public final class InstallerMain {
         final LibraryManager libraryManager = this.installer.getLibraryManager();
         try {
             if (mcVersion != null) {
-                final CompletableFuture<Path> mappingsFuture = this.downloadMappings(mcVersion);
                 final CompletableFuture<Path> originalMcFuture = this.downloadMinecraft(mcVersion);
                 final CompletableFuture<ServerAndLibraries> extractedFuture = originalMcFuture
                     .thenApplyAsync(this::extractBundle, libraryManager.preparationWorker());
-                final CompletableFuture<ServerAndLibraries> remappedMinecraftJarFuture = mappingsFuture.thenCombineAsync(extractedFuture, (mappings, minecraft) -> {
-                    try {
-                        return this.remapMinecraft(minecraft, mappings);
-                    } catch (final IOException ex) {
-                        throw new UncheckedIOException(ex);
-                    }
-                }, libraryManager.preparationWorker());
-                remappedMinecraftJar = remappedMinecraftJarFuture.get();
+                remappedMinecraftJar = extractedFuture.get();
             }
         } catch (final ExecutionException ex) {
             final /* @Nullable */ Throwable cause = ex.getCause();
