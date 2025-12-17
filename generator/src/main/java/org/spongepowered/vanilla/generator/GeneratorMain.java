@@ -59,6 +59,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -129,6 +131,8 @@ public final class GeneratorMain {
         // Load resource packs, see WorldStem.load
         // and call to WorldStem.load in net.minecraft.server.Main
         // We don't currently try to load any datapacks here
+        final ExecutorService executor = Executors.newCachedThreadPool();
+
         final var packRepository = ServerPacksSource.createVanillaTrustedRepository();
         MinecraftServer.configurePackRepository(packRepository, WorldDataConfiguration.DEFAULT, /* safeMode = */ false, true);
         final CloseableResourceManager rm = new MultiPackResourceManager(PackType.SERVER_DATA, packRepository.openAllSelected());
@@ -138,10 +142,10 @@ public final class GeneratorMain {
         List<Registry.PendingTags<?>> pendingTags = TagLoader.loadTagsForExistingRegistries(rm, staticRegistries.getLayer(RegistryLayer.STATIC));
         final var wga = staticRegistries.getAccessForLoading(RegistryLayer.WORLDGEN);
         List<HolderLookup.RegistryLookup<?>> tl = TagLoader.buildUpdatedLookups(wga, pendingTags);
-        RegistryAccess.Frozen wgr = RegistryDataLoader.load(rm, tl, RegistryDataLoader.WORLDGEN_REGISTRIES);
+        RegistryAccess.Frozen wgr = RegistryDataLoader.load(rm, tl, RegistryDataLoader.WORLDGEN_REGISTRIES, executor).join();
         List<HolderLookup.RegistryLookup<?>> cl = Stream.concat(tl.stream(), wgr.listRegistries()).toList();
         final LayeredRegistryAccess<RegistryLayer> withWorldGen = staticRegistries.replaceFrom(RegistryLayer.WORLDGEN, wgr);
-        RegistryAccess.Frozen da = RegistryDataLoader.load(rm, cl, RegistryDataLoader.DIMENSION_REGISTRIES);
+        RegistryAccess.Frozen da = RegistryDataLoader.load(rm, cl, RegistryDataLoader.DIMENSION_REGISTRIES, executor).join();
         final LayeredRegistryAccess<RegistryLayer> withDimensions = withWorldGen.replaceFrom(RegistryLayer.DIMENSIONS, da);
         TagLoader.loadTagsForExistingRegistries(rm, withDimensions.getLayer(RegistryLayer.WORLDGEN));
 
@@ -153,12 +157,13 @@ public final class GeneratorMain {
             packRepository.getRequestedFeatureFlags(),
             CommandSelection.ALL,
             LevelBasedPermissionSet.ALL_PERMISSIONS, // functionPermissionLevel
-            Util.backgroundExecutor(), // prepareExecutor
+            executor, // prepareExecutor
             Runnable::run // applyExecutor
         ).whenComplete((result, ex) -> {
             if (ex != null) {
                 rm.close();
             }
+            executor.shutdown();
         }).thenApply(resources -> {
             resources.updateStaticRegistryTags();
             return resources;
@@ -170,6 +175,7 @@ public final class GeneratorMain {
         try {
             resources = resourcesFuture.get();
         } catch (final InterruptedException | ExecutionException ex) {
+            executor.shutdown();
             Logger.error(ex, "Failed to load registries/datapacks");
             System.exit(1);
             throw new RuntimeException();
