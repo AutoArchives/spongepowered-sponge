@@ -56,7 +56,7 @@ public abstract class SpongeItemList implements HolderSet<Item> {
     @Override
     public Stream<Holder<Item>> stream() {
         return Arrays.stream(this.stacks)
-            .map(ItemStack::getItemHolder);
+            .map(ItemStack::typeHolder);
     }
 
     @Override
@@ -78,13 +78,13 @@ public abstract class SpongeItemList implements HolderSet<Item> {
     public Optional<Holder<Item>> getRandomElement(RandomSource source) {
         return this.stacks.length == 0 ? Optional.empty() :
             Optional.of(Util.getRandom(this.stacks, source)).
-                map(ItemStack::getItemHolder);
+                map(ItemStack::typeHolder);
     }
 
     @Override
     public Holder<Item> get(int var1) {
         final var stack = this.stacks[var1];
-        return stack.getItemHolder();
+        return stack.typeHolder();
     }
 
     @Override
@@ -106,7 +106,7 @@ public abstract class SpongeItemList implements HolderSet<Item> {
     @Override
     public @NotNull Iterator<Holder<Item>> iterator() {
         return Arrays.stream(this.stacks)
-            .map(ItemStack::getItemHolder)
+            .map(ItemStack::typeHolder)
             .iterator();
     }
 

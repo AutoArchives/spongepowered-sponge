@@ -520,7 +520,7 @@ public final class SpongeAdventure {
                 final var stack = si.item();
                 final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
                 yield HoverEvent.showItem(
-                    SpongeAdventure.asAdventure(stack.getItemHolder().unwrap().map(ResourceKey::identifier, itemRegistry::getKey)),
+                    SpongeAdventure.asAdventure(stack.typeHolder().unwrap().map(ResourceKey::identifier, itemRegistry::getKey)),
                     stack.getCount(),
                     SpongeAdventure.asAdventure(stack.getComponentsPatch())
                 );

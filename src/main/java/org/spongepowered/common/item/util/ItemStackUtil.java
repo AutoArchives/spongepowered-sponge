@@ -57,7 +57,7 @@ public abstract class ItemStackUtil {
         }
         return switch ((Object) stack) {
             case net.minecraft.world.item.ItemStack itemStack:
-                yield new TransmuteResult(itemStack.getItemHolder(), itemStack.getCount(), itemStack.getComponentsPatch());
+                yield new TransmuteResult(itemStack.typeHolder(), itemStack.getCount(), itemStack.getComponentsPatch());
             case SpongeItemStackSnapshot snapshot:
                 final var direct = Holder.direct(((Item) stack.type()));
                 yield new TransmuteResult(direct, snapshot.quantity(), snapshot.getComponentsPatch());

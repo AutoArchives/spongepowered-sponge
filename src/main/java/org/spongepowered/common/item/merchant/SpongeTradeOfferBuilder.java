@@ -146,7 +146,7 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @NotNull
     private static ItemCost itemCostOf(final net.minecraft.world.item.ItemStack stack) {
-        return new ItemCost(stack.getItemHolder(), stack.getCount(), DataComponentExactPredicate.allOf(stack.getComponents()), stack);
+        return new ItemCost(stack.typeHolder(), stack.getCount(), DataComponentExactPredicate.allOf(stack.getComponents()), stack);
     }
 
     @Override

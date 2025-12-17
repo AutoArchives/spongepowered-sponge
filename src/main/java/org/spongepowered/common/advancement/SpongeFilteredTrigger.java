@@ -27,7 +27,7 @@ package org.spongepowered.common.advancement;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.criterion.CriterionValidator;
+import net.minecraft.world.level.storage.loot.ValidationContextSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
@@ -70,8 +70,7 @@ public final class SpongeFilteredTrigger implements CriterionTriggerInstance, Fi
     }
 
     @Override
-    public void validate(final CriterionValidator var1) {
+    public void validate(ValidationContextSource validator) {
 
     }
-
 }

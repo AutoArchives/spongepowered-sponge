@@ -52,13 +52,13 @@ public abstract class TagLoaderMixin_Vanilla<T> implements TagLoaderBridge<T> {
         return this.bridge$acceptTag(instance, lookup, consumer, original::call, $$1, entry);
     }
 
-    @Inject(method = "lambda$build$5", at = @At("HEAD"))
+    @Inject(method = "lambda$build$1", at = @At("HEAD"))
     private void vanilla$onStartBuildingTag(final TagEntry.Lookup<T> $$0x, final Map<Identifier, Collection<T>> $$1x, final Identifier $$2x,
             final @Coerce Object $$3x, final CallbackInfo ci) {
         this.bridge$buildingTagKey($$2x);
     }
 
-    @Inject(method = "lambda$build$5", at = @At("RETURN"))
+    @Inject(method = "lambda$build$1", at = @At("RETURN"))
     private void vanilla$onDoneBuildingTag(final CallbackInfo ci) {
         this.bridge$buildingTagKey(null);
     }

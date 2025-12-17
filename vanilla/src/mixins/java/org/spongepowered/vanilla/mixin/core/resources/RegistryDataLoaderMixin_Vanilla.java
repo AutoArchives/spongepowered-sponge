@@ -30,13 +30,14 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.util.DependencySorter;
 import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.accessor.resources.RegistryDataLoader_LoaderAccessor;
+import org.spongepowered.common.accessor.resources.RegistryDataLoader_ResourceManagerRegistryLoadTaskAccessor;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
-import org.spongepowered.common.bridge.resources.RegistryDataLoader_LoaderBridge;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.registry.SpongeRegistryDependencyEntry;
@@ -53,19 +54,20 @@ import java.util.stream.Stream;
 public class RegistryDataLoaderMixin_Vanilla {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    @WrapOperation(method = "load(Lnet/minecraft/resources/RegistryDataLoader$LoadingFunction;Ljava/util/List;Ljava/util/List;)Lnet/minecraft/core/RegistryAccess$Frozen;",
-        at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V", ordinal = 1))
-    private static void impl$onLoad(final List<RegistryDataLoader_LoaderAccessor<?>> instance, final Consumer<?> consumer, final Operation<Void> original) {
+    @WrapOperation(method = "lambda$load$2(Ljava/util/List;Ljava/util/Map;Ljava/lang/Void;)Lnet/minecraft/core/RegistryAccess$Frozen;",
+        at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V"))
+    private static void impl$onLoad(final List<RegistryDataLoader_LoaderAccessor<?>> instance, final Consumer consumer, Operation<Void> original) {
         // TODO: Remote layer
         final DependencySorter<RegistryType<?>, SpongeRegistryDependencyEntry<RegistryDataLoader_LoaderAccessor<?>>> dependencies = new DependencySorter<>();
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         instance.stream()
-            .filter(l -> ((RegistryDataLoader_LoaderBridge) l).bridge$registryHolder() != null)
-            .collect(Collectors.groupingBy(l -> ((RegistryDataLoader_LoaderBridge) l).bridge$registryHolder(), Collectors.toSet()))
+            .filter(l -> l instanceof RegistryDataLoader_ResourceManagerRegistryLoadTaskAccessor)
+            .collect(Collectors.groupingBy(l -> ((RegistryDataLoader_ResourceManagerRegistryLoadTaskAccessor)l).accessor$getResourceManager(), Collectors.toSet()))
             .forEach((k, v) -> {
+                final var registryHolder = (RegistryHolder) k;
                 ((SpongeRegistryHolder) k).setRootMinecraftRegistry(new RegistryAccess.ImmutableRegistryAccess(
-                    (List) Stream.concat(k.streamRegistries(RegistryRoots.MINECRAFT), v.stream().map(RegistryDataLoader_LoaderAccessor::accessor$registry)).toList()));
-                lifecycle.processServerRegistries(k, v.stream()
+                    (List) Stream.concat(registryHolder.streamRegistries(RegistryRoots.MINECRAFT), v.stream().map(RegistryDataLoader_LoaderAccessor::accessor$registry)).toList()));
+                lifecycle.processServerRegistries(registryHolder, v.stream()
                     .filter(l -> !RegistryDataLoader.DIMENSION_REGISTRIES.contains(l.accessor$data())) // NOTE: DIMENSION_REGISTRIES are special!
                     .map(l -> (Registry<?>) l.accessor$registry()));
                 v.forEach(l -> dependencies.addEntry(((Registry<?>) l.accessor$registry()).type(),

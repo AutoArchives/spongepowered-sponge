@@ -284,7 +284,7 @@
     "minecraft.world.entity.npc.villager.AbstractVillagerMixin_API",
     "minecraft.world.entity.npc.villager.VillagerMixin_API",
     "minecraft.world.entity.npc.villager.VillagerProfessionMixin_API",
-    "minecraft.world.entity.npc.villager.VillagerTrades_ItemListingMixin_API",
+    "minecraft.world.item.trading.VillagerTradeMixin_API",
     "minecraft.world.entity.npc.villager.VillagerTypeMixin_API",
     "minecraft.world.entity.npc.wanderingtrader.WanderingTraderMixin_API",
     "minecraft.world.entity.player.ChatVisiblityMixin_API",

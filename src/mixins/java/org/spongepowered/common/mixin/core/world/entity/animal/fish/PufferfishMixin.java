@@ -51,11 +51,10 @@ public class PufferfishMixin {
     }
 
     @WrapOperation(method = "lambda$static$0",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityType;is(Lnet/minecraft/tags/TagKey;)Z")
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;is(Lnet/minecraft/tags/TagKey;)Z")
     )
     private static boolean impl$considerVanishedEntitiesWithTyeps(
-        final EntityType<?> entityType, final TagKey<EntityType<?>> tagKey, final Operation<Boolean> operation,
-        final LivingEntity entity, final ServerLevel level
+        final LivingEntity entity, final TagKey<EntityType<?>> tagKey, final Operation<Boolean> operation
     ) {
         if (entity instanceof VanishableBridge vb) {
             if (vb.bridge$vanishState().untargetable()) {
@@ -63,6 +62,6 @@ public class PufferfishMixin {
                 return true;
             }
         }
-        return operation.call(entityType, tagKey);
+        return operation.call(entity, tagKey);
     }
 }

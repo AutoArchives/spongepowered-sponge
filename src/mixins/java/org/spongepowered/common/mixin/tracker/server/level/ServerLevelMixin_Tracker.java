@@ -146,7 +146,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     @WrapOperation(
             // This normally would target this.entityTickList.forEach((var2x) ->
             // but we don't have lambda syntax support yet.
-            method = "lambda$tick$2",
+            method = "lambda$tick$0",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/server/level/ServerLevel;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V")

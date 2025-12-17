@@ -29,7 +29,7 @@ import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -232,11 +232,11 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     public boolean onClick(
-        final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final Container container) {
+        final int slotId, final int dragType, final ContainerInput clickTypeIn, final Player player, final Container container) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(player);
             final Cause cause = frame.currentCause();
-            if (clickTypeIn == ClickType.QUICK_CRAFT) {
+            if (clickTypeIn == ContainerInput.QUICK_CRAFT) {
                 return this.onClickDrag(cause, slotId, dragType, container);
             }
             final Optional<org.spongepowered.api.item.inventory.Slot> slot = container.slot(slotId);
@@ -338,7 +338,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     private boolean onClickRight(
-        final Cause cause, final SlotClickHandler handler, final ClickType clickTypeIn, final Container container,
+        final Cause cause, final SlotClickHandler handler, final ContainerInput clickTypeIn, final Container container,
                                  final int idx, final org.spongepowered.api.item.inventory.Slot slot) {
         switch (clickTypeIn) {
             case PICKUP:
@@ -354,7 +354,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     private Boolean onClickLeft(
-        final Cause cause, final SlotClickHandler handler, final ClickType clickTypeIn, final Container container,
+        final Cause cause, final SlotClickHandler handler, final ContainerInput clickTypeIn, final Container container,
                                 final int idx, final org.spongepowered.api.item.inventory.Slot slot) {
         switch (clickTypeIn) {
             case PICKUP:

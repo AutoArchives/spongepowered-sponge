@@ -43,29 +43,34 @@ import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 
 @Mixin(WorldLoader.class)
 public abstract class WorldLoaderMixin {
 
-    @WrapOperation(method = "load", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/WorldLoader$PackConfig;createResourceManager()Lcom/mojang/datafixers/util/Pair;"))
-    private static Pair<WorldDataConfiguration, CloseableResourceManager> impl$onCreateResourceManager(final WorldLoader.PackConfig instance,
-            final Operation<Pair<WorldDataConfiguration, CloseableResourceManager>> original, final @Local(argsOnly = true) WorldLoader.InitConfig $$0) {
-        final Pair<WorldDataConfiguration, CloseableResourceManager> pair = original.call(instance);
-        final CloseableResourceManager resourceManager = pair.getSecond();
-        final Lifecycle lifecycle = Launch.instance().lifecycle();
-        var permLevel = $$0.functionCompilationPermissions() == PermissionSet.ALL_PERMISSIONS ? PermissionLevel.OWNERS : PermissionLevel.ALL;
-        if ($$0.functionCompilationPermissions() instanceof LevelBasedPermissionSet lbps) {
-            permLevel = lbps.level();
-        }
-        lifecycle.establishServerServices(resourceManager, permLevel);
-        lifecycle.setWorldDataConfiguration(pair.getFirst());
-        lifecycle.beginEstablishServerRegistries((RegistryHolder) resourceManager);
-        return pair;
+    @WrapOperation(method = "load(Lnet/minecraft/server/WorldLoader$InitConfig;Lnet/minecraft/server/WorldLoader$WorldDataSupplier;Lnet/minecraft/server/WorldLoader$ResultFactory;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", at = @At(value = "INVOKE",
+            target = "Ljava/util/concurrent/CompletableFuture;supplyAsync(Ljava/util/function/Supplier;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", remap = false))
+    private static CompletableFuture<Pair<WorldDataConfiguration, CloseableResourceManager>> impl$onCreateResourceManager(
+        final Supplier<Pair<WorldDataConfiguration, CloseableResourceManager>> supplier, final Executor executor, final Operation<CompletableFuture<Pair<WorldDataConfiguration, CloseableResourceManager>>> original,
+        final @Local(argsOnly = true) WorldLoader.InitConfig $$0) {
+        return original.call(supplier, executor).thenApply(pair -> {
+            final CloseableResourceManager resourceManager = pair.getSecond();
+            final Lifecycle lifecycle = Launch.instance().lifecycle();
+            var permLevel = $$0.functionCompilationPermissions() == PermissionSet.ALL_PERMISSIONS ? PermissionLevel.OWNERS : PermissionLevel.ALL;
+            if ($$0.functionCompilationPermissions() instanceof LevelBasedPermissionSet lbps) {
+                permLevel = lbps.level();
+            }
+            lifecycle.establishServerServices(resourceManager, permLevel);
+            lifecycle.setWorldDataConfiguration(pair.getFirst());
+            lifecycle.beginEstablishServerRegistries((RegistryHolder) resourceManager);
+            return pair;
+        });
     }
 
-    @ModifyExpressionValue(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldLoader$WorldDataSupplier;get(Lnet/minecraft/server/WorldLoader$DataLoadContext;)Lnet/minecraft/server/WorldLoader$DataLoadOutput;"))
+    @ModifyExpressionValue(method = "lambda$load$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldLoader$WorldDataSupplier;get(Lnet/minecraft/server/WorldLoader$DataLoadContext;)Lnet/minecraft/server/WorldLoader$DataLoadOutput;"))
     private static WorldLoader.DataLoadOutput<?> impl$onBakedDimensionRegistries(final WorldLoader.DataLoadOutput<?> original,
             final @Local CloseableResourceManager resourceManager) {
         original.finalDimensions().registries().forEach(r -> ((WritableRegistryBridge<?>) r.value()).bridge$unfreeze());

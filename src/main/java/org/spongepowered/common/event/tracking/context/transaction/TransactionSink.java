@@ -30,7 +30,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
@@ -340,7 +340,7 @@ interface TransactionSink {
     }
 
     default EffectTransactor logClickContainer(
-        final AbstractContainerMenu menu, final int slotNum, final int buttonNum, final ClickType clickType, final Player player
+        final AbstractContainerMenu menu, final int slotNum, final int buttonNum, final ContainerInput clickType, final Player player
     ) {
         @Nullable Slot slot = null;
         if (buttonNum >= 0) { // Try to get valid slot - might not be present e.g. for drag-events

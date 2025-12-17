@@ -21,3 +21,4 @@ accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
 accessible class net/minecraft/core/MappedRegistry$TagSet
 accessible class net/minecraft/world/level/BaseCommandBlock$CloseableCommandBlockSource
 accessible class net/minecraft/world/entity/monster/illager/SpellcasterIllager$IllagerSpell
+accessible class net/minecraft/resources/RegistryDataLoader$RegistryLoadTask

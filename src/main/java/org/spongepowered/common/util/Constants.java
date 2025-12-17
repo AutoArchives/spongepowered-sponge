@@ -44,7 +44,7 @@ import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Relative;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -480,13 +480,13 @@ public final class Constants {
         public static final int CLICK_OUTSIDE_WINDOW = 0x01 << 16 << 1;
         public static final int CLICK_ANYWHERE = Networking.CLICK_INSIDE_WINDOW | Networking.CLICK_OUTSIDE_WINDOW;
         // Modes flags
-        public static final int MODE_CLICK = 0x01 << 9 << ClickType.PICKUP.ordinal();
-        public static final int MODE_SHIFT_CLICK = 0x01 << 9 << ClickType.QUICK_MOVE.ordinal();
-        public static final int MODE_HOTBAR = 0x01 << 9 << ClickType.SWAP.ordinal();
-        public static final int MODE_PICKBLOCK = 0x01 << 9 << ClickType.CLONE.ordinal();
-        public static final int MODE_DROP = 0x01 << 9 << ClickType.THROW.ordinal();
-        public static final int MODE_DRAG = 0x01 << 9 << ClickType.QUICK_CRAFT.ordinal();
-        public static final int MODE_DOUBLE_CLICK = 0x01 << 9 << ClickType.PICKUP_ALL.ordinal();
+        public static final int MODE_CLICK = 0x01 << 9 << ContainerInput.PICKUP.ordinal();
+        public static final int MODE_SHIFT_CLICK = 0x01 << 9 << ContainerInput.QUICK_MOVE.ordinal();
+        public static final int MODE_HOTBAR = 0x01 << 9 << ContainerInput.SWAP.ordinal();
+        public static final int MODE_PICKBLOCK = 0x01 << 9 << ContainerInput.CLONE.ordinal();
+        public static final int MODE_DROP = 0x01 << 9 << ContainerInput.THROW.ordinal();
+        public static final int MODE_DRAG = 0x01 << 9 << ContainerInput.QUICK_CRAFT.ordinal();
+        public static final int MODE_DOUBLE_CLICK = 0x01 << 9 << ContainerInput.PICKUP_ALL.ordinal();
         // Drag mode flags, bitmasked from button and only set if MODE_DRAG
         public static final int DRAG_MODE_PRIMARY_BUTTON = 0x01 << 6; // << 0
         public static final int DRAG_MODE_SECONDARY_BUTTON = 0x01 << 6 << 1;

@@ -45,7 +45,7 @@ import java.util.List;
 @Mixin(ReloadableServerResources.class)
 public abstract class ReloadableServerResourcesMixin_Vanilla {
 
-    @WrapOperation(method = "lambda$loadResources$1", at = @At(value = "NEW", target = "(Lnet/minecraft/core/LayeredRegistryAccess;Lnet/minecraft/core/HolderLookup$Provider;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;Ljava/util/List;Lnet/minecraft/server/permissions/PermissionSet;)Lnet/minecraft/server/ReloadableServerResources;"))
+    @WrapOperation(method = "lambda$loadResources$0", at = @At(value = "NEW", target = "(Lnet/minecraft/core/LayeredRegistryAccess;Lnet/minecraft/core/HolderLookup$Provider;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;Ljava/util/List;Lnet/minecraft/server/permissions/PermissionSet;)Lnet/minecraft/server/ReloadableServerResources;"))
     private static ReloadableServerResources impl$onCreateResources(
         final LayeredRegistryAccess<RegistryLayer> $$0, final HolderLookup.Provider $$1, final FeatureFlagSet $$2,
         final Commands.CommandSelection $$3, final List<?> $$4, final PermissionSet $$5,

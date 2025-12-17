@@ -47,7 +47,7 @@ import org.spongepowered.common.util.PrettyPrinter;
 @Mixin(ChunkStatusTasks.class)
 public abstract class ChunkStatusTasksMixin_Tracker {
 
-    @Inject(method = "lambda$full$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"), slice = @Slice(
+    @Inject(method = "lambda$full$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setFullStatus(Ljava/util/function/Supplier;)V"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V")
     ))
@@ -80,7 +80,7 @@ public abstract class ChunkStatusTasksMixin_Tracker {
                 .buildAndSwitch();
     }
 
-    @Inject(method = "lambda$full$2",
+    @Inject(method = "lambda$full$0",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V", shift = At.Shift.BY, by = 2),
         slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"))
     )

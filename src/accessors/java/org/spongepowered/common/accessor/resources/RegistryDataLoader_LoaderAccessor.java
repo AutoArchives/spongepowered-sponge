@@ -29,7 +29,7 @@ import net.minecraft.resources.RegistryDataLoader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(targets = "net/minecraft/resources/RegistryDataLoader$Loader")
+@Mixin(RegistryDataLoader.RegistryLoadTask.class)
 public interface RegistryDataLoader_LoaderAccessor<T> {
 
     @Accessor("data") RegistryDataLoader.RegistryData<T> accessor$data();

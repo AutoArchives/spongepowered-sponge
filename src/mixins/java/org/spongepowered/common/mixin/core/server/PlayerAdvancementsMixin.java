@@ -159,7 +159,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
         }
     }
 
-    @Redirect(method = "lambda$award$2",
+    @Redirect(method = "lambda$award$0",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))

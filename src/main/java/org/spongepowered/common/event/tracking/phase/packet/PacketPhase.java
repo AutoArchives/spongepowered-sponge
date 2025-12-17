@@ -234,7 +234,7 @@ public final class PacketPhase {
     // Inventory packet specific methods
 
     private static BasicInventoryPacketState fromWindowPacket(final ServerboundContainerClickPacket windowPacket) {
-        final int mode = 0x01 << 9 << windowPacket.clickType().ordinal();
+        final int mode = 0x01 << 9 << windowPacket.containerInput().ordinal();
         final int packed = windowPacket.buttonNum();
         final int unpacked = mode == Constants.Networking.MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
 

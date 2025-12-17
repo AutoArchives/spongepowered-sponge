@@ -24,22 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.resources;
 
-import com.mojang.serialization.Decoder;
 import net.minecraft.core.RegistrationInfo;
-import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ChatTypeDecoration;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryDataLoader;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.api.adventure.ChatTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.resources.RegistryDataLoader_RegistryLoadTaskAccessor;
 
 import java.util.Map;
 
@@ -47,19 +44,15 @@ import java.util.Map;
 public class RegistryDataLoaderMixin {
 
     @SuppressWarnings("unchecked")
-    @Inject(method = "loadContentsFromManager", at = @At("RETURN"))
+    @Inject(method = "lambda$load$3", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/WritableRegistry;freeze()Lnet/minecraft/core/Registry;"))
     private static <E> void impl$afterLoadRegistryContents(
-            final ResourceManager $$0,
-            final RegistryOps.RegistryInfoLookup $$1,
-            final WritableRegistry<E> $$2,
-            final Decoder<E> $$3,
-            final Map<ResourceKey<?>, Exception> $$4,
-            final CallbackInfo ci)
-    {
-        if (Registries.CHAT_TYPE.equals($$2.key())) {
+        final Map loadingErrors, final RegistryDataLoader.RegistryLoadTask<E> p, CallbackInfo ci
+    ) {
+        final var registry = ((RegistryDataLoader_RegistryLoadTaskAccessor<E>) p).accessor$getRegistry();
+        if (Registries.CHAT_TYPE.equals(registry.key())) {
             final ChatTypeDecoration narration = ChatTypeDecoration.withSender("chat.type.text.narrate");
-            $$2.register(ResourceKey.create($$2.key(), (Identifier) (Object) ChatTypes.CUSTOM_CHAT.location()), (E) new ChatType(ChatTypeDecoration.withSender("%s%s"), narration), RegistrationInfo.BUILT_IN);
-            $$2.register(ResourceKey.create($$2.key(), (Identifier) (Object) ChatTypes.CUSTOM_MESSAGE.location()), (E) new ChatType(ChatTypeDecoration.teamMessage("%s%s%s"), narration), RegistrationInfo.BUILT_IN);
+            registry.register(ResourceKey.create(registry.key(), (Identifier) (Object) ChatTypes.CUSTOM_CHAT.location()), (E) new ChatType(ChatTypeDecoration.withSender("%s%s"), narration), RegistrationInfo.BUILT_IN);
+            registry.register(ResourceKey.create(registry.key(), (Identifier) (Object) ChatTypes.CUSTOM_MESSAGE.location()), (E) new ChatType(ChatTypeDecoration.teamMessage("%s%s%s"), narration), RegistrationInfo.BUILT_IN);
         }
     }
 

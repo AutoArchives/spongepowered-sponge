@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.item.merchant;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.npc.villager.VillagerTrades;
-import net.minecraft.world.item.trading.MerchantOffer;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.util.RandomProvider;
@@ -36,17 +31,12 @@ import org.spongepowered.api.util.RandomProvider;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public final class TradeOfferGeneratorWrapper implements VillagerTrades.ItemListing, TradeOfferGenerator {
+public final class TradeOfferGeneratorWrapper implements TradeOfferGenerator {
 
     private final TradeOfferGenerator generator;
 
     public TradeOfferGeneratorWrapper(final TradeOfferGenerator generator) {
         this.generator = generator;
-    }
-
-    @Override
-    public MerchantOffer getOffer(final ServerLevel level, final Entity trader, final RandomSource rand) {
-        return (MerchantOffer) this.generator.apply((org.spongepowered.api.entity.Entity) trader, (RandomProvider.Source) rand);
     }
 
     @Override

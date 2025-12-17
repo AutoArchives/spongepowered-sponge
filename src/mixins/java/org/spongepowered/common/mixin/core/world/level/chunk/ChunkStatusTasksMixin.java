@@ -96,7 +96,7 @@ public abstract class ChunkStatusTasksMixin {
         } //Sponge end
     }
 
-    @Inject(method = "lambda$full$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"))
+    @Inject(method = "lambda$full$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"))
     private static void impl$onLoad(final CallbackInfoReturnable<ChunkAccess> cir, @Local() final LevelChunk levelChunk) {
         final Vector3i chunkPos = VecHelper.toVector3i(levelChunk.getPos());
         if (ShouldFire.CHUNK_EVENT_BLOCKS_LOAD) {

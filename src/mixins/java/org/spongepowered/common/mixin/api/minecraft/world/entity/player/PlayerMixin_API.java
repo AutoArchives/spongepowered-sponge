@@ -141,7 +141,7 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
 
     @Override
     public void playSound(final Sound sound, final double x, final double y, final double z) {
-        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.playSound(sound, this.shadow$level().random, x, y, z));
+        ((ViewerBridge) this).bridge$sendToViewer(ViewerPacketUtil.playSound(sound, this.shadow$level().getRandom(), x, y, z));
     }
 
     @Override

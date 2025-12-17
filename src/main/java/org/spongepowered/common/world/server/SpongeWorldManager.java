@@ -948,7 +948,7 @@ public class SpongeWorldManager implements WorldManager {
                     } else if (worldData.worldGenOptions().generateBonusChest()) {
                         final BlockPos pos = levelData.getRespawnData().pos();
                         final ConfiguredFeature<?, ?> bonusChestFeature = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE).getValue(MiscOverworldFeatures.BONUS_CHEST);
-                        bonusChestFeature.place(level, level.getChunkSource().getGenerator(), level.random, pos);
+                        bonusChestFeature.place(level, level.getChunkSource().getGenerator(), level.getRandom(), pos);
                     }
                     levelData.setInitialized(true);
                     if (isDebugGeneration) {

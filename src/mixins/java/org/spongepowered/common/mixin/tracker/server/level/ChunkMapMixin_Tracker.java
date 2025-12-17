@@ -60,7 +60,7 @@ public abstract class ChunkMapMixin_Tracker {
         return exception;
     }
 
-    @Redirect(method = "lambda$prepareTickingChunk$25",
+    @Redirect(method = "lambda$prepareTickingChunk$2",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;startTickingChunk(Lnet/minecraft/world/level/chunk/LevelChunk;)V"))
     private void tracker$wrapUnpackTicks(final ServerLevel level, final LevelChunk chunk) {
         final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(level);

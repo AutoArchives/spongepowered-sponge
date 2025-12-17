@@ -46,7 +46,7 @@ public final class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> 
                     new ShulkerBullet(shulker.level(), shulker, (Entity) args[0], shulker.getAttachFace().getAxis());
             shulker.level().addFreshEntity(bullet);
             shulker.playSound(SoundEvents.SHULKER_SHOOT,
-                    2.0F, (shulker.level().random.nextFloat() - shulker.level().random.nextFloat()) * 0.2F + 1.0F);
+                    2.0F, (shulker.level().getRandom().nextFloat() - shulker.level().getRandom().nextFloat()) * 0.2F + 1.0F);
 
             return Optional.of((P) bullet);
         }

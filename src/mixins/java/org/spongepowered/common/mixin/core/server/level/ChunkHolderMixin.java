@@ -58,7 +58,7 @@ abstract class ChunkHolderMixin extends GenerationChunkHolderMixin {
     /**
      * After onFullChunkStatusChange
      */
-    @Inject(method = "lambda$scheduleFullChunkPromotion$4", at = @At("TAIL"))
+    @Inject(method = "lambda$scheduleFullChunkPromotion$0", at = @At("TAIL"))
     private void impl$onScheduleFullChunkPromotion(final ChunkMap $$0x, final FullChunkStatus $$1x, final CallbackInfo ci) {
         if ($$1x == FullChunkStatus.ENTITY_TICKING) {
             this.shadow$getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK).ifSuccess(chunk -> {

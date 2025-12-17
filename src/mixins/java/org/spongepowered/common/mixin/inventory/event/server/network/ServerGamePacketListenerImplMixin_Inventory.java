@@ -39,7 +39,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
@@ -85,7 +85,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     private void impl$onPickItem(final InventoryMenu menu, final Operation<Void> original) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        try (final EffectTransactor ignored = transactor.logClickContainer(menu, this.player.getInventory().getSelectedSlot(), 0, ClickType.PICKUP, this.player)) {
+        try (final EffectTransactor ignored = transactor.logClickContainer(menu, this.player.getInventory().getSelectedSlot(), 0, ContainerInput.PICKUP, this.player)) {
             original.call(menu);
         }
     }
@@ -117,13 +117,13 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     private void impl$onSpectatorClick(final AbstractContainerMenu menu, final ServerboundContainerClickPacket packet) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        try (final EffectTransactor ignored = transactor.logClickContainer(menu, packet.slotNum(), packet.buttonNum(), packet.clickType(),
+        try (final EffectTransactor ignored = transactor.logClickContainer(menu, packet.slotNum(), packet.buttonNum(), packet.containerInput(),
             this.player
         )) {
             if (menu instanceof MenuBridge bridge) {
                 final SpongeInventoryMenu spongeMenu = bridge.bridge$getMenu();
                 if (spongeMenu != null) {
-                    spongeMenu.onClick(packet.slotNum(), packet.buttonNum(), packet.clickType(), this.player, ((Container) menu));
+                    spongeMenu.onClick(packet.slotNum(), packet.buttonNum(), packet.containerInput(), this.player, ((Container) menu));
                 }
             }
             menu.sendAllDataToRemote();

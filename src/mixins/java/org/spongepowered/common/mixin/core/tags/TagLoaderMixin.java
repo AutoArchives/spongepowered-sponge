@@ -183,11 +183,13 @@ public abstract class TagLoaderMixin<T> implements TagLoaderBridge<T> {
     }
 
     @SuppressWarnings("unchecked")
-    @WrapOperation(method = "loadTagsForRegistry", at = @At(value = "NEW", target = "Lnet/minecraft/tags/TagLoader;"))
-    private static <T> TagLoader<T> impl$onLoadTagsForRegistry(final TagLoader.ElementLookup<T> $$0, final String $$1, final Operation<TagLoader<T>> original,
-            final ResourceManager resourceManager, final WritableRegistry<T> registry) {
-        final TagLoader<T> loader = original.call($$0, $$1);
-        ((TagLoaderBridge<T>) loader).bridge$registryKey(registry.key());
+    @WrapOperation(method = "loadTagsForRegistry(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/tags/TagLoader$ElementLookup;)Ljava/util/Map;", at = @At(value = "NEW", target = "Lnet/minecraft/tags/TagLoader;"))
+    private static <T> TagLoader<T> impl$onLoadTagsForRegistry(
+        final TagLoader.ElementLookup elementLookup, final String directory, final Operation<TagLoader> original,
+        final ResourceManager resourceManager, final net.minecraft.resources.ResourceKey<? extends Registry<T>> registryKey, final TagLoader.ElementLookup<Holder<T>> lookup
+        ) {
+        final TagLoader<T> loader = original.call(elementLookup, directory);
+        ((TagLoaderBridge<T>) loader).bridge$registryKey(registryKey);
         return loader;
     }
 

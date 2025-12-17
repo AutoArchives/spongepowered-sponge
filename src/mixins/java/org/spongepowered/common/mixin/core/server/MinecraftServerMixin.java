@@ -34,7 +34,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.Component;
-import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionManager;
@@ -82,6 +81,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.accessor.util.BlockableEventLoopAccessor;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
@@ -274,7 +274,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      * @author Zidane
      * @reason Apply our branding
      */
-    @DontObfuscate
     @Overwrite
     public String getServerModName() {
         return "sponge";
@@ -510,7 +509,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Inject(method = "pollTaskInternal", at = @At("HEAD"), cancellable = true)
     private void impl$pollSpongeTasks(final CallbackInfoReturnable<Boolean> cir) {
         //Pool our tasks first to try to have small impact on timings
-        if (this.impl$spongeMainThreadExecutor.pollTask()) {
+        if (((BlockableEventLoopAccessor) this.impl$spongeMainThreadExecutor).invoker$pollTask()) {
             cir.setReturnValue(true);
         }
     }

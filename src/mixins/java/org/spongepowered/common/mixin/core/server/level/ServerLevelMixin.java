@@ -527,7 +527,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
     }
 
-    @WrapOperation(method = "lambda$updatePOIOnBlockStateChange$15",
+    @WrapOperation(method = "lambda$updatePOIOnBlockStateChange$3",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Holder;)Lnet/minecraft/world/entity/ai/village/poi/PoiRecord;"

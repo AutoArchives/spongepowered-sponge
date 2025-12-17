@@ -30,7 +30,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.ContainerSynchronizer;
 import net.minecraft.world.inventory.DataSlot;
@@ -82,7 +82,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Shadow @Final private NonNullList<RemoteSlot> remoteSlots;
     @Shadow @Nullable private ContainerSynchronizer synchronizer;
 
-    @Shadow protected abstract void shadow$doClick(int param0, int param1, ClickType param2, Player param3);
+    @Shadow protected abstract void shadow$doClick(int param0, int param1, ContainerInput param2, Player param3);
     @Shadow protected abstract void shadow$updateDataSlotListeners(int $$0, int $$1);
     @Shadow protected abstract void shadow$synchronizeDataSlotToRemote(int $$0, int $$1);
     @Shadow protected abstract void shadow$synchronizeCarriedToRemote();
@@ -113,10 +113,10 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         ),
         slice = @Slice(
             from = @At(value = "FIELD",
-                target = "Lnet/minecraft/world/inventory/ClickType;SWAP:Lnet/minecraft/world/inventory/ClickType;"
+                target = "Lnet/minecraft/world/inventory/ContainerInput;SWAP:Lnet/minecraft/world/inventory/ContainerInput;"
             ),
             to = @At(value = "FIELD",
-                target = "Lnet/minecraft/world/inventory/ClickType;CLONE:Lnet/minecraft/world/inventory/ClickType;"
+                target = "Lnet/minecraft/world/inventory/ContainerInput;CLONE:Lnet/minecraft/world/inventory/ContainerInput;"
             )
         )
     )
@@ -137,14 +137,14 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             ),
             slice = @Slice(
                     from = @At(value = "FIELD",
-                            target = "Lnet/minecraft/world/inventory/ClickType;SWAP:Lnet/minecraft/world/inventory/ClickType;"
+                            target = "Lnet/minecraft/world/inventory/ContainerInput;SWAP:Lnet/minecraft/world/inventory/ContainerInput;"
                     ),
                     to = @At(value = "FIELD",
-                            target = "Lnet/minecraft/world/inventory/ClickType;CLONE:Lnet/minecraft/world/inventory/ClickType;"
+                            target = "Lnet/minecraft/world/inventory/ContainerInput;CLONE:Lnet/minecraft/world/inventory/ContainerInput;"
                     )
             )
     )
-    private ItemStack impl$handleUnviewedSlotSwap2(final ItemStack origin, final int splitOff, int $$0, int index, ClickType $$2, Player $$3) {
+    private ItemStack impl$handleUnviewedSlotSwap2(final ItemStack origin, final int splitOff, int $$0, int index, ContainerInput $$2, Player $$3) {
         Inventory inv = $$3.getInventory();
         if (!PhaseTracker.getWorldInstance().onSidedThread() || inv.player.inventoryMenu == inv.player.containerMenu || Inventory.isHotbarSlot(index)) {
             return origin.split(splitOff);
@@ -165,10 +165,10 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         ),
         slice = @Slice(
             from = @At(value = "FIELD",
-                target = "Lnet/minecraft/world/inventory/ClickType;THROW:Lnet/minecraft/world/inventory/ClickType;"
+                target = "Lnet/minecraft/world/inventory/ContainerInput;THROW:Lnet/minecraft/world/inventory/ContainerInput;"
             ),
             to = @At(value = "FIELD",
-                target = "Lnet/minecraft/world/inventory/ClickType;PICKUP_ALL:Lnet/minecraft/world/inventory/ClickType;"
+                target = "Lnet/minecraft/world/inventory/ContainerInput;PICKUP_ALL:Lnet/minecraft/world/inventory/ContainerInput;"
             )
         )
     )
@@ -204,10 +204,10 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Redirect(
             method = "clicked",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;doClick(IILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)V"))
+                    target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;doClick(IILnet/minecraft/world/inventory/ContainerInput;Lnet/minecraft/world/entity/player/Player;)V"))
     private void inventory$wrapDoClickWithTransaction(
             final AbstractContainerMenu menu, final int slotId, final int dragType,
-            final ClickType clickType,
+            final ContainerInput clickType,
             final Player player
     ) {
         if (((LevelBridge) player.level()).bridge$isFake() || player.level().isClientSide()) {

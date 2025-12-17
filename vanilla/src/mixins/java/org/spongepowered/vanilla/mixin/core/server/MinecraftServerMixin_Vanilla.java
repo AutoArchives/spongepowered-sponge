@@ -59,13 +59,13 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
         Launch.instance().lifecycle().callStoppingEngineEvent(this);
     }
 
-    @ModifyExpressionValue(method = "lambda$reloadResources$29", at = @At(value = "NEW", target = "Lnet/minecraft/server/packs/resources/MultiPackResourceManager;"))
+    @ModifyExpressionValue(method = "lambda$reloadResources$1", at = @At(value = "NEW", target = "Lnet/minecraft/server/packs/resources/MultiPackResourceManager;"))
     private MultiPackResourceManager impl$onReloadResources(final MultiPackResourceManager original) {
         ((MinecraftServerBridge) this).bridge$reloadServerRegistries((RegistryHolder) original);
         return original;
     }
 
-    @Inject(method = "lambda$reloadResources$30", at = @At("TAIL"))
+    @Inject(method = "lambda$reloadResources$4", at = @At("TAIL"))
     public void impl$onReloadedResources(final Collection<?> $$0x, final @Coerce MinecraftServer_ReloadableResourcesAccessor $$1x, final CallbackInfo ci) {
         ((MinecraftServerBridge) this).bridge$reloadedServerRegistries(((SpongeRegistryHolder) $$1x.accessor$resourceManager()).registryHolder());
     }

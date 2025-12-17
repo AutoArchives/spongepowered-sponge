@@ -558,7 +558,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         }
     }
 
-    @Redirect(method = "lambda$handleChatCommand$8", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performUnsignedChatCommand(Ljava/lang/String;)V"))
+    @Redirect(method = "lambda$handleChatCommand$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performUnsignedChatCommand(Ljava/lang/String;)V"))
     public void impl$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final String $$0) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this.player);
@@ -567,7 +567,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         }
     }
 
-    @Redirect(method = "lambda$handleSignedChatCommand$9", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performSignedChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandSignedPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
+    @Redirect(method = "lambda$handleSignedChatCommand$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performSignedChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandSignedPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
     public void impl$onPerformSignedChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandSignedPacket $$0, final LastSeenMessages $$1) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(this.player);

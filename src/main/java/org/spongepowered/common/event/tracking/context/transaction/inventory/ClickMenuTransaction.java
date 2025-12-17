@@ -30,7 +30,7 @@ import net.minecraft.network.protocol.game.ServerboundPickItemFromEntityPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
@@ -53,13 +53,13 @@ public class ClickMenuTransaction extends ContainerBasedTransaction {
     private final ServerPlayer player;
     private final int slotNum;
     private final int buttonNum;
-    private final ClickType clickType;
+    private final ContainerInput clickType;
     private final @Nullable Slot slot;
     private final ItemStackSnapshot cursor;
 
     public ClickMenuTransaction(
         final Player player, final AbstractContainerMenu menu, final int slotNum, final int buttonNum,
-        final ClickType clickType,
+        final ContainerInput clickType,
         final @Nullable Slot slot,
         final ItemStackSnapshot cursor
     ) {

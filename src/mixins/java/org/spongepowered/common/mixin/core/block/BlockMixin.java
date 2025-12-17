@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -70,13 +72,12 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge {
             target = "Lnet/minecraft/world/level/block/Block;popResource(Lnet/minecraft/world/level/Level;Ljava/util/function/Supplier;Lnet/minecraft/world/item/ItemStack;)V"
         ),
         cancellable = true,
-        locals = LocalCapture.CAPTURE_FAILSOFT,
         require = 0,
         expect = 0
     )
     private static void impl$throwConstructPreEvent(
-        final Level level, final BlockPos pos, final ItemStack stack, final CallbackInfo ci, final double $$3,
-        final double xPos, final double yPos, final double zPos
+        final Level level, final BlockPos pos, final ItemStack itemStack, final CallbackInfo ci,
+        @Local(index = 6) final double x, @Local(index = 8) final double y, @Local(index = 10) final double z
     ) {
         if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             return;
@@ -85,7 +86,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(level.getBlockState(pos));
             final ConstructEntityEvent.Pre eventPre = SpongeEventFactory.createConstructEntityEventPre(
-                frame.currentCause(), ServerLocation.of((ServerWorld) level, xPos, yPos, zPos), Vector3d.ZERO,
+                frame.currentCause(), ServerLocation.of((ServerWorld) level, x, y, z), Vector3d.ZERO,
                 EntityTypes.ITEM.get()
             );
             SpongeCommon.post(eventPre);
@@ -101,13 +102,12 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge {
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/Block;popResource(Lnet/minecraft/world/level/Level;Ljava/util/function/Supplier;Lnet/minecraft/world/item/ItemStack;)V"
         ),
-        cancellable = true,
-        locals = LocalCapture.CAPTURE_FAILSOFT
+        cancellable = true
     )
     private static void impl$throwConstructPreEvent(
         final Level level, final BlockPos pos, final Direction direction, final ItemStack stack, final CallbackInfo ci,
-        final int stepX, final int stepY, final int stepZ, final double itemWidthX, final double itemWidthZ,
-        final double xPos, final double yPos, final double zPos, final double xMov, final double yMov, final double zMov
+        final @Local(index = 12) double x, final @Local(index = 14) double y, final @Local(index = 16) double z,
+        final @Local(index = 18) double xMov, final @Local(index = 20) double yMov, final @Local(index = 22) double zMov
     ) {
         if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             return;
@@ -116,7 +116,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.pushCause(level.getBlockState(pos));
             final ConstructEntityEvent.Pre eventPre = SpongeEventFactory.createConstructEntityEventPre(
-                frame.currentCause(), ServerLocation.of((ServerWorld) level, xPos, yPos, zPos), new Vector3d(xMov, yMov, zMov),
+                frame.currentCause(), ServerLocation.of((ServerWorld) level, x, y, z), new Vector3d(xMov, yMov, zMov),
                 EntityTypes.ITEM.get()
             );
             SpongeCommon.post(eventPre);

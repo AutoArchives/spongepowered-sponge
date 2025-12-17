@@ -216,11 +216,11 @@ public final class EntityData {
                     .create(Keys.SCALE)
                         .get(h -> 1d)
                     .create(Keys.SCOREBOARD_TAGS)
-                        .get(Entity::getTags)
-                        .delete(h -> h.getTags().clear())
+                        .get(Entity::entityTags)
+                        .delete(h -> h.entityTags().clear())
                         .set((h, v) -> {
-                            h.getTags().clear();
-                            h.getTags().addAll(v);
+                            h.entityTags().clear();
+                            h.entityTags().addAll(v);
                         })
                     .create(Keys.VEHICLE)
                         .get(h -> (org.spongepowered.api.entity.Entity) h.getVehicle())

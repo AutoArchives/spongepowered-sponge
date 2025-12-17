@@ -28,7 +28,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickAction;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -69,7 +69,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     // Called when clicking in an inventory
     // InventoryMenu Callback
     @Inject(method = "doClick", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onClick(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfo ci) {
+    private void impl$onClick(final int slotId, final int dragType, final ContainerInput clickTypeIn, final Player player, final CallbackInfo ci) {
         final SpongeInventoryMenu menu = this.bridge$getMenu();
         if (menu != null) {
             if (!menu.onClick(slotId, dragType, clickTypeIn, player, (org.spongepowered.api.item.inventory.Container) this)) {
