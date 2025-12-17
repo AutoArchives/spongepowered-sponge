@@ -51,7 +51,7 @@ jobs:
         id: setup
         uses: SpongePowered/.github/.github/actions/setup-java-env@master
         with:
-          runtime_version: 21
+          runtime_version: 25
           publishing_branch_regex: ''
       - name: setup / minecraft cache
         if: "!(matrix.skipUpdateBranch && startsWith(github.ref, 'refs/heads/update/'))"
