@@ -229,10 +229,7 @@ dependencies {
     testImplementation(apiLibs.junit.launcher)
     testRuntimeOnly(apiLibs.junit.engine)
 
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.junitJupiter) {
-        exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
-    }
+    testImplementation(apiLibs.mockito)
 
     testRuntimeOnly(libs.jacoco.core) {
         exclude(group = "org.ow2.asm")

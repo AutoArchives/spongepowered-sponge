@@ -25,13 +25,9 @@
 package org.spongepowered.common.util.transformation;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
@@ -54,8 +50,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 public final class VolumeTransformationTest {
 
     private static final Vector3i INVALID_STUB_POSITION = Vector3i.from(

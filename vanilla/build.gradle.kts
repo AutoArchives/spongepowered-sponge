@@ -35,6 +35,8 @@ val gameManagedLibrariesConfig = configurations.register("gameManagedLibraries")
 val bootShadedLibrariesConfig = configurations.register("bootShadedLibraries")
 val gameShadedLibrariesConfig = configurations.register("gameShadedLibraries")
 
+val testModulesConfig = configurations.register("testModules")
+
 // ModLauncher layers
 val bootLayerConfig = configurations.register("bootLayer") {
     extendsFrom(bootLibrariesConfig.get())
@@ -143,6 +145,10 @@ val testSources = sourceSets.named("test") {
 
     spongeImpl.addDependencyToImplementation(bootstrapMain.get(), this)
     spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(testModulesConfig.get())
+    }
 }
 
 val mixinConfigs = spongeImpl.mixinConfigurations
@@ -256,10 +262,8 @@ dependencies {
     testImplementation(apiLibs.junit.launcher)
     testRuntimeOnly(apiLibs.junit.engine)
 
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.junitJupiter) {
-        exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
-    }
+    val test = testModulesConfig.name
+    test(apiLibs.mockito)
 
     testRuntimeOnly(libs.jacoco.core) {
         exclude(group = "org.ow2.asm")
@@ -504,6 +508,8 @@ tasks {
 
         val runServer = minecraft.runs.server().get()
         jvmArgs(runServer.allJvmArguments())
+        jvmArgs("--module-path=" + testModulesConfig.get().asPath)
+        jvmArgs("--add-modules=net.bytebuddy.agent,net.bytebuddy")
         jvmArgs("-Dsponge.test.args=" + runServer.allArguments().joinToString(" "))
         jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
         jvmArgs("-Djunit.platform.launcher.interceptors.enabled=true")
