@@ -26,11 +26,6 @@ package org.spongepowered.vanilla.installer;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import net.minecraftforge.fart.api.Renamer;
-import net.minecraftforge.fart.api.SignatureStripperConfig;
-import net.minecraftforge.fart.api.SourceFixerConfig;
-import net.minecraftforge.fart.api.Transformer;
-import net.minecraftforge.srgutils.IMappingFile;
 import org.spongepowered.bootstrap.forge.VanillaBootstrap;
 import org.spongepowered.libs.LibraryManager;
 import org.spongepowered.libs.LibraryUtils;
@@ -50,15 +45,12 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.AccessDeniedException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,7 +69,6 @@ public final class InstallerMain {
 
     private static final String COLLECTION_BOOTSTRAP = "bootstrap"; // boot layer
     private static final String COLLECTION_MAIN = "main"; // game layer
-    private static final int MAX_TRIES = 2;
 
     private final Installer installer;
     private final boolean isolated;
@@ -104,35 +95,32 @@ public final class InstallerMain {
     }
 
     private void downloadAndRun() throws Exception {
-        ServerAndLibraries remappedMinecraftJar = null;
+        ServerAndLibraries extractedMinecraftJar = null;
         Version mcVersion = null;
         try {
             mcVersion = this.downloadMinecraftManifest();
         } catch (final IOException ex) {
-            remappedMinecraftJar = this.recoverFromMinecraftDownloadError(ex);
+            extractedMinecraftJar = this.recoverFromMinecraftDownloadError(ex);
         }
 
         final LibraryManager libraryManager = this.installer.getLibraryManager();
         try {
             if (mcVersion != null) {
-                final CompletableFuture<Path> originalMcFuture = this.downloadMinecraft(mcVersion);
-                final CompletableFuture<ServerAndLibraries> extractedFuture = originalMcFuture
-                    .thenApplyAsync(this::extractBundle, libraryManager.preparationWorker());
-                remappedMinecraftJar = extractedFuture.get();
+                extractedMinecraftJar = this.downloadMinecraft(mcVersion).thenApplyAsync(this::extractBundle, libraryManager.preparationWorker()).get();
             }
         } catch (final ExecutionException ex) {
             final /* @Nullable */ Throwable cause = ex.getCause();
-            remappedMinecraftJar = this.recoverFromMinecraftDownloadError(cause instanceof Exception ? (Exception) cause : ex);
+            extractedMinecraftJar = this.recoverFromMinecraftDownloadError(cause instanceof Exception ? (Exception) cause : ex);
         }
-        assert remappedMinecraftJar != null; // always assigned or thrown
+        assert extractedMinecraftJar != null; // always assigned or thrown
 
         libraryManager.validate();
 
         // Minecraft itself is on the main layer
-        libraryManager.addLibrary(InstallerMain.COLLECTION_MAIN, new LibraryManager.Library("minecraft", remappedMinecraftJar.server()));
+        libraryManager.addLibrary(InstallerMain.COLLECTION_MAIN, new LibraryManager.Library("minecraft", extractedMinecraftJar.server()));
 
         // Other libs are on the bootstrap layer
-        for (final Map.Entry<GroupArtifactVersion, Path> entry : remappedMinecraftJar.libraries().entrySet()) {
+        for (final Map.Entry<GroupArtifactVersion, Path> entry : extractedMinecraftJar.libraries().entrySet()) {
             final GroupArtifactVersion artifact = entry.getKey();
             final Path path = entry.getValue();
 
@@ -211,10 +199,9 @@ public final class InstallerMain {
 
     private <T extends Throwable> ServerAndLibraries recoverFromMinecraftDownloadError(final T ex) throws T {
         final Path expectedUnpacked = this.expectedMinecraftLocation(Constants.Libraries.MINECRAFT_VERSION_TARGET);
-        final Path expectedRemapped = this.expectedRemappedLocation(expectedUnpacked);
         // Re-read bundler metadata (needs original bundled location)
-        if (Files.exists(expectedRemapped)) {
-            Logger.warn(ex, "Failed to download and remap Minecraft. An existing jar exists, so we will attempt to use that instead.");
+        if (Files.exists(expectedUnpacked)) {
+            Logger.warn(ex, "Failed to download Minecraft. An existing jar exists, so we will attempt to use that instead.");
             return this.extractBundle(this.expectedBundleLocation(expectedUnpacked));
         } else {
             throw ex;
@@ -274,10 +261,6 @@ public final class InstallerMain {
         return this.installer.getLibraryManager().getRootDirectory().resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX)
             .resolve(version)
             .resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
-    }
-
-    private Path expectedRemappedLocation(final Path originalLocation) {
-        return originalLocation.resolveSibling(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "-remapped.jar");
     }
 
     private Path expectedBundleLocation(final Path originalLocation) {
@@ -372,137 +355,9 @@ public final class InstallerMain {
         }
     }
 
-    private CompletableFuture<Path> downloadMappings(final Version version) {
-        return LibraryUtils.asyncFailableFuture(() -> {
-            Logger.info("Setting up names for Minecraft {}", Constants.Libraries.MINECRAFT_VERSION_TARGET);
-            final Path downloadTarget = this.installer.getLibraryManager().getRootDirectory().resolve(Constants.Libraries.MINECRAFT_MAPPINGS_PREFIX)
-                    .resolve(Constants.Libraries.MINECRAFT_VERSION_TARGET)
-                    .resolve(Constants.Libraries.MINECRAFT_MAPPINGS_NAME);
-
-            final Version.Downloads.Download mappings = version.downloads().server_mappings();
-            if (mappings == null) {
-                throw new IOException(String.format("Mappings were not included in version manifest for %s", Constants.Libraries.MINECRAFT_VERSION_TARGET));
-            }
-
-            final boolean checkHashes = this.installer.getConfig().checkLibraryHashes();
-            if (Files.exists(downloadTarget)) {
-                if (checkHashes) {
-                    Logger.info("Detected existing mappings, verifying hashes...");
-                    if (LibraryUtils.validateDigest("SHA-1", mappings.sha1(), downloadTarget)) {
-                        Logger.info("Mappings verified!");
-                        return downloadTarget;
-                    } else {
-                        Logger.error("Checksum verification failed: Expected {}. Deleting cached server mappings file...", mappings.sha1());
-                        Files.delete(downloadTarget);
-                    }
-                } else {
-                    return downloadTarget;
-                }
-            }
-
-            if (this.installer.getConfig().autoDownloadLibraries()) {
-                if (checkHashes) {
-                    LibraryUtils.downloadAndVerifyDigest(TinyLogger.INSTANCE, mappings.url(), downloadTarget, "SHA-1", mappings.sha1());
-                } else {
-                    LibraryUtils.download(TinyLogger.INSTANCE, mappings.url(), downloadTarget, false);
-                }
-            } else {
-                throw new IOException(String.format("Mappings were not located at '%s' and downloading them has been turned off.", downloadTarget));
-            }
-
-            return downloadTarget;
-        }, this.installer.getLibraryManager().preparationWorker());
-    }
-
-    private ServerAndLibraries remapMinecraft(final ServerAndLibraries minecraft, final Path serverMappings) throws IOException {
-        Logger.info("Checking if we need to remap Minecraft...");
-        final Path outputJar = this.expectedRemappedLocation(minecraft.server());
-        final Path tempOutput = outputJar.resolveSibling(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_remapped.jar.tmp");
-
-        if (Files.exists(outputJar)) {
-            Logger.info("Remapped Minecraft detected, skipping...");
-            return minecraft.server(outputJar);
-        }
-
-        Logger.info("Remapping Minecraft. This may take a while...");
-        final IMappingFile mappings = IMappingFile.load(serverMappings.toFile()).reverse();
-
-        final Renamer.Builder renamerBuilder = Renamer.builder()
-            .add(Transformer.parameterAnnotationFixerFactory())
-            .add(ctx -> {
-                final Transformer backing = Transformer.renamerFactory(mappings, false).create(ctx);
-                return new Transformer() {
-                    @Override
-                    public ClassEntry process(final ClassEntry entry) {
-                        final String name = entry.getName();
-                        if (name.startsWith("it/unimi")
-                            || name.startsWith("com/google")
-                            || name.startsWith("com/mojang/datafixers")
-                            || name.startsWith("com/mojang/brigadier")
-                            || name.startsWith("org/apache")) {
-                            return entry;
-                        }
-                        return backing.process(entry);
-                    }
-
-                    @Override
-                    public ManifestEntry process(final ManifestEntry entry) {
-                        return backing.process(entry);
-                    }
-
-                    @Override
-                    public ResourceEntry process(final ResourceEntry entry) {
-                        return backing.process(entry);
-                    }
-
-                    @Override
-                    public Collection<? extends Entry> getExtras() {
-                        return backing.getExtras();
-                    }
-                };
-            })
-            .add(Transformer.recordFixerFactory())
-            .add(Transformer.parameterAnnotationFixerFactory())
-            .add(Transformer.sourceFixerFactory(SourceFixerConfig.JAVA))
-            .add(Transformer.signatureStripperFactory(SignatureStripperConfig.ALL))
-            .logger(Logger::debug); // quiet
-
-        try (final Renamer ren = renamerBuilder.build()) {
-            ren.run(minecraft.server.toFile(), tempOutput.toFile());
-        }
-
-        // Restore file
-        try {
-            Files.move(tempOutput, outputJar, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        } catch (final AccessDeniedException ex) {
-            // Sometimes because of file locking this will fail... Let's just try again and hope for the best
-            // Thanks Windows!
-            for (int tries = 0; tries < InstallerMain.MAX_TRIES; ++tries) {
-                // Pause for a bit
-                try {
-                    Thread.sleep(5 * tries);
-                    Files.move(tempOutput, outputJar, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-                } catch (final AccessDeniedException ex2) {
-                    if (tries == InstallerMain.MAX_TRIES - 1) {
-                        throw ex;
-                    }
-                } catch (final InterruptedException exInterrupt) {
-                    Thread.currentThread().interrupt();
-                    throw ex;
-                }
-            }
-        }
-
-        return minecraft.server(outputJar);
-    }
-
     record ServerAndLibraries(Path server, Map<GroupArtifactVersion, Path> libraries) {
         ServerAndLibraries {
             libraries = Map.copyOf(libraries);
-        }
-
-        public ServerAndLibraries server(final Path server) {
-            return new ServerAndLibraries(server, this.libraries);
         }
     }
 }

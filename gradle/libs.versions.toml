@@ -6,7 +6,6 @@ format = { version = "1.1" }
 [versions]
 asm = "9.8"
 log4j = "2.24.1"
-forgeAutoRenamingTool = "1.0.6"
 mixin = "0.8.7"
 mixinextras = "0.5.0"
 modlauncher = "10.2.2"
@@ -54,7 +53,6 @@ mixinextras-forge = { module = "io.github.llamalad7:mixinextras-forge", version.
 jacoco-core = { module = "org.jacoco:org.jacoco.core", version.ref = "jacoco" }
 
 # vanilla
-forgeAutoRenamingTool = { module = "net.minecraftforge:ForgeAutoRenamingTool", version.ref = "forgeAutoRenamingTool" }
 jarjar-fs = { module = "net.minecraftforge:JarJarFileSystems", version.ref = "jarjar" }
 jline-reader = { module = "org.jline:jline-reader", version.ref = "jline" }
 jline-terminal = { module = "org.jline:jline-terminal", version.ref = "jline" }

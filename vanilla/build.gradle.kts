@@ -182,11 +182,6 @@ dependencies {
     installer(libs.tinylog.api)
     installer(libs.tinylog.impl)
 
-    installer(libs.forgeAutoRenamingTool) {
-        exclude(group = "net.sf.jopt-simple")
-        exclude(group = "org.ow2.asm")
-    }
-
     installer(project(libraryManagerProject.path))
 
     // optional at runtime
