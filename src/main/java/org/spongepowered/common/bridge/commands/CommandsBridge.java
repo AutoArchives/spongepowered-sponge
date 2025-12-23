@@ -29,4 +29,6 @@ import org.spongepowered.common.command.manager.SpongeCommandManager;
 public interface CommandsBridge {
 
     SpongeCommandManager bridge$commandManager();
+
+    void bridge$endVanillaRegistration();
 }
