@@ -22,28 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.levelgen.structure;
+package org.spongepowered.common.bridge.world.level.storage;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.common.bridge.world.level.storage.DimensionDataStorageBridge;
 
-import java.util.Optional;
+public interface DimensionDataStorageBridge {
 
-@Mixin(LegacyStructureDataHandler.class)
-public abstract class LegacyStructureDataHandlerMixin {
+    void bridge$dimensionKey(@Nullable ResourceLocation dimensionKey);
 
-    @ModifyVariable(method = "getLegacyStructureHandler", at = @At("HEAD"), argsOnly = true)
-    private static ResourceKey<Level> impl$fixupLevelDimension(final ResourceKey<Level> dimension, final ResourceKey<Level> $$0, final @Nullable DimensionDataStorage $$1) {
-        return Optional.ofNullable(((DimensionDataStorageBridge) $$1).bridge$dimensionKey())
-            .map(k -> ResourceKey.create(Registries.DIMENSION, k))
-            .orElse(dimension);
-    }
+    @Nullable ResourceLocation bridge$dimensionKey();
 }
