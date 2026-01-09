@@ -39,8 +39,11 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
+import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.resolver.SpongeSuggestionTreeResolver;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -50,7 +53,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Mixin(Commands.class)
-public abstract class CommandsMixin_Forge {
+public abstract class CommandsMixin_Forge implements CommandsBridge {
 
     private SpongeCommandManager impl$commandManager;
 
@@ -86,5 +89,10 @@ public abstract class CommandsMixin_Forge {
                 rootSuggestion.addChild((CommandNode<T>) node);
             }
         }
+    }
+
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/event/ForgeEventFactory;onCommandRegister(Lcom/mojang/brigadier/CommandDispatcher;Lnet/minecraft/commands/Commands$CommandSelection;Lnet/minecraft/commands/CommandBuildContext;)V", unsafe = true))
+    private void forge$tellDispatcherCommandsAreRegistered(final CallbackInfo ci) {
+        this.bridge$endVanillaRegistration();
     }
 }
