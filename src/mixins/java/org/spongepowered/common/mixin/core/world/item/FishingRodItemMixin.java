@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -34,8 +36,8 @@ import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.projectile.FishingBobber;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,11 +50,9 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(FishingRodItem.class)
 public abstract class FishingRodItemMixin {
 
-    @Nullable private FishingHook impl$fishHook;
-
     @Inject(method = "use", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
             target = "Lnet/minecraft/world/entity/projectile/FishingHook;retrieve(Lnet/minecraft/world/item/ItemStack;)I"), cancellable = true)
-    private void cancelHookRetraction(Level world, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+    private void impl$cancelHookRetraction(Level world, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         if (player.fishing != null) {
             cir.setReturnValue(InteractionResult.SUCCESS); // Event was cancelled
         }
@@ -61,7 +61,8 @@ public abstract class FishingRodItemMixin {
     @Inject(method = "use", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V", ordinal = 1),
             cancellable = true)
-    private void onThrowEvent(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+    private void impl$onThrowEvent(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir,
+            @Share("entity") LocalRef<FishingHook> entityRef) {
         if (level.isClientSide) {
             // Only fire event on server-side to avoid crash on client
             return;
@@ -73,23 +74,23 @@ public abstract class FishingRodItemMixin {
             int $$7 = EnchantmentHelper.getFishingLuckBonus(serverLevel, itemstack, player);
             FishingHook fishHook = new FishingHook(player, level, $$7, $$6);
 
-            PhaseTracker.getInstance().pushCause(player);
-            if (SpongeCommon.post(SpongeEventFactory.createFishingEventStart(PhaseTracker.getInstance().currentCause(), (FishingBobber) fishHook))) {
-                fishHook.remove(Entity.RemovalReason.DISCARDED); // Bye
-                cir.setReturnValue(InteractionResult.SUCCESS);
-            } else {
-                this.impl$fishHook = fishHook;
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+                frame.pushCause(player);
+                if (SpongeCommon.post(SpongeEventFactory.createFishingEventStart(PhaseTracker.getInstance().currentCause(), (FishingBobber) fishHook))) {
+                    fishHook.remove(Entity.RemovalReason.DISCARDED); // Bye
+                    cir.setReturnValue(InteractionResult.SUCCESS);
+                } else {
+                    entityRef.set(fishHook);
+                }
             }
-            PhaseTracker.getInstance().popCause();
         }
     }
 
     @Redirect(method = "use", at = @At(value = "NEW", target = "net/minecraft/world/entity/projectile/FishingHook"))
-    private FishingHook onNewEntityFishHook(final Player $$0, final Level $$1, final int $$2, final int $$3) {
+    private FishingHook impl$onNewEntityFishHook(final Player $$0, final Level $$1, final int $$2, final int $$3,
+            @Share("entity") LocalRef<FishingHook> entityRef) {
         // Use the fish hook we created for the event
-        FishingHook fishHook = this.impl$fishHook;
-        this.impl$fishHook = null;
-        return fishHook;
+        return entityRef.get();
     }
 
 }

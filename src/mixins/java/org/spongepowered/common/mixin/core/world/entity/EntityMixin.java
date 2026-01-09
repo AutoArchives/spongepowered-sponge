@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Cancellable;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
@@ -93,7 +94,6 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -104,7 +104,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
-import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.PortalProcessorAccessor;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -184,6 +183,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract boolean shadow$onGround();
     @Shadow @Nullable protected abstract String shadow$getEncodeId();
     @Shadow @javax.annotation.Nullable public PortalProcessor portalProcess;
+    @Shadow public abstract void shadow$stopRiding();
     // @formatter:on
 
     @Shadow public abstract void move(final MoverType $$0, final Vec3 $$1);
@@ -258,23 +258,15 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public boolean bridge$dismountRidingEntity(final DismountType type) {
-        if (!this.shadow$level().isClientSide && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
-                frame.pushCause(this);
-                frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
-                if (SpongeCommon.post(SpongeEventFactory.
-                        createRideEntityEventDismount(frame.currentCause(), (org.spongepowered.api.entity.Entity) this.shadow$getVehicle()))) {
-                    return false;
-                }
-            }
+        final Entity vehicle = this.shadow$getVehicle();
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
+
+            this.shadow$stopRiding();
         }
 
-        final Entity tempEntity = this.shadow$getVehicle();
-        if (tempEntity != null) {
-            this.vehicle = null;
-            ((EntityAccessor) tempEntity).invoker$removePassenger((Entity) (Object) this);
-        }
-        return true;
+        return vehicle != this.shadow$getVehicle();
     }
 
     @Override
@@ -649,18 +641,26 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    /**
-     * @author rexbut - December 16th, 2016
-     * @reason - adjusted to support {@link DismountTypes}
-     */
-    @Overwrite
-    public void stopRiding() {
+    @Inject(method = "removeVehicle",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;vehicle:Lnet/minecraft/world/entity/Entity;", opcode = Opcodes.PUTFIELD), cancellable = true)
+    private void impl$onRemoveVehicle(final CallbackInfo ci) {
         final Entity vehicle = this.shadow$getVehicle();
         if (vehicle != null) {
-            if (vehicle.isRemoved()) {
-                this.bridge$dismountRidingEntity(DismountTypes.DEATH.get());
-            } else {
-                this.bridge$dismountRidingEntity(DismountTypes.PLAYER.get());
+            if (this.shadow$level().isClientSide || !ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
+                return;
+            }
+
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+                frame.pushCause(this);
+                if (!frame.currentContext().containsKey(EventContextKeys.DISMOUNT_TYPE)) {
+                    frame.addContext(EventContextKeys.DISMOUNT_TYPE, vehicle.isRemoved()
+                        ? DismountTypes.DEATH.get()
+                        : DismountTypes.PLAYER.get());
+                }
+                if (SpongeCommon.post(SpongeEventFactory.
+                    createRideEntityEventDismount(frame.currentCause(), (org.spongepowered.api.entity.Entity) this.shadow$getVehicle()))) {
+                    ci.cancel();
+                }
             }
         }
     }
@@ -740,25 +740,24 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    @Redirect(
+    @WrapOperation(
             method = "applyEffectsFromBlocks(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/Block;stepOn(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/Entity;)V"
             )
     )
-    private void impl$onStepOnCollide(final Block block, final Level world, final BlockPos pos, final BlockState state, final Entity entity) {
+    private void impl$onStepOnCollide(final Block block, final Level world, final BlockPos pos, final BlockState state, final Entity entity, final Operation<Void> original) {
         if (!ShouldFire.COLLIDE_BLOCK_EVENT_STEP_ON || world.isClientSide) {
-            block.stepOn(world, pos, state, entity);
+            original.call(block, world, pos, state, entity);
             return;
         }
 
         final org.spongepowered.api.util.Direction dir = org.spongepowered.api.util.Direction.NONE;
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, dir, SpongeCommonEventFactory.CollisionType.STEP_ON)) {
-            block.stepOn(world, pos, state, entity);
+            original.call(block, world, pos, state, entity);
             this.impl$lastCollidedBlockPos = pos;
         }
-
     }
 
     @Redirect(method = "checkInsideBlocks(Ljava/util/List;Ljava/util/Set;)V",

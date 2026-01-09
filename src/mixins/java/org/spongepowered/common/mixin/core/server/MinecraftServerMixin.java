@@ -500,8 +500,8 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             this.impl$serviceProvider.init();
 
             Util.blockUntilDone(e ->
-                SimpleReloadInstance.create(this.shadow$getResourceManager(), List.of(((ServerFunctionManagerAccessor) this.functionManager).accessor$library()),
-                    Util.backgroundExecutor(), e, CompletableFuture.completedFuture(Unit.INSTANCE), MinecraftServerMixin.LOGGER.isDebugEnabled()).done());
+                SimpleReloadInstance.of(this.shadow$getResourceManager(), List.of(((ServerFunctionManagerAccessor) this.functionManager).accessor$library()),
+                    Util.backgroundExecutor(), e, CompletableFuture.completedFuture(Unit.INSTANCE)).done());
         }
     }
 
