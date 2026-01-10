@@ -70,6 +70,7 @@ import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -115,6 +116,7 @@ import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
+import org.spongepowered.common.bridge.world.level.storage.DimensionDataStorageBridge;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
@@ -152,7 +154,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Shadow @Nullable private EndDragonFight dragonFight;
     @Shadow @Final List<ServerPlayer> players;
-
+    @Shadow public abstract DimensionDataStorage shadow$getDataStorage();
     // @formatter:on
 
 
@@ -231,6 +233,9 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
 
         super.bridge$adjustDimensionLogic(dimensionType);
+
+        ((DimensionDataStorageBridge) this.shadow$getDataStorage()).bridge$dimensionKey(
+            this.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE).getKey(dimensionType));
 
         // TODO Minecraft 1.16.2 - Rebuild level stems, get generator from type, set generator
         // TODO ...or cache generator on type?
