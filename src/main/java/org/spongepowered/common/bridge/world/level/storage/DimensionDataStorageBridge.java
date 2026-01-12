@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.commands;
+package org.spongepowered.common.bridge.world.level.storage;
 
-import org.spongepowered.common.command.manager.SpongeCommandManager;
+import net.minecraft.resources.Identifier;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface CommandsBridge {
+public interface DimensionDataStorageBridge {
 
-    SpongeCommandManager bridge$commandManager();
+    void bridge$dimensionKey(@Nullable Identifier dimensionKey);
 
-    void bridge$endVanillaRegistration();
+    @Nullable Identifier bridge$dimensionKey();
 }

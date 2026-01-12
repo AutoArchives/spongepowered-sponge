@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.adventure;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Message;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
@@ -41,6 +42,7 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.EntityNBTComponent;
 import net.kyori.adventure.text.KeybindComponent;
 import net.kyori.adventure.text.NBTComponentBuilder;
+import net.kyori.adventure.text.ObjectComponent;
 import net.kyori.adventure.text.ScoreComponent;
 import net.kyori.adventure.text.SelectorComponent;
 import net.kyori.adventure.text.StorageNBTComponent;
@@ -56,6 +58,8 @@ import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.object.PlayerHeadObjectContents;
+import net.kyori.adventure.text.object.SpriteObjectContents;
 import net.kyori.adventure.text.renderer.ComponentRenderer;
 import net.kyori.adventure.text.renderer.TranslatableComponentRenderer;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -77,6 +81,7 @@ import net.minecraft.network.chat.HoverEvent.Action;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.KeybindContents;
 import net.minecraft.network.chat.contents.NbtContents;
+import net.minecraft.network.chat.contents.ObjectContents;
 import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.chat.contents.ScoreContents;
 import net.minecraft.network.chat.contents.SelectorContents;
@@ -84,6 +89,9 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.chat.contents.data.BlockDataSource;
 import net.minecraft.network.chat.contents.data.EntityDataSource;
 import net.minecraft.network.chat.contents.data.StorageDataSource;
+import net.minecraft.network.chat.contents.objects.AtlasSprite;
+import net.minecraft.network.chat.contents.objects.ObjectInfo;
+import net.minecraft.network.chat.contents.objects.PlayerSprite;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerBossEvent;
@@ -92,6 +100,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ResolvableProfile;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -315,8 +324,17 @@ public final class SpongeAdventure {
                 net.minecraft.network.chat.Component.nbt(storage.nbtPath(), storage.interpret(),
                     SpongeAdventure.asVanillaOpt(storage.separator()),
                     new StorageDataSource(SpongeAdventure.asVanilla(storage.storage())));
+            case ObjectComponent obj -> net.minecraft.network.chat.Component.object(SpongeAdventure.asVanilla(obj.contents()));
             default ->
                 throw new UnsupportedOperationException("Cannot convert Component of type " + component.getClass());
+        };
+    }
+
+    private static ObjectInfo asVanilla(final net.kyori.adventure.text.object.ObjectContents obj) {
+        return switch (obj) {
+            case SpriteObjectContents sprite -> new AtlasSprite(SpongeAdventure.asVanilla(sprite.atlas()), SpongeAdventure.asVanilla(sprite.sprite()));
+            case PlayerHeadObjectContents player ->  new PlayerSprite(player.id() == null ? ResolvableProfile.createUnresolved(player.name()) : ResolvableProfile.createUnresolved(player.id()), player.hat());
+            default -> throw new UnsupportedOperationException("Cannot convert ObjectContents of type " + obj.getClass());
         };
     }
 
@@ -370,9 +388,22 @@ public final class SpongeAdventure {
                     .interpret(nbt.isInterpreting())
                     .separator(SpongeAdventure.asAdventure(nbt.getSeparator()));
             }
+            case ObjectContents obj -> Component.object().contents(SpongeAdventure.asAdventure(obj.contents()));
             default ->
                 throw new UnsupportedOperationException("Cannot convert ComponentContents of type " + contents.getClass());
         };
+    }
+
+    private static net.kyori.adventure.text.object.ObjectContents asAdventure(final ObjectInfo info) {
+        switch (info) {
+            case AtlasSprite atlas:
+                return net.kyori.adventure.text.object.ObjectContents.sprite(SpongeAdventure.asAdventure(atlas.atlas()), SpongeAdventure.asAdventure(atlas.sprite()));
+            case PlayerSprite player:
+                final GameProfile profile = player.player().partialProfile();
+                return net.kyori.adventure.text.object.ObjectContents.playerHead().name(profile.name()).id(profile.id()).hat(player.hat()).build();
+            default:
+                throw new UnsupportedOperationException("Cannot convert ObjectInfo of type " + info.getClass());
+        }
     }
 
     public static @Nullable Component asAdventure(final Optional<net.minecraft.network.chat.Component> component) {

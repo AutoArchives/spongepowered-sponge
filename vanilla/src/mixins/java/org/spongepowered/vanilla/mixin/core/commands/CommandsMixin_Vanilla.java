@@ -34,8 +34,11 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
+import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.resolver.SpongeSuggestionTreeResolver;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -44,7 +47,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 @Mixin(Commands.class)
-public abstract class CommandsMixin_Vanilla {
+public abstract class CommandsMixin_Vanilla implements CommandsBridge {
 
     private SpongeCommandManager impl$commandManager;
 
@@ -69,5 +72,10 @@ public abstract class CommandsMixin_Vanilla {
                 rootSuggestion.addChild((CommandNode<S>) node);
             }
         }
+    }
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void vanilla$tellDispatcherCommandsAreRegistered(final CallbackInfo ci) {
+        this.bridge$endVanillaRegistration();
     }
 }

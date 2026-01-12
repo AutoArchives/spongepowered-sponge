@@ -24,31 +24,35 @@
  */
 package org.spongepowered.common.mixin.core.world.level.levelgen.structure;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.datafixers.DataFixer;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.storage.LegacyTagFixer;
 import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.bridge.world.level.storage.DimensionDataStorageBridge;
 
 import java.util.function.Supplier;
 
 @Mixin(LegacyStructureDataHandler.class)
 public abstract class LegacyStructureDataHandlerMixin {
 
-    /**
-     * @author zidane - November, 26th 2020 - Minecraft 1.15.2
-     * @reason Allow the platform to determine how to create the legacy structure data updater
-     */
-    @Overwrite
-    public static Supplier<LegacyTagFixer> getLegacyTagFixer(
-        final ResourceKey<Level> dimension,
-        final Supplier<DimensionDataStorage> savedData,
-        final DataFixer fixer
-    ) {
-        return () -> PlatformHooks.INSTANCE.getWorldGenerationHooks().createLegacyStructureDataUtil(dimension, savedData.get(), fixer);
+    @WrapMethod(method = "getLegacyTagFixer")
+    private static Supplier<LegacyTagFixer> impl$fixupLevelDimension(final ResourceKey<Level> dimension, final Supplier<@Nullable DimensionDataStorage> dataStorage,
+                                                                     final DataFixer fixer, final Operation<Supplier<LegacyTagFixer>> original) {
+        return () -> {
+            ResourceKey<Level> dim = dimension;
+            final Identifier dimKey = ((DimensionDataStorageBridge) dataStorage.get()).bridge$dimensionKey();
+            if (dimKey != null) {
+                dim = ResourceKey.create(Registries.DIMENSION, dimKey);
+            }
+            return original.call(dim, dataStorage, fixer).get();
+        };
     }
 }

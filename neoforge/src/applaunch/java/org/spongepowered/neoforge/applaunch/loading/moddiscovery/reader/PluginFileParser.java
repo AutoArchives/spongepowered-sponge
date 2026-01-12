@@ -61,7 +61,7 @@ public final class PluginFileParser {
                 container = MetadataParser.read(reader);
             }
 
-            final PluginFileConfigurable config = new PluginFileConfigurable(PluginMetadataFixer.fixPluginIds(container));
+            final PluginFileConfigurable config = new PluginFileConfigurable(PluginMetadataFixer.fixPluginIds(container), modFile.getContents().getManifest());
             return new ModFileInfo((ModFile) modFile, config, (info) -> {}, List.of());
         } catch (final Exception e) {
             AppLaunch.logger().warn("Could not read metadata for plugin file '{}'", modFile, e);

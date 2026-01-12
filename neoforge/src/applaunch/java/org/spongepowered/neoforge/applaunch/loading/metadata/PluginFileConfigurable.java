@@ -34,14 +34,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.jar.Manifest;
 
 // ModFileInfo
 public final class PluginFileConfigurable implements IConfigurable {
 
     private final MetadataContainer container;
+    private final Manifest manifest;
 
-    public PluginFileConfigurable(final MetadataContainer container) {
+    public PluginFileConfigurable(final MetadataContainer container, final Manifest manifest) {
         this.container = container;
+        this.manifest = manifest;
     }
 
     @SuppressWarnings("unchecked")
@@ -103,6 +106,19 @@ public final class PluginFileConfigurable implements IConfigurable {
             final List<IConfigurable> metadataConfigurables = new ArrayList<>();
             metadataById.forEach((metadata) -> metadataConfigurables.add(new PluginMetadataConfigurable(metadata)));
             return metadataConfigurables;
+        }
+
+        if ("mixins".equals(query)) {
+            final String mixinConfigs = this.manifest.getMainAttributes().getValue("MixinConfigs");
+            if (mixinConfigs == null) {
+                return Collections.emptyList();
+            }
+
+            final List<IConfigurable> mixinConfigurables = new ArrayList<>();
+            for (final String config : mixinConfigs.split(",")) {
+                mixinConfigurables.add(new PluginMixinConfigurable(config.trim()));
+            }
+            return mixinConfigurables;
         }
 
         if (key.length != 2) {

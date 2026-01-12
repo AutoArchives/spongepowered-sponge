@@ -34,9 +34,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
@@ -75,8 +73,7 @@ public abstract class CommandsMixin implements CommandsBridge {
         AdvancementCommands.register(dispatcher);
     }
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$tellDispatcherCommandsAreRegistered(final CallbackInfo ci) {
+    public void bridge$endVanillaRegistration() {
         if (this.impl$initFrame != null) {
             this.impl$initFrame.popCause();
             PhaseTracker.getInstance().popCauseFrame(this.impl$initFrame);

@@ -20,4 +20,5 @@ accessible class net/minecraft/world/entity/monster/SpellcasterIllager$IllagerSp
 accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
 accessible class net/minecraft/core/MappedRegistry$TagSet
 accessible class net/minecraft/world/level/BaseCommandBlock$CloseableCommandBlockSource
+accessible class net/minecraft/server/level/ServerChunkCache$MainThreadExecutor
 accessible class net/minecraft/world/entity/monster/illager/SpellcasterIllager$IllagerSpell
