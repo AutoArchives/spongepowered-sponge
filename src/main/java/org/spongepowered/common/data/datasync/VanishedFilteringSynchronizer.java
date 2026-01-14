@@ -54,6 +54,8 @@ public record VanishedFilteringSynchronizer(
         if (this.ref.get() instanceof VanishableBridge vb) {
             if (!vb.bridge$vanishState().invisible()) {
                 this.proxy.sendToTrackingPlayersAndSelf(var1);
+            } else if (this.ref.get() instanceof final ServerPlayer player) {
+                player.connection.send(var1);
             }
             return;
         }
