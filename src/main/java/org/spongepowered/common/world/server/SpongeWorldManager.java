@@ -887,11 +887,12 @@ public class SpongeWorldManager implements WorldManager {
         final PrimaryLevelData levelData) {
 
         final ResourceKey worldKey = (ResourceKey) (Object) registryKey.location();
+        final Registry<DimensionType> dimensionTypes = this.server.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
 
         MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}'", worldKey);
 
         final List<CustomSpawner> spawners;
-        if (levelStem.type().is(BuiltinDimensionTypes.OVERWORLD) || levelStem.type().is(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
+        if (levelStem.type().value() == dimensionTypes.getValue(BuiltinDimensionTypes.OVERWORLD) || levelStem.type().value() == dimensionTypes.getValue(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
             spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(levelData));
         } else {
             spawners = ImmutableList.of();
