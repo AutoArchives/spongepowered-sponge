@@ -38,9 +38,9 @@ public final class DimensionEffectProvider {
 
     public static DimensionEffectProvider INSTANCE = new DimensionEffectProvider();
 
-    private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.OVERWORLD);
-    private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.NETHER);
-    private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.END);
+    private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.OVERWORLD.identifier());
+    private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.NETHER.identifier());
+    private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.END.identifier());
 
     static {
         DimensionEffectProvider.INSTANCE.register(DimensionType.Skybox.OVERWORLD, OVERWORLD);
