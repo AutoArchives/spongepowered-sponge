@@ -21,6 +21,8 @@
          <trust group="org.codehaus.groovy" name="groovy-xml" reason="FIX"/>
          <trust file=".*-javadoc[.]jar" regex="true"/>
          <trust file=".*-sources[.]jar" regex="true"/>
+         <trust file=".*[.]pom" regex="true"/>
+         <trust file=".*[.]module" regex="true"/>
          <trust group="gradle" name="gradle" file="gradle-.*-src.zip" regex="true"/>
       </trusted-artifacts>
    </configuration>
