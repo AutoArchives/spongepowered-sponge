@@ -246,9 +246,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @Redirect(method = "createLevels", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;entrySet()Ljava/util/Set;"))
-    private Set<?> impl$onCreateOtherLevels(final Registry<?> stemRegistry) {
+    private Set<Map.Entry<ResourceKey<LevelStem>, LevelStem>> impl$onCreateOtherLevels(final Registry<LevelStem> stemRegistry) {
         this.worldManager().createNonDefaultLevels();
-        return Set.of(); // prevent vanilla code
+        // prevent vanilla code, except for the overworld as its special cased
+        return Set.of(Map.entry(LevelStem.OVERWORLD, stemRegistry.getValueOrThrow(LevelStem.OVERWORLD)));
     }
 
     @WrapMethod(method = "setInitialSpawn")
