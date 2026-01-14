@@ -5,7 +5,7 @@ format = { version = "1.1" }
 # See SpongeAPI's gradle/libs.versions.toml for many dependency declarations that Sponge also uses
 [versions]
 asm = "9.8"
-log4j = "2.24.1"
+log4j = "2.25.2"
 forgeAutoRenamingTool = "1.0.6"
 mixin = "0.8.7"
 mixinextras = "0.5.0"
