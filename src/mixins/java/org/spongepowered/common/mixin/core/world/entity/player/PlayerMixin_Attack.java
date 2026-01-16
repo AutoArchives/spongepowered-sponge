@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.player;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -50,7 +52,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.entity.TrackedAttackBridge;
@@ -79,8 +80,9 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         return this.attack$trackers.peekLast();
     }
 
-    @ModifyVariable(method = "attack", at = @At("LOAD"),
-        slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F", ordinal = 0)))
+    @Definition(id = "getEnchantedDamage", method = "Lnet/minecraft/world/entity/player/Player;getEnchantedDamage(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F")
+    @Expression("? = this.getEnchantedDamage(?, @(?), ?) - ?")
+    @ModifyExpressionValue(method = "attack", at = @At("MIXINEXTRAS:EXPRESSION"))
     private float attack$firePreEvent(final float damage, @Local(argsOnly = true) final Entity target, @Local final DamageSource source, @Local final ItemStack weapon, final @Cancellable CallbackInfo ci) {
         final SpongeAttackTracker tracker = SpongeAttackTracker.callAttackPreEvent((org.spongepowered.api.entity.Entity) target, source, damage, weapon);
         if (tracker == null) {
@@ -101,36 +103,36 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         return value;
     }
 
-    @ModifyVariable(method = "attack", at = @At("LOAD"), ordinal = 0, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"),
-        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/EntityTypeTags;REDIRECTABLE_PROJECTILE:Lnet/minecraft/tags/TagKey;")
-    ))
+    @Expression("? = @(?) * (0.2 + ? * ? * 0.8)")
+    @ModifyExpressionValue(method = "attack", at = @At("MIXINEXTRAS:EXPRESSION"))
     private float attack$modifyBeforeBaseCooldown(final float damage) {
         final SpongeAttackTracker tracker = this.attack$tracker();
         return tracker == null ? damage : tracker.startStep(DamageStepTypes.BASE_COOLDOWN, damage, this);
     }
 
-    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 0, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"),
-        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/EntityTypeTags;REDIRECTABLE_PROJECTILE:Lnet/minecraft/tags/TagKey;")
-    ))
+    @Expression("? = @(? * (0.2 + ? * ? * 0.8))")
+    @ModifyExpressionValue(method = "attack", at = @At("MIXINEXTRAS:EXPRESSION"))
     private float attack$modifyAfterBaseCooldown(final float damage) {
         final SpongeAttackTracker tracker = this.attack$tracker();
         return tracker == null ? damage : tracker.endStep(DamageStepTypes.BASE_COOLDOWN, damage);
     }
 
-    @ModifyVariable(method = "attack", at = @At("LOAD"), ordinal = 1, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"),
-        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/EntityTypeTags;REDIRECTABLE_PROJECTILE:Lnet/minecraft/tags/TagKey;")
+    @Expression("? = @(?) * ?")
+    @Expression(id = "from", value = "? = ? * (0.2 + ? * ? * 0.8)")
+    @ModifyExpressionValue(method = "attack", at = @At("MIXINEXTRAS:EXPRESSION"), slice = @Slice(
+        from = @At(value = "MIXINEXTRAS:EXPRESSION", id = "from"),
+        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;resetAttackStrengthTicker()V")
     ))
     private float attack$modifyBeforeEnchantmentCooldown(final float damage) {
         final SpongeAttackTracker tracker = this.attack$tracker();
         return tracker == null ? damage : tracker.startStep(DamageStepTypes.ENCHANTMENT_COOLDOWN, damage, tracker.weaponSnapshot());
     }
 
-    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 1, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAttackStrengthScale(F)F"),
-        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/EntityTypeTags;REDIRECTABLE_PROJECTILE:Lnet/minecraft/tags/TagKey;")
+    @Expression("? = @(? * ?)")
+    @Expression(id = "from", value = "? = ? * (0.2 + ? * ? * 0.8)")
+    @ModifyExpressionValue(method = "attack", at = @At("MIXINEXTRAS:EXPRESSION"), slice = @Slice(
+        from = @At(value = "MIXINEXTRAS:EXPRESSION", id = "from"),
+        to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;resetAttackStrengthTicker()V")
     ))
     private float attack$modifyAfterEnchantmentCooldown(final float damage) {
         final SpongeAttackTracker tracker = this.attack$tracker();
@@ -162,8 +164,9 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         return (float) step.applyChildrenAfter(damage) - originalDamage;
     }
 
-    @ModifyVariable(method = "attack", at = @At(value = "LOAD", ordinal = 0), ordinal = 0, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z", ordinal = 1),
+    @Expression("? = @(?) * 1.5")
+    @ModifyExpressionValue(method = "attack", at = @At("MIXINEXTRAS:EXPRESSION"), slice = @Slice(
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;getAttackDamageBonus(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;horizontalDistanceSqr()D")
     ))
     private float attack$modifyBeforeCriticalHit(final float damage) {
@@ -171,8 +174,9 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         return tracker == null ? damage : tracker.startStep(DamageStepTypes.CRITICAL_HIT, damage, this);
     }
 
-    @ModifyVariable(method = "attack", at = @At("STORE"), ordinal = 0, slice = @Slice(
-        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z", ordinal = 1),
+    @Expression("? = @(? * 1.5)")
+    @ModifyExpressionValue(method = "attack", at = @At("MIXINEXTRAS:EXPRESSION"), slice = @Slice(
+        from = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;getAttackDamageBonus(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;)F"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;horizontalDistanceSqr()D")
     ))
     private float attack$modifyAfterCriticalHit(final float damage) {
