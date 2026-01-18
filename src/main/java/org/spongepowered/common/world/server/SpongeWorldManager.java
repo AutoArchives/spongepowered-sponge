@@ -107,7 +107,6 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.FutureUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -255,7 +254,7 @@ public class SpongeWorldManager implements WorldManager {
         final ResourceKey key = Objects.requireNonNull(template, "template").key();
         final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
         if (Level.OVERWORLD.equals(registryKey)) {
-            return FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
+            return CompletableFuture.failedFuture(new IllegalArgumentException("The default world cannot be told to load!"));
         }
 
         final ServerLevel serverWorld = this.worlds.get(registryKey);
@@ -271,7 +270,7 @@ public class SpongeWorldManager implements WorldManager {
     @Override
     public CompletableFuture<ServerWorld> loadWorld(final ResourceKey key) {
         if (DefaultWorldKeys.DEFAULT.equals(key)) {
-            return FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
+            return CompletableFuture.failedFuture(new IllegalArgumentException("The default world cannot be told to load!"));
         }
 
         final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
@@ -292,7 +291,7 @@ public class SpongeWorldManager implements WorldManager {
         final DataPack<WorldTemplate> pack = this.findPack(key);
         return this.loadTemplate(pack, key).thenCompose(template -> {
             if (template.isEmpty()) {
-                return FutureUtil.completedWithException(new IOException(String.format("Failed to load a template for '%s'!", key)));
+                return CompletableFuture.failedFuture(new IOException(String.format("Failed to load a template for '%s'!", key)));
             }
             return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template.get()).levelStem());
         });
@@ -307,7 +306,7 @@ public class SpongeWorldManager implements WorldManager {
         try {
             level = this.createNonDefaultLevel(registryKey, levelStem, worldKey);
         } catch (final IOException e) {
-            return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e));
+            return CompletableFuture.failedFuture(new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e));
         }
 
         return SpongeCommon.asyncScheduler().submit(() -> this.prepareLevel(level)).thenApply(w -> {
@@ -394,7 +393,7 @@ public class SpongeWorldManager implements WorldManager {
             final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
             levelData = this.loadLevelData(defaultLevelData.getDataConfiguration(), storageSource.getDataTag());
         } catch (final Exception e) {
-            return FutureUtil.completedWithException(e);
+            return CompletableFuture.failedFuture(e);
         }
 
         final DataPack<WorldTemplate> pack = this.findPack(key);
@@ -421,7 +420,7 @@ public class SpongeWorldManager implements WorldManager {
             try {
                 this.saveLevelDat(worldData, properties.key());
             } catch (Exception ex) {
-                return FutureUtil.completedWithException(ex);
+                return CompletableFuture.failedFuture(ex);
             }
         }
         // TODO else: what about DerivedDataLevel?
