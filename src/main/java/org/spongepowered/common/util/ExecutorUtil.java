@@ -35,8 +35,9 @@ public class ExecutorUtil {
 
     public static <T> CompletableFuture<T> serverManagedBlock(final MinecraftServer server, final CompletableFuture<T> future) {
         while (!future.isDone()) {
-            ((MinecraftServerAccessor) server).accessor$nextTickTimeNanos(Util.getNanos() + TimeUtil.NANOSECONDS_PER_MILLISECOND);
-            ((MinecraftServerAccessor) server).accessor$waitUntilNextTick();
+            final long timeUp = Util.getNanos() + TimeUtil.NANOSECONDS_PER_MILLISECOND;
+            ((MinecraftServerAccessor) server).accessor$nextTickTimeNanos(timeUp);
+            server.managedBlock(() -> future.isDone() || Util.getNanos() >= timeUp);
         }
         return future;
     }
