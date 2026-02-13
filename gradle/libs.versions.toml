@@ -56,6 +56,7 @@ javaxInject = { module = "javax.inject:javax.inject", version = "1" }
 mixin = { module = "org.spongepowered:mixin", version.ref = "mixin" }
 mixinextras-common = { module = "io.github.llamalad7:mixinextras-common", version.ref = "mixinextras" }
 mixinextras-forge = { module = "io.github.llamalad7:mixinextras-forge", version.ref = "mixinextras" }
+mixinextras-neo = { module = "io.github.llamalad7:mixinextras-neoforge", version.ref = "mixinextras" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-junitJupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 jacoco-core = { module = "org.jacoco:org.jacoco.core", version.ref = "jacoco" }
