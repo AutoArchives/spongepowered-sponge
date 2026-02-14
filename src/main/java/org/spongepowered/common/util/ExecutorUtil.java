@@ -24,16 +24,24 @@
  */
 package org.spongepowered.common.util;
 
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.Util;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+
 import java.util.concurrent.CompletableFuture;
 
-public class FutureUtil {
+public class ExecutorUtil {
 
-    public static <T> CompletableFuture<T> completedWithException(Throwable throwable) {
-        final CompletableFuture<T> future = new CompletableFuture<>();
-        future.completeExceptionally(throwable);
+    public static <T> CompletableFuture<T> serverManagedBlock(final MinecraftServer server, final CompletableFuture<T> future) {
+        while (!future.isDone()) {
+            final long timeUp = Util.getNanos() + TimeUtil.NANOSECONDS_PER_MILLISECOND;
+            ((MinecraftServerAccessor) server).accessor$nextTickTimeNanos(timeUp);
+            server.managedBlock(() -> future.isDone() || Util.getNanos() >= timeUp);
+        }
         return future;
     }
 
-    private FutureUtil() {
+    private ExecutorUtil() {
     }
 }

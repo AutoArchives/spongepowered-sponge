@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -71,6 +72,8 @@ import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.common.service.server.permission.SpongeContextCalculator;
+import org.spongepowered.common.util.ExecutorUtil;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collection;
@@ -274,6 +277,9 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void callStoppingEngineEvent(final Engine engine) {
+        if (engine instanceof SpongeServer) {
+            ExecutorUtil.serverManagedBlock((MinecraftServer) this.game.server(), ((SpongeWorldManager) this.game.server().worldManager()).close());
+        }
         this.game.eventManager().post(SpongeEventFactory.createStoppingEngineEvent(PhaseTracker.getInstance().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
         if (engine instanceof SpongeServer) {

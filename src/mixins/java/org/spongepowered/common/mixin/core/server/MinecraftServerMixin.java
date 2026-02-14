@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -105,6 +106,7 @@ import org.spongepowered.common.launch.config.core.SpongeConfigs;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
+import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.AutoSaveMapQueue;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
@@ -136,6 +138,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract ResourceManager shadow$getResourceManager();
     @Shadow public abstract Services shadow$services();
     @Shadow @Nullable public abstract ServerLevel shadow$getLevel(ResourceKey<Level> $$0);
+    @Shadow public abstract boolean shadow$isShutdown();
     // @formatter:on
 
     private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
@@ -246,9 +249,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @Redirect(method = "createLevels", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;entrySet()Ljava/util/Set;"))
-    private Set<?> impl$onCreateOtherLevels(final Registry<?> stemRegistry) {
+    private Set<Map.Entry<ResourceKey<LevelStem>, LevelStem>> impl$onCreateOtherLevels(final Registry<LevelStem> stemRegistry) {
         this.worldManager().createNonDefaultLevels();
-        return Set.of(); // prevent vanilla code
+        // prevent vanilla code, except for the overworld as its special cased
+        return Set.of(Map.entry(LevelStem.OVERWORLD, stemRegistry.getValueOrThrow(LevelStem.OVERWORLD)));
     }
 
     @WrapMethod(method = "setInitialSpawn")
@@ -261,13 +265,9 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         }
     }
 
-    /**
-     * @author Yeregorix
-     * @reason Multi world.
-     */
-    @Overwrite
-    private void prepareLevels() {
-        this.worldManager().prepareLevels();
+    @Inject(method = "prepareLevels", at = @At("TAIL"))
+    private void impl$onPrepareLevels(final CallbackInfo ci) {
+        ((SpongeUserManager) Sponge.server().userManager()).init();
     }
 
     /**
@@ -536,5 +536,13 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Override
     public RegistryHolderLogic bridge$registryHolder() {
         return this.impl$registryHolder;
+    }
+
+    @ModifyExpressionValue(method = "scheduleExecutables", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isStopped()Z"))
+    private boolean impl$scheduleExecutablesIsShutdown(final boolean original) {
+        // Vanilla immediately flips this bit when the shutdown starts
+        // and causes all pending I/O operations to be executed in the
+        // async thread instead of the server thread. This is bad.
+        return this.shadow$isShutdown();
     }
 }

@@ -118,7 +118,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -208,56 +207,63 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Inject(method = "handleMovePlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundMovePlayerPacket;getYRot(F)F"),
-        cancellable = true,
         slice = @Slice(
-            // TODO - confirm we are injecting at the right spot given the subtle changes
             from = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;hasClientLoaded()Z"),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;updateAwaitingTeleport()Z")))
-    private void impl$callMoveEntityEvent(final ServerboundMovePlayerPacket packetIn, final CallbackInfo ci) {
-        final boolean fireMoveEvent = packetIn.hasPosition();
-        final boolean fireRotationEvent = packetIn.hasRotation();
+    private void impl$callRotateEntityEvent(final ServerboundMovePlayerPacket packetIn, final CallbackInfo ci) {
+        if (!packetIn.hasRotation()) {
+            return;
+        }
 
-        // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
-        // We don't fire an event to avoid confusing plugins.
-        if (!fireMoveEvent && !fireRotationEvent) {
+        final ServerPlayer player = (ServerPlayer) this.player;
+        final Vector3d fromRotation = player.rotation();
+
+        final Vector3d originalToRotation = new Vector3d(packetIn.getXRot(this.player.getXRot()),
+            packetIn.getYRot(this.player.getYRot()), 0);
+
+        @Nullable Vector3d toRotation = SpongeCommonEventFactory.callRotateEvent(
+            player,
+            fromRotation,
+            originalToRotation);
+
+        if (toRotation == null) {
+            toRotation = fromRotation;
+        }
+
+        if (!toRotation.equals(originalToRotation)) {
+            this.player.forceSetRotation((float) toRotation.y(), false, (float) toRotation.x(), false);
+
+            ((ServerboundMovePlayerPacketAccessor) packetIn).accessor$yRot((float) toRotation.y());
+            ((ServerboundMovePlayerPacketAccessor) packetIn).accessor$xRot((float) toRotation.x());
+            ((ServerboundMovePlayerPacketAccessor) packetIn).accessor$hasRot(true);
+        }
+    }
+
+    @Inject(method = "handleMovePlayer",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundMovePlayerPacket;getX(D)D"),
+        cancellable = true,
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;updateAwaitingTeleport()Z"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isPassenger()Z")))
+    private void impl$callMoveEntityEvent(final ServerboundMovePlayerPacket packetIn, final CallbackInfo ci) {
+        if (!packetIn.hasPosition()) {
             return;
         }
 
         final ServerPlayer player = (ServerPlayer) this.player;
         final Vector3d fromPosition = player.position();
-        final Vector3d fromRotation = player.rotation();
 
         final Vector3d originalToPosition = new Vector3d(packetIn.getX(this.player.getX()),
                 packetIn.getY(this.player.getY()), packetIn.getZ(this.player.getZ()));
-        final Vector3d originalToRotation = new Vector3d(packetIn.getXRot(this.player.getXRot()),
-                packetIn.getYRot(this.player.getYRot()), 0);
 
         // common checks and throws are done here.
         final @Nullable Vector3d toPosition;
-        if (fireMoveEvent) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
-                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
-                toPosition = SpongeCommonEventFactory.callMoveEvent(
-                        player,
-                        fromPosition,
-                        originalToPosition);
-            }
-        } else {
-            toPosition = originalToPosition;
-        }
-
-        // Rotation result
-        Vector3d toRotation;
-        if (fireRotationEvent) {
-            toRotation = SpongeCommonEventFactory.callRotateEvent(
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
+            toPosition = SpongeCommonEventFactory.callMoveEvent(
                     player,
-                    fromRotation,
-                    originalToRotation);
-            if (toRotation == null) {
-                toRotation = fromRotation;
-            }
-        } else {
-            toRotation = originalToRotation;
+                    fromPosition,
+                    originalToPosition);
         }
 
         // At this point, we cancel out and let the "confirmed teleport" code run through to update the
@@ -266,15 +272,12 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             // This will both cancel the movement and notify the client about the new rotation if any.
             // The position is absolute so the momentum will be reset by the client.
             // The rotation is relative so the head movement is still smooth.
-            // The client thinks its current rotation is originalToRotation so the new rotation is relative to that.
-            // The rotation values can be out of "valid" range so set them directly to the same value the client has.
             this.player.absSnapTo(fromPosition.x(), fromPosition.y(), fromPosition.z());
-            this.player.setXRot((float) originalToRotation.x());
-            this.player.setYRot((float) originalToRotation.y());
             this.shadow$teleport(new PositionMoveRotation(
                     VecHelper.toVanillaVector3d(fromPosition),
                     Vec3.ZERO,
-                    (float) (toRotation.y() - originalToRotation.y()), (float) (toRotation.x() - originalToRotation.x())
+                    0,
+                    0
                 ),
                 Relative.ROTATION
             );
@@ -287,34 +290,15 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             // Notify the client about the new position and new rotation.
             // Both are relatives so the client will keep its momentum.
             // The client thinks its current position is originalToPosition so the new position is relative to that.
-            // The rotation values can be out of "valid" range so set them directly to the same value the client has.
             this.player.absSnapTo(originalToPosition.x(), originalToPosition.y(), originalToPosition.z());
-            this.player.setXRot((float) originalToRotation.x());
-            this.player.setYRot((float) originalToRotation.y());
             this.shadow$teleport(new PositionMoveRotation(
                     VecHelper.toVanillaVector3d(toPosition.sub(originalToPosition)),
                     Vec3.ZERO,
-                    (float) (toRotation.y() - originalToRotation.y()), (float) (toRotation.x() - originalToRotation.x())
+                    0,
+                    0
                 ),
                 Relative.ALL);
             ci.cancel();
-        } else if (!toRotation.equals(originalToRotation)) {
-            // Notify the client about the new rotation.
-            // Both are relatives so the client will keep its momentum.
-            // The rotation values can be out of "valid" range so set them directly to the same value the client has.
-            this.player.setXRot((float) originalToRotation.x());
-            this.player.setYRot((float) originalToRotation.y());
-            this.shadow$teleport(new PositionMoveRotation(
-                    Vec3.ZERO,
-                    Vec3.ZERO,
-                    (float) (toRotation.y() - originalToRotation.y()), (float) (toRotation.x() - originalToRotation.x())
-                ),
-                EnumSet.of(Relative.X, Relative.Y, Relative.Z, Relative.X_ROT, Relative.Y_ROT, Relative.DELTA_X, Relative.DELTA_Y, Relative.DELTA_Z));
-
-            // Let MC handle the movement but override the rotation.
-            ((ServerboundMovePlayerPacketAccessor) packetIn).accessor$yRot((float) toRotation.y());
-            ((ServerboundMovePlayerPacketAccessor) packetIn).accessor$xRot((float) toRotation.x());
-            ((ServerboundMovePlayerPacketAccessor) packetIn).accessor$hasRot(true);
         }
     }
 

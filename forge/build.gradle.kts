@@ -201,6 +201,7 @@ dependencies {
     game(platform(apiLibs.adventure.bom))
     game(libs.adventure.serializerConfigurate4)
     game(libs.mixinextras.common)
+    game(libs.mixinextras.forge)
 
     val serviceShadedLibraries = serviceShadedLibrariesConfig.name
     serviceShadedLibraries(project(libraryManagerProject.path)) { isTransitive = false }
