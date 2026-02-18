@@ -48,7 +48,6 @@ import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.util.Preconditions;
 
 import java.util.List;
 import java.util.Map;
@@ -189,7 +188,6 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
         Objects.requireNonNull(base, "base");
         Objects.requireNonNull(view, "view");
         Objects.requireNonNull(key, "key");
-        Preconditions.checkArgument(!key.isEmpty(), "key is empty");
         switch (base) {
             case ByteTag bt:
                 if (key.contains(NBTTranslator.BOOLEAN_IDENTIFIER)) {

@@ -22,13 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.commands;
+package org.spongepowered.neoforge.applaunch.loading.metadata;
 
-import org.spongepowered.common.command.manager.SpongeCommandManager;
+import net.neoforged.neoforgespi.language.IConfigurable;
 
-public interface CommandsBridge {
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-    SpongeCommandManager bridge$commandManager();
+public final class PluginMixinConfigurable implements IConfigurable {
+    private final String config;
 
-    void bridge$endVanillaRegistration();
+    public PluginMixinConfigurable(final String config) {
+        this.config = config;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> Optional<T> getConfigElement(final String... key) {
+        if (key.length == 1 && "config".equals(key[0])) {
+            return Optional.of((T) this.config);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<? extends IConfigurable> getConfigList(final String... key) {
+        return Collections.emptyList();
+    }
 }

@@ -28,16 +28,23 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.world.level.storage.DimensionDataStorageBridge;
 import org.spongepowered.common.data.DataUtil;
 
 import java.util.Optional;
 
 @Mixin(DimensionDataStorage.class)
-public abstract class DimensionDataStorageMixin {
+public abstract class DimensionDataStorageMixin implements DimensionDataStorageBridge {
+
+    // @formatter:off
+    private @Nullable Identifier impl$dimensionKey;
+    // @formatter:on
 
     @WrapOperation(method = "readSavedData", at = @At(value = "INVOKE", target = "Ljava/util/Optional;orElse(Ljava/lang/Object;)Ljava/lang/Object;"))
     public <T> T readSpongeMapData(
@@ -51,5 +58,15 @@ public abstract class DimensionDataStorageMixin {
             dch.data$setCompound(null);
         }
         return null;
+    }
+
+    @Override
+    public void bridge$dimensionKey(final @Nullable Identifier dimensionKey) {
+        this.impl$dimensionKey = dimensionKey;
+    }
+
+    @Override
+    public @Nullable Identifier bridge$dimensionKey() {
+        return this.impl$dimensionKey;
     }
 }
