@@ -1031,7 +1031,7 @@ public class SpongeWorldManager implements WorldManager {
 
             while (longIterator.hasNext()) {
                 final long i = longIterator.nextLong();
-                final ChunkPos forceChunkPos = new ChunkPos(i);
+                final ChunkPos forceChunkPos = ChunkPos.unpack(i);
                 serverChunkProvider.updateChunkForced(forceChunkPos, true);
             }
         }

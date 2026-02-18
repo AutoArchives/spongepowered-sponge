@@ -153,7 +153,7 @@ public final class VecHelper {
         if (pos == null) {
             return null;
         }
-        return new Vector3i(pos.x, 0, pos.z);
+        return new Vector3i(pos.x(), 0, pos.z());
     }
 
     // === Flow Vector3i --> MC ChunkPos ===

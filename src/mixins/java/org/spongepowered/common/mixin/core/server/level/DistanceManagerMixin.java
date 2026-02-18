@@ -101,7 +101,7 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
         final int distance = Mth.clamp(Constants.ChunkTicket.MAX_FULL_CHUNK_DISTANCE - distanceLimit, 0, Constants.ChunkTicket.MAX_FULL_CHUNK_TICKET_LEVEL);
         final TicketType type = (TicketType) (Object) ticketType;
         final net.minecraft.server.level.Ticket ticketToRequest = new net.minecraft.server.level.Ticket(type, distance);
-        this.ticketStorage.addTicket(VecHelper.toChunkPos(pos).toLong(), ticketToRequest);
+        this.ticketStorage.addTicket(VecHelper.toChunkPos(pos).pack(), ticketToRequest);
         return Optional.of(((TicketBridge) (Object) ticketToRequest).bridge$retrieveAppropriateTicket());
     }
 

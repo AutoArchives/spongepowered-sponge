@@ -194,7 +194,7 @@ public final class PhaseTracker implements CauseStackManager {
                     if (useTile) {
                         blockIn = source.getBlockState().getBlock();
                     } else {
-                        blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
+                        blockIn = (pos.getX() >> 4 == chunk.getPos().x() && pos.getZ() >> 4 == chunk.getPos().z())
                                       ? chunk.getBlockState(pos).getBlock()
                                       : worldServer.getBlockState(pos).getBlock();
                     }
@@ -202,7 +202,7 @@ public final class PhaseTracker implements CauseStackManager {
                         PhasePrinter.printNullSourceBlockWithTile(pos, blockIn, otherPos, id, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
                     }
                 } else {
-                    blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
+                    blockIn = (pos.getX() >> 4 == chunk.getPos().x() && pos.getZ() >> 4 == chunk.getPos().z())
                                   ? chunk.getBlockState(pos).getBlock()
                                   : worldServer.getBlockState(pos).getBlock();
                     if (trackerConfig.reportNullSourceBlocksOnNeighborNotifications) {
@@ -212,7 +212,7 @@ public final class PhaseTracker implements CauseStackManager {
                 }
 
             } else {
-                blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
+                blockIn = (pos.getX() >> 4 == chunk.getPos().x() && pos.getZ() >> 4 == chunk.getPos().z())
                               ? chunk.getBlockState(pos).getBlock()
                               : worldServer.getBlockState(pos).getBlock();
                 if (trackerConfig.reportNullSourceBlocksOnNeighborNotifications) {

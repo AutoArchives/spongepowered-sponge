@@ -88,7 +88,7 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
             chunkSource.randomState(),
             level.getStructureManager(),
             level.getSeed(),
-            new ChunkPos(VecHelper.toBlockPos(pos)),
+            ChunkPos.containing(VecHelper.toBlockPos(pos)),
             0,
             level,
             ignored -> true);

@@ -147,7 +147,7 @@ public final class VolumeStreamUtils {
             final ChunkStatus chunkStatus = shouldGenerate
                 ? ChunkStatus.FULL
                 : ChunkStatus.EMPTY;
-            final @Nullable ChunkAccess ichunk = readerSupplier.get().getChunk(chunkPos.x, chunkPos.z, chunkStatus, shouldGenerate);
+            final @Nullable ChunkAccess ichunk = readerSupplier.get().getChunk(chunkPos.x(), chunkPos.z(), chunkStatus, shouldGenerate);
             if (shouldGenerate) {
                 Objects.requireNonNull(ichunk, "Chunk was expected to load fully and generate, but somehow got a null chunk!");
             }
@@ -224,14 +224,14 @@ public final class VolumeStreamUtils {
     ) {
         if (chunk.getLevel() instanceof ServerLevel) {
             return ((PersistentEntitySectionManagerAccessor<Entity>) ((ServerLevelAccessor) chunk.getLevel()).accessor$getEntityManager()).accessor$sectionStorage()
-                .getExistingSectionsInChunk(chunk.getPos().toLong())
+                .getExistingSectionsInChunk(chunk.getPos().pack())
                 .flatMap(EntitySection::getEntities)
                 .filter(entity -> VecHelper.inBounds(entity.blockPosition(), min, max))
                 .map(entity -> new AbstractMap.SimpleEntry<>(entity.blockPosition(), entity));
         } else if (Sponge.isClientAvailable() && chunk.getLevel() instanceof ClientLevel) {
             return ((TransientEntitySectionManagerAccessor<Entity>) ((ClientLevelAccessor) chunk.getLevel()).accessor$getEntityStorage())
                 .accessor$sectionStorage()
-                .getExistingSectionsInChunk(chunk.getPos().toLong())
+                .getExistingSectionsInChunk(chunk.getPos().pack())
                 .flatMap(EntitySection::getEntities)
                 .filter(entity -> VecHelper.inBounds(entity.blockPosition(), min, max))
                 .map(entity -> new AbstractMap.SimpleEntry<>(entity.blockPosition(), entity));
@@ -380,9 +380,9 @@ public final class VolumeStreamUtils {
 
     private static TriFunction<ChunkAccess, LevelChunkSection, BlockPos, BlockState> chunkSectionBlockStateGetter() {
         return ((chunk, chunkSection, pos) -> chunkSection.getBlockState(
-            pos.getX() - (chunk.getPos().x << 4),
+            pos.getX() - (chunk.getPos().x() << 4),
             pos.getY() & 15,
-            pos.getZ() - (chunk.getPos().z << 4)));
+            pos.getZ() - (chunk.getPos().z() << 4)));
     }
 
     private static <T> Function<ChunkAccess, Stream<Map.Entry<BlockPos, T>>> getElementByPosition(
@@ -396,13 +396,13 @@ public final class VolumeStreamUtils {
         return chunk -> {
             final ChunkPos pos = chunk.getPos();
 
-            final int xStart = pos.x == minCursor.chunkX ? minCursor.xOffset : 0;
-            final int xEnd = pos.x == maxCursor.chunkX ? maxCursor.xOffset : 15;
-            final int zStart = pos.z == minCursor.chunkZ ? minCursor.zOffset : 0;
-            final int zEnd = pos.z == maxCursor.chunkZ ? maxCursor.zOffset : 15;
+            final int xStart = pos.x() == minCursor.chunkX ? minCursor.xOffset : 0;
+            final int xEnd = pos.x() == maxCursor.chunkX ? maxCursor.xOffset : 15;
+            final int zStart = pos.z() == minCursor.chunkZ ? minCursor.zOffset : 0;
+            final int zEnd = pos.z() == maxCursor.chunkZ ? maxCursor.zOffset : 15;
 
-            final int chunkMinX = pos.x << 4;
-            final int chunkMinZ = pos.z << 4;
+            final int chunkMinX = pos.x() << 4;
+            final int chunkMinZ = pos.z() << 4;
 
             final LevelChunkSection[] sections = chunk.getSections();
 

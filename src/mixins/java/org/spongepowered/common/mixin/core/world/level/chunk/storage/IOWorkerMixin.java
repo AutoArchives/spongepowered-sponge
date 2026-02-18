@@ -99,7 +99,7 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
     private void impl$onSaved(final ChunkPos param0, final @Coerce Object param1, final CallbackInfo ci) {
         if (this.impl$type == SpongeIOWorkerType.CHUNK) {
             if (ShouldFire.CHUNK_EVENT_BLOCKS_SAVE_POST) {
-                final Vector3i chunkPos = new Vector3i(param0.x, 0, param0.z);
+                final Vector3i chunkPos = new Vector3i(param0.x(), 0, param0.z());
                 final ChunkEvent.Blocks.Save.Post postSave = SpongeEventFactory.createChunkEventBlocksSavePost(PhaseTracker.getInstance().currentCause(), chunkPos,
                         (org.spongepowered.api.ResourceKey) (Object) this.impl$dimension.identifier());
                 SpongeCommon.post(postSave);
@@ -107,7 +107,7 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
         }
         else if (this.impl$type == SpongeIOWorkerType.ENTITY) {
             if (ShouldFire.CHUNK_EVENT_ENTITIES_SAVE_POST) {
-                final Vector3i chunkPos = new Vector3i(param0.x, 0, param0.z);
+                final Vector3i chunkPos = new Vector3i(param0.x(), 0, param0.z());
                 final ChunkEvent.Entities.Save.Post postSave = SpongeEventFactory.createChunkEventEntitiesSavePost(PhaseTracker.getInstance().currentCause(), chunkPos,
                         (org.spongepowered.api.ResourceKey) (Object) this.impl$dimension.identifier());
                 SpongeCommon.post(postSave);

@@ -124,7 +124,7 @@ public final class SpongeEmptyChunk implements WorldChunk {
     @Override
     public Vector3i chunkPosition() {
         final ChunkPos pos = this.chunk.getPos();
-        return new Vector3i(pos.x, 0, pos.z);
+        return new Vector3i(pos.x(), 0, pos.z());
     }
 
     @Override

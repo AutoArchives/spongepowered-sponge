@@ -261,7 +261,7 @@ public final class EntityActivationRange {
     private static void activateChunkEntities(final ServerPlayer player, final LevelChunk chunk) {
         final PersistentEntitySectionManager<Entity> entityManager = ((ServerLevelAccessor) chunk.getLevel()).accessor$getEntityManager();
         final EntitySectionStorage<Entity> entitySectionStorage = ((PersistentEntitySectionManagerAccessor<Entity>) entityManager).accessor$sectionStorage();
-        entitySectionStorage.getExistingSectionsInChunk(chunk.getPos().toLong()).flatMap(EntitySection::getEntities).forEach(entity -> {
+        entitySectionStorage.getExistingSectionsInChunk(chunk.getPos().pack()).flatMap(EntitySection::getEntities).forEach(entity -> {
             if (!entity.chunkPosition().equals(chunk.getPos())) {
                 return;
             }

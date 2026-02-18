@@ -67,8 +67,8 @@ public final class UpdateChunkLightManagerEffect implements ProcessingSideEffect
             final var source = pipeline.getServerWorld().getChunkSource();
             source.getLightEngine().updateSectionStatus(oldState.pos(), isStillEmpty);
             final var sectionPos = SectionPos.blockToSectionCoord(blockY);
-            final var chunkX = chunk.getPos().x;
-            final var chunkZ = chunk.getPos().z;
+            final var chunkX = chunk.getPos().x();
+            final var chunkZ = chunk.getPos().z();
             source.onSectionEmptinessChanged(chunkX, sectionPos, chunkZ, isStillEmpty);
         }
         return EffectResult.nullPass();

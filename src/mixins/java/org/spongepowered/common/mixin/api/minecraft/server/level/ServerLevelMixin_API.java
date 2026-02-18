@@ -394,7 +394,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         return this.api$chunkPosStream((regionFile, stream) ->
 //            stream.filter(regionFile::doesChunkExist) // filter out non-existent chunks
             stream.filter(cp -> ((RegionFileBridge) regionFile).bridge$doesChunkExist(cp)) // filter out non-existent chunks
-                      .map(cp -> new Vector3i(cp.x, 0, cp.z)) // map to API type
+                      .map(cp -> new Vector3i(cp.x(), 0, cp.z())) // map to API type
         );
     }
 
@@ -418,6 +418,6 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         final int ry = Integer.parseInt(split[2]);
         final ChunkPos min = ChunkPos.minFromRegion(rx, ry);
         final ChunkPos max = ChunkPos.maxFromRegion(rx, ry);
-        return new Vector4i(min.x, min.z, max.x, max.z);
+        return new Vector4i(min.x(), min.z(), max.x(), max.z());
     }
 }

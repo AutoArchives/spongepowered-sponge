@@ -85,7 +85,7 @@ public abstract class LevelTicksMixin_API<T> implements ScheduledUpdateList<T> {
         final var subCount = level.nextSubTickCount();
         final var scheduledUpdate = new ScheduledTick<>(
             target, blockPos, tickDelay.ticks() + gameTime, (TickPriority) (Object) priority, subCount);
-        if (this.tickCheck.test(ChunkPos.asLong(blockPos))) {
+        if (this.tickCheck.test(ChunkPos.pack(blockPos))) {
             this.shadow$schedule(scheduledUpdate);
         }
         return (ScheduledUpdate<T>) (Object) scheduledUpdate;
@@ -102,7 +102,7 @@ public abstract class LevelTicksMixin_API<T> implements ScheduledUpdateList<T> {
         if (!this.alreadyRunThisTick.isEmpty()) {
             return Collections.emptySet();
         }
-        final long longPos = ChunkPos.asLong(new BlockPos(x, y, z));
+        final long longPos = ChunkPos.pack(new BlockPos(x, y, z));
         final LevelChunkTicks<T> $$2 = this.allContainers.get(longPos);
 
         return $$2.getAll()

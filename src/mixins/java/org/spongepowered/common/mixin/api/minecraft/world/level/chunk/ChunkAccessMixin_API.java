@@ -116,7 +116,7 @@ public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<
     @Override
     public Vector3i chunkPosition() {
         final ChunkPos chunkPos = this.shadow$getPos();
-        return new Vector3i(chunkPos.x, 0, chunkPos.z);
+        return new Vector3i(chunkPos.x(), 0, chunkPos.z());
     }
 
     @Override

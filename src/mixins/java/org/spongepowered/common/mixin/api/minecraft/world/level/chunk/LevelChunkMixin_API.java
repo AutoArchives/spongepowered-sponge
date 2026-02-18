@@ -173,7 +173,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
 
     @Override
     public Vector3i chunkPosition() {
-        return new Vector3i(this.chunkPos.x, 0, this.chunkPos.z);
+        return new Vector3i(this.chunkPos.x(), 0, this.chunkPos.z());
     }
 
     @Override
@@ -435,7 +435,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     public Collection<? extends Entity> entities() {
         final PersistentEntitySectionManager<net.minecraft.world.entity.Entity> entityManager = ((ServerLevelAccessor) this.level).accessor$getEntityManager();
         final EntitySectionStorage<net.minecraft.world.entity.Entity> entitySectionStorage = ((PersistentEntitySectionManagerAccessor<net.minecraft.world.entity.Entity>) entityManager).accessor$sectionStorage();
-        return (Collection) entitySectionStorage.getExistingSectionsInChunk(this.chunkPos.toLong()).flatMap(EntitySection::getEntities).toList();
+        return (Collection) entitySectionStorage.getExistingSectionsInChunk(this.chunkPos.pack()).flatMap(EntitySection::getEntities).toList();
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

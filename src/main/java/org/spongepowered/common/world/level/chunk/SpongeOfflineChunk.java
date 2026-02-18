@@ -60,7 +60,7 @@ public final class SpongeOfflineChunk implements OfflineChunk {
             throw new RuntimeException(e);
         }
 
-        return new SpongeOfflineChunk(chunkNbt, pos.x, pos.z);
+        return new SpongeOfflineChunk(chunkNbt, pos.x(), pos.z());
     }
 
     @Override

@@ -113,7 +113,7 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
     private void impl$onConstruct(final Level $$0, final ChunkPos $$1, final UpgradeData $$2, final LevelChunkTicks $$3, final LevelChunkTicks $$4,
                                   final long $$5, final LevelChunkSection[] $$6, final LevelChunk.PostLoadProcessor $$7, final BlendingData $$8,
                                   final CallbackInfo ci) {
-        this.impl$cacheKey = ChunkPos.asLong($$1.x, $$1.z);
+        this.impl$cacheKey = $$1.pack();
     }
 
     @Override
@@ -128,7 +128,7 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
 
     @Override
     public boolean bridge$isQueuedForUnload() {
-        return ((ChunkMapAccessor) ((ServerChunkCache) this.level.getChunkSource()).chunkMap).accessor$pendingUnloads().containsKey(this.chunkPos.toLong());
+        return ((ChunkMapAccessor) ((ServerChunkCache) this.level.getChunkSource()).chunkMap).accessor$pendingUnloads().containsKey(this.chunkPos.pack());
     }
 
     @Override
@@ -355,7 +355,7 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
     public String toString() {
         return new StringJoiner(", ", LevelChunkMixin.class.getSimpleName() + "[", "]")
                 .add("World=" + this.level)
-                .add("Position=" + this.chunkPos.x + ":" + this.chunkPos.z)
+                .add("Position=" + this.chunkPos.x() + ":" + this.chunkPos.z())
                 .add("super=" + super.toString())
                 .toString();
     }
@@ -369,7 +369,7 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
     public boolean bridge$spawnEntity(final org.spongepowered.api.entity.Entity entity) {
         final net.minecraft.world.entity.Entity mcEntity = (net.minecraft.world.entity.Entity) entity;
         final BlockPos blockPos = mcEntity.blockPosition();
-        if (this.chunkPos.x == blockPos.getX() >> 4 && this.chunkPos.z == blockPos.getZ() >> 4) {
+        if (this.chunkPos.x() == blockPos.getX() >> 4 && this.chunkPos.z() == blockPos.getZ() >> 4) {
             // Calling addEntity on the chunk only adds them to storage,
             // we need to redirect this to add to the world.
             //
