@@ -89,7 +89,6 @@
     "server.network.LegacyQueryHandlerMixin",
     "server.network.ServerCommonPacketListenerImplMixin",
     "server.network.ServerConfigurationPacketListenerImplMixin",
-    "server.network.ServerGamePacketListenerImpl_1Mixin",
     "server.network.ServerGamePacketListenerImplMixin",
     "server.network.ServerHandshakePacketListenerImplMixin",
     "server.network.ServerLoginPacketListenerImplMixin",

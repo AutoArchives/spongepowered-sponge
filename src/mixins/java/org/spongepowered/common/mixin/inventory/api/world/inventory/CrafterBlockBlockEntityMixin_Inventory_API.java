@@ -80,7 +80,7 @@ public abstract class CrafterBlockBlockEntityMixin_Inventory_API extends Randomi
         }
         final var recipeHolder = potentialResults.get();
         final var recipe = recipeHolder.value();
-        final var craftedStack = recipe.assemble(input, this.level.registryAccess());
+        final var craftedStack = recipe.assemble(input);
         if (craftedStack.isEmpty()) {
             return false;
         }

@@ -25,8 +25,7 @@
 package org.spongepowered.common.item.recipe.cooking;
 
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
@@ -55,7 +54,7 @@ public final class SpongeCookingRecipeBuilder implements CookingRecipe.Builder.R
 
     private net.minecraft.world.item.crafting.RecipeType<?> type;
     private Ingredient ingredient;
-    private ItemStack result;
+    private ItemStackTemplate result;
     private Function<SingleRecipeInput, net.minecraft.world.item.ItemStack> resultFunction;
 
     private @Nullable Float experience;
@@ -85,21 +84,21 @@ public final class SpongeCookingRecipeBuilder implements CookingRecipe.Builder.R
 
     @Override
     public EndStep result(final ItemType result) {
-        this.result = new ItemStack((Item) result);
+        this.result = ItemStackUtil.toTemplate(org.spongepowered.api.item.inventory.ItemStack.of(result));
         this.resultFunction = null;
         return this;
     }
 
     @Override
     public EndStep result(final ItemStackLike result) {
-        this.result = ItemStackUtil.fromLikeToNative(result);
+        this.result = ItemStackUtil.toTemplate(result);
         this.resultFunction = null;
         return this;
     }
 
     // currently unused
     public EndStep result(final Function<RecipeInput.Single, ? extends ItemStackLike> resultFunction, final ItemStackLike exemplaryResult) {
-        this.result = ItemStackUtil.fromLikeToNative(exemplaryResult);
+        this.result = ItemStackUtil.toTemplate(exemplaryResult);
         this.resultFunction = (inv) -> ItemStackUtil.fromLikeToNative(resultFunction.apply(InventoryUtil.toSponge(inv)));
         return this;
     }

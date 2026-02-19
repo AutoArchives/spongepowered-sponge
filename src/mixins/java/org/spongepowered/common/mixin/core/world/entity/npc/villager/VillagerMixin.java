@@ -24,21 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.npc.villager;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.npc.villager.Villager;
 import org.slf4j.Logger;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(Villager.class)
 public abstract class VillagerMixin extends AbstractVillagerMixin {
@@ -53,12 +43,4 @@ public abstract class VillagerMixin extends AbstractVillagerMixin {
         //noop
     }
 
-    @Inject(method = "startSleeping", at = @At("HEAD"), cancellable = true)
-    private void impl$callPreSleepingEvent(BlockPos param0, CallbackInfo ci) {
-        final Cause currentCause = PhaseTracker.getInstance().currentCause();
-        final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
-        if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventPre(currentCause, snapshot, (Living) this))) {
-            ci.cancel();
-        }
-    }
 }

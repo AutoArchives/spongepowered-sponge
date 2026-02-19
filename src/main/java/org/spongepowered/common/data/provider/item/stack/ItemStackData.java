@@ -109,7 +109,7 @@ public final class ItemStackData {
                             }
                         })
                     .create(Keys.CONTAINER_ITEM)
-                        .get(h -> (ItemType) h.getItem().getCraftingRemainder().getItem())
+                        .get(h -> (ItemType) h.getItem().getCraftingRemainder().item())
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.CUSTOM_MODEL_DATA_FLOATS)
@@ -259,9 +259,9 @@ public final class ItemStackData {
                     .create(Keys.FOOD_CONVERTS_TO)
                         .get(h -> {
                             final var remainder = h.get(DataComponents.USE_REMAINDER);
-                            return remainder == null ? null : ItemStackUtil.fromNative(remainder.convertInto());
+                            return remainder == null ? null : ItemStackUtil.fromTemplate(remainder.convertInto());
                         })
-                        .set((h, v) -> h.set(DataComponents.USE_REMAINDER, new UseRemainder(ItemStackUtil.toNative(v))))
+                        .set((h, v) -> h.set(DataComponents.USE_REMAINDER, new UseRemainder(ItemStackUtil.toTemplate(v))))
                         .delete(h -> h.remove(DataComponents.USE_REMAINDER))
                     .create(Keys.REPAIR_COST)
                         .get(h -> h.getOrDefault(DataComponents.REPAIR_COST, 0))
@@ -272,8 +272,8 @@ public final class ItemStackData {
                         .set((stack, value) -> stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, value))
                         .delete(stack -> stack.remove(DataComponents.ENCHANTMENT_GLINT_OVERRIDE))
                     .create(Keys.CHARGED_PROJECTILES)
-                        .get(h -> ItemStackUtil.snapshotOf(h.getOrDefault(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).getItems()))
-                        .set((stack, value) -> stack.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.of(ItemStackUtil.fromSnapshotToNativeList(value))))
+                        .get(h -> ItemStackUtil.snapshotOf(h.getOrDefault(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).items()))
+                        .set((stack, value) -> stack.set(DataComponents.CHARGED_PROJECTILES, new ChargedProjectiles(ItemStackUtil.toTemplate(value))))
                         .delete(stack -> stack.remove(DataComponents.CHARGED_PROJECTILES))
                     .create(Keys.INTANGIBLE_PROJECTILE)
                         .get(h -> h.get(DataComponents.INTANGIBLE_PROJECTILE) != null)
@@ -442,7 +442,7 @@ public final class ItemStackData {
         if (contents == null) {
             return null;
         }
-        var slots = contents.stream().map(ItemStackUtil::cloneDefensive).toList();
+        var slots = contents.allItemsCopyStream().map(ItemStackUtil::fromNative).toList();
         if (slots.isEmpty()) {
             return null;
         }

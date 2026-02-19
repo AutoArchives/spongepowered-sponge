@@ -117,7 +117,7 @@ public class SpongeShapelessCraftingRecipeBuilder implements ShapelessCraftingRe
     public ShapelessCraftingRecipe build() {
         Preconditions.checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
         return (ShapelessCraftingRecipe) new SpongeShapelessRecipe(this.group == null ? "": this.group, this.craftingBookCategory, this.ingredients,
-                ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction);
+                ItemStackUtil.toTemplate(this.result), this.resultFunction, this.remainingItemsFunction);
     }
 
     @Override

@@ -114,7 +114,7 @@ public final class SpongeAdvancementBuilder implements Advancement.Builder.RootS
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
 
         var displayInfo = Optional.ofNullable(this.displayInfo).map(di -> new net.minecraft.advancements.DisplayInfo(
-                ItemStackUtil.fromSnapshotToNative(di.icon()),
+                ItemStackUtil.toTemplate(di.icon()),
                 SpongeAdventure.asVanilla(di.title()),
                 SpongeAdventure.asVanilla(di.description()),
 // TODO - Define how we want to expose ClientResource that is a combo of resource location and asset location

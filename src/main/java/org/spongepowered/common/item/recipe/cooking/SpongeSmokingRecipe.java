@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
@@ -37,19 +37,27 @@ public class SpongeSmokingRecipe extends SmokingRecipe {
 
     private final Function<SingleRecipeInput, ItemStack> function;
 
-    public SpongeSmokingRecipe(final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<SingleRecipeInput, ItemStack> function) {
+    public SpongeSmokingRecipe(
+        final String group,
+        final CookingBookCategory category,
+        final Ingredient ingredient,
+        final ItemStackTemplate result,
+        final float experience,
+        final int cookingTime,
+        final Function<SingleRecipeInput, ItemStack> function
+    ) {
         super(group, category, ingredient, result, experience, cookingTime);
         this.function = function;
     }
 
     @Override
-    public ItemStack assemble(final SingleRecipeInput $$0, final HolderLookup.Provider $$1) {
+    public ItemStack assemble(final SingleRecipeInput input) {
         if (this.function != null) {
-            final ItemStack result = this.function.apply($$0);
+            final ItemStack result = this.function.apply(input);
             result.setCount(1);
             return result;
         }
-        return super.assemble($$0, $$1);
+        return super.assemble(input);
     }
 
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
 
-@Mixin(FarmBlock.class)
+@Mixin(FarmlandBlock.class)
 public abstract class FarmBlockMixin extends BlockMixin {
 
     // @formatter:off
@@ -46,7 +46,7 @@ public abstract class FarmBlockMixin extends BlockMixin {
     @Redirect(method = "fallOn",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/FarmBlock;turnToDirt(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"
+            target = "Lnet/minecraft/world/level/block/FarmlandBlock;turnToDirt(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"
         )
     )
     private void impl$CheckIfGrieferCanGrief(Entity entityIn, BlockState state, Level world, BlockPos pos) {

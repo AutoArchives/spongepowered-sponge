@@ -186,7 +186,7 @@ public final class SpongeShapedCraftingRecipeBuilder implements
 //        ingredientsMap.putIfAbsent(' ', net.minecraft.item.crafting.Ingredient.EMPTY);
         final ShapedRecipePattern pattern = ShapedRecipePattern.of(ingredientsMap, this.aisle);
         return (ShapedCraftingRecipe) new SpongeShapedRecipe(this.group == null ? "": this.group, this.craftingBookCategory, pattern, true,
-                ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction);
+                ItemStackUtil.toTemplate(this.result), this.resultFunction, this.remainingItemsFunction);
     }
 
     @Override

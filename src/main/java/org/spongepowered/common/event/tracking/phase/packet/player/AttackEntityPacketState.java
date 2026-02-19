@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
@@ -51,9 +51,9 @@ public final class AttackEntityPacketState extends BasicPacketState {
     private final BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>
         ATTACK_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
         frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
-        final ServerboundInteractPacket useEntityPacket = ctx.getPacket();
+        final ServerboundAttackPacket useEntityPacket = ctx.getPacket();
         final ServerPlayer player = ctx.getPacketPlayer();
-        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.level());
+        final net.minecraft.world.entity.@Nullable Entity entity = player.level().getEntityOrPart(useEntityPacket.entityId());
         if (entity != null) {
             // hand is not populated if we don't have an entity in scope that caused this.
             frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
@@ -69,10 +69,10 @@ public final class AttackEntityPacketState extends BasicPacketState {
 
     @Override
     public boolean isPacketIgnored(final Packet<?> packetIn, final ServerPlayer packetPlayer) {
-        final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
+        final ServerboundAttackPacket useEntityPacket = (ServerboundAttackPacket) packetIn;
         // There are cases where a player is interacting with an entity that
         // doesn't exist on the server.
-        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(packetPlayer.level());
+        final net.minecraft.world.entity.@Nullable Entity entity = packetPlayer.level().getEntityOrPart(useEntityPacket.entityId());
         return entity == null;
     }
 
@@ -86,9 +86,9 @@ public final class AttackEntityPacketState extends BasicPacketState {
     public Supplier<SpawnType> getSpawnTypeForTransaction(
         final BasicPacketContext context, final net.minecraft.world.entity.Entity entityToSpawn
     ) {
-        final ServerboundInteractPacket useEntityPacket = context.getPacket();
+        final ServerboundAttackPacket useEntityPacket = context.getPacket();
         final ServerPlayer player = context.getPacketPlayer();
-        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.level());
+        final net.minecraft.world.entity.@Nullable Entity entity = player.level().getEntityOrPart(useEntityPacket.entityId());
         if (entity != null && (entity.isRemoved() || entity instanceof LivingEntity && ((LivingEntity) entity).isDeadOrDying())) {
             return entityToSpawn instanceof ExperienceOrb ? SpawnTypes.EXPERIENCE : SpawnTypes.DROPPED_ITEM;
         }
@@ -101,9 +101,9 @@ public final class AttackEntityPacketState extends BasicPacketState {
     @Override
     public void unwind(final BasicPacketContext context) {
         if (!TrackingUtil.processBlockCaptures(context)) {
-            final ServerboundInteractPacket useEntityPacket = context.getPacket();
+            final ServerboundAttackPacket useEntityPacket = context.getPacket();
             final ServerPlayer player = context.getPacketPlayer();
-            final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.level());
+            final net.minecraft.world.entity.@Nullable Entity entity = player.level().getEntityOrPart(useEntityPacket.entityId());
             if (entity instanceof Entity) {
                 ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
             }

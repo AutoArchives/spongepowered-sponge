@@ -31,6 +31,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import org.apache.commons.lang3.NotImplementedException;
@@ -134,7 +135,11 @@ public class SpongeIngredient extends Ingredient {
 
     @Override
     public SlotDisplay display() {
-        return new SlotDisplay.Composite(this.itemList.getItems().stream().map(SlotDisplay.ItemStackSlotDisplay::new).map(SlotDisplay.class::cast).toList());
+        return new SlotDisplay.Composite(this.itemList.getItems().stream()
+            .filter(ItemStack::isEmpty)
+            .map(ItemStackTemplate::fromNonEmptyStack)
+            .map(SlotDisplay.ItemStackSlotDisplay::new)
+            .map(SlotDisplay.class::cast).toList());
     }
 
     public static SpongeIngredient spongeFromStacks(net.minecraft.world.item.ItemStack... stacks) {

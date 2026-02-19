@@ -31,6 +31,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
@@ -55,7 +56,6 @@ import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacketAccessor;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryAddSlotState;
@@ -85,7 +85,6 @@ import org.spongepowered.common.event.tracking.phase.packet.inventory.SwitchHotb
 import org.spongepowered.common.event.tracking.phase.packet.player.AnimationPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.AttackEntityPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.IgnoredPacketState;
-import org.spongepowered.common.event.tracking.phase.packet.player.InteractAtEntityPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.InteractEntityPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.InteractionPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.player.InteractionPacketState;
@@ -115,7 +114,6 @@ public final class PacketPhase {
         static final IPhaseState<BasicPacketContext> IGNORED = new IgnoredPacketState();
         static final IPhaseState<BasicPacketContext> INTERACT_ENTITY = new InteractEntityPacketState();
         static final IPhaseState<BasicPacketContext> ATTACK_ENTITY = new AttackEntityPacketState();
-        static final IPhaseState<BasicPacketContext> INTERACT_AT_ENTITY = new InteractAtEntityPacketState();
         static final IPhaseState<BasicPacketContext> CREATIVE_INVENTORY = new CreativeInventoryPacketState();
         static final IPhaseState<BasicPacketContext> PLACE_BLOCK = new PlaceBlockPacketState();
         static final IPhaseState<BasicPacketContext> REQUEST_RESPAWN = new BasicPacketState();
@@ -281,19 +279,8 @@ public final class PacketPhase {
     private void setupPacketToStateMapping() {
         this.packetTranslationMap.put(ServerboundKeepAlivePacket.class, packet -> PacketPhase.General.IGNORED);
         this.packetTranslationMap.put(ServerboundChatPacket.class, packet -> PacketPhase.General.CHAT_COMMAND);
-        this.packetTranslationMap.put(ServerboundInteractPacket.class, packet -> {
-            final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
-            final ServerboundInteractPacket.ActionType action = ((ServerboundInteractPacketAccessor) useEntityPacket).accessor$action().getType();
-            if (action == ServerboundInteractPacket.ActionType.INTERACT) {
-                return PacketPhase.General.INTERACT_ENTITY;
-            } else if (action == ServerboundInteractPacket.ActionType.ATTACK) {
-                return PacketPhase.General.ATTACK_ENTITY;
-            } else if (action == ServerboundInteractPacket.ActionType.INTERACT_AT) {
-                return PacketPhase.General.INTERACT_AT_ENTITY;
-            } else {
-                return PacketPhase.General.INVALID;
-            }
-        });
+        this.packetTranslationMap.put(ServerboundInteractPacket.class, packet -> PacketPhase.General.INTERACT_ENTITY);
+        this.packetTranslationMap.put(ServerboundAttackPacket.class, packet -> PacketPhase.General.ATTACK_ENTITY);
         this.packetTranslationMap.put(ServerboundMovePlayerPacket.class, packet -> PacketPhase.General.MOVEMENT);
         this.packetTranslationMap.put(ServerboundMovePlayerPacket.Pos.class, packet -> PacketPhase.General.MOVEMENT);
         this.packetTranslationMap.put(ServerboundMovePlayerPacket.Rot.class, packet -> PacketPhase.General.MOVEMENT);

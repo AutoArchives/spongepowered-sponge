@@ -48,6 +48,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Living;
@@ -286,7 +287,8 @@ public abstract class PlayerMixin extends AvatarMixin implements PlayerBridge, G
     }
 
     @Inject(method = "interactOn", at = @At(value = "HEAD"), cancellable = true)
-    protected void impl$onRightClickEntity(final Entity entityToInteractOn, final InteractionHand hand,
+    protected void impl$onRightClickEntity(
+        final Entity entity, final InteractionHand hand, final Vec3 location,
         final CallbackInfoReturnable<InteractionResult> cir) {
     }
 

@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.advancements;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.TreeLayoutElement;
@@ -56,7 +56,7 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     @Shadow public abstract boolean shadow$shouldAnnounceChat();
     @Shadow public abstract boolean shadow$isHidden();
 
-    @Shadow @Final private ItemStack icon;
+    @Shadow @Final private ItemStackTemplate icon;
 
     @Shadow @Final private boolean hidden;
 

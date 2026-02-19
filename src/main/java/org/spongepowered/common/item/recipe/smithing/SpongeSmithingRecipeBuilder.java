@@ -123,7 +123,7 @@ public final class SpongeSmithingRecipeBuilder implements
     @Override
     public SmithingRecipe build() {
         return (SmithingRecipe) new SpongeSmithingRecipe(Optional.ofNullable(this.template), this.base, Optional.ofNullable(this.addition),
-                ItemStackUtil.toTransmute(this.result), this.resultFunction);
+                ItemStackUtil.toTemplate(this.result), this.resultFunction);
     }
 
     @Override

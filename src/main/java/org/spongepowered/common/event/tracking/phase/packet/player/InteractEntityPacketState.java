@@ -32,8 +32,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacketAccessor;
-import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacket_InteractionActionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -43,36 +41,37 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 public final class InteractEntityPacketState extends BasicPacketState {
 
+    @SuppressWarnings("deprecation") // getEntityOrPart is the easiest way to check if the entity is valid
     @Override
     public boolean isPacketIgnored(final Packet<?> packetIn, final ServerPlayer packetPlayer) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(packetPlayer.level());
+        final net.minecraft.world.entity.@Nullable Entity entity =  packetPlayer.level().getEntityOrPart(useEntityPacket.entityId());
         return entity == null;
     }
 
+    @SuppressWarnings("deprecation") // getEntityOrPart is the easiest way to check if the entity is valid
     @Override
     public void populateContext(final ServerPlayer player, final Packet<?> packet, final BasicPacketContext context) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
-        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(player.level());
+        final net.minecraft.world.entity.@Nullable Entity entity = player.level().getEntityOrPart(useEntityPacket.entityId());
         if (entity != null) {
-            final ServerboundInteractPacket_InteractionActionAccessor accessor = (ServerboundInteractPacket_InteractionActionAccessor) ((ServerboundInteractPacketAccessor) useEntityPacket).accessor$action();
-            final ItemStack stack = ItemStackUtil.cloneDefensive(player.getItemInHand(accessor.accessor$hand()));
+            final ItemStack stack = ItemStackUtil.cloneDefensive(player.getItemInHand(useEntityPacket.hand()));
             if (stack != null) {
                 context.itemUsed(stack);
             }
-            final HandType handType = (HandType) (Object) accessor.accessor$hand();
+            final HandType handType = (HandType) (Object) useEntityPacket.hand();
             context.handUsed(handType);
         }
 
     }
 
+    @SuppressWarnings("deprecation") // getEntityOrPart is the easiest way to check if the entity is valid
     @Override
     public void unwind(final BasicPacketContext phaseContext) {
-
         final ServerPlayer player = phaseContext.getPacketPlayer();
         final ServerboundInteractPacket useEntityPacket = phaseContext.getPacket();
-        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(player.level());
+        final net.minecraft.world.entity.@Nullable Entity entity = player.level().getEntityOrPart(useEntityPacket.entityId());
         if (entity == null) {
             // Something happened?
             return;

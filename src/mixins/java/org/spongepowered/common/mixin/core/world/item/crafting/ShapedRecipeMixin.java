@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.item.crafting;
 
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import org.spongepowered.asm.mixin.Final;
@@ -36,8 +38,8 @@ import org.spongepowered.common.bridge.world.item.crafting.ShapedRecipeBridge;
 public abstract class ShapedRecipeMixin implements ShapedRecipeBridge {
 
     // @formatter=off
-    @Shadow @Final ItemStack result;
-    @Shadow @Final ShapedRecipePattern pattern;
+    @Shadow @Final private ItemStackTemplate result;
+    @Shadow @Final private ShapedRecipePattern pattern;
 
     // @formatter=on
 
@@ -49,7 +51,7 @@ public abstract class ShapedRecipeMixin implements ShapedRecipeBridge {
 
     @Override
     public ItemStack bridge$result() {
-        return this.result;
+        return this.result.apply(DataComponentPatch.EMPTY);
     }
 
 

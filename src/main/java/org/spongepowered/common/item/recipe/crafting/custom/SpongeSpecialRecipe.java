@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting.custom;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -63,7 +62,7 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(final CraftingInput input, final HolderLookup.Provider lookup) {
+    public ItemStack assemble(final CraftingInput input) {
         return ItemStackUtil.toNative(this.resultFunction.apply(InventoryUtil.toSponge(input)));
     }
 

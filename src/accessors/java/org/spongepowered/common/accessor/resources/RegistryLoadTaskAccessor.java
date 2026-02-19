@@ -22,15 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.network.protocol.game;
+package org.spongepowered.common.accessor.resources;
 
-import net.minecraft.world.InteractionHand;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.resources.RegistryLoadTask;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(targets = "net.minecraft.network.protocol.game.ServerboundInteractPacket$InteractionAtLocationAction")
-public interface ServerboundInteractPacket_InteractionAtLocationActionAccessor {
+@Mixin(RegistryLoadTask.class)
+public interface RegistryLoadTaskAccessor<T> {
 
-    @Accessor("hand") InteractionHand accessor$hand();
+    @Accessor("data") RegistryDataLoader.RegistryData<T> accessor$data();
 
+    @Accessor("registry") WritableRegistry<T> accessor$registry();
 }

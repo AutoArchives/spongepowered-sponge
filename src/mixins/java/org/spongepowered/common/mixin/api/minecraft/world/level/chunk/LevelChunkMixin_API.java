@@ -181,7 +181,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
         if (!(this.level instanceof ServerLevel sl)) {
             return 0;
         }
-        return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(),
+        return new DifficultyInstance(this.level.getDifficulty(), this.level.getOverworldClockTime(),
                 this.inhabitedTime().ticks(), sl.getMoonBrightness(sl.getRespawnData().pos())).getEffectiveDifficulty();
     }
 
@@ -190,7 +190,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
         if (!(this.level instanceof ServerLevel sl)) {
             return 0;
         }
-        return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(),
+        return new DifficultyInstance(this.level.getDifficulty(), this.level.getOverworldClockTime(),
                 this.inhabitedTime().ticks(), sl.getMoonBrightness(sl.getRespawnData().pos())).getSpecialMultiplier();
     }
 

@@ -99,7 +99,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.ResolvableProfile;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -552,8 +552,8 @@ public final class SpongeAdventure {
                 final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
                 yield HoverEvent.showItem(
                     SpongeAdventure.asAdventure(stack.typeHolder().unwrap().map(ResourceKey::identifier, itemRegistry::getKey)),
-                    stack.getCount(),
-                    SpongeAdventure.asAdventure(stack.getComponentsPatch())
+                    stack.count(),
+                    SpongeAdventure.asAdventure(stack.components())
                 );
             case net.minecraft.network.chat.HoverEvent.ShowEntity se:
                 final net.minecraft.network.chat.HoverEvent.EntityTooltipInfo value = se.entity();
@@ -641,8 +641,7 @@ public final class SpongeAdventure {
             final HoverEvent.ShowItem value = (HoverEvent.ShowItem) event.value();
             final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
             final var item = Holder.direct(itemRegistry.getValue(SpongeAdventure.asVanilla(value.item())));
-            final var stack = new ItemStack(item, value.count(), SpongeAdventure.asVanilla(value.dataComponents()));
-            return new net.minecraft.network.chat.HoverEvent.ShowItem(stack);
+            return new net.minecraft.network.chat.HoverEvent.ShowItem(new ItemStackTemplate(item, value.count(), SpongeAdventure.asVanilla(value.dataComponents())));
         }
         throw new IllegalArgumentException(event.toString());
     }

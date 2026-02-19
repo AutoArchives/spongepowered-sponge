@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.world.item.crafting;
 
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
-import net.minecraft.world.item.crafting.TransmuteResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,10 +39,10 @@ import java.util.Optional;
 public abstract class SmithingTransformRecipeMixin implements SmithingRecipeBridge {
 
     // @formatter=off
-    @Shadow @Final Optional<Ingredient> template;
-    @Shadow @Final Ingredient base;
-    @Shadow @Final Optional<Ingredient> addition;
-    @Shadow @Final TransmuteResult result;
+    @Shadow @Final private Optional<Ingredient> template;
+    @Shadow @Final private Ingredient base;
+    @Shadow @Final private Optional<Ingredient> addition;
+    @Shadow @Final private ItemStackTemplate result;
     // @formatter=on
 
     @Override

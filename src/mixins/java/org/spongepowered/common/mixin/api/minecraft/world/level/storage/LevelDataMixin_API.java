@@ -37,7 +37,6 @@ public interface LevelDataMixin_API extends WorldProperties {
 
     // @formatter:off
     @Shadow long shadow$getGameTime();
-    @Shadow long shadow$getDayTime();
     // @formatter:on
 
     @Override
@@ -47,7 +46,8 @@ public interface LevelDataMixin_API extends WorldProperties {
 
     @Override
     default MinecraftDayTime dayTime() {
-        return new SpongeMinecraftDayTime(this.shadow$getDayTime());
+        // TODO
+        return this.gameTime();
     }
 
 }

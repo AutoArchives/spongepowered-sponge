@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import org.apache.logging.log4j.Level;
@@ -152,7 +151,7 @@ public final class PhasePrinter {
     }
 
     static void printNullSourceBlockWithTile(
-            final BlockPos pos, final Block blockIn, final BlockPos otherPos, final Identifier type, final boolean useTile,
+            final BlockPos pos, final Block blockIn, final BlockPos otherPos, final String type, final boolean useTile,
             final NullPointerException e) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block on TileEntity!").centre().hr()
@@ -161,7 +160,7 @@ public final class PhasePrinter {
                         + "attempting to perform a neighbor notification with it. Because "
                         + "this is guaranteed to lead to a crash or a spam of reports, "
                         + "Sponge is going ahead and fixing the issue. The offending Tile "
-                        + "is " + type.toString())
+                        + "is " + type)
             .add()
             .add("%s : %s", "Source position", pos)
             .add("%s : %s", "Source TileEntity", type)

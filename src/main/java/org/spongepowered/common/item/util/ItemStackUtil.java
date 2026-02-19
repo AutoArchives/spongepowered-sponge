@@ -25,9 +25,10 @@
 package org.spongepowered.common.item.util;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.TransmuteResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackLike;
@@ -51,16 +52,16 @@ public abstract class ItemStackUtil {
         throw new NativeStackException("The supplied item stack was not native to the current platform");
     }
 
-    public static TransmuteResult toTransmute(final @Nullable ItemStackLike stack) {
+    public static ItemStackTemplate toTemplate(final @Nullable ItemStackLike stack) {
         if (stack == null) {
-            return new TransmuteResult(Items.AIR);
+            return new ItemStackTemplate(Items.AIR);
         }
         return switch ((Object) stack) {
             case net.minecraft.world.item.ItemStack itemStack:
-                yield new TransmuteResult(itemStack.typeHolder(), itemStack.getCount(), itemStack.getComponentsPatch());
+                yield new ItemStackTemplate(itemStack.typeHolder(), itemStack.getCount(), itemStack.getComponentsPatch());
             case SpongeItemStackSnapshot snapshot:
                 final var direct = Holder.direct(((Item) stack.type()));
-                yield new TransmuteResult(direct, snapshot.quantity(), snapshot.getComponentsPatch());
+                yield new ItemStackTemplate(direct, snapshot.quantity(), snapshot.getComponentsPatch());
             default:
                 throw new NativeStackException("The supplied item stack was not native to the current platform");
         };
@@ -86,8 +87,8 @@ public abstract class ItemStackUtil {
         return items.stream().map(ItemStackUtil::fromSnapshotToNative).toArray(net.minecraft.world.item.ItemStack[]::new);
     }
 
-    public static List<net.minecraft.world.item.ItemStack> fromSnapshotToNativeList(List<ItemStackSnapshot> items) {
-        return items.stream().map(ItemStackUtil::fromSnapshotToNative).toList();
+    public static List<ItemStackTemplate> toTemplate(List<? extends ItemStackLike> items) {
+        return items.stream().map(ItemStackUtil::toTemplate).toList();
     }
 
     public static ItemStack fromNative(net.minecraft.world.item.ItemStack stack) {
@@ -95,6 +96,10 @@ public abstract class ItemStackUtil {
             return (ItemStack) (Object) stack;
         }
         throw new NativeStackException("The supplied native item stack was not compatible with the target environment");
+    }
+
+    public static ItemStack fromTemplate(ItemStackTemplate template) {
+        return ItemStackUtil.fromNative(template.apply(DataComponentPatch.EMPTY));
     }
 
     /**
@@ -159,6 +164,10 @@ public abstract class ItemStackUtil {
         return ItemStackUtil.compareIgnoreQuantity(ItemStackUtil.toNative(stack1), stack2);
     }
 
+    public static ItemStackSnapshot snapshotOf(ItemStackTemplate template) {
+        return template == null ? ItemStackSnapshot.empty() : ItemStackUtil.snapshotOf(template.apply(DataComponentPatch.EMPTY));
+    }
+
     public static ItemStackSnapshot snapshotOf(net.minecraft.world.item.ItemStack itemStack) {
         if (itemStack == null) {
             return ItemStackSnapshot.empty();
@@ -170,7 +179,7 @@ public abstract class ItemStackUtil {
         return itemStack == null ? ItemStackSnapshot.empty() : itemStack.isEmpty() ? ItemStackSnapshot.empty() : itemStack.asImmutable();
     }
 
-    public static List<ItemStackSnapshot> snapshotOf(final List<net.minecraft.world.item.ItemStack> items) {
+    public static List<ItemStackSnapshot> snapshotOf(final List<ItemStackTemplate> items) {
         return items.stream().map(ItemStackUtil::snapshotOf).toList();
     }
 

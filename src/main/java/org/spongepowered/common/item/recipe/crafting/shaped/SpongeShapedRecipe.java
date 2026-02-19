@@ -25,9 +25,9 @@
 package org.spongepowered.common.item.recipe.crafting.shaped;
 
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.ShapedRecipe;
@@ -41,13 +41,14 @@ public class SpongeShapedRecipe extends ShapedRecipe {
     private final Function<CraftingInput, NonNullList<net.minecraft.world.item.ItemStack>> remainingItemsFunction;
 
     public SpongeShapedRecipe(
-            final String groupIn,
-            final CraftingBookCategory category,
-            final ShapedRecipePattern pattern,
-            final boolean showNotification,
-            final ItemStack resultStack,
-            final Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction,
-            final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction) {
+        final String groupIn,
+        final CraftingBookCategory category,
+        final ShapedRecipePattern pattern,
+        final boolean showNotification,
+        final ItemStackTemplate resultStack,
+        final Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction,
+        final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction
+    ) {
         super(groupIn, category, pattern, resultStack, showNotification);
         this.resultFunction = resultFunction;
         this.remainingItemsFunction = remainingItemsFunction;
@@ -62,11 +63,11 @@ public class SpongeShapedRecipe extends ShapedRecipe {
     }
 
     @Override
-    public ItemStack assemble(final CraftingInput $$0, final HolderLookup.Provider $$1) {
+    public ItemStack assemble(final CraftingInput input) {
         if (this.resultFunction != null) {
-            return this.resultFunction.apply($$0);
+            return this.resultFunction.apply(input);
         }
-        return super.assemble($$0, $$1);
+        return super.assemble(input);
     }
 
 }

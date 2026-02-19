@@ -24,11 +24,15 @@
  */
 package org.spongepowered.common.world.server;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.attribute.BedRule;
 import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.clock.WorldClock;
+import net.minecraft.world.clock.WorldClocks;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -43,6 +47,7 @@ import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Range;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeEffect;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.tags.TagBridge;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -106,7 +111,7 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
 
         final SpongeDimensionTypes.SpongeDataSection spongeData = new SpongeDimensionTypes.SpongeDataSection(createDragonFight);
         try {
-
+            final var clocks = SpongeCommon.vanillaRegistry(Registries.WORLD_CLOCK);
             final var attributes = EnvironmentAttributeMap.builder();
             attributes.set(EnvironmentAttributes.PIGLINS_ZOMBIFY, !piglinSafe);
             attributes.set(EnvironmentAttributes.BED_RULE, bedsUsable ? BedRule.CAN_SLEEP_WHEN_DARK : BedRule.EXPLODES);
@@ -127,7 +132,8 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
                     DimensionType.Skybox.OVERWORLD,
                     DimensionType.CardinalLightType.DEFAULT,
                     attributes.build(),
-                    HolderSet.empty()
+                    HolderSet.empty(),
+                    clocks.get(WorldClocks.OVERWORLD).map(r -> (Holder<WorldClock>) r)
                 );
             if ((Object) dimensionType instanceof DimensionTypeBridge bridge) {
                 bridge.bridge$decorateData(spongeData);

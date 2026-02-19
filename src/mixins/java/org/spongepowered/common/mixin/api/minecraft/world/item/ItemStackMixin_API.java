@@ -74,7 +74,6 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     // @formatter:off
     @Shadow public abstract int shadow$getCount();
     @Shadow public abstract void shadow$setCount(int size); // Do not use field directly as Minecraft tracks the empty state
-    @Shadow public abstract int shadow$getMaxStackSize();
     @Shadow public abstract boolean shadow$isEmpty();
     @Shadow public abstract net.minecraft.world.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();

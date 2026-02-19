@@ -40,7 +40,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
@@ -275,7 +274,7 @@ public final class VolumeStreamUtils {
             Objects.requireNonNull(
                 cloned,
                 () -> String.format(
-                    "TileEntityType[%s] creates a null TileEntity!", BlockEntityType.getKey(tile.getType()))
+                    "TileEntityType[%s] creates a null TileEntity!", tile.typeHolder().getRegisteredName())
             ).loadWithComponents(input);
 
             if (level != null) {

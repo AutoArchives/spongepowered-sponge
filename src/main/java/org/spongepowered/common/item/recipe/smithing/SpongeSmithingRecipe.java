@@ -25,12 +25,11 @@
 package org.spongepowered.common.item.recipe.smithing;
 
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
-import net.minecraft.world.item.crafting.TransmuteResult;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -40,18 +39,18 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe {
     private Function<SmithingRecipeInput, ItemStack> resultFunction;
 
     public SpongeSmithingRecipe(final Optional<Ingredient> template, final Ingredient base,
-                                final Optional<Ingredient> addition, final TransmuteResult spongeResult, final Function<SmithingRecipeInput, ItemStack> resultFunction) {
+                                final Optional<Ingredient> addition, final ItemStackTemplate spongeResult, final Function<SmithingRecipeInput, ItemStack> resultFunction) {
         super(template, base, addition, spongeResult);
         this.resultFunction = resultFunction;
     }
 
     @Override
-    public ItemStack assemble(final SmithingRecipeInput $$0, final HolderLookup.Provider $$1) {
+    public ItemStack assemble(final SmithingRecipeInput input) {
         if (this.resultFunction != null) {
-            return this.resultFunction.apply($$0);
+            return this.resultFunction.apply(input);
         }
 
-        return super.assemble($$0, $$1);
+        return super.assemble(input);
     }
 
 }

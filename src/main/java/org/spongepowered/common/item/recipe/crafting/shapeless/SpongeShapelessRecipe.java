@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shapeless;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -55,12 +55,14 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     private final Function<CraftingInput, ItemStack> resultFunction;
     private final Function<CraftingInput, NonNullList<net.minecraft.world.item.ItemStack>> remainingItemsFunction;
 
-    public SpongeShapelessRecipe(final String groupIn,
-            final CraftingBookCategory category,
-            final List<Ingredient> recipeItemsIn,
-            final ItemStack spongeResultStack,
-            final Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction,
-            final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction) {
+    public SpongeShapelessRecipe(
+        final String groupIn,
+        final CraftingBookCategory category,
+        final List<Ingredient> recipeItemsIn,
+        final ItemStackTemplate spongeResultStack,
+        final Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction,
+        final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction
+    ) {
         super(groupIn, category, spongeResultStack, recipeItemsIn);
         this.onlyVanillaIngredients = recipeItemsIn.stream().noneMatch(i -> i instanceof SpongeIngredient);
         this.resultFunction = resultFunction;
@@ -85,11 +87,11 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
 
 
     @Override
-    public ItemStack assemble(final CraftingInput $$0, final HolderLookup.Provider $$1) {
+    public ItemStack assemble(final CraftingInput input) {
         if (this.resultFunction != null) {
-            return this.resultFunction.apply($$0);
+            return this.resultFunction.apply(input);
         }
-        return super.assemble($$0, $$1);
+        return super.assemble(input);
     }
 
     private static boolean
@@ -109,7 +111,8 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
             for (int j = 0; j < stacks.size(); j++) {
                 final ItemStack stack = stacks.get(j);
                 if (!stack.isEmpty() && ingredient.test(stack)) {
-                    matchesMap.computeIfAbsent(j, k -> new ArrayList<>()).add(i);;
+                    matchesMap.computeIfAbsent(j, k -> new ArrayList<>()).add(i);
+                    ;
                     noMatch = false;
                 }
             }

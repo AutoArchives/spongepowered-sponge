@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
@@ -38,7 +37,6 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.crafting.RecipeUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -52,7 +50,7 @@ import java.util.function.Predicate;
 public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepowered.api.item.recipe.crafting.RecipeInput> extends Recipe<I2> {
 
     // @formatter:off
-    @Shadow ItemStack shadow$assemble(I inv, HolderLookup.Provider registryAccess);
+    @Shadow ItemStack shadow$assemble(I inv);
     @Shadow boolean shadow$isSpecial();
     @Shadow boolean shadow$matches(I inv, net.minecraft.world.level.Level worldIn);
     @Shadow net.minecraft.world.item.crafting.RecipeType<?> shadow$getType();
@@ -79,7 +77,7 @@ public interface RecipeMixin_API<I extends RecipeInput, I2 extends org.spongepow
     @NonNull
     @Override
     default ItemStackSnapshot result(@NonNull final I2 inv) {
-        return ItemStackUtil.snapshotOf(this.shadow$assemble((I) InventoryUtil.toCraftingInputOrThrow(inv), SpongeCommon.server().registryAccess()));
+        return ItemStackUtil.snapshotOf(this.shadow$assemble((I) InventoryUtil.toCraftingInputOrThrow(inv)));
     }
 
     @NonNull

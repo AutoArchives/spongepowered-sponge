@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
+import net.minecraft.world.clock.PackedClockStates;
+import net.minecraft.world.clock.WorldClocks;
 import net.minecraft.world.level.gamerules.GameRuleMap;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -44,6 +46,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.HashMap;
@@ -63,9 +66,14 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
     @Shadow void shadow$setWanderingTraderSpawnChance(int p_230397_1_);
     @Shadow void shadow$setWanderingTraderId(UUID p_230394_1_);
     @Shadow @Nullable UUID shadow$getWanderingTraderId();
-    @Shadow void shadow$setDayTime(long p_76068_1_);
     @Shadow GameRules shadow$getGameRules();
     // @formatter:on
+
+    @Shadow
+    PackedClockStates clockStates();
+
+    @Shadow
+    void setClockStates(PackedClockStates packedClocks);
 
     @Override
     default ResourceKey key() {
@@ -115,7 +123,8 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     @Override
     default void setDayTime(final MinecraftDayTime dayTime) {
-        this.shadow$setDayTime(dayTime.asTicks().ticks());
+        // TODO - adjust to world clocks now
+//        this.setClockStates(this.clockStates().clocks());
     }
 
     @Override
@@ -158,4 +167,13 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
         this.offer(Keys.WEATHER, Weather.of(Objects.requireNonNull(type, "type"), Objects.requireNonNull(ticks, "ticks")));
     }
 
+    @Override
+    default MinecraftDayTime dayTime() {
+        final var clockstate = this.clockStates().clocks().get(WorldClocks.OVERWORLD);
+        if (clockstate == null) {
+            return new SpongeMinecraftDayTime(0);
+        }
+        final var totalTicks = clockstate.totalTicks();
+        return new SpongeMinecraftDayTime(totalTicks);
+    }
 }

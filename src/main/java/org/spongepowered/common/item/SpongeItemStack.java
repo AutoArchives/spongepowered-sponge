@@ -28,6 +28,7 @@ package org.spongepowered.common.item;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -141,11 +142,8 @@ public final class SpongeItemStack {
             Objects.requireNonNull(modifier, "AttributeModifier cannot be null");
             Objects.requireNonNull(equipmentType, "EquipmentType cannot be null");
 
-            var existing = this.components.get(DataComponents.ATTRIBUTE_MODIFIERS);
-            if (existing == null) {
-                existing = Optional.empty();
-            }
-            var modifiers = existing.map(ItemAttributeModifiers.class::cast).orElse(ItemAttributeModifiers.EMPTY);
+            final var existing = Optional.ofNullable(this.components.get(Holder.direct(this.type).components(), DataComponents.ATTRIBUTE_MODIFIERS));
+            var modifiers = existing.orElse(ItemAttributeModifiers.EMPTY);
             var attribute = BuiltInRegistries.ATTRIBUTE.wrapAsHolder((Attribute) attributeType);
             var slotGroup = SpongeItemStack.asEquipmentSlotGroup(equipmentType);
 

@@ -130,7 +130,7 @@ public final class SpongeParticleHelper {
             final ItemStackSnapshot snapshot = effect.optionOrDefault(ParticleOptions.ITEM_STACK_SNAPSHOT).get();
             final ItemParticleOption particleData = new ItemParticleOption(
                     (net.minecraft.core.particles.ParticleType<ItemParticleOption>) internalType,
-                    ItemStackUtil.fromSnapshotToNative(snapshot));
+                    ItemStackUtil.toTemplate(snapshot));
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         } else if (internalType == ParticleTypes.SCULK_CHARGE) {
             final double roll = effect.optionOrDefault(ParticleOptions.ROLL).get();

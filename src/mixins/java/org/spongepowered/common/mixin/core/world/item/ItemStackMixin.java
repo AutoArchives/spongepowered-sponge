@@ -114,7 +114,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
     }
 
     // Read custom data from nbt
-    @Inject(method = "<init>(Lnet/minecraft/world/level/ItemLike;ILnet/minecraft/core/component/PatchedDataComponentMap;)V", at = @At("RETURN"))
+    @Inject(method = "<init>(Lnet/minecraft/core/Holder;ILnet/minecraft/core/component/PatchedDataComponentMap;)V", at = @At("RETURN"))
     private void impl$onRead(final CallbackInfo ci) {
         if (!this.shadow$isEmpty()) {
             DataUtil.syncTagToData(this); // Deserialize

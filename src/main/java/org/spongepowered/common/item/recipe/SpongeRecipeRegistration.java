@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeInput;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
@@ -35,11 +36,11 @@ import java.util.function.Function;
 
 public final class SpongeRecipeRegistration {
 
-    public static <I extends RecipeInput> boolean isVanillaSerializer(final ItemStack resultStack,
+    public static <I extends RecipeInput> boolean isVanillaSerializer(final ItemStackTemplate resultStack,
                                                                       final Function<I, ItemStack> resultFunction,
                                                                       final Function<I, NonNullList<ItemStack>> remainingItemsFunction,
                                                                       final Collection<Ingredient> ingredients) {
-        if (!resultStack.getComponents().isEmpty() || resultFunction != null || remainingItemsFunction != null) {
+        if (!resultStack.components().isEmpty() || resultFunction != null || remainingItemsFunction != null) {
             return false;
         }
         return ingredients.stream().noneMatch(value -> value instanceof SpongeIngredient);

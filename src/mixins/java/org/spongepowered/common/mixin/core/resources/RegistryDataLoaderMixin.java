@@ -29,14 +29,16 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ChatTypeDecoration;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.NetworkRegistryLoadTask;
 import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.resources.RegistryLoadTask;
 import net.minecraft.resources.ResourceKey;
 import org.spongepowered.api.adventure.ChatTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.accessor.resources.RegistryDataLoader_RegistryLoadTaskAccessor;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.accessor.resources.RegistryLoadTaskAccessor;
 
 import java.util.Map;
 
@@ -44,11 +46,15 @@ import java.util.Map;
 public class RegistryDataLoaderMixin {
 
     @SuppressWarnings("unchecked")
-    @Inject(method = "lambda$load$3", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/WritableRegistry;freeze()Lnet/minecraft/core/Registry;"))
+    @Inject(method = "lambda$load$3", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryLoadTask;freezeRegistry(Ljava/util/Map;)Z"))
     private static <E> void impl$afterLoadRegistryContents(
-        final Map loadingErrors, final RegistryDataLoader.RegistryLoadTask<E> p, CallbackInfo ci
+        Map<ResourceKey<?>, Exception> loadingErrors, RegistryLoadTask<E> task, CallbackInfoReturnable<Boolean> cir
     ) {
-        final var registry = ((RegistryDataLoader_RegistryLoadTaskAccessor<E>) p).accessor$getRegistry();
+        if (task instanceof NetworkRegistryLoadTask<E>) {
+            // On the client side, this ought to already be registered through the network
+            return;
+        }
+        final var registry = ((RegistryLoadTaskAccessor<E>) task).accessor$registry();
         if (Registries.CHAT_TYPE.equals(registry.key())) {
             final ChatTypeDecoration narration = ChatTypeDecoration.withSender("chat.type.text.narrate");
             registry.register(ResourceKey.create(registry.key(), (Identifier) (Object) ChatTypes.CUSTOM_CHAT.location()), (E) new ChatType(ChatTypeDecoration.withSender("%s%s"), narration), RegistrationInfo.BUILT_IN);

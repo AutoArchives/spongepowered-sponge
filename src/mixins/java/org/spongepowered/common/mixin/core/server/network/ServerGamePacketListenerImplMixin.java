@@ -42,8 +42,10 @@ import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandSignedPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -84,6 +86,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.entity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -566,6 +569,38 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             this.server.execute(() -> this.impl$handleSpongePayload(payload));
 
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "handleInteract", at = @At("HEAD"), cancellable = true)
+    private void impl$throwInteractItemEventForInteract(ServerboundInteractPacket packet, CallbackInfo ci) {
+        final @Nullable Entity entity = this.player.level().getEntityOrPart(packet.entityId());
+        final var hand = packet.hand();
+        final var pos = packet.location();
+
+        final ItemStack itemInHand = hand == null ? ItemStack.EMPTY : player.getItemInHand(hand);
+        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
+            .callInteractEntityEventSecondary(player, itemInHand, entity, hand, VecHelper.toVector3d(pos));
+        if (event.isCancelled()) {
+            ci.cancel();
+        } else {
+            this.bridge$incrementIgnorePackets();
+        }
+    }
+
+    @Inject(method = "handleAttack", at = @At("HEAD"), cancellable = true)
+    private void impl$throwInteractPrimaryEventForAttack(ServerboundAttackPacket packet, CallbackInfo ci) {
+        final @Nullable Entity entity = this.player.level().getEntityOrPart(packet.entityId());
+        if (entity == null) {
+            return;
+        }
+
+        final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(player,
+            player.getItemInHand(player.getUsedItemHand()), entity, player.getUsedItemHand());
+        if (event.isCancelled()) {
+            ci.cancel();
+        } else {
+           this.bridge$incrementIgnorePackets();
         }
     }
 

@@ -545,4 +545,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
+    @Inject(method = "startSleeping", at = @At("HEAD"), cancellable = true)
+    private void impl$callPreSleepingEvent(BlockPos param0, CallbackInfo ci) {
+        final Cause currentCause = PhaseTracker.getInstance().currentCause();
+        final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
+        if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventPre(currentCause, snapshot, (Living) this))) {
+            ci.cancel();
+        }
+    }
+
 }

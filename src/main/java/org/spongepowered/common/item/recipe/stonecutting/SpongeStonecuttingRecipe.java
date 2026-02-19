@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.item.recipe.stonecutting;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
@@ -37,17 +37,22 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe {
 
     private Function<SingleRecipeInput, ItemStack> resultFunction;
 
-    public SpongeStonecuttingRecipe(final String groupIn, final Ingredient ingredientIn, final ItemStack spongeResult, final Function<SingleRecipeInput, ItemStack> resultFunction) {
+    public SpongeStonecuttingRecipe(
+        final String groupIn,
+        final Ingredient ingredientIn,
+        final ItemStackTemplate spongeResult,
+        final Function<SingleRecipeInput, ItemStack> resultFunction
+    ) {
         super(groupIn, ingredientIn, spongeResult);
         this.resultFunction = resultFunction;
     }
 
     @Override
-    public ItemStack assemble(final SingleRecipeInput $$0, final HolderLookup.Provider $$1) {
+    public ItemStack assemble(final SingleRecipeInput input) {
         if (this.resultFunction != null) {
-            return this.resultFunction.apply($$0);
+            return this.resultFunction.apply(input);
         }
-        return super.assemble($$0, $$1);
+        return super.assemble(input);
     }
 
 }
