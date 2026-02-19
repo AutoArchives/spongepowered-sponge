@@ -164,7 +164,7 @@ public final class GeneratorMain {
             }
             executor.shutdown();
         }).thenApply(resources -> {
-            resources.updateStaticRegistryTags();
+            resources.updateComponentsAndStaticRegistryTags();
             return resources;
         });
 
