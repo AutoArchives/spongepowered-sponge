@@ -67,7 +67,7 @@ public final class PriorityOverrideModule extends PrivateModule {
 
         for (final Element element : elements) {
             if (element instanceof final Binding<?> binding) {
-                this.binder().expose(binding.getKey());
+                this.binder().withSource(binding.getSource()).expose(binding.getKey());
             } else if (element instanceof final PrivateElements privateElements) {
                 for (final Key<?> exposedKey : privateElements.getExposedKeys()) {
                     this.binder().withSource(privateElements.getExposedSource(exposedKey)).expose(exposedKey);

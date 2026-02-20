@@ -47,7 +47,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.List;
 import java.util.Optional;
 
-public class PlaceRecipeTransaction extends ContainerBasedTransaction {
+public class PlaceCraftingRecipeTransaction extends ContainerBasedTransaction {
 
     private final ServerPlayer player;
     private final ItemStackSnapshot originalCursor;
@@ -55,7 +55,7 @@ public class PlaceRecipeTransaction extends ContainerBasedTransaction {
     private RecipeHolder<?> recipe;
     private CraftingInventory craftingInventory;
 
-    public PlaceRecipeTransaction(final ServerPlayer player, final boolean shift, final RecipeHolder<?> recipe, CraftingInventory craftingInventory) {
+    public PlaceCraftingRecipeTransaction(final ServerPlayer player, final boolean shift, final RecipeHolder<?> recipe, CraftingInventory craftingInventory) {
         super(player.containerMenu);
         this.player = player;
         this.originalCursor = ItemStackUtil.snapshotOf(player.containerMenu.getCarried());
