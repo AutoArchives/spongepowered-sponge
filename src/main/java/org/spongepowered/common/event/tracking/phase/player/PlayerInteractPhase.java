@@ -28,6 +28,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
+
 public final class PlayerInteractPhase extends PooledPhaseState<PlayerInteractContext> {
 
     @Override
