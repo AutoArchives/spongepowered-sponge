@@ -24,20 +24,24 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.network;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.inventory.AbstractFurnaceMenuAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -46,27 +50,38 @@ import org.spongepowered.common.event.tracking.context.transaction.Transactional
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
 public abstract class ServerGamePacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "handlePlaceRecipe",
+    @Shadow public ServerPlayer player;
+
+    @SuppressWarnings({"rawtypes"})
+    @WrapOperation(method = "handlePlaceRecipe",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZZLnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/player/Inventory;)Lnet/minecraft/world/inventory/RecipeBookMenu$PostPlaceAction;"))
     private RecipeBookMenu.PostPlaceAction vanilla$onPlaceRecipe(
         final RecipeBookMenu instance, final boolean shift, final boolean creative,
         final RecipeHolder<?> recipe, final ServerLevel serverLevel,
-        final net.minecraft.world.entity.player.Inventory inventory) {
-        final var player = inventory.player;
+        final net.minecraft.world.entity.player.Inventory inventory,
+        final Operation<RecipeBookMenu.PostPlaceAction> original
+        ) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(serverLevel).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
 
-        final Inventory craftInv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
+        final var menu = (Inventory) this.player.containerMenu;
+        if ( menu instanceof AbstractFurnaceMenuAccessor afm && afm.accessor$container() instanceof BlockEntity be) {
+            try (final EffectTransactor ignored = transactor.logPlaceCookingRecipe(be,shift, recipe, this.player)) {
+                final var postPlaceAction = original.call(instance, shift, creative, recipe, serverLevel, inventory);
+                this.player.containerMenu.broadcastChanges();
+                return postPlaceAction;
+            }
+        }
+        Inventory craftInv = menu.query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
-            final var postPlaceAction = instance.handlePlacement(shift, creative, recipe, serverLevel, inventory);
+            final var postPlaceAction = original.call(instance, shift, creative, recipe, serverLevel, inventory);
             SpongeCommon.logger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
             return postPlaceAction;
         }
 
-        try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, (RecipeHolder) recipe, (ServerPlayer) player, (CraftingInventory) craftInv)) {
-            final var postPlaceAction = instance.handlePlacement(shift, creative, recipe, serverLevel, inventory);
-            player.containerMenu.broadcastChanges();
+        try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, (RecipeHolder) recipe, this.player, (CraftingInventory) craftInv)) {
+            final var postPlaceAction = original.call(instance, shift, creative, recipe, serverLevel, inventory);
+            this.player.containerMenu.broadcastChanges();
             return postPlaceAction;
         }
     }
