@@ -24,12 +24,15 @@
  */
 package org.spongepowered.neoforge.mixin.core.server.network;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
@@ -37,8 +40,8 @@ import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.inventory.AbstractFurnaceMenuAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -49,25 +52,35 @@ public abstract class ServerGamePacketListenerImplMixin_Neo implements ServerGam
 
     @Shadow public ServerPlayer player;
 
-    @Redirect(method = "handlePlaceRecipe",
+    @WrapOperation(method = "handlePlaceRecipe",
         at = @At(value = "INVOKE", target = "net/minecraft/world/inventory/RecipeBookMenu.handlePlacement(ZZLnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/player/Inventory;)Lnet/minecraft/world/inventory/RecipeBookMenu$PostPlaceAction;"))
     private RecipeBookMenu.PostPlaceAction neo$onPlaceRecipe(
         final RecipeBookMenu recipeBookMenu, final boolean shift, final boolean isCreative, final RecipeHolder<?> recipe,
-        final ServerLevel serverLevel, final net.minecraft.world.entity.player.Inventory inventory) {
+        final ServerLevel serverLevel, final net.minecraft.world.entity.player.Inventory inventory,
+        final Operation<RecipeBookMenu.PostPlaceAction> original
+    ) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance(this.player.level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final var player = this.player;
 
-        final Inventory craftInv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         final RecipeBookMenu.PostPlaceAction result;
+        final var menu = (Inventory) player.containerMenu;
+        if (menu instanceof AbstractFurnaceMenuAccessor afm && afm.accessor$container() instanceof BlockEntity be) {
+            try (final EffectTransactor ignored = transactor.logPlaceCookingRecipe(be, shift, recipe, player)) {
+                result = original.call(recipeBookMenu, shift,isCreative, recipe, serverLevel, inventory);
+                player.containerMenu.broadcastChanges();
+                return result;
+            }
+        }
+        final Inventory craftInv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
-            result = recipeBookMenu.handlePlacement(shift,isCreative, recipe, serverLevel, inventory);
+            result = original.call(recipeBookMenu, shift,isCreative, recipe, serverLevel, inventory);
             SpongeCommon.logger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
             return result;
         }
 
         try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, recipe, player, (CraftingInventory) craftInv)) {
-            result = recipeBookMenu.handlePlacement(shift,isCreative, recipe, serverLevel, inventory);
+            result = original.call(recipeBookMenu, shift,isCreative, recipe, serverLevel, inventory);
             player.containerMenu.broadcastChanges();
         }
         return result;
