@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe.crafting.custom;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.BannerDuplicateRecipe;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
@@ -45,15 +46,22 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
     private final BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate;
     private final Function<RecipeInput.Crafting, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction;
     private final Function<RecipeInput.Crafting, org.spongepowered.api.item.inventory.ItemStack> resultFunction;
+    private final CraftingBookCategory category;
 
     public SpongeSpecialRecipe(CraftingBookCategory category,
             BiPredicate<RecipeInput.Crafting, ServerWorld> biPredicate,
             Function<RecipeInput.Crafting, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction,
             Function<RecipeInput.Crafting, org.spongepowered.api.item.inventory.ItemStack> resultFunction) {
-        super(category);
+        super();
+        this.category = category;
         this.biPredicate = biPredicate;
         this.remainingItemsFunction = remainingItemsFunction;
         this.resultFunction = resultFunction;
+    }
+
+    @Override
+    public CraftingBookCategory category() {
+        return this.category;
     }
 
     @Override
@@ -82,6 +90,6 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
         // Fake special crafting serializer
         // because of Unknown recipe serializer when using our serializer with a vanilla client
         // return Registry.RECIPE_SERIALIZER.getOrDefault(this.id());
-        return RecipeSerializer.BANNER_DUPLICATE;
+        return BannerDuplicateRecipe.SERIALIZER;
     }
 }

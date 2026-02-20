@@ -55,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.block.entity.AbstractFurnaceBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.general.RecipeContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collections;
@@ -65,27 +66,35 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
 
     // @Formatter:off
     @Shadow protected NonNullList<ItemStack> items;
-    @Shadow int cookingTimer;
-    @Shadow int cookingTotalTime;
+    @Shadow private int cookingTimer;
+    @Shadow private int cookingTotalTime;
 
     // @Formatter:on
 
     @Shadow @Final private RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> quickCheck;
 
     // Shrink Fuel
-    @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
+    @Redirect(method = "consumeFuel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
     private static void impl$throwFuelEventIfOrShrink(
-        final ItemStack itemStack, final int quantity, final ServerLevel var0, final BlockPos var1,
-        final BlockState var2, final AbstractFurnaceBlockEntity entity) {
+        ItemStack instance, int amount,
+        final NonNullList<ItemStack> slots, final ItemStack fuel
+    ) {
         final Cause cause = PhaseTracker.getInstance().currentCause();
+        // This is injected or switched in as a context by the platform dependent mixins
+        if (!(PhaseTracker.getInstance().getPhaseContext() instanceof RecipeContext rCtx)) {
+            instance.shrink(amount);
+            return;
+        }
+        final var entity = rCtx.furnace();
+        final var recipe = rCtx.recipe();
+        final var recipeID = rCtx.recipeID();
 
-        final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(itemStack);
-        final ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(itemStack, itemStack.getCount() - 1));
+        final ItemStackSnapshot fuelSnapshot = ItemStackUtil.snapshotOf(fuel);
+        final ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(fuel, fuel.getCount() - 1));
 
-        final SlotTransaction transaction = new SlotTransaction(((FurnaceBlockEntity) entity).inventory().slot(1).get(), fuel, shrinkedFuel);
-        final var recipe = ((AbstractFurnaceBlockEntityMixin) (Object) entity).bridge$getCurrentRecipe();
-        final CookingEvent.ConsumeFuel event = SpongeEventFactory.createCookingEventConsumeFuel(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
-                recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id().identifier()), Collections.singletonList(transaction));
+        final SlotTransaction transaction = new SlotTransaction(((FurnaceBlockEntity) entity).inventory().slot(1).get(), fuelSnapshot, shrinkedFuel);
+        final CookingEvent.ConsumeFuel event = SpongeEventFactory.createCookingEventConsumeFuel(cause, (FurnaceBlockEntity) entity, Optional.of(fuelSnapshot),
+            Optional.of((CookingRecipe) recipe), Optional.of((ResourceKey) (Object) recipeID), Collections.singletonList(transaction));
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             ((AbstractFurnaceBlockEntityMixin) (Object) entity).cookingTotalTime = 0;
@@ -99,7 +108,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         if (transaction.custom().isPresent()) {
             ((AbstractFurnaceBlockEntityMixin) (Object) entity).items.set(1, ItemStackUtil.fromSnapshotToNative(transaction.finalReplacement()));
         } else { // vanilla
-            itemStack.shrink(quantity);
+            instance.shrink(amount);
         }
     }
 
@@ -123,7 +132,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;burn(Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/world/item/crafting/SingleRecipeInput;Lnet/minecraft/core/NonNullList;I)Z"
+                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;burn(Lnet/minecraft/core/NonNullList;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)V"
             ),
             to = @At(
                 value = "INVOKE",

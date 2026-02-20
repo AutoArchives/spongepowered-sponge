@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DyedItemColor;
 import org.spongepowered.api.data.Keys;
@@ -45,7 +44,7 @@ public final class DyeableItemStackData {
                         .get(h -> h.has(DataComponents.DYED_COLOR) ? Color.ofRgb(h.get(DataComponents.DYED_COLOR).rgb()) : null)
                         .set((h, v) -> h.update(DataComponents.DYED_COLOR, new DyedItemColor(0), prev -> new DyedItemColor(v.rgb())))
                         .delete(h -> h.set(DataComponents.DYED_COLOR, null))
-                        .supports(h -> h.is(ItemTags.DYEABLE));
+                        .supports(h -> h.has(DataComponents.DYED_COLOR));
     }
     // @formatter:on
 }

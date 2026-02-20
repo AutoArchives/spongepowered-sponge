@@ -152,7 +152,7 @@ public final class CommandRegistryLoader {
             l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
             l.add(ResourceKeyedValueParameters.INTEGER, k -> ClientNativeArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
             l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
-            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> new BindableValueParameter<>(k, h -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(CommandBuildContext.simple((HolderLookup.Provider) h, ((CommandBuildContext) h).enabledFeatures())), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true)))));
+            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> new BindableValueParameter<>(k, h -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(CommandBuildContext.simple((HolderLookup.Provider) h, ((CommandBuildContext) h).enabledFeatures())), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1)))));
             l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
             l.add(ResourceKeyedValueParameters.LONG, k -> ClientNativeArgumentParser.createIdentity(k, LongArgumentType.longArg()));
             l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(

@@ -49,7 +49,7 @@ public class SpongeShapedRecipe extends ShapedRecipe {
         final Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction,
         final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction
     ) {
-        super(groupIn, category, pattern, resultStack, showNotification);
+        super(new CommonInfo(showNotification), new CraftingBookInfo(category, groupIn), pattern, resultStack);
         this.resultFunction = resultFunction;
         this.remainingItemsFunction = remainingItemsFunction;
     }

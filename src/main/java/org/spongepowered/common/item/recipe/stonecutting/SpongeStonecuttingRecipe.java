@@ -43,7 +43,7 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe {
         final ItemStackTemplate spongeResult,
         final Function<SingleRecipeInput, ItemStack> resultFunction
     ) {
-        super(groupIn, ingredientIn, spongeResult);
+        super(new CommonInfo(false), ingredientIn, spongeResult);
         this.resultFunction = resultFunction;
     }
 

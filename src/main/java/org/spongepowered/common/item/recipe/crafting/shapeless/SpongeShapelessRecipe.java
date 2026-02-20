@@ -63,7 +63,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
         final Function<CraftingInput, net.minecraft.world.item.ItemStack> resultFunction,
         final Function<CraftingInput, NonNullList<ItemStack>> remainingItemsFunction
     ) {
-        super(groupIn, category, spongeResultStack, recipeItemsIn);
+        super(new CommonInfo(false), new CraftingBookInfo(category, groupIn), spongeResultStack, recipeItemsIn);
         this.onlyVanillaIngredients = recipeItemsIn.stream().noneMatch(i -> i instanceof SpongeIngredient);
         this.resultFunction = resultFunction;
         this.remainingItemsFunction = remainingItemsFunction;

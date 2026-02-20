@@ -35,6 +35,7 @@ public final class GeneralPhase {
         public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
         public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
         public static final IPhaseState<EmptyContext> COMPLETE = new CompletePhase();
+        public static final IPhaseState<RecipeContext> RECIPE_CRAFTING = new RecipeCraftingState();
 
         private State() { }
     }

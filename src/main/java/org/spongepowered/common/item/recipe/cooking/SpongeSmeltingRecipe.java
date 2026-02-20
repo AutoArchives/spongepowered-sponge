@@ -46,7 +46,7 @@ public class SpongeSmeltingRecipe extends SmeltingRecipe {
         final int cookingTime,
         final Function<SingleRecipeInput, ItemStack> function
     ) {
-        super(group, category, ingredient, result, experience, cookingTime);
+        super(new CommonInfo(false), new CookingBookInfo(category, group), ingredient, result, experience, cookingTime);
         this.function = function;
     }
 

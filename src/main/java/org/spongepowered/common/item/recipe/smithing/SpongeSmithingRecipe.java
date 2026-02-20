@@ -40,7 +40,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe {
 
     public SpongeSmithingRecipe(final Optional<Ingredient> template, final Ingredient base,
                                 final Optional<Ingredient> addition, final ItemStackTemplate spongeResult, final Function<SmithingRecipeInput, ItemStack> resultFunction) {
-        super(template, base, addition, spongeResult);
+        super(new CommonInfo(false), template, base, addition, spongeResult);
         this.resultFunction = resultFunction;
     }
 

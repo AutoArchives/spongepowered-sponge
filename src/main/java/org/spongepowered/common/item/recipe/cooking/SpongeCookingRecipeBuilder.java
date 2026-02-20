@@ -26,10 +26,12 @@ package org.spongepowered.common.item.recipe.cooking;
 
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
@@ -147,28 +149,28 @@ public final class SpongeCookingRecipeBuilder implements CookingRecipe.Builder.R
             if (!isVanilla) {
                 return (CookingRecipe) new SpongeBlastingRecipe(group, this.cookingCategory, this.ingredient, this.result, experience, ticksCookingTime, this.resultFunction);
             }
-            return (CookingRecipe) new BlastingRecipe(group, this.cookingCategory, this.ingredient, this.result, experience, ticksCookingTime);
+            return (CookingRecipe) new BlastingRecipe(new Recipe.CommonInfo(false), new AbstractCookingRecipe.CookingBookInfo(this.cookingCategory, group), this.ingredient, this.result, experience, ticksCookingTime);
         }
         if (this.type == net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING) {
             final int ticksCookingTime = Optional.ofNullable(this.cookingTime).map(SpongeTicks::toSaturatedIntOrInfinite).orElse(600);
             if (!isVanilla) {
                 return (CookingRecipe) new SpongeCampfireCookingRecipe(group, this.cookingCategory, this.ingredient, this.result, experience, ticksCookingTime, this.resultFunction);
             }
-            return (CookingRecipe) new CampfireCookingRecipe(group, this.cookingCategory, this.ingredient, this.result, experience, ticksCookingTime);
+            return (CookingRecipe) new CampfireCookingRecipe(new Recipe.CommonInfo(false), new AbstractCookingRecipe.CookingBookInfo(this.cookingCategory, group), this.ingredient, this.result, experience, ticksCookingTime);
         }
         if (this.type == net.minecraft.world.item.crafting.RecipeType.SMOKING) {
             final int ticksCookingTime = Optional.ofNullable(this.cookingTime).map(SpongeTicks::toSaturatedIntOrInfinite).orElse(100);
             if (!isVanilla) {
                 return (CookingRecipe) new SpongeSmokingRecipe(group, this.cookingCategory, this.ingredient, this.result, experience, ticksCookingTime, this.resultFunction);
             }
-            return (CookingRecipe) new SmokingRecipe(group, this.cookingCategory, this.ingredient, this.result, experience, ticksCookingTime);
+            return (CookingRecipe) new SmokingRecipe(new Recipe.CommonInfo(false), new AbstractCookingRecipe.CookingBookInfo(this.cookingCategory, group), this.ingredient, this.result, experience, ticksCookingTime);
         }
         if (this.type == net.minecraft.world.item.crafting.RecipeType.SMELTING) {
             final int ticksCookingTime = Optional.ofNullable(this.cookingTime).map(SpongeTicks::toSaturatedIntOrInfinite).orElse(200);
             if (!isVanilla) {
                 return (CookingRecipe) new SpongeSmeltingRecipe(group, this.cookingCategory, this.ingredient, this.result, experience, ticksCookingTime, this.resultFunction);
             }
-            return (CookingRecipe) new SmeltingRecipe(group, this.cookingCategory, this.ingredient, this.result, experience, ticksCookingTime);
+            return (CookingRecipe) new SmeltingRecipe(new Recipe.CommonInfo(false), new AbstractCookingRecipe.CookingBookInfo(this.cookingCategory, group), this.ingredient, this.result, experience, ticksCookingTime);
         }
         throw new IllegalArgumentException("Unknown RecipeType " + this.type);
     }
