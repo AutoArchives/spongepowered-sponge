@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.context.transaction.inventory;
 import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -34,12 +35,12 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.entity.CookingEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -47,21 +48,25 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.List;
 import java.util.Optional;
 
-public class PlaceRecipeTransaction extends ContainerBasedTransaction {
+public class PlaceCookingRecipeTransaction extends ContainerBasedTransaction {
 
     private final ServerPlayer player;
     private final ItemStackSnapshot originalCursor;
-    private boolean shift;
+    private final BlockEntity blockEntity;
+    private final boolean shift;
     private RecipeHolder<?> recipe;
-    private CraftingInventory craftingInventory;
 
-    public PlaceRecipeTransaction(final ServerPlayer player, final boolean shift, final RecipeHolder<?> recipe, CraftingInventory craftingInventory) {
+    public PlaceCookingRecipeTransaction(
+        final BlockEntity blockEntity,
+        final ServerPlayer player,
+        boolean shift, final RecipeHolder<?> recipe
+    ) {
         super(player.containerMenu);
+        this.blockEntity = blockEntity;
         this.player = player;
         this.originalCursor = ItemStackUtil.snapshotOf(player.containerMenu.getCarried());
-        this.shift = shift;
         this.recipe = recipe;
-        this.craftingInventory = craftingInventory;
+        this.shift = shift;
     }
 
     @Override
@@ -70,22 +75,23 @@ public class PlaceRecipeTransaction extends ContainerBasedTransaction {
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {
-        final SlotTransaction preview = this.getPreviewTransaction(this.craftingInventory.result(), slotTransactions);
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.originalCursor, ItemStackUtil.snapshotOf(this.player.containerMenu.getCarried()));
-        ClickContainerEvent.Recipe event;
         if (this.shift) {
-            event = SpongeEventFactory.createClickContainerEventRecipeAll(cause, (Container) this.menu,
-                    this.craftingInventory, cursorTransaction, preview,
-                    Optional.of(this.recipe).map(RecipeHolder::value).map(CraftingRecipe.class::cast),
+            return Optional.of(
+                SpongeEventFactory.createCookingEventRecipeAll(cause,
+                    (org.spongepowered.api.block.entity.BlockEntity) this.blockEntity,
+                    (Container) this.menu,  cursorTransaction, Optional.empty(),
+                    Optional.of(this.recipe).map(RecipeHolder::value).map(CookingRecipe.class::cast),
                     Optional.of(this.recipe).map(r -> (ResourceKey) (Object) r.id().location()),
-                    Optional.empty(), slotTransactions);
-        } else {
-            event = SpongeEventFactory.createClickContainerEventRecipeSingle(cause, (Container) this.menu,
-                    this.craftingInventory, cursorTransaction, preview,
-                    Optional.of(this.recipe).map(RecipeHolder::value).map(CraftingRecipe.class::cast),
-                    Optional.of(this.recipe).map(r -> (ResourceKey) (Object) r.id().location()),
-                    Optional.empty(), slotTransactions);
+                    Optional.empty(), slotTransactions)
+            );
         }
+        final CookingEvent.Recipe event = SpongeEventFactory.createCookingEventRecipeSingle(cause,
+            (org.spongepowered.api.block.entity.BlockEntity) this.blockEntity,
+            (Container) this.menu,  cursorTransaction, Optional.empty(),
+            Optional.of(this.recipe).map(RecipeHolder::value).map(CookingRecipe.class::cast),
+            Optional.of(this.recipe).map(r -> (ResourceKey) (Object) r.id().location()),
+            Optional.empty(), slotTransactions);
         return Optional.of(event);
     }
 

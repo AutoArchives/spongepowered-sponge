@@ -44,4 +44,5 @@ public abstract class SnowGolemMixin_Neo {
         }
         return EventHooks.canEntityGrief(level, entity);
     }
+
 }
