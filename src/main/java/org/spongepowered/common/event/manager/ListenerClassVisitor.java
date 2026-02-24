@@ -194,7 +194,7 @@ public class ListenerClassVisitor extends ClassVisitor {
 
     static final class ListenerSignatureVisitor extends SignatureVisitor {
         private final ListenerParameter parameter;
-        private State state;
+        private @Nullable State state;
 
         public ListenerSignatureVisitor(final ListenerParameter parameter) {
             super(ListenerClassVisitor.ASM_VERSION);
@@ -203,7 +203,9 @@ public class ListenerClassVisitor extends ClassVisitor {
 
         @Override
         public SignatureVisitor visitParameterType() {
-            this.state = State.PARSING;
+            if (this.state == null) {
+                this.state = State.PARSING;
+            }
             return this;
         }
 
