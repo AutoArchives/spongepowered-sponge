@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.world.weather;
 
-import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.saveddata.WeatherData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -32,10 +34,13 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.api.world.weather.WeatherTypes;
+import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
 public final class SpongeWeather implements Weather {
+
+    private static final RandomSource RANDOM = RandomSource.create();
 
     private final SpongeWeatherType type;
     private final Ticks remainingDuration, runningDuration;
@@ -46,54 +51,55 @@ public final class SpongeWeather implements Weather {
         this.runningDuration = runningDuration;
     }
 
-    public static Weather of(final ServerLevelData levelData) {
-        final boolean thundering = levelData.isThundering();
+    public static Weather of(final WeatherData weatherData) {
+        final boolean thundering = weatherData.isThundering();
         if (thundering) {
-            final Ticks thunderTime = SpongeTicks.ticksOrInfinite(levelData.getThunderTime());
+            final Ticks thunderTime = SpongeTicks.ticksOrInfinite(weatherData.getThunderTime());
             return new SpongeWeather((SpongeWeatherType) WeatherTypes.THUNDER.get(),
                     thunderTime,
                     thunderTime.isInfinite()
                             ? thunderTime
-                            : new SpongeTicks(6000 - thunderTime.ticks()));
+                            : new SpongeTicks(ServerLevel.THUNDER_DURATION.sample(RANDOM)));
         }
-        final boolean raining = levelData.isRaining();
+        final boolean raining = weatherData.isRaining();
         if (raining) {
-            final Ticks rainTime = SpongeTicks.ticksOrInfinite(levelData.getRainTime());
+            final Ticks rainTime = SpongeTicks.ticksOrInfinite(weatherData.getRainTime());
             return new SpongeWeather((SpongeWeatherType) WeatherTypes.RAIN.get(),
                     rainTime,
                     rainTime.isInfinite()
                             ? rainTime
-                            : new SpongeTicks(6000 - rainTime.ticks()));
+                            : new SpongeTicks(ServerLevel.RAIN_DURATION.sample(RANDOM)));
         }
-        final Ticks clearWeatherTime = SpongeTicks.ticksOrInfinite(levelData.getClearWeatherTime());
+        final Ticks clearWeatherTime = SpongeTicks.ticksOrInfinite(weatherData.getClearWeatherTime());
         return new SpongeWeather((SpongeWeatherType) WeatherTypes.CLEAR.get(),
                 clearWeatherTime,
                 clearWeatherTime.isInfinite()
                         ? clearWeatherTime
-                        : new SpongeTicks(6000 - clearWeatherTime.ticks()));
+                        : new SpongeTicks(ServerLevel.RAIN_DURATION.sample(RANDOM) + ServerLevel.THUNDER_DURATION.sample(RANDOM)));
     }
 
-    public static void apply(final ServerLevelData levelData, final Weather weather) {
+    public static void apply(final ServerLevelDataBridge levelData, final Weather weather) {
+        final var weatherData = levelData.bridge$level().getWeatherData();
         final int time = SpongeTicks.toSaturatedIntOrInfinite(weather.remainingDuration());
         final WeatherType type = weather.type();
         if (type == WeatherTypes.CLEAR.get()) {
-            levelData.setClearWeatherTime(time);
-            levelData.setRaining(false);
-            levelData.setRainTime(0);
-            levelData.setThundering(false);
-            levelData.setThunderTime(0);
+            weatherData.setClearWeatherTime(time);
+            weatherData.setRaining(false);
+            weatherData.setRainTime(0);
+            weatherData.setThundering(false);
+            weatherData.setThunderTime(0);
         } else if (type == WeatherTypes.RAIN.get()) {
-            levelData.setRaining(true);
-            levelData.setRainTime(time);
-            levelData.setThundering(false);
-            levelData.setThunderTime(0);
-            levelData.setClearWeatherTime(0);
+            weatherData.setRaining(true);
+            weatherData.setRainTime(time);
+            weatherData.setThundering(false);
+            weatherData.setThunderTime(0);
+            weatherData.setClearWeatherTime(0);
         } else if (type == WeatherTypes.THUNDER.get()) {
-            levelData.setRaining(true);
-            levelData.setRainTime(time);
-            levelData.setThundering(true);
-            levelData.setThunderTime(time);
-            levelData.setClearWeatherTime(0);
+            weatherData.setRaining(true);
+            weatherData.setRainTime(time);
+            weatherData.setThundering(true);
+            weatherData.setThunderTime(time);
+            weatherData.setClearWeatherTime(0);
         }
     }
 

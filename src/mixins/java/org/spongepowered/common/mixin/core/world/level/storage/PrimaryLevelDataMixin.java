@@ -98,9 +98,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     @Shadow public abstract void shadow$setSpawn(LevelData.RespawnData $$0);
     // @formatter:on
 
-    @Shadow
-    private boolean difficultyLocked;
-    private final SpongeServerLevelData impl$spongeData = new SpongeServerLevelData();
+    private SpongeServerLevelData impl$spongeData = new SpongeServerLevelData();
 
     private DimensionType impl$dimensionType;
     private ChunkGenerator impl$chunkGenerator;
@@ -238,14 +236,17 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
         if (gameType != null) {
             this.impl$customGameType = true;
         }
+        final var difficultySettings = new LevelSettings.DifficultySettings(
+            difficulty == null ? this.settings.difficultySettings().difficulty() : difficulty,
+            isHardcore == null ? this.settings.difficultySettings().hardcore() : isHardcore,
+            false
+        );
         this.settings = new LevelSettings(
             this.settings.levelName(),
             gameType == null ? this.settings.gameType() : gameType,
-            isHardcore == null ? this.settings.hardcore() : isHardcore,
-            difficulty == null ? this.settings.difficulty() : difficulty,
+            difficultySettings,
             allowCommands == null ? this.settings.allowCommands() : allowCommands,
-            this.settings.gameRules(),
-            this.settings.getDataConfiguration());
+            this.settings.dataConfiguration());
 
         final Vector3i spawnPos = bridge.bridge$spawnPosition();
         if (spawnPos != null) {
@@ -291,7 +292,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
         } else if (server.isSingleplayer()) {
             level.setSpawnSettings(difficulty != Difficulty.PEACEFUL);
         } else {
-            level.setSpawnSettings(server.getWorldData().getGameRules().get(GameRules.SPAWN_MONSTERS));
+            level.setSpawnSettings(server.getGameRules().get(GameRules.SPAWN_MONSTERS));
         }
 
         level.players().forEach(player -> player.connection.send(new ClientboundChangeDifficultyPacket(difficulty, isLocked)));
@@ -310,6 +311,9 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     @Override
     @SuppressWarnings({"deprecated","deprecation"})
     public void bridge$readSpongeLevelData(final Dynamic<Tag> dynamic) {
+        dynamic.get(Constants.Sponge.Data.V3.SPONGE_WORLD_DATA).read(SpongeServerLevelData.CODEC).ifSuccess(ssld -> {
+            this.impl$spongeData = ssld;
+        });
         dynamic.get(Constants.Sponge.Data.V2.SPONGE_DATA).get().ifSuccess(v2 -> {
             v2.get(Constants.Sponge.World.UNIQUE_ID).read(UUIDUtil.CODEC).result().ifPresent(this.impl$spongeData::setUniqueId);
             v2.get(Constants.Sponge.World.WORLD_KEY).read(Identifier.CODEC).result()
@@ -368,21 +372,6 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
                 .add("difficulty=" + this.getDifficulty())
                 .toString();
     }
-
-    @Inject(method = "isRaining", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onIsRaining(final CallbackInfoReturnable<Boolean> cir) {
-        if (this.impl$dimensionType.hasCeiling()) {
-            cir.setReturnValue(false);
-        }
-    }
-
-    @Inject(method = "isThundering", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onIsThundering(final CallbackInfoReturnable<Boolean> cir) {
-        if (this.impl$dimensionType.hasCeiling()) {
-            cir.setReturnValue(false);
-        }
-    }
-
     @Override
     public CompoundTag data$getCompound() {
         return this.impl$compound;
@@ -393,15 +382,16 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
         this.impl$compound = nbt;
     }
 
-    @Redirect(method = "setTagData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/WorldGenSettings;encode(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/world/level/levelgen/WorldOptions;Lnet/minecraft/core/RegistryAccess;)Lcom/mojang/serialization/DataResult;"))
-    private DataResult<?> impl$onEncodeWorldGenSettings(final DynamicOps<?> $$0, final WorldOptions $$1, final RegistryAccess $$2) {
-        final Map<ResourceKey<LevelStem>, LevelStem> dimensions = $$2.lookupOrThrow(Registries.LEVEL_STEM)
-            .listElements()
-            .collect(Collectors.toMap(Holder.Reference::key, Holder.Reference::value));
-        if (this.impl$dimensionType != null && this.impl$chunkGenerator != null) {
-            dimensions.computeIfAbsent(ResourceKey.create(Registries.LEVEL_STEM, (Identifier) (Object) this.impl$spongeData.key()),
-                $ -> new LevelStem($$2.lookupOrThrow(Registries.DIMENSION_TYPE).wrapAsHolder(this.impl$dimensionType), this.impl$chunkGenerator));
-        }
-        return WorldGenSettings.encode($$0, $$1, new WorldDimensions(dimensions));
-    }
+    // TODO - 26.1-snapshot-6 - figure out where to shove this in now? Do we just append it to the level data or keep it in sponge data?
+//    @Redirect(method = "setTagData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/WorldGenSettings;encode(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/world/level/levelgen/WorldOptions;Lnet/minecraft/core/RegistryAccess;)Lcom/mojang/serialization/DataResult;"))
+//    private DataResult<?> impl$onEncodeWorldGenSettings(final DynamicOps<?> $$0, final WorldOptions $$1, final RegistryAccess $$2) {
+//        final Map<ResourceKey<LevelStem>, LevelStem> dimensions = $$2.lookupOrThrow(Registries.LEVEL_STEM)
+//            .listElements()
+//            .collect(Collectors.toMap(Holder.Reference::key, Holder.Reference::value));
+//        if (this.impl$dimensionType != null && this.impl$chunkGenerator != null) {
+//            dimensions.computeIfAbsent(ResourceKey.create(Registries.LEVEL_STEM, (Identifier) (Object) this.impl$spongeData.key()),
+//                $ -> new LevelStem($$2.lookupOrThrow(Registries.DIMENSION_TYPE).wrapAsHolder(this.impl$dimensionType), this.impl$chunkGenerator));
+//        }
+//        return WorldGenSettings.encode($$0, $$1, new WorldDimensions(dimensions));
+//    }
 }

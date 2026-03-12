@@ -51,7 +51,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem) {
                     .group(
                             SpongeAdventure.STRING_CODEC.optionalFieldOf("display_name").forGetter(v -> Optional.ofNullable(v.displayName)),
                             Identifier.CODEC.optionalFieldOf("game_mode").forGetter(v -> Optional.ofNullable(v.gameMode).map(t -> Identifier.fromNamespaceAndPath("sponge", t.getName()))),
-                            Identifier.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty).map(t -> Identifier.fromNamespaceAndPath("sponge", t.getKey()))),
+                            Identifier.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty).map(t -> Identifier.fromNamespaceAndPath("sponge", t.getSerializedName()))),
                             EnumCodec.create(SerializationBehavior.class).optionalFieldOf("serialization_behavior")
                                     .forGetter(v -> Optional.ofNullable(v.serializationBehavior)),
                             Codec.INT.optionalFieldOf("view_distance").forGetter(v -> Optional.ofNullable(v.viewDistance)),
@@ -74,7 +74,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem) {
                     )
             );
 
-    public static final Codec<LevelStem> DIRECT_CODEC = new MapCodec.MapCodecCodec<LevelStem>(new SpongeDataCodec<>(LevelStem.CODEC,
+    public static final Codec<LevelStem> DIRECT_CODEC = new MapCodec.MapCodecCodec<LevelStem>(new SpongeDataCodec<LevelStem, SpongeDataSection>(LevelStem.CODEC,
             SpongeWorldTemplate.SPONGE_CODEC, (type, data) -> ((LevelStemBridge) (Object) type).bridge$decorateData(data),
             type -> null));
 

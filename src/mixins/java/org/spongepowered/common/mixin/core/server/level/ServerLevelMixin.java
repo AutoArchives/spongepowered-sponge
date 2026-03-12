@@ -50,7 +50,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LightningBolt;
@@ -73,16 +72,18 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
-import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.saveddata.WeatherData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.Vec3;
@@ -131,6 +132,7 @@ import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.level.storage.DimensionDataStorageBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
@@ -168,11 +170,12 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow @NonNull public abstract MinecraftServer shadow$getServer();
     @Shadow @Final private MinecraftServer server;
 
-    @Shadow @Nullable private EndDragonFight dragonFight;
+    @Shadow @Nullable private EnderDragonFight dragonFight;
     @Shadow @Final List<ServerPlayer> players;
-    @Shadow public abstract DimensionDataStorage shadow$getDataStorage();
+    @Shadow public abstract SavedDataStorage shadow$getDataStorage();
 
     @Shadow public abstract DifficultyInstance shadow$getCurrentDifficultyAt(BlockPos p_175649_1_);
+    @Shadow public abstract WeatherData shadow$getWeatherData();
     // @formatter:on
 
 
@@ -187,10 +190,17 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$onInit(
-        final MinecraftServer server, final Executor executor, final LevelStorageSource.LevelStorageAccess storage,
-        final ServerLevelData levelData, final net.minecraft.resources.ResourceKey<Level> key, final LevelStem levelStem,
-        final boolean debug, final long biomeSeed, final List<CustomSpawner> spawners, final boolean tick,
-        final RandomSequences randomSequences, final CallbackInfo ci
+        final MinecraftServer server,
+        final Executor executor,
+        final LevelStorageSource.LevelStorageAccess storage,
+        final ServerLevelData levelData,
+        final net.minecraft.resources.ResourceKey<Level> dimension,
+        final LevelStem levelStem,
+        final boolean isDebug,
+        final long biomeZoomSeed,
+        final List<CustomSpawner> customSpawners,
+        final boolean tickTime,
+        final CallbackInfo ci
     ) {
         final SpongeServerLevelData spongeData = ((ServerLevelDataBridge) levelData).bridge$spongeData();
 
@@ -215,8 +225,9 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final Boolean createDragonFight = ((DimensionTypeBridge) (Object) this.shadow$dimensionType()).bridge$createDragonFight();
         if (createDragonFight != null) {
             if (createDragonFight) {
-                final long seed = server.getWorldData().worldGenOptions().seed();
-                this.dragonFight = new EndDragonFight((ServerLevel) (Object) this, seed, server.getWorldData().endDragonFightData());
+                final long seed = spongeData.worldGenOptions().seed();
+                this.dragonFight = this.shadow$getDataStorage().computeIfAbsent(EnderDragonFight.TYPE);
+                this.dragonFight.init((ServerLevel) (Object) this, seed, BlockPos.ZERO);
             } else {
                 this.dragonFight = null;
             }
@@ -290,8 +301,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final ServerExplosion mcExplosion = (ServerExplosion) explosion;
 
         try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext(phaseTracker)
-                .explosion(mcExplosion)
-                .source(explosion.sourceExplosive().isPresent() ? explosion.sourceExplosive() : this)) {
+            .explosion(mcExplosion)
+            .source(explosion.sourceExplosive().isPresent() ? explosion.sourceExplosive() : this)) {
             ignored.buildAndSwitch();
 
             mcExplosion.explode();
@@ -322,6 +333,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         var newPacket = new ClientboundExplodePacket(packet.center(), packet.radius(), packet.blockCount(), packet.playerKnockback(), particleData, soundEvent, packet.blockParticles());
         instance.send(newPacket);
     }
+
     @Override
     public void bridge$setManualSave(final boolean state) {
         this.impl$isManualSave = state;
@@ -340,10 +352,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
         final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled();
         builder.world((ServerLevel) (Object) this).position(new Vector3i(x, y, z));
-        final net.minecraft.world.level.chunk.LevelChunk chunk = this.shadow$getChunkAt(pos);
-        final net.minecraft.world.level.block.state.BlockState state = chunk.getBlockState(pos);
+        final LevelChunk chunk = this.shadow$getChunkAt(pos);
+        final BlockState state = chunk.getBlockState(pos);
         builder.blockState(state);
-        final net.minecraft.world.level.block.entity.BlockEntity blockEntity = chunk.getBlockEntity(pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType.CHECK);
+        final BlockEntity blockEntity = chunk.getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
         if (blockEntity != null) {
             TrackingUtil.addTileEntityToBuilder(blockEntity, builder);
         }
@@ -393,13 +405,18 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         if (behavior != SerializationBehavior.NONE) {
             original.call(self, flush);
 
-            // per-world WorldInfo/WorldBorder/BossBars
-            final var border = this.getWorldBorder();
-            levelData.setLegacyWorldBorderSettings(Optional.of(new WorldBorder.Settings(border)));
-            if (levelData instanceof WorldData worldData) {
-                worldData.setCustomBossEvents(this.bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
-                this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess(), worldData, this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList().getSingleplayerData() : null);
-            }
+            // per-world WorldInfo/WorldBorder/BossBars/WorldGen
+            // TODO - 26.1-snapshot-6 figure out if this is still required
+//            final var border = this.getWorldBorder();
+//            if (levelData instanceof PrimaryLevelDataBridge pldb) {
+//               final var spongeData = pldb.bridge$spongeData();
+//               this.bridge$getLevelSave().saveLevelData();
+//            }
+//            levelData.setLegacyWorldBorderSettings(Optional.of(new WorldBorder.Settings(border)));
+//            if (levelData instanceof WorldData worldData) {
+//                worldData.setCustomBossEvents(this.bridge$getBossBarManager().save(SpongeCommon.server().registryAccess()));
+//                this.bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess(), worldData, this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList().getSingleplayerData() : null);
+//            }
         }
     }
 
@@ -416,9 +433,22 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, (ServerWorld) this));
     }
 
+    @WrapOperation(method = "advanceWeatherCycle",
+        at = {
+            @At(value = "INVOKE", target = "Lnet/minecraft/world/level/saveddata/WeatherData;isThundering()Z"),
+            @At(value = "INVOKE", target = "Lnet/minecraft/world/level/saveddata/WeatherData;isRaining()Z")
+        }
+    )
+    private boolean impl$handleIsThunderingIfHasCeiling(final WeatherData instance, final Operation<Boolean> original) {
+        if (this.levelData instanceof PrimaryLevelDataBridge pldb && pldb.bridge$dimensionType() != null) {
+            return pldb.bridge$dimensionType().hasCeiling() && original.call(instance);
+        }
+        return original.call(instance);
+    }
+
     @Inject(method = "advanceWeatherCycle",
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            at = @At(value = "FIELD", target = "Lnet/minecraft/server/level/ServerLevel;oRainLevel:F", shift = At.Shift.BEFORE, ordinal = 1))
+        locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+        at = @At(value = "FIELD", target = "Lnet/minecraft/server/level/ServerLevel;oRainLevel:F", shift = At.Shift.BEFORE, ordinal = 1))
     public void impl$onSetWeatherParameters(final CallbackInfo ci, final boolean $$0) {
         final boolean isRaining = this.shadow$isRaining();
         if (this.oRainLevel != this.rainLevel || this.oThunderLevel != this.thunderLevel || $$0 != isRaining) {
@@ -433,24 +463,27 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             }
 
             // Set event results
+            // TODO - 26.1-snapshot-6 revamp weather with a timelines api.
             this.impl$prevWeather = newWeather;
             if (newWeather.type() == WeatherTypes.CLEAR.get()) {
-                this.serverLevelData.setThunderTime(0);
-                this.serverLevelData.setRainTime(0);
-                this.serverLevelData.setClearWeatherTime(SpongeTicks.toSaturatedIntOrInfinite(newWeather.remainingDuration()));
-                this.serverLevelData.setThundering(false);
-                this.serverLevelData.setRaining(false);
+                final var weatherData = this.shadow$getWeatherData();
+                weatherData.setClearWeatherTime(SpongeTicks.toSaturatedIntOrInfinite(newWeather.remainingDuration()));
+                weatherData.setRainTime(0);
+                weatherData.setRaining(false);
+                weatherData.setThunderTime(0);
+                weatherData.setThundering(false);
             } else {
                 final int newTime = SpongeTicks.toSaturatedIntOrInfinite(newWeather.remainingDuration());
-                this.serverLevelData.setRaining(true);
-                this.serverLevelData.setClearWeatherTime(0);
-                this.serverLevelData.setRainTime(newTime);
+                final var weatherData = this.shadow$getWeatherData();
+                weatherData.setRaining(true);
+                weatherData.setRainTime(newTime);
+                weatherData.setClearWeatherTime(0);
                 if (newWeather.type() == WeatherTypes.THUNDER.get()) {
-                    this.serverLevelData.setThunderTime(newTime);
-                    this.serverLevelData.setThundering(true);
+                    weatherData.setThundering(true);
+                    weatherData.setThunderTime(newTime);
                 } else {
-                    this.serverLevelData.setThunderTime(0);
-                    this.serverLevelData.setThundering(false);
+                    weatherData.setThunderTime(0);
+                    weatherData.setThundering(false);
                 }
             }
         }
@@ -458,7 +491,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     }
 
     @WrapOperation(method = "tickThunder",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;isRainingAt(Lnet/minecraft/core/BlockPos;)Z"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;isRainingAt(Lnet/minecraft/core/BlockPos;)Z"))
     private boolean impl$onBeforeThunder(
         final ServerLevel serverLevel, final BlockPos param0, final Operation<Boolean> wrapped
     ) {
@@ -502,17 +535,17 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Inject(method = "levelEvent", at = @At("HEAD"), cancellable = true)
     private void impl$throwBroadcastEvent(final Entity player, final int eventID, final BlockPos pos, final int dataID, CallbackInfo ci) {
-        if(eventID == Constants.WorldEvents.PLAY_RECORD_EVENT && ShouldFire.PLAY_SOUND_EVENT_FROM_JUKEBOX) {
+        if (eventID == Constants.WorldEvents.PLAY_RECORD_EVENT && ShouldFire.PLAY_SOUND_EVENT_FROM_JUKEBOX) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 final BlockEntity tileEntity = this.shadow$getBlockEntity(pos);
-                if(tileEntity instanceof JukeboxBlockEntity) {
+                if (tileEntity instanceof JukeboxBlockEntity) {
                     final JukeboxBlockEntity jukebox = (JukeboxBlockEntity) tileEntity;
                     final ItemStack record = jukebox.getItem(0);
                     frame.pushCause(jukebox);
                     frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(record));
                     if (!record.isEmpty()) {
                         final Optional<MusicDisc> recordProperty = ((org.spongepowered.api.item.inventory.ItemStack) (Object) record).get(Keys.MUSIC_DISC);
-                        if(!recordProperty.isPresent()) {
+                        if (!recordProperty.isPresent()) {
                             //Safeguard for https://github.com/SpongePowered/SpongeCommon/issues/2337
                             return;
                         }
@@ -577,9 +610,9 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     public String toString() {
         final Optional<ResourceKey> worldTypeKey = Optional.ofNullable(this.server.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE).getKey(this.shadow$dimensionType())).map(ResourceKey.class::cast);
         return new StringJoiner(",", ServerLevel.class.getSimpleName() + "[", "]")
-                .add("key=" + this.shadow$dimension())
-                .add("worldType=" + worldTypeKey.map(ResourceKey::toString).orElse("inline"))
-                .toString();
+            .add("key=" + this.shadow$dimension())
+            .add("worldType=" + worldTypeKey.map(ResourceKey::toString).orElse("inline"))
+            .toString();
     }
 
     @Redirect(
@@ -605,11 +638,11 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             throw new IllegalArgumentException("A Player cannot be created by the API!");
         }
 
-        net.minecraft.world.entity.Entity entity = null;
+        Entity entity = null;
         final double x = position.x();
         final double y = position.y();
         final double z = position.z();
-        final net.minecraft.world.level.Level thisWorld = (net.minecraft.world.level.Level) (Object) this;
+        final Level thisWorld = (Level) (Object) this;
         // Not all entities have a single World parameter as their constructor
         if (type == net.minecraft.world.entity.EntityType.LIGHTNING_BOLT) {
             entity = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(thisWorld, EntitySpawnReason.EVENT);

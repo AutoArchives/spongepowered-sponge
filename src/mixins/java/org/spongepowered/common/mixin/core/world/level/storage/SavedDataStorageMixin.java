@@ -28,8 +28,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,12 +43,30 @@ import org.spongepowered.common.data.DataUtil;
 
 import java.util.Optional;
 
-@Mixin(DimensionDataStorage.class)
-public abstract class DimensionDataStorageMixin implements DimensionDataStorageBridge {
+@Mixin(SavedDataStorage.class)
+public abstract class SavedDataStorageMixin implements DimensionDataStorageBridge {
 
     // @formatter:off
     private @Nullable Identifier impl$dimensionKey;
     // @formatter:on
+
+    @WrapOperation(method = "encodeUnchecked",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/nbt/CompoundTag;put(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;"
+        )
+    )
+    public <T extends SavedData> Tag impl$writeAdditionalMapNBT(
+        final CompoundTag instance, final String key, final Tag encoded,
+        final Operation<Tag> original, final SavedDataType<T> type,
+        final SavedData data, final RegistryOps<Tag> registry
+    ) {
+        if (data instanceof DataCompoundHolder dch) {
+            if (DataUtil.syncDataToTag(dch)) {
+                instance.merge(dch.data$getCompound());
+            }
+        }
+        return original.call(instance, key, encoded);
+    }
 
     @WrapOperation(method = "readSavedData", at = @At(value = "INVOKE", target = "Ljava/util/Optional;orElse(Ljava/lang/Object;)Ljava/lang/Object;"))
     public <T> T readSpongeMapData(

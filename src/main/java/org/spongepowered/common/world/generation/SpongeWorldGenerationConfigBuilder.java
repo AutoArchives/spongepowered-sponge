@@ -61,7 +61,7 @@ public final class SpongeWorldGenerationConfigBuilder implements WorldGeneration
 
     @Override
     public WorldGenerationConfig.Builder reset() {
-        final WorldOptions defaultSettings = SpongeCommon.server().getWorldData().worldGenOptions();
+        final WorldOptions defaultSettings = SpongeCommon.server().getWorldGenSettings().options();
         this.seed = defaultSettings.seed();
         this.generateFeatures = defaultSettings.generateStructures();
         this.generateBonusChest = defaultSettings.generateBonusChest();

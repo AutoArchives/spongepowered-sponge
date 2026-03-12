@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.explosive.EndCrystal;
-import org.spongepowered.common.accessor.world.level.dimension.end.EndDragonFightAccessor;
+import org.spongepowered.common.accessor.world.level.dimension.end.EnderDragonFightAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -47,9 +47,9 @@ public final class EnderDragonData {
                         .set((h, v) -> h.nearestCrystal = (net.minecraft.world.entity.boss.enderdragon.EndCrystal) v)
                     .create(Keys.BOSS_BAR)
                         .get(h -> {
-                            final @Nullable EndDragonFight fight = h.getDragonFight();
+                            final @Nullable EnderDragonFight fight = h.getDragonFight();
                             if (fight != null) {
-                                return SpongeAdventure.asAdventure(((EndDragonFightAccessor) fight).accessor$dragonEvent());
+                                return SpongeAdventure.asAdventure(((EnderDragonFightAccessor) fight).accessor$dragonEvent());
                             } else {
                                 return null;
                             }

@@ -37,12 +37,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
-import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
@@ -75,7 +74,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
-import org.spongepowered.common.accessor.world.level.dimension.end.EndDragonFightAccessor;
+import org.spongepowered.common.accessor.world.level.dimension.end.EnderDragonFightAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
@@ -125,8 +124,9 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Shadow public abstract List<net.minecraft.server.level.ServerPlayer> shadow$players();
     @Shadow public abstract Raids shadow$getRaids();
     @Nullable @Shadow public abstract Raid shadow$getRaidAt(BlockPos p_217475_1_);
-    @Nullable @Shadow public abstract EndDragonFight shadow$getDragonFight();
+    @Nullable @Shadow public abstract EnderDragonFight shadow$getDragonFight();
     @Shadow public abstract long shadow$getSeed();
+    @Shadow public abstract net.minecraft.world.level.border.WorldBorder shadow$getWorldBorder();
     // @formatter:on
 
     private volatile @MonotonicNonNull Pointers api$pointers;
@@ -264,9 +264,9 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public Optional<BossBar> dragonFightBossBar() {
-        final @Nullable EndDragonFight fight = this.shadow$getDragonFight();
+        final @Nullable EnderDragonFight fight = this.shadow$getDragonFight();
         if (fight != null) {
-            return Optional.of(SpongeAdventure.asAdventure(((EndDragonFightAccessor) fight).accessor$dragonEvent()));
+            return Optional.of(SpongeAdventure.asAdventure(((EnderDragonFightAccessor) fight).accessor$dragonEvent()));
         } else {
             return Optional.empty();
         }
@@ -339,14 +339,13 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @SuppressWarnings("deprecation")
     @Override
     public WorldBorder setBorder(final WorldBorder border) {
-
-        final WorldBorderBridge borderBridge = (WorldBorderBridge) ((CollisionGetter) this).getWorldBorder();
+        final var old = this.shadow$getWorldBorder();
+        final WorldBorderBridge borderBridge = (WorldBorderBridge) old;
         borderBridge.bridge$setAssociatedWorld(this.key());
         final WorldBorder worldBorder = borderBridge.bridge$applyFrom(border);
         if (worldBorder == null) {
             return (WorldBorder) (Object) net.minecraft.world.level.border.WorldBorder.Settings.DEFAULT;
         }
-        this.serverLevelData.setLegacyWorldBorderSettings(Optional.of((net.minecraft.world.level.border.WorldBorder.Settings) (Object) border));
         return worldBorder;
     }
 

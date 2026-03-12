@@ -44,7 +44,7 @@ import org.spongepowered.common.SpongeCommon;
 public abstract class DifficultyCommandMixin {
 
     // @formatter:off
-    @Shadow @Final private static DynamicCommandExceptionType ERROR_ALREADY_DIFFICULT;
+    @Shadow @Final private static DynamicCommandExceptionType ERROR_ALREADY_SAME_DIFFICULTY;
     // @formatter:on
 
     /**
@@ -54,11 +54,11 @@ public abstract class DifficultyCommandMixin {
     @Overwrite
     public static int setDifficulty(CommandSourceStack source, Difficulty difficulty) throws CommandSyntaxException {
         if (source.getLevel().getDifficulty() == difficulty) {
-            throw DifficultyCommandMixin.ERROR_ALREADY_DIFFICULT.create(difficulty.getKey());
+            throw DifficultyCommandMixin.ERROR_ALREADY_SAME_DIFFICULTY.create(difficulty.getSerializedName());
         } else {
             final LevelData levelData = source.getLevel().getLevelData();
             ((ServerWorldProperties) levelData).setDifficulty((org.spongepowered.api.world.difficulty.Difficulty) (Object) difficulty);
-            source.getLevel().setSpawnSettings(SpongeCommon.server().getWorldData().getGameRules().get(GameRules.SPAWN_MONSTERS));
+            source.getLevel().setSpawnSettings(SpongeCommon.server().getGameRules().get(GameRules.SPAWN_MONSTERS));
             source.getLevel().getPlayers(p -> true).forEach(p -> p.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(),
                     levelData.isDifficultyLocked())));
             source.sendSuccess(() -> Component.translatable("commands.difficulty.success", difficulty.getDisplayName()), true);

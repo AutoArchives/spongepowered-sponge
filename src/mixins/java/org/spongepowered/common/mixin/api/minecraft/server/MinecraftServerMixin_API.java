@@ -80,6 +80,7 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.sponge.SpongeCommand;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
@@ -129,6 +130,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow public abstract net.minecraft.server.packs.resources.ResourceManager shadow$getResourceManager();
     @Shadow public abstract WorldData shadow$getWorldData();
+    @Shadow public abstract GameRules shadow$getGameRules();
     // @formatter:on
 
 
@@ -248,17 +250,17 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public boolean isPVPEnabled() {
-        return this.worldData.getGameRules().get(GameRules.PVP);
+        return this.shadow$getGameRules().get(GameRules.PVP);
     }
 
     @Override
     public boolean areCommandBlocksEnabled() {
-        return this.worldData.getGameRules().get(GameRules.COMMAND_BLOCKS_WORK);
+        return this.shadow$getGameRules().get(GameRules.COMMAND_BLOCKS_WORK);
     }
 
     @Override
     public boolean isMonsterSpawnsEnabled() {
-        return this.worldData.getGameRules().get(GameRules.SPAWN_MONSTERS);
+        return this.shadow$getGameRules().get(GameRules.SPAWN_MONSTERS);
     }
 
     @Override
@@ -271,17 +273,13 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
      */
     @Override
     public boolean isMultiWorldEnabled() {
-        return this.isSingleplayer() || ((Object) this instanceof DedicatedServer ds) && ds.getWorldData().getGameRules().get(GameRules.ALLOW_ENTERING_NETHER_USING_PORTALS);
+        return this.isSingleplayer() || ((Object) this instanceof DedicatedServer ds) && ds.getGameRules().get(GameRules.ALLOW_ENTERING_NETHER_USING_PORTALS);
     }
 
     @Override
     public WorldGenerationConfig worldGenerationConfig() {
         final WorldData overworldData = this.shadow$getWorldData();
-
-        final WorldGenSettings settings = new WorldGenSettings(overworldData.worldGenOptions(),
-                new WorldDimensions(this.registryAccess().lookupOrThrow(Registries.LEVEL_STEM)));
-
-        return (WorldGenerationConfig) (Object) settings;
+        return (WorldGenerationConfig) (Object) ((PrimaryLevelDataBridge) overworldData.overworldData()).bridge$spongeData().worldGenOptions();
     }
 
     @Override
@@ -482,6 +480,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
         return this.api$blockDestructionIdCache;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void sendMessage(final Identity identity, final Component message, final MessageType type) {
         this.shadow$getPlayerList().broadcastSystemMessage(SpongeAdventure.asVanilla(message), false);

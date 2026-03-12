@@ -155,6 +155,7 @@ public final class Constants {
                 public static final DataQuery SPONGE_DATA_ROOT = DataQuery.of("sponge-data");
                 public static final DataQuery CONTENT_VERSION = DataQuery.of("version");
                 public static final DataQuery CONTENT = DataQuery.of("content");
+                public static final String SPONGE_WORLD_DATA = "SpongeData";
             }
         }
 
@@ -429,7 +430,7 @@ public final class Constants {
             .of(net.minecraft.core.Direction.WEST, net.minecraft.core.Direction.EAST, net.minecraft.core.Direction.DOWN,
                 net.minecraft.core.Direction.UP, net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.SOUTH);
         public static final ResourceKey INVALID_WORLD_KEY = ResourceKey.sponge("invalid_world");
-        public static final String LEVEL_DAT_OLD = LevelResource.LEVEL_DATA_FILE.getId() + "_old";
+        public static final String LEVEL_DAT_OLD = LevelResource.LEVEL_DATA_FILE.id() + "_old";
         public static final int DEFAULT_BLOCK_CHANGE_LIMIT = 512;
     }
 
@@ -983,7 +984,7 @@ public final class Constants {
          * Tell the block being changed that it's being moved, rather than being replaced/removed.
          * The flag, if set, is set as a boolean to {@link BlockState#onPlace(Level, BlockPos, BlockState, boolean)}
          * by means of calling
-         * {@link net.minecraft.world.level.chunk.LevelChunk#setBlockState(BlockPos, BlockState, boolean)}
+         * {@link net.minecraft.world.level.chunk.LevelChunk#setBlockState(BlockPos, BlockState, int)}
          */
         public static final int BLOCK_MOVING =    1 << 6; // 64
         /**

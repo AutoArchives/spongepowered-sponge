@@ -422,7 +422,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 //        ServerLevel var2 = this.overworld();
 //        ServerLevelData var3 = this.worldData.overworldData();
 //        var3.setWorldBorder(var2.getWorldBorder().createSettings());
-//        this.worldData.setCustomBossEvents(this.getCustomBossEvents().save(this.registryAccess()));
+//        this.worldData.setCustomBossEvents(this.customBossEvents().save(this.registryAccess()));
 //        this.storageSource.saveDataTag(this.registryHolder, this.worldData, this.shadow$getPlayerList().getSingleplayerData());
         // Sponge end
 

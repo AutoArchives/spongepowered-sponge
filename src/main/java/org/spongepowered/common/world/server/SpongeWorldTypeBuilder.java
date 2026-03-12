@@ -122,6 +122,7 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
                     fixedTime != null,
                     hasSkylight,
                     hasCeiling,
+                    false,
                     coordinateMultiplier,
                     floor,
                     height,

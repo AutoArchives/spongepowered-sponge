@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level.dimension.end;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -31,10 +33,9 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.end.DragonRespawnAnimation;
-import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.level.dimension.end.DragonRespawnStage;
+import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,27 +48,26 @@ import org.spongepowered.common.event.tracking.phase.world.dragon.SpawnDragonCon
 
 import java.util.List;
 
-@Mixin(EndDragonFight.class)
+@Mixin(EnderDragonFight.class)
 public abstract class EndDragonFightMixin_Tracker {
 
     // @formatter:off
-    @Shadow @Final private ServerLevel level;
-
-    @Shadow protected abstract EnderDragon shadow$createNewDragon();
+    @Shadow private ServerLevel level;
     // @formatter:on
 
     @Redirect(method = "lambda$spawnNewGateway$1",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/feature/ConfiguredFeature;place(Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;)Z"))
-    private boolean tracker$switchToFeatureState(final ConfiguredFeature configuredFeature, final WorldGenLevel worldIn, final ChunkGenerator generator,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/feature/ConfiguredFeature;place(Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;)Z"))
+    private boolean tracker$switchToFeatureState(
+        final ConfiguredFeature<?, ?> configuredFeature, final WorldGenLevel worldIn, final ChunkGenerator generator,
         final RandomSource rand, final BlockPos pos
     ) {
 
         try (final FeaturePhaseContext context = GenerationPhase.State.FEATURE_PLACEMENT.createPhaseContext(PhaseTracker.getWorldInstance(worldIn.getLevel()))) {
             context
-                    .world((ServerLevel) worldIn)
-                    .generator(generator)
-                    .feature(configuredFeature.feature())
-                    .origin(pos)
+                .world((ServerLevel) worldIn)
+                .generator(generator)
+                .feature(configuredFeature.feature())
+                .origin(pos)
             ;
             context.buildAndSwitch();
 
@@ -75,30 +75,32 @@ public abstract class EndDragonFightMixin_Tracker {
         }
     }
 
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/DragonRespawnAnimation;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/dimension/end/EndDragonFight;Ljava/util/List;ILnet/minecraft/core/BlockPos;)V"))
-    private void tracker$switchToSpawnDragonState(final DragonRespawnAnimation dragonSpawnState, final ServerLevel worldIn,
-            final EndDragonFight manager, final List<EndCrystal> crystals, int respawnStateTicks, final BlockPos exitPortalLocation) {
-        try (final SpawnDragonContext context = DragonPhase.State.SPAWN_DRAGON.createPhaseContext(PhaseTracker.getWorldInstance(worldIn))) {
+    @WrapOperation(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/DragonRespawnStage;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/dimension/end/EnderDragonFight;Ljava/util/List;I)V"))
+    private void tracker$switchToSpawnDragonState(
+        final DragonRespawnStage instance, final ServerLevel serverLevel, final EnderDragonFight manager,
+        final List<EndCrystal> endCrystals, int i, final Operation<Void> original
+    ) {
+        try (final SpawnDragonContext context = DragonPhase.State.SPAWN_DRAGON.createPhaseContext(PhaseTracker.getWorldInstance(serverLevel))) {
             context
-                    .manager(manager)
-                    .setIsRespawn(true)
-                    .buildAndSwitch()
+                .manager(manager)
+                .setIsRespawn(true)
+                .buildAndSwitch()
             ;
-            ++respawnStateTicks;
-            dragonSpawnState.tick(worldIn, manager, crystals, respawnStateTicks, exitPortalLocation);
+            ++i;
+            original.call(instance, serverLevel, manager, endCrystals, i);
         }
     }
 
-    @Redirect(method = "findOrCreateDragon", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/EndDragonFight;createNewDragon()Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;"))
-    private EnderDragon tracker$switchToSpawnDragonState(final EndDragonFight manager) {
+    @WrapOperation(method = "findOrCreateDragon", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/EnderDragonFight;createNewDragon()Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;"))
+    private EnderDragon tracker$switchToSpawnDragonState(final EnderDragonFight manager, final Operation<EnderDragon> original) {
         try (final SpawnDragonContext context = DragonPhase.State.SPAWN_DRAGON.createPhaseContext(PhaseTracker.getWorldInstance(this.level))) {
             context
-                    .manager(manager)
-                    .setIsRespawn(false)
-                    .buildAndSwitch()
+                .manager(manager)
+                .setIsRespawn(false)
+                .buildAndSwitch()
             ;
 
-            return this.shadow$createNewDragon();
+            return original.call(manager);
         }
     }
 }
