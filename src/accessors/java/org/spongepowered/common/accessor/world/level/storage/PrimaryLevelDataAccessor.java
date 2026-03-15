@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.accessor.world.level.storage;
 
-import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -32,8 +31,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(PrimaryLevelData.class)
 public interface PrimaryLevelDataAccessor {
-
-    @Accessor("worldOptions") @Mutable void accessor$worldOptions(WorldOptions worldOptions);
 
     @Accessor("specialWorldProperty") @Mutable void accessor$specialWorldProperty(PrimaryLevelData.SpecialWorldProperty specialWorldProperty);
 }

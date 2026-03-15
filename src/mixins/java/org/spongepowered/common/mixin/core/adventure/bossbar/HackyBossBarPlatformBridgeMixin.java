@@ -33,6 +33,8 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 
+import java.util.UUID;
+
 @Mixin(targets = "net.kyori.adventure.bossbar.HackyBossBarPlatformBridge", remap = false)
 public abstract class HackyBossBarPlatformBridgeMixin implements BossBarBridge {
 
@@ -42,7 +44,12 @@ public abstract class HackyBossBarPlatformBridgeMixin implements BossBarBridge {
     public ServerBossEvent bridge$asVanillaServerBar() {
         if (this.bridge$vanillaServerBar == null) {
             final BossBar $this = (BossBar) this;
-            this.bridge$vanillaServerBar = new ServerBossEvent(SpongeAdventure.asVanilla($this.name()), SpongeAdventure.asVanilla($this.color()), SpongeAdventure.asVanilla($this.overlay()));
+            this.bridge$vanillaServerBar = new ServerBossEvent(
+                UUID.randomUUID(),
+                SpongeAdventure.asVanilla($this.name()),
+                SpongeAdventure.asVanilla($this.color()),
+                SpongeAdventure.asVanilla($this.overlay())
+            );
             final BossEventBridge bridge = (BossEventBridge) this.bridge$vanillaServerBar;
             bridge.bridge$copy($this);
             bridge.bridge$setAdventure($this);

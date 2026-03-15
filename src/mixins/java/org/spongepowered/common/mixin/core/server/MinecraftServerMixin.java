@@ -49,6 +49,7 @@ import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -114,6 +115,7 @@ import java.io.IOException;
 import java.net.Proxy;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Mixin(MinecraftServer.class)
@@ -195,12 +197,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setThreadOnServerPhaseTracker(
-        Thread thread, LevelStorageSource.LevelStorageAccess storageAccess, PackRepository packRepo,
-        WorldStem stem, Proxy proxy, DataFixer fixer,
-        Services services, LevelLoadListener progress, CallbackInfo ci
+        Thread serverThread, LevelStorageSource.LevelStorageAccess storageSource, PackRepository packRepository,
+        WorldStem worldStem, Optional<GameRules> gameRules, Proxy proxy, DataFixer fixerUpper, Services services,
+        LevelLoadListener levelLoadListener, CallbackInfo ci
     ) {
         try {
-            PhaseTracker.getServerInstanceExplicitly().setThread(thread);
+            PhaseTracker.getServerInstanceExplicitly().setThread(serverThread);
         } catch (final IllegalAccessException e) {
             throw new RuntimeException("Could not initialize the server PhaseTracker!");
         }
@@ -231,10 +233,13 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @Inject(method = "createLevels", at = @At(value = "NEW",
-        target = "(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;ZJLjava/util/List;ZLnet/minecraft/world/RandomSequences;)Lnet/minecraft/server/level/ServerLevel;"
+        target = "(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;ZJLjava/util/List;Z)Lnet/minecraft/server/level/ServerLevel;"
     ), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;getValue(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"),
-        to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;getDataStorage()Lnet/minecraft/world/level/storage/DimensionDataStorage;")
+        to = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/storage/SavedDataStorage;computeIfAbsent(Lnet/minecraft/world/level/saveddata/SavedDataType;)Lnet/minecraft/world/level/saveddata/SavedData;",
+            ordinal = 0
+        )
     ))
     private void impl$onCreateDefaultLevel(final CallbackInfo ci, @Local final ServerLevelData levelData, @Local final LevelStem levelStem) {
         ((PrimaryLevelDataBridge) levelData).bridge$populateFromLevelStem(levelStem);

@@ -28,22 +28,16 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
-import com.mojang.serialization.DynamicOps;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
@@ -53,9 +47,6 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.gamerules.GameRules;
-import net.minecraft.world.level.levelgen.WorldDimensions;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -64,11 +55,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -81,11 +67,9 @@ import org.spongepowered.common.world.server.SpongeServerLevelData;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Mixin(PrimaryLevelData.class)
 public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldData, PrimaryLevelDataBridge, DataCompoundHolder {
@@ -300,12 +284,27 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
 
     @Override
     public void bridge$hardcore(final boolean hardcore) {
-        ((LevelSettingsAccessor) (Object) this.settings).accessor$hardcore(hardcore);
+        final var oldDifficulty = this.settings.difficultySettings();
+        final var newDifficulty = new LevelSettings.DifficultySettings(oldDifficulty.difficulty(), hardcore, oldDifficulty.locked());
+        this.settings = new LevelSettings(
+            this.settings.levelName(),
+            this.settings.gameType(),
+            newDifficulty,
+            this.settings.allowCommands(),
+            this.settings.dataConfiguration()
+        );
     }
 
     @Override
     public void bridge$allowCommands(final boolean allowCommands) {
-        ((LevelSettingsAccessor) (Object) this.settings).accessor$allowCommands(allowCommands);
+        final var oldDifficulty = this.settings.difficultySettings();
+        this.settings = new LevelSettings(
+            this.settings.levelName(),
+            this.settings.gameType(),
+            oldDifficulty,
+            allowCommands,
+            this.settings.dataConfiguration()
+        );
     }
 
     @Override

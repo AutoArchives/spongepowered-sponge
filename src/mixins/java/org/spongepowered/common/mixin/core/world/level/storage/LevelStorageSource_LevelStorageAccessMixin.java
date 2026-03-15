@@ -26,11 +26,9 @@ package org.spongepowered.common.mixin.core.world.level.storage;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -69,15 +67,16 @@ public abstract class LevelStorageSource_LevelStorageAccessMixin implements Leve
     }
 
     @WrapOperation(
-            method = "saveDataTag(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/storage/WorldData;Lnet/minecraft/nbt/CompoundTag;)V",
+            method = "saveDataTag(Lnet/minecraft/world/level/storage/WorldData;Ljava/util/UUID;)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;saveLevelData(Lnet/minecraft/nbt/CompoundTag;)V"
             )
     )
     @SuppressWarnings("deprecation")
-    private void impl$saveSpongeLevelData(final LevelStorageSource.LevelStorageAccess instance, final CompoundTag root, final Operation<Void> original,
-            final RegistryAccess registry, final WorldData levelData, final @Nullable CompoundTag tag) {
+    private void impl$saveSpongeLevelData(
+        final LevelStorageSource.LevelStorageAccess instance, final CompoundTag root,
+        final Operation<Void> original, final WorldData levelData) {
         root.put(Constants.Sponge.Data.V2.SPONGE_DATA, ((PrimaryLevelDataBridge) levelData).bridge$writeSpongeLevelData());
         if (DataUtil.syncDataToTag(levelData)) {
             root.merge(((DataCompoundHolder) levelData).data$getCompound());

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.clock.PackedClockStates;
 import net.minecraft.world.clock.WorldClocks;
 import net.minecraft.world.level.gamerules.GameRuleMap;
@@ -43,6 +44,7 @@ import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.util.Constants;
@@ -60,20 +62,7 @@ import java.util.UUID;
 public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     // @formatter:off
-    @Shadow int shadow$getWanderingTraderSpawnDelay();
-    @Shadow void shadow$setWanderingTraderSpawnDelay(int p_230396_1_);
-    @Shadow int shadow$getWanderingTraderSpawnChance();
-    @Shadow void shadow$setWanderingTraderSpawnChance(int p_230397_1_);
-    @Shadow void shadow$setWanderingTraderId(UUID p_230394_1_);
-    @Shadow @Nullable UUID shadow$getWanderingTraderId();
-    @Shadow GameRules shadow$getGameRules();
     // @formatter:on
-
-    @Shadow
-    PackedClockStates clockStates();
-
-    @Shadow
-    void setClockStates(PackedClockStates packedClocks);
 
     @Override
     default ResourceKey key() {
@@ -97,7 +86,7 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     @Override
     default <V> V gameRule(GameRule<V> gameRule) {
-        final var value = this.shadow$getGameRules().get((net.minecraft.world.level.gamerules.GameRule<?>) (Object) Objects.requireNonNull(gameRule,
+        final var value = ((ServerLevelDataBridge) this).bridge$level().getGameRules().get((net.minecraft.world.level.gamerules.GameRule<?>) (Object) Objects.requireNonNull(gameRule,
             "gameRule"));
         return (V) value;
     }
@@ -107,12 +96,12 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
         Objects.requireNonNull(gameRule, "gameRule");
         Objects.requireNonNull(value, "value");
 
-        this.shadow$getGameRules().set((net.minecraft.world.level.gamerules.GameRule<V>) (Object) gameRule, value, SpongeCommon.server());
+        ((ServerLevelDataBridge) this).bridge$level().getGameRules().set((net.minecraft.world.level.gamerules.GameRule<V>) (Object) gameRule, value, SpongeCommon.server());
     }
 
     @Override
     default Map<GameRule<?>, ?> gameRules() {
-        final GameRuleMap rules =  ((GameRulesAccessor) this.shadow$getGameRules()).accessor$rules();
+        final GameRuleMap rules = ((GameRulesAccessor) ((ServerLevelDataBridge) this).bridge$level().getGameRules()).accessor$rules();
         final Map<GameRule<?>, Object> apiRules = new HashMap<>();
         for (final var rule : rules.keySet()) {
             final GameRule<?> key = (GameRule<?>) (Object) rule;
@@ -129,32 +118,39 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     @Override
     default Ticks wanderingTraderSpawnDelay() {
-        return SpongeTicks.ticksOrInfinite(this.shadow$getWanderingTraderSpawnDelay());
+        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
+        final var level = ((ServerLevelDataBridge) this).bridge$level();
+        if (level instanceof ServerLevelAccessor sla) {
+            sla.cu
+        }
+        return SpongeTicks.ticksOrInfinite(0);
     }
 
     @Override
     default void setWanderingTraderSpawnDelay(final Ticks delay) {
-        this.shadow$setWanderingTraderSpawnDelay(SpongeTicks.toSaturatedIntOrInfinite(delay));
+        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
     }
 
     @Override
     default int wanderingTraderSpawnChance() {
-        return this.shadow$getWanderingTraderSpawnChance();
+        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
     }
 
     @Override
     default void setWanderingTraderSpawnChance(final int chance) {
-        this.shadow$setWanderingTraderSpawnChance(chance);
+        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
     }
 
     @Override
     default void setWanderingTrader(@Nullable final WanderingTrader trader) {
-        this.shadow$setWanderingTraderId(trader == null ? null : trader.uniqueId());
+        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
+
     }
 
     @Override
     default Optional<UUID> wanderTraderUniqueId() {
-        return Optional.ofNullable(this.shadow$getWanderingTraderId());
+        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
+        return Optional.empty();
     }
 
     @Override
@@ -169,7 +165,7 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     @Override
     default MinecraftDayTime dayTime() {
-        final var clockstate = this.clockStates().clocks().get(WorldClocks.OVERWORLD);
+        final var clockstate = ((ServerLevelDataBridge) this).bridge$level().clockManager().packState().clocks().get(WorldClocks.OVERWORLD);
         if (clockstate == null) {
             return new SpongeMinecraftDayTime(0);
         }

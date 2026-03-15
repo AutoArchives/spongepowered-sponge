@@ -157,7 +157,6 @@
     "world.level.GameRules_ValueAccessor",
     "world.level.GameRulesAccessor",
     "world.level.LevelAccessor",
-    "world.level.LevelSettingsAccessor",
     "world.level.NaturalSpawnerAccessor",
     "world.level.ServerExplosionAccessor",
     "world.level.TicketStorageAccessor",

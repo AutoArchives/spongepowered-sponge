@@ -92,6 +92,10 @@ public final class SpongeServerLevelData {
         this.worldGenOptions = worldGenSettings.options();
     }
 
+    public void setWorldOptions(final WorldOptions options) {
+        this.worldGenOptions = options;
+    }
+
     public WorldOptions worldGenOptions() {
         return this.worldGenOptions;
     }

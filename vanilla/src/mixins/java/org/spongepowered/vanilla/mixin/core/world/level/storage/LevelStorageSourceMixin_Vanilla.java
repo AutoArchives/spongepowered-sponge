@@ -32,7 +32,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,7 +44,7 @@ public abstract class LevelStorageSourceMixin_Vanilla {
     private static Dynamic<Tag> impl$spongeLevelData;
 
     @WrapOperation(
-            method = "readLevelDataTagFixed",
+            method = "readExistingSavedData",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/nbt/CompoundTag;getCompoundOrEmpty(Ljava/lang/String;)Lnet/minecraft/nbt/CompoundTag;",
@@ -61,13 +60,15 @@ public abstract class LevelStorageSourceMixin_Vanilla {
             method = "getLevelDataAndDimensions",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/storage/PrimaryLevelData;parse(Lcom/mojang/serialization/Dynamic;Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lnet/minecraft/world/level/levelgen/WorldOptions;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/world/level/storage/PrimaryLevelData;"
+                    target = "Lnet/minecraft/world/level/storage/PrimaryLevelData;parse(Lcom/mojang/serialization/Dynamic;Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/world/level/storage/PrimaryLevelData;"
             )
     )
-    private static PrimaryLevelData impl$readSpongeLevelData(final Dynamic<?> dynamic, final LevelSettings settings,
-            final PrimaryLevelData.SpecialWorldProperty special, final WorldOptions options, final Lifecycle lifecycle, final Operation<PrimaryLevelData> original)
+    private static PrimaryLevelData impl$readSpongeLevelData(
+        final Dynamic<?> input, final LevelSettings settings,
+        final PrimaryLevelData.SpecialWorldProperty specialWorldProperty, final Lifecycle worldGenSettingsLifecycle,
+        final Operation<PrimaryLevelData> original)
     {
-        final PrimaryLevelData levelData = original.call(dynamic, settings, special, options, lifecycle);
+        final PrimaryLevelData levelData = original.call(input, settings, specialWorldProperty, worldGenSettingsLifecycle);
 
         ((PrimaryLevelDataBridge) levelData).bridge$readSpongeLevelData(LevelStorageSourceMixin_Vanilla.impl$spongeLevelData);
 

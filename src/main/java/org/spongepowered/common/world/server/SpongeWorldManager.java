@@ -855,7 +855,7 @@ public class SpongeWorldManager implements WorldManager {
         final LevelStem levelStem = (LevelStem) (Object) worldArchetype.type();
         final PrimaryLevelData worldData = (PrimaryLevelData) levelData.worldDataAndGenSettings().data();
         worldArchetype.generationConfig().ifPresent(o ->
-            ((PrimaryLevelDataAccessor) worldData).accessor$worldOptions((WorldOptions) o));
+            ((PrimaryLevelDataBridge) worldData).bridge$spongeData().setWorldOptions((WorldOptions) o));
         ((PrimaryLevelDataAccessor) worldData).accessor$specialWorldProperty(SpongeWorldManager.specialWorldProperty(levelStem));
         return this.initializeLevelData((ResourceKey) (Object) registryKey.identifier(), worldData, levelStem);
     }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server.bossevents;
 
 import net.minecraft.server.bossevents.CustomBossEvent;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,8 +36,8 @@ import org.spongepowered.common.mixin.core.server.level.ServerBossEventMixin;
 public abstract class CustomBossEventMixin extends ServerBossEventMixin {
     @Shadow private int max;
 
-    @Redirect(method = {"getValue"},
-        at = @At(value = "FIELD", target = "Lnet/minecraft/server/bossevents/CustomBossEvent;value:I"))
+    @Redirect(method = {"value"},
+        at = @At(value = "FIELD", target = "Lnet/minecraft/server/bossevents/CustomBossEvent;value:I", opcode = Opcodes.GETFIELD))
     private int impl$valueRead(final CustomBossEvent $this) {
         return (int) (this.bridge$asAdventure().progress() * this.max);
     }
