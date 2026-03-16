@@ -65,6 +65,8 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.worldupdate.UpgradeProgress;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -821,8 +823,12 @@ public class SpongeWorldManager implements WorldManager {
 
     private LevelDataLoadResult initializeLevelData(final ResourceKey key, final PrimaryLevelData data, final LevelStem stem) {
         final DimensionType dimensionType = stem.type().value();
-        ((PrimaryLevelDataBridge) data).bridge$spongeData().setKey(key);
-        ((PrimaryLevelDataBridge) data).bridge$spongeData().setConfigAdapter(SpongeGameConfigs.load(dimensionType, key));
+        final var spongeData = ((PrimaryLevelDataBridge) data).bridge$spongeData();
+        spongeData.setKey(key);
+        spongeData.setConfigAdapter(SpongeGameConfigs.load(dimensionType, key));
+        if (spongeData.worldGenOptions() == null) {
+            spongeData.setWorldGenOptions(this.server.getWorldGenSettings());
+        }
         ((PrimaryLevelDataBridge) data).bridge$populateFromLevelStem(stem);
         return new LevelDataLoadResult(data, stem);
     }
@@ -847,10 +853,21 @@ public class SpongeWorldManager implements WorldManager {
         final Dynamic<?> dataTag,
         final ServerWorldProperties.LoadOptions.@Nullable LoadOperation loadOperation
     ) {
+        // Apply file-fixing and data-fixing before parsing. In 26.1, FileFixerUpper
+        // requires all level data to be fixed before getLevelDataAndDimensions() can parse it.
+        // Vanilla handles this for the overworld via the WorldLoader pipeline, but Sponge's
+        // per-world level.dat files need the same treatment.
+        final Dynamic<?> fixedDataTag;
+        try {
+            fixedDataTag = DataFixers.getFileFixer().fix(worldAccess, dataTag, new UpgradeProgress());
+        } catch (final IOException e) {
+            throw new RuntimeException(String.format("Failed to apply data fixes for world '%s'", registryKey.identifier()), e);
+        }
+
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
         final RegistryAccess.Frozen access = this.server.registryAccess();
         final LevelDataAndDimensions levelData = LevelStorageSource.getLevelDataAndDimensions(worldAccess,
-            dataTag, defaultLevelData.getDataConfiguration(), access.lookupOrThrow(Registries.LEVEL_STEM), access);
+            fixedDataTag, defaultLevelData.getDataConfiguration(), access.lookupOrThrow(Registries.LEVEL_STEM), access);
         final WorldArchetype worldArchetype = SpongeWorldManager.resolveWorldArchetype(levelData, registryKey, loadOperation);
         final LevelStem levelStem = (LevelStem) (Object) worldArchetype.type();
         final PrimaryLevelData worldData = (PrimaryLevelData) levelData.worldDataAndGenSettings().data();

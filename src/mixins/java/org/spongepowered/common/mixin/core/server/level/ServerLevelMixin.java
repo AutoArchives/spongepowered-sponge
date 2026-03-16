@@ -116,6 +116,7 @@ import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -148,6 +149,7 @@ import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.world.server.SpongeServerLevelData;
+import org.spongepowered.common.world.weather.SpongeWeather;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -183,10 +185,46 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
     private CustomBossEvents impl$bossBarManager;
+    @Unique private @Nullable WeatherData impl$perWorldWeatherData;
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
     private boolean impl$closed = false;
+
+    /**
+     * Initializes per-world {@link WeatherData}, replacing the global server weather data.
+     * This intercepts the {@code server.getWeatherData()} call used by {@code prepareWeather}
+     * in the constructor, ensuring each world has independent weather state from creation.
+     *
+     * <p>A new {@link WeatherData} instance is created per world rather than using
+     * {@link SavedDataStorage#computeIfAbsent}, because all dimensions share the same
+     * {@link SavedDataStorage} (the overworld's). Weather state is instead persisted through
+     * {@link SpongeServerLevelData.WeatherState} in the Sponge level data.</p>
+     */
+    @WrapOperation(
+        method = "<init>",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWeatherData()Lnet/minecraft/world/level/saveddata/WeatherData;")
+    )
+    private WeatherData impl$initPerWorldWeatherData(final MinecraftServer instance, final Operation<WeatherData> original) {
+        this.impl$perWorldWeatherData = new WeatherData();
+        return this.impl$perWorldWeatherData;
+    }
+
+    /**
+     * Redirects {@link ServerLevel#getWeatherData()} to return the per-world {@link WeatherData}
+     * instead of the global server weather data. This enables independent weather cycles, commands,
+     * and API access for each world.
+     */
+    @WrapOperation(
+        method = "getWeatherData",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWeatherData()Lnet/minecraft/world/level/saveddata/WeatherData;")
+    )
+    private WeatherData impl$usePerWorldWeatherData(final MinecraftServer instance, final Operation<WeatherData> original) {
+        if (this.impl$perWorldWeatherData != null) {
+            return this.impl$perWorldWeatherData;
+        }
+        return original.call(instance);
+    }
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$onInit(
@@ -204,6 +242,22 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     ) {
         final SpongeServerLevelData spongeData = ((ServerLevelDataBridge) levelData).bridge$spongeData();
 
+        // Restore per-world weather state from Sponge level data if available.
+        // On first load (migration from global weather), the overworld inherits the
+        // server's global WeatherData state, while other worlds start with clear weather.
+        if (this.impl$perWorldWeatherData != null) {
+            spongeData.weatherState().ifPresentOrElse(
+                ws -> ws.applyTo(this.impl$perWorldWeatherData),
+                () -> {
+                    // Migration: for overworld, copy the server's global weather state
+                    if (Level.OVERWORLD.equals(dimension)) {
+                        final WeatherData globalWeather = server.getWeatherData();
+                        SpongeServerLevelData.WeatherState.fromWeatherData(globalWeather).applyTo(this.impl$perWorldWeatherData);
+                    }
+                }
+            );
+        }
+
         final ResourceKey worldKey = ((ServerWorld) this).key();
         if (spongeData.key() == null) {
             SpongeCommon.logger().warn("Level data ({}) has no key associated but is used by world {} ({}).", levelData.getClass().getSimpleName(), worldKey, this.getClass().getSimpleName());
@@ -218,7 +272,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
 
         this.impl$levelSave = storage;
-        this.impl$prevWeather = ((ServerWorld) this).weather();
+        this.impl$prevWeather = SpongeWeather.of(this.shadow$getWeatherData());
         ((LevelTicksBridge<?>) this.blockTicks).bridge$level((ServerLevel) (Object) this);
         ((LevelTicksBridge<?>) this.fluidTicks).bridge$level((ServerLevel) (Object) this);
 
@@ -403,6 +457,12 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final SerializationBehavior behavior = ((ServerLevelDataBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
 
         if (behavior != SerializationBehavior.NONE) {
+            // Persist per-world weather state to Sponge level data before saving
+            if (this.impl$perWorldWeatherData != null) {
+                ((ServerLevelDataBridge) levelData).bridge$spongeData()
+                    .setWeatherState(SpongeServerLevelData.WeatherState.fromWeatherData(this.impl$perWorldWeatherData));
+            }
+
             original.call(self, flush);
 
             // per-world WorldInfo/WorldBorder/BossBars/WorldGen

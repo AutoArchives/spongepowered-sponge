@@ -22,33 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.accessor.world.entity.npc.wanderingtrader;
 
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockEventData;
-import net.minecraft.world.level.CustomSpawner;
-import net.minecraft.world.level.entity.PersistentEntitySectionManager;
-import org.slf4j.Logger;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner;
+import net.minecraft.world.level.saveddata.WanderingTraderData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.common.UntransformedAccessorError;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.List;
+@Mixin(WanderingTraderSpawner.class)
+public interface WanderingTraderSpawnerAccessor {
 
-@Mixin(ServerLevel.class)
-public interface ServerLevelAccessor {
-
-    @Accessor("LOGGER")
-    static Logger accessor$LOGGER() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("blockEvents") ObjectLinkedOpenHashSet<BlockEventData> accessor$blockEvents();
-
-    @Accessor("customSpawners") List<CustomSpawner> accessor$customSpawners();
-
-    @Accessor("entityManager") PersistentEntitySectionManager<Entity> accessor$getEntityManager();
+    @Invoker("getTraderData") WanderingTraderData invoker$getTraderData();
 
 }

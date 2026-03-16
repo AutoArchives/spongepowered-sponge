@@ -35,6 +35,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.UserNameToIdResolver;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -56,9 +57,9 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$setServerOnGame(
         final Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2, final WorldStem $$3,
-        final DedicatedServerSettings $$4, final DataFixer $$5, final Services $$6, final CallbackInfo ci
+        final Optional<GameRules> $$4, final DedicatedServerSettings $$5, final DataFixer $$6, final Services $$7, final CallbackInfo ci
     ) {
-        $$4.getProperties().serverResourcePackInfo.ifPresent(packInfo -> {
+        $$5.getProperties().serverResourcePackInfo.ifPresent(packInfo -> {
             try {
                 this.impl$resourcePack = ResourcePackRequest.resourcePackRequest()
                     .packs(ResourcePackInfo.resourcePackInfo(packInfo.id(), new URI(packInfo.url()), packInfo.hash()))

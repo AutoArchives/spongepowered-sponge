@@ -27,9 +27,11 @@ package org.spongepowered.common.mixin.core.server.commands;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.commands.WeatherCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.saveddata.WeatherData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -44,15 +46,31 @@ public abstract class WeatherCommandMixin {
         return original.call(source.getLevel());
     }
 
+    /**
+     * Redirects weather parameter changes to the command source's current world
+     * instead of the global server weather. This enables per-world weather control
+     * via the {@code /weather} command.
+     *
+     * <p>The vanilla implementation calls {@link MinecraftServer#setWeatherParameters(int, int, boolean, boolean)}
+     * which sets weather on the global {@link WeatherData}. Since {@code ServerLevel} does not extend
+     * {@code MinecraftServer}, we cannot pass the level to {@code original.call()}. Instead, we
+     * directly manipulate the per-world {@link WeatherData} obtained from the source's level.</p>
+     */
     @WrapOperation(method = {
         "setClear",
         "setRain",
         "setThunder"
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;setWeatherParameters(IIZZ)V"))
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;setWeatherParameters(IIZZ)V"))
     private static void impl$useCurrentWorld(
-        ServerLevel instance, int delay, int duration, boolean rain, boolean thunder, Operation<Void> original,
+        final MinecraftServer instance, final int clearTime, final int rainTime, final boolean raining,
+        final boolean thundering, final Operation<Void> original,
         final CommandSourceStack source
     ) {
-        original.call(source.getLevel(), delay, duration, rain, thunder);
+        final WeatherData weatherData = source.getLevel().getWeatherData();
+        weatherData.setClearWeatherTime(clearTime);
+        weatherData.setRainTime(rainTime);
+        weatherData.setThunderTime(rainTime);
+        weatherData.setRaining(raining);
+        weatherData.setThundering(thundering);
     }
 }

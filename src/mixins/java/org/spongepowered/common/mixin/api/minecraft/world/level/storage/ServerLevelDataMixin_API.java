@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.clock.PackedClockStates;
 import net.minecraft.world.clock.WorldClocks;
+import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.gamerules.GameRuleMap;
-import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.saveddata.WanderingTraderData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -42,9 +41,9 @@ import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
+import org.spongepowered.common.accessor.world.entity.npc.wanderingtrader.WanderingTraderSpawnerAccessor;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.util.Constants;
@@ -116,41 +115,65 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 //        this.setClockStates(this.clockStates().clocks());
     }
 
+    @SuppressWarnings("removal")
     @Override
     default Ticks wanderingTraderSpawnDelay() {
-        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
-        final var level = ((ServerLevelDataBridge) this).bridge$level();
-        if (level instanceof ServerLevelAccessor sla) {
-            sla.cu
+        final var data = this.api$wanderingTraderData();
+        if (data == null) {
+            return SpongeTicks.ticksOrInfinite(0);
         }
-        return SpongeTicks.ticksOrInfinite(0);
+        return SpongeTicks.ticksOrInfinite(data.spawnDelay());
     }
 
+    @SuppressWarnings("removal")
     @Override
     default void setWanderingTraderSpawnDelay(final Ticks delay) {
-        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
+        final var data = this.api$wanderingTraderData();
+        if (data != null) {
+            data.setSpawnDelay((int) delay.ticks());
+        }
     }
 
+    @SuppressWarnings("removal")
     @Override
     default int wanderingTraderSpawnChance() {
-        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
+        final var data = this.api$wanderingTraderData();
+        if (data == null) {
+            return 0;
+        }
+        return data.spawnChance();
     }
 
+    @SuppressWarnings("removal")
     @Override
     default void setWanderingTraderSpawnChance(final int chance) {
-        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
+        final var data = this.api$wanderingTraderData();
+        if (data != null) {
+            data.setSpawnChance(chance);
+        }
     }
 
+    @SuppressWarnings("removal")
     @Override
     default void setWanderingTrader(@Nullable final WanderingTrader trader) {
-        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
-
+        // Wandering trader is no longer tracked in WanderingTraderData as of 26.1-snapshot-6
     }
 
+    @SuppressWarnings("removal")
     @Override
     default Optional<UUID> wanderTraderUniqueId() {
-        // TODO - 26.1-snapshot-6 make this per-world instead of just MinecraftServer
+        // Wandering trader is no longer tracked in WanderingTraderData as of 26.1-snapshot-6
         return Optional.empty();
+    }
+
+    private @Nullable WanderingTraderData api$wanderingTraderData() {
+        final var level = ((ServerLevelDataBridge) this).bridge$level();
+        for (final CustomSpawner spawner : ((ServerLevelAccessor) level).accessor$customSpawners()) {
+            if (spawner instanceof WanderingTraderSpawnerAccessor wtsa) {
+                return wtsa.invoker$getTraderData();
+            }
+        }
+        return null;
     }
 
     @Override

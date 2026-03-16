@@ -117,6 +117,7 @@
     "world.entity.monster.illager.VindicatorAccessor",
     "world.entity.monster.zombie.ZombifiedPiglinAccessor",
     "world.entity.npc.villager.AbstractVillagerAccessor",
+    "world.entity.npc.wanderingtrader.WanderingTraderSpawnerAccessor",
     "world.entity.player.AbilitiesAccessor",
     "world.entity.player.PlayerAccessor",
     "world.entity.projectile.EyeOfEnderAccessor",
