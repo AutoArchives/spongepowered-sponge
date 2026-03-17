@@ -33,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 
+import net.minecraft.core.Holder;
+
 import java.util.Map;
 
 @Mixin(WorldDimensions.class)
@@ -52,7 +54,9 @@ public abstract class WorldDimensionsMixin {
         // ends up being a double lookup for all worlds but the overworld but I feel it is a small price to pay vs. a very complicated series
         // of mixins to remove retrieving the level stem settings solely for all worlds but the overworld
         if (val == null) {
-            return SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM).get((ResourceKey<LevelStem>) key);
+            // Registry.get() returns Optional<Holder.Reference<T>> in 26.1, not the value directly
+            return SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM).get((ResourceKey<LevelStem>) key)
+                .map(ref -> (Object) ref.value()).orElse(null);
         }
 
         return val;

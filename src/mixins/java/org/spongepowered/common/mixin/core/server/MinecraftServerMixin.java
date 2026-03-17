@@ -83,13 +83,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.util.BlockableEventLoopAccessor;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.network.chat.SpongeChatDecorator;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
@@ -109,9 +109,9 @@ import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.AutoSaveMapQueue;
+import org.spongepowered.common.world.server.SpongeLevelMigration;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
-import java.io.IOException;
 import java.net.Proxy;
 import java.util.Locale;
 import java.util.Map;
@@ -232,6 +232,18 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         frame.pushCause(Sponge.systemSubject());
     }
 
+    /**
+     * Writes migrated SpongeRegistryData files AFTER FileFixerUpper.fix() has completed
+     * (the COW swap is done, directory structure is final) but BEFORE any ServerLevel is created.
+     * This ensures SavedDataStorage.computeIfAbsent() finds the files on disk.
+     */
+    @Inject(method = "loadLevel", at = @At("HEAD"))
+    private void impl$writeMigratedSpongeRegistryData(final CallbackInfo ci) {
+        SpongeLevelMigration.writeCachedRegistryData(
+            ((MinecraftServerAccessor) this).accessor$storageSource().getLevelDirectory().path()
+        );
+    }
+
     @Inject(method = "createLevels", at = @At(value = "NEW",
         target = "(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;ZJLjava/util/List;Z)Lnet/minecraft/server/level/ServerLevel;"
     ), slice = @Slice(
@@ -292,21 +304,9 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         }
     }
 
-    @Inject(method = "stopServer", at = @At(value = "TAIL"))
-    private void impl$closeLevelSaveForOtherWorlds(final CallbackInfo ci) {
-        for (final Map.Entry<ResourceKey<Level>, ServerLevel> entry : this.levels.entrySet()) {
-            if (entry.getKey() == Level.OVERWORLD) {
-                continue;
-            }
-
-            final LevelStorageSource.LevelStorageAccess levelSave = ((ServerLevelBridge) entry.getValue()).bridge$getLevelSave();
-            try {
-                levelSave.close();
-            } catch (final IOException e) {
-                MinecraftServerMixin.LOGGER.error("Failed to unlock level {}", levelSave.getLevelId(), e);
-            }
-        }
-    }
+    // Phase 1+2: All worlds now share the server's single LevelStorageAccess.
+    // The server's storageSource is closed by vanilla's stopServer() itself,
+    // so we no longer need to close per-world storage access instances.
 
     /**
      * Render localized/formatted chat components

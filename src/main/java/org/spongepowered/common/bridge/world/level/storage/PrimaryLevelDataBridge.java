@@ -25,10 +25,7 @@
 package org.spongepowered.common.bridge.world.level.storage;
 
 import com.google.common.collect.BiMap;
-import com.mojang.serialization.Dynamic;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -67,8 +64,4 @@ public interface PrimaryLevelDataBridge extends ServerLevelDataBridge {
     void bridge$hardcore(boolean hardcore);
 
     void bridge$allowCommands(boolean commands);
-
-    void bridge$readSpongeLevelData(Dynamic<Tag> impl$spongeLevelData);
-
-    CompoundTag bridge$writeSpongeLevelData();
 }

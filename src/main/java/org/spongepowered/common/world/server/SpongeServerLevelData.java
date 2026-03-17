@@ -32,7 +32,6 @@ import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
-import net.minecraft.world.level.saveddata.WeatherData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.accessor.server.bossevents.CustomBossEventsAccessor;
@@ -44,47 +43,12 @@ import java.util.UUID;
 
 public final class SpongeServerLevelData {
 
-    /**
-     * Stores per-world weather state for persistence. This is necessary because
-     * vanilla's {@link WeatherData} is stored in a shared {@link net.minecraft.world.level.storage.SavedDataStorage}
-     * across all dimensions, making it impossible to have independent per-world weather
-     * through the vanilla persistence mechanism alone.
-     */
-    public record WeatherState(int clearWeatherTime, int rainTime, int thunderTime, boolean raining, boolean thundering) {
-        public static final Codec<WeatherState> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Codec.INT.fieldOf("clear_weather_time").forGetter(WeatherState::clearWeatherTime),
-            Codec.INT.fieldOf("rain_time").forGetter(WeatherState::rainTime),
-            Codec.INT.fieldOf("thunder_time").forGetter(WeatherState::thunderTime),
-            Codec.BOOL.fieldOf("raining").forGetter(WeatherState::raining),
-            Codec.BOOL.fieldOf("thundering").forGetter(WeatherState::thundering)
-        ).apply(i, WeatherState::new));
-
-        public static WeatherState fromWeatherData(final WeatherData weatherData) {
-            return new WeatherState(
-                weatherData.getClearWeatherTime(),
-                weatherData.getRainTime(),
-                weatherData.getThunderTime(),
-                weatherData.isRaining(),
-                weatherData.isThundering()
-            );
-        }
-
-        public void applyTo(final WeatherData weatherData) {
-            weatherData.setClearWeatherTime(this.clearWeatherTime);
-            weatherData.setRainTime(this.rainTime);
-            weatherData.setThunderTime(this.thunderTime);
-            weatherData.setRaining(this.raining);
-            weatherData.setThundering(this.thundering);
-        }
-    }
-
     public static final Codec<SpongeServerLevelData> CODEC = RecordCodecBuilder.create(
         i -> i.group(
                 WorldOptions.CODEC.fieldOf("world_gen_options").stable().forGetter(SpongeServerLevelData::worldGenOptions),
                 CustomBossEventsAccessor.accessor$codec().optionalFieldOf("custom_boss_events").stable().forGetter(SpongeServerLevelData::customBossEvents),
                 UUIDUtil.CODEC.fieldOf("uuid").stable().forGetter(SpongeServerLevelData::uniqueId),
-                net.minecraft.resources.ResourceKey.codec(Registries.DIMENSION).optionalFieldOf("key").stable().forGetter(SpongeServerLevelData::resourceKey),
-                WeatherState.CODEC.optionalFieldOf("weather_state").stable().forGetter(SpongeServerLevelData::weatherState)
+                net.minecraft.resources.ResourceKey.codec(Registries.DIMENSION).optionalFieldOf("key").stable().forGetter(SpongeServerLevelData::resourceKey)
             )
             .apply(i, i.stable(SpongeServerLevelData::new))
     );
@@ -93,20 +57,18 @@ public final class SpongeServerLevelData {
     private @Nullable InheritableConfigHandle<WorldConfig> configAdapter;
     private WorldOptions worldGenOptions;
     private @Nullable CustomBossEvents customBossEvents;
-    private @Nullable WeatherState weatherState;
 
     public SpongeServerLevelData() {
     }
 
     public SpongeServerLevelData(
         WorldOptions worldOptions, Optional<CustomBossEvents> customBossEvents, UUID uuid,
-        Optional<net.minecraft.resources.ResourceKey<Level>> levelResourceKey, Optional<WeatherState> weatherState
+        Optional<net.minecraft.resources.ResourceKey<Level>> levelResourceKey
     ) {
         this.worldGenOptions = worldOptions;
         this.customBossEvents = customBossEvents.orElse(null);
         this.uniqueId = uuid;
         this.key = (ResourceKey) levelResourceKey.orElse(null);
-        this.weatherState = weatherState.orElse(null);
     }
 
     public @Nullable ResourceKey key() {
@@ -157,11 +119,4 @@ public final class SpongeServerLevelData {
         this.customBossEvents = customBossEvents;
     }
 
-    public Optional<WeatherState> weatherState() {
-        return Optional.ofNullable(this.weatherState);
-    }
-
-    public void setWeatherState(final @Nullable WeatherState weatherState) {
-        this.weatherState = weatherState;
-    }
 }

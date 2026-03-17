@@ -25,19 +25,10 @@
 package org.spongepowered.common.mixin.core.world.level.storage;
 
 import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.Dynamic;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntArrayTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
@@ -55,18 +46,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
-import org.spongepowered.common.data.DataUtil;
-import org.spongepowered.common.data.fixer.LegacyUUIDCodec;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.server.SpongeMapUUIDData;
 import org.spongepowered.common.world.server.SpongeServerLevelData;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -87,11 +75,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     private DimensionType impl$dimensionType;
     private ChunkGenerator impl$chunkGenerator;
 
-    private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
-
     private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false;
-
-    private BiMap<Integer, UUID> impl$mapUUIDIndex = HashBiMap.create();
     private @Nullable CompoundTag impl$compound;
 
     @Override
@@ -247,24 +231,30 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
 
     @Override
     public BiMap<Integer, UUID> bridge$getMapUUIDIndex() {
-        return this.impl$mapUUIDIndex;
+        return this.impl$getMapUUIDData().mapUUIDIndex();
     }
 
     @Override
     public int bridge$getIndexForUniqueId(final UUID uuid) {
-        final Integer index = this.impl$playerUniqueIdMap.inverse().get(uuid);
+        final var data = this.impl$getMapUUIDData();
+        final Integer index = data.playerUUIDIndex().inverse().get(uuid);
         if (index != null) {
             return index;
         }
 
-        final int newIndex = this.impl$playerUniqueIdMap.size();
-        this.impl$playerUniqueIdMap.put(newIndex, uuid);
+        final int newIndex = data.playerUUIDIndex().size();
+        data.playerUUIDIndex().put(newIndex, uuid);
+        data.setDirty();
         return newIndex;
     }
 
     @Override
     public Optional<UUID> bridge$getUniqueIdForIndex(final int index) {
-        return Optional.ofNullable(this.impl$playerUniqueIdMap.get(index));
+        return Optional.ofNullable(this.impl$getMapUUIDData().playerUUIDIndex().get(index));
+    }
+
+    private SpongeMapUUIDData impl$getMapUUIDData() {
+        return SpongeCommon.server().getDataStorage().computeIfAbsent(SpongeMapUUIDData.TYPE);
     }
 
     void impl$updateWorldForDifficultyChange(final ServerLevel level, final boolean isLocked) {
@@ -308,58 +298,6 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     }
 
     @Override
-    @SuppressWarnings({"deprecated","deprecation"})
-    public void bridge$readSpongeLevelData(final Dynamic<Tag> dynamic) {
-        dynamic.get(Constants.Sponge.Data.V3.SPONGE_WORLD_DATA).read(SpongeServerLevelData.CODEC).ifSuccess(ssld -> {
-            this.impl$spongeData = ssld;
-        });
-        dynamic.get(Constants.Sponge.Data.V2.SPONGE_DATA).get().ifSuccess(v2 -> {
-            v2.get(Constants.Sponge.World.UNIQUE_ID).read(UUIDUtil.CODEC).result().ifPresent(this.impl$spongeData::setUniqueId);
-            v2.get(Constants.Sponge.World.WORLD_KEY).read(Identifier.CODEC).result()
-                .map(org.spongepowered.api.ResourceKey.class::cast).ifPresent(this.impl$spongeData::setKey);
-
-            v2.get(Constants.Map.MAP_UUID_INDEX).readMap(Codec.STRING, UUIDUtil.CODEC).result().ifPresent(value -> {
-                final BiMap<Integer, UUID> mapIndex = HashBiMap.create();
-                for (final Pair<String, UUID> pair : value) {
-                    final int id = Integer.parseInt(pair.getFirst());
-                    mapIndex.put(id, pair.getSecond());
-                }
-                this.impl$mapUUIDIndex = mapIndex;
-            });
-
-            // TODO Move this to Schema
-            v2.get(Constants.Sponge.LEGACY_SPONGE_PLAYER_UUID_TABLE).readList(LegacyUUIDCodec.CODEC).result().orElseGet(() ->
-                v2.get(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE).readList(UUIDUtil.CODEC).result().orElse(Collections.emptyList())
-            ).forEach(uuid -> this.impl$playerUniqueIdMap.inverse().putIfAbsent(uuid, this.impl$playerUniqueIdMap.size()));
-        });
-
-        this.data$setCompound((CompoundTag) dynamic.getValue());
-        DataUtil.syncTagToData(this);
-        this.data$setCompound(null);
-    }
-
-    @Override
-    public CompoundTag bridge$writeSpongeLevelData() {
-        final CompoundTag data = new CompoundTag();
-        data.store(Constants.Sponge.World.UNIQUE_ID, UUIDUtil.CODEC, this.impl$spongeData.uniqueId());
-
-        if (this.impl$spongeData.key() != null) {
-            data.putString(Constants.Sponge.World.WORLD_KEY, this.impl$spongeData.key().formatted());
-        }
-
-        // Map Storage
-        final CompoundTag mapUUIDIndexTag = new CompoundTag();
-        MapUtil.saveMapUUIDIndex(mapUUIDIndexTag, this.impl$mapUUIDIndex);
-        data.put(Constants.Map.MAP_UUID_INDEX, mapUUIDIndexTag);
-
-        final ListTag playerIdList = new ListTag();
-        data.put(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, playerIdList);
-        this.impl$playerUniqueIdMap.values().forEach(uuid -> playerIdList.add(new IntArrayTag(UUIDUtil.uuidToIntArray(uuid))));
-
-        return data;
-    }
-
-    @Override
     public String toString() {
         return new StringJoiner(", ", PrimaryLevelData.class.getSimpleName() + "[", "]")
                 .add("key=" + this.impl$spongeData.key())
@@ -381,16 +319,6 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
         this.impl$compound = nbt;
     }
 
-    // TODO - 26.1-snapshot-6 - figure out where to shove this in now? Do we just append it to the level data or keep it in sponge data?
-//    @Redirect(method = "setTagData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/WorldGenSettings;encode(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/world/level/levelgen/WorldOptions;Lnet/minecraft/core/RegistryAccess;)Lcom/mojang/serialization/DataResult;"))
-//    private DataResult<?> impl$onEncodeWorldGenSettings(final DynamicOps<?> $$0, final WorldOptions $$1, final RegistryAccess $$2) {
-//        final Map<ResourceKey<LevelStem>, LevelStem> dimensions = $$2.lookupOrThrow(Registries.LEVEL_STEM)
-//            .listElements()
-//            .collect(Collectors.toMap(Holder.Reference::key, Holder.Reference::value));
-//        if (this.impl$dimensionType != null && this.impl$chunkGenerator != null) {
-//            dimensions.computeIfAbsent(ResourceKey.create(Registries.LEVEL_STEM, (Identifier) (Object) this.impl$spongeData.key()),
-//                $ -> new LevelStem($$2.lookupOrThrow(Registries.DIMENSION_TYPE).wrapAsHolder(this.impl$dimensionType), this.impl$chunkGenerator));
-//        }
-//        return WorldGenSettings.encode($$0, $$1, new WorldDimensions(dimensions));
-//    }
+    // LevelStem persistence for runtime-created worlds is now handled by SpongeWorldManager.createLevel()
+    // which adds the LevelStem to WorldGenSettings.dimensions() (a SavedData in server-level SavedDataStorage).
 }

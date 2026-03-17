@@ -44,7 +44,6 @@ import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.ticks.LevelTicks;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -208,7 +207,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public Path directory() {
-        return ((ServerLevelBridge) this).bridge$getLevelSave().getLevelPath(LevelResource.ROOT);
+        return ((ServerLevelBridge) this).bridge$getLevelSave().getDimensionPath(this.shadow$dimension());
     }
 
     private boolean impl$save(final boolean flush) {

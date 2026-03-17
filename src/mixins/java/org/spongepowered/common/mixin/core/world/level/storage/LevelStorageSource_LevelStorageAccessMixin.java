@@ -24,68 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.world.level.storage;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.world.level.storage.LevelStorageAccessBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
-import org.spongepowered.common.data.DataUtil;
-import org.spongepowered.common.util.Constants;
-
-import java.nio.file.Path;
 
 @Mixin(LevelStorageSource.LevelStorageAccess.class)
-public abstract class LevelStorageSource_LevelStorageAccessMixin implements LevelStorageAccessBridge {
+public abstract class LevelStorageSource_LevelStorageAccessMixin {
 
     // @formatter:off
     @Shadow @Final LevelStorageSource.LevelDirectory levelDirectory;
     // @formatter:on
 
-    private boolean impl$dedicated = false;
-
-    @Inject(method = "getDimensionPath", at = @At("HEAD"), cancellable = true)
-    public void impl$dedicatedDimensionPath(final CallbackInfoReturnable<Path> cir) {
-        if (this.impl$dedicated) {
-            cir.setReturnValue(this.levelDirectory.path());
-        }
-    }
-
     @ModifyArg(method = "checkLock",
         at = @At(value = "INVOKE", target = "Ljava/lang/IllegalStateException;<init>(Ljava/lang/String;)V", ordinal = 0, remap = false))
     private String modifyMinecraftExceptionOutputIfNotInitializationTime(final String message) {
         return "Lock for world " + this.levelDirectory.path() + " is no longer valid!";
-    }
-
-    @WrapOperation(
-            method = "saveDataTag(Lnet/minecraft/world/level/storage/WorldData;Ljava/util/UUID;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;saveLevelData(Lnet/minecraft/nbt/CompoundTag;)V"
-            )
-    )
-    @SuppressWarnings("deprecation")
-    private void impl$saveSpongeLevelData(
-        final LevelStorageSource.LevelStorageAccess instance, final CompoundTag root,
-        final Operation<Void> original, final WorldData levelData) {
-        root.put(Constants.Sponge.Data.V2.SPONGE_DATA, ((PrimaryLevelDataBridge) levelData).bridge$writeSpongeLevelData());
-        if (DataUtil.syncDataToTag(levelData)) {
-            root.merge(((DataCompoundHolder) levelData).data$getCompound());
-        }
-        original.call(instance, root);
-    }
-
-    @Override
-    public void bridge$setDedicated(final boolean dedicated) {
-        this.impl$dedicated = dedicated;
     }
 }

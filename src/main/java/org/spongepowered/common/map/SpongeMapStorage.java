@@ -35,9 +35,9 @@ import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.saveddata.maps.MapIndexAccessor;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.world.server.SpongeMapUUIDData;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -120,7 +120,8 @@ public final class SpongeMapStorage implements MapStorage {
 
     private void ensureHasMapUUIDIndex() {
         if (this.mapIdUUIDIndex == null) {
-            this.mapIdUUIDIndex = ((PrimaryLevelDataBridge) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get().properties()).bridge$getMapUUIDIndex();
+            this.mapIdUUIDIndex = SpongeCommon.server().getDataStorage()
+                .computeIfAbsent(SpongeMapUUIDData.TYPE).mapUUIDIndex();
         }
     }
 }

@@ -219,6 +219,7 @@
     "world.item.crafting.SingleItemRecipeMixin",
     "world.item.crafting.SmithingTransformRecipeMixin",
     "world.item.enchantment.EnchantmentMixin_Attack",
+    "util.filefix.FileFixerUpperMixin",
     "world.level.BaseSpawnerMixin",
     "world.level.BlockGetterMixin",
     "world.level.Explosion_BlockInteractionMixin",

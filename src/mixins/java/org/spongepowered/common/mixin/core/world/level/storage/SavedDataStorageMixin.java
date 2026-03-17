@@ -79,7 +79,7 @@ public abstract class SavedDataStorageMixin implements DimensionDataStorageBridg
             DataUtil.syncTagToData(dch);
             dch.data$setCompound(null);
         }
-        return null;
+        return result;
     }
 
     @Override

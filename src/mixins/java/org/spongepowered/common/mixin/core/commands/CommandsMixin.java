@@ -31,10 +31,10 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.commands.AdvancementCommands;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
@@ -58,7 +58,7 @@ public abstract class CommandsMixin implements CommandsBridge {
             return new CommandDispatcher<>();
         }
         final SpongeCommandManager manager = Launch.instance().lifecycle().platformInjector().getInstance(SpongeCommandManager.class);
-        manager.init((RegistryHolder) context);
+        manager.init(SpongeCommon.game());
         this.impl$commandManager = manager;
         return new DelegatingCommandDispatcher(manager.getBrigadierRegistrar());
     }

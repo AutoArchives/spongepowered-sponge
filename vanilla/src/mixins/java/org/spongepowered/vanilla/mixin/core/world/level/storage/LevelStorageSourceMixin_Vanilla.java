@@ -24,55 +24,14 @@
  */
 package org.spongepowered.vanilla.mixin.core.world.level.storage;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.mojang.serialization.Dynamic;
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
-import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 
+/**
+ * Previously captured and read SpongeData from level.dat during world loading.
+ * SpongeData is no longer stored in level.dat; per-world identity (UUID, key)
+ * is now handled by {@code SpongeRegistryData} via per-dimension SavedDataStorage.
+ */
 @Mixin(LevelStorageSource.class)
 public abstract class LevelStorageSourceMixin_Vanilla {
-
-    private static Dynamic<Tag> impl$spongeLevelData;
-
-    @WrapOperation(
-            method = "readExistingSavedData",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/nbt/CompoundTag;getCompoundOrEmpty(Ljava/lang/String;)Lnet/minecraft/nbt/CompoundTag;",
-                    ordinal = 0
-            )
-    )
-    private static CompoundTag impl$createSpongeLevelData(final CompoundTag compoundNBT, final String path, final Operation<CompoundTag> original) {
-        LevelStorageSourceMixin_Vanilla.impl$spongeLevelData = new Dynamic<>(NbtOps.INSTANCE, compoundNBT);
-        return original.call(compoundNBT, path);
-    }
-
-    @WrapOperation(
-            method = "getLevelDataAndDimensions",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/storage/PrimaryLevelData;parse(Lcom/mojang/serialization/Dynamic;Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/world/level/storage/PrimaryLevelData;"
-            )
-    )
-    private static PrimaryLevelData impl$readSpongeLevelData(
-        final Dynamic<?> input, final LevelSettings settings,
-        final PrimaryLevelData.SpecialWorldProperty specialWorldProperty, final Lifecycle worldGenSettingsLifecycle,
-        final Operation<PrimaryLevelData> original)
-    {
-        final PrimaryLevelData levelData = original.call(input, settings, specialWorldProperty, worldGenSettingsLifecycle);
-
-        ((PrimaryLevelDataBridge) levelData).bridge$readSpongeLevelData(LevelStorageSourceMixin_Vanilla.impl$spongeLevelData);
-
-        LevelStorageSourceMixin_Vanilla.impl$spongeLevelData = null;
-        return levelData;
-    }
 }
