@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.world.level.block.SnowyDirtBlock;
+import net.minecraft.world.level.block.SnowyBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -39,9 +39,9 @@ public final class SnowyDirtData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_SNOWY)
-                        .get(h -> h.getValue(SnowyDirtBlock.SNOWY))
-                        .set((h, v) -> h.setValue(SnowyDirtBlock.SNOWY, v))
-                        .supports(h -> h.getBlock() instanceof SnowyDirtBlock);
+                        .get(h -> h.getValue(SnowyBlock.SNOWY))
+                        .set((h, v) -> h.setValue(SnowyBlock.SNOWY, v))
+                        .supports(h -> h.getBlock() instanceof SnowyBlock);
     }
     // @formatter:on
 }

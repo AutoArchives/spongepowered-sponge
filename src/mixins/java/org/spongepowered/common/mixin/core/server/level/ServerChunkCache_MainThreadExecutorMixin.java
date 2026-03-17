@@ -34,7 +34,7 @@ public abstract class ServerChunkCache_MainThreadExecutorMixin extends Blockable
     private volatile boolean impl$closed;
 
     protected ServerChunkCache_MainThreadExecutorMixin(final String $$0) {
-        super($$0);
+        super($$0, false);
     }
 
     @Override

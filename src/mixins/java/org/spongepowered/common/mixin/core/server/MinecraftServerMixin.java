@@ -146,7 +146,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
     protected @Nullable ResourcePackRequest impl$resourcePack;
-    private final BlockableEventLoop<Runnable> impl$spongeMainThreadExecutor = new BlockableEventLoop<>("Sponge") {
+    private final BlockableEventLoop<Runnable> impl$spongeMainThreadExecutor = new BlockableEventLoop<>("Sponge", false) {
 
         //Used to schedule internal Sponge tasks to the main thread
         //that could be joined on the main thread. Avoiding using the
@@ -199,7 +199,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     private void impl$setThreadOnServerPhaseTracker(
         Thread serverThread, LevelStorageSource.LevelStorageAccess storageSource, PackRepository packRepository,
         WorldStem worldStem, Optional<GameRules> gameRules, Proxy proxy, DataFixer fixerUpper, Services services,
-        LevelLoadListener levelLoadListener, CallbackInfo ci
+        LevelLoadListener levelLoadListener, boolean propagatesCrashes, CallbackInfo ci
     ) {
         try {
             PhaseTracker.getServerInstanceExplicitly().setThread(serverThread);

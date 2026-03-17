@@ -54,7 +54,7 @@ public abstract class MinecraftServerMixin_Test extends ReentrantBlockableEventL
     // @formatter:on
 
     public MinecraftServerMixin_Test(final String name) {
-        super(name);
+        super(name, false);
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))

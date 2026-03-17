@@ -48,6 +48,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.LevelLoadListener;
 import net.minecraft.server.level.progress.LoggingLevelLoadListener;
 import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.filefix.FileFixException;
 import net.minecraft.util.worldupdate.UpgradeProgress;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
@@ -924,7 +925,7 @@ public class SpongeWorldManager implements WorldManager {
         final Dynamic<?> fixedDataTag;
         try {
             fixedDataTag = DataFixers.getFileFixer().fix(worldAccess, dataTag, new UpgradeProgress());
-        } catch (final IOException e) {
+        } catch (final FileFixException e) {
             throw new RuntimeException(String.format("Failed to apply data fixes for world '%s'", registryKey.identifier()), e);
         }
 

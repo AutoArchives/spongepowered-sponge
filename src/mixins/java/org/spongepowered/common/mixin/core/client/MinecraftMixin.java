@@ -56,7 +56,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
     private IntegratedServer impl$temporaryIntegratedServer;
 
     public MinecraftMixin(String param0) {
-        super(param0);
+        super(param0, false);
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))

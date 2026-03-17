@@ -68,7 +68,7 @@ public class BedBlockMixin {
         if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) param3))) {
             param3.startSleepInBed(param2).ifLeft((param1x) -> {
                 if (param1x != null && param1x.message() != null) {
-                    param3.displayClientMessage(param1x.message(), true);
+                    param3.sendOverlayMessage(param1x.message());
                 }
             });
             cir.setReturnValue(InteractionResult.SUCCESS);
