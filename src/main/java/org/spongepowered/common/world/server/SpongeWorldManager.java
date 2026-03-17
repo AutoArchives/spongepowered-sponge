@@ -31,6 +31,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
@@ -1005,10 +1006,17 @@ public class SpongeWorldManager implements WorldManager {
         final Registry<DimensionType> dimensionTypes = this.server.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
         final var saveDataSotrage = this.server.getDataStorage();
 
+        // Resolve inline DimensionType holders to registry references.
+        // When a LevelStem is deserialized from WorldGenSettings with an inline DimensionType
+        // (Holder.direct), the login packet encoder fails because STREAM_CODEC expects a registry ID.
+        // The registry uses IdentityHashMap so wrapAsHolder() won't match deserialized instances.
+        // Instead, iterate the registry and match by record equals().
+        final LevelStem resolvedStem = SpongeWorldManager.resolveInlineDimensionType(levelStem, dimensionTypes);
+
         MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}'", worldKey);
 
         final List<CustomSpawner> spawners;
-        if (levelStem.type().value() == dimensionTypes.getValue(BuiltinDimensionTypes.OVERWORLD) || levelStem.type().value() == dimensionTypes.getValue(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
+        if (resolvedStem.type().value() == dimensionTypes.getValue(BuiltinDimensionTypes.OVERWORLD) || resolvedStem.type().value() == dimensionTypes.getValue(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
             // TODO - 26.1-snapshot-6 figure out if we need to do anything here per world?
             spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(saveDataSotrage));
         } else {
@@ -1021,18 +1029,17 @@ public class SpongeWorldManager implements WorldManager {
         final Executor executor = ((MinecraftServerAccessor) this.server).accessor$executor();
 
         final ServerLevel world = new ServerLevel(this.server, executor, storageSource, levelData,
-            registryKey, levelStem, levelData.isDebugWorld(), seed, spawners, true);
+            registryKey, resolvedStem, levelData.isDebugWorld(), seed, spawners, true);
         this.worlds.put(registryKey, world);
 
-        // Persist the LevelStem in the server's WorldGenSettings so custom dimensions survive restart.
-        // WorldGenSettings is a SavedData in the server-level SavedDataStorage. The dimensions() map
-        // may be immutable (from codec deserialization), so we replace the WorldGenSettings entirely
-        // with a new instance containing the updated dimensions map.
+        // Persist the LevelStem (with resolved holder) in the server's WorldGenSettings so custom
+        // dimensions survive restart. Using the resolved stem ensures the DimensionType is serialized
+        // as a registry reference, not inline, breaking the inline cycle for future loads.
         final net.minecraft.resources.ResourceKey<LevelStem> stemKey = Registries.levelToLevelStem(registryKey);
         final WorldGenSettings currentSettings = this.server.getWorldGenSettings();
         if (!currentSettings.dimensions().dimensions().containsKey(stemKey)) {
             final Map<net.minecraft.resources.ResourceKey<LevelStem>, LevelStem> mutableDims = new HashMap<>(currentSettings.dimensions().dimensions());
-            mutableDims.put(stemKey, levelStem);
+            mutableDims.put(stemKey, resolvedStem);
             final WorldGenSettings updated = new WorldGenSettings(currentSettings.options(), new WorldDimensions(mutableDims));
             this.server.getDataStorage().set(WorldGenSettings.TYPE, updated);
         }
@@ -1043,7 +1050,7 @@ public class SpongeWorldManager implements WorldManager {
         final WorldOptions perWorldOptions = levelSpongeData.worldGenOptions() != null
             ? levelSpongeData.worldGenOptions() : currentSettings.options();
         final WorldGenSettings perDimSettings = new WorldGenSettings(
-            perWorldOptions, new WorldDimensions(Map.of(stemKey, levelStem)));
+            perWorldOptions, new WorldDimensions(Map.of(stemKey, resolvedStem)));
         world.getDataStorage().set(WorldGenSettings.TYPE, perDimSettings);
 
         PlatformHooks.INSTANCE.getWorldHooks().postLoadWorld(world);
@@ -1242,6 +1249,57 @@ public class SpongeWorldManager implements WorldManager {
                 previous.cancel();
             }
         }
+    }
+
+    /**
+     * Resolves inline (Holder.direct) DimensionType holders in a LevelStem to registry references.
+     *
+     * <p>When a LevelStem is deserialized from WorldGenSettings with an inline DimensionType,
+     * the network STREAM_CODEC (ByteBufCodecs.holderRegistry) can't find the registry ID,
+     * causing login packet encoding to fail. The DimensionType registry uses IdentityHashMap
+     * for value lookups, so wrapAsHolder() won't match deserialized record instances.
+     * Record equals() also fails because HolderSet.Named uses identity comparison.</p>
+     *
+     * <p>This method matches by comparing the structural primitive/enum/TagKey fields of
+     * DimensionType, which are reliably comparable across deserialized instances.</p>
+     */
+    static LevelStem resolveInlineDimensionType(final LevelStem stem, final Registry<DimensionType> dimensionTypes) {
+        if (stem.type() instanceof Holder.Reference<?>) {
+            return stem; // Already a registry reference
+        }
+        final DimensionType inline = stem.type().value();
+        for (final var entry : dimensionTypes.entrySet()) {
+            final DimensionType registered = entry.getValue();
+            if (SpongeWorldManager.dimensionTypeStructurallyEquals(inline, registered)) {
+                final Optional<Holder.Reference<DimensionType>> ref = dimensionTypes.get(entry.getKey().identifier());
+                if (ref.isPresent()) {
+                    return new LevelStem(ref.get(), stem.generator());
+                }
+            }
+        }
+        SpongeCommon.logger().warn("Could not resolve inline DimensionType to registry reference. "
+            + "Login packets for worlds using this dimension type may fail.");
+        return stem;
+    }
+
+    /**
+     * Compares two DimensionType instances by their structural fields, ignoring Holder/HolderSet
+     * fields that use identity-based equality (HolderSet.Named, Holder.Reference).
+     */
+    private static boolean dimensionTypeStructurallyEquals(final DimensionType a, final DimensionType b) {
+        return a.hasFixedTime() == b.hasFixedTime()
+            && a.hasSkyLight() == b.hasSkyLight()
+            && a.hasCeiling() == b.hasCeiling()
+            && a.hasEnderDragonFight() == b.hasEnderDragonFight()
+            && Double.compare(a.coordinateScale(), b.coordinateScale()) == 0
+            && a.minY() == b.minY()
+            && a.height() == b.height()
+            && a.logicalHeight() == b.logicalHeight()
+            && a.infiniburn().equals(b.infiniburn())
+            && Float.compare(a.ambientLight(), b.ambientLight()) == 0
+            && a.monsterSettings().monsterSpawnBlockLightLimit() == b.monsterSettings().monsterSpawnBlockLightLimit()
+            && a.skybox() == b.skybox()
+            && a.cardinalLightType() == b.cardinalLightType();
     }
 
     private enum WorldOperationType {

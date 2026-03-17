@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.world.server;
 
-import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.WorldArchetypeType;
+import org.spongepowered.common.SpongeCommon;
 
 public final class SpongeWorldArchetypeType implements WorldArchetypeType.Builder {
 
@@ -68,6 +70,8 @@ public final class SpongeWorldArchetypeType implements WorldArchetypeType.Builde
 
     @Override
     public WorldArchetypeType build() {
-        return (WorldArchetypeType) (Object) new LevelStem(Holder.direct((DimensionType) (Object) this.worldType), (net.minecraft.world.level.chunk.ChunkGenerator) this.chunkGenerator);
+        final DimensionType dimensionType = (DimensionType) (Object) this.worldType;
+        final Registry<DimensionType> registry = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE);
+        return (WorldArchetypeType) (Object) new LevelStem(registry.wrapAsHolder(dimensionType), (net.minecraft.world.level.chunk.ChunkGenerator) this.chunkGenerator);
     }
 }

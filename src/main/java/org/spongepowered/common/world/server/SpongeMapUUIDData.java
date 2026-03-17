@@ -46,8 +46,9 @@ import java.util.UUID;
  */
 public final class SpongeMapUUIDData extends SavedData {
 
+    // NBT CompoundTag keys must be strings, so use string-based int codec for map keys
     private static final Codec<Map<Integer, UUID>> MAP_INDEX_CODEC =
-        Codec.unboundedMap(Codec.INT, UUIDUtil.CODEC);
+        Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, String::valueOf), UUIDUtil.CODEC);
 
     public static final Codec<SpongeMapUUIDData> CODEC = RecordCodecBuilder.create(
         i -> i.group(

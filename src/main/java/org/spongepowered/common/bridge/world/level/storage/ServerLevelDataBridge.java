@@ -26,7 +26,8 @@ package org.spongepowered.common.bridge.world.level.storage;
 
 import com.google.common.collect.MapMaker;
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -88,7 +89,8 @@ public interface ServerLevelDataBridge {
     }
 
     default LevelStem bridge$levelStem() {
-        return new LevelStem(Holder.direct(this.bridge$dimensionType()), this.bridge$chunkGenerator());
+        final Registry<DimensionType> registry = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE);
+        return new LevelStem(registry.wrapAsHolder(this.bridge$dimensionType()), this.bridge$chunkGenerator());
     }
 
     default boolean bridge$customDifficulty() {
