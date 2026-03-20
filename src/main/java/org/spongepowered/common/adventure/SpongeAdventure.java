@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.adventure;
 
+import com.google.gson.JsonPrimitive;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Message;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import io.netty.util.AttributeKey;
 import net.kyori.adventure.audience.Audience;
@@ -66,8 +68,9 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.ChatFormatting;
-import net.minecraft.commands.arguments.selector.SelectorPattern;
-import net.minecraft.core.Holder;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentPatch;
@@ -96,6 +99,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.CompilableString;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -286,6 +290,18 @@ public final class SpongeAdventure {
         return component == null ? Optional.empty() : Optional.of(((ComponentBridge) component).bridge$asVanillaComponent());
     }
 
+    private static CompilableString<EntitySelector> parseSelector(final String pattern) {
+        return EntitySelector.COMPILABLE_CODEC.parse(JsonOps.INSTANCE, new JsonPrimitive(pattern)).getOrThrow();
+    }
+
+    private static CompilableString<NbtPathArgument.NbtPath> parseNbtPath(final String path) {
+        return NbtContents.NBT_PATH_CODEC.parse(JsonOps.INSTANCE, new JsonPrimitive(path)).getOrThrow();
+    }
+
+    private static CompilableString<Coordinates> parseBlockPos(final String pos) {
+        return BlockDataSource.BLOCK_POS_CODEC.parse(JsonOps.INSTANCE, new JsonPrimitive(pos)).getOrThrow();
+    }
+
     // no caching
     public static MutableComponent asVanillaMutable(final Component component) {
         final MutableComponent vanilla = SpongeAdventure.asVanillaMutable0(component);
@@ -311,17 +327,20 @@ public final class SpongeAdventure {
             case KeybindComponent keybind -> net.minecraft.network.chat.Component.keybind(keybind.keybind());
             case ScoreComponent score -> net.minecraft.network.chat.Component.score(score.name(), score.objective());
             case SelectorComponent selector -> net.minecraft.network.chat.Component.selector(
-                SelectorPattern.parse(selector.pattern()).getOrThrow(), SpongeAdventure.asVanillaOpt(selector.separator())
+                SpongeAdventure.parseSelector(selector.pattern()), SpongeAdventure.asVanillaOpt(selector.separator())
             );
-            case BlockNBTComponent block -> net.minecraft.network.chat.Component.nbt(block.nbtPath(), block.interpret(),
+            case BlockNBTComponent block -> net.minecraft.network.chat.Component.nbt(
+                SpongeAdventure.parseNbtPath(block.nbtPath()), block.interpret(), false,
                 SpongeAdventure.asVanillaOpt(block.separator()),
-                new BlockDataSource(block.pos().asString()));
+                new BlockDataSource(SpongeAdventure.parseBlockPos(block.pos().asString())));
             case EntityNBTComponent entity ->
-                net.minecraft.network.chat.Component.nbt(entity.nbtPath(), entity.interpret(),
+                net.minecraft.network.chat.Component.nbt(
+                    SpongeAdventure.parseNbtPath(entity.nbtPath()), entity.interpret(), false,
                     SpongeAdventure.asVanillaOpt(entity.separator()),
-                    new EntityDataSource(entity.selector()));
+                    new EntityDataSource(SpongeAdventure.parseSelector(entity.selector())));
             case StorageNBTComponent storage ->
-                net.minecraft.network.chat.Component.nbt(storage.nbtPath(), storage.interpret(),
+                net.minecraft.network.chat.Component.nbt(
+                    SpongeAdventure.parseNbtPath(storage.nbtPath()), storage.interpret(), false,
                     SpongeAdventure.asVanillaOpt(storage.separator()),
                     new StorageDataSource(SpongeAdventure.asVanilla(storage.storage())));
             case ObjectComponent obj -> net.minecraft.network.chat.Component.object(SpongeAdventure.asVanilla(obj.contents()));
@@ -372,21 +391,21 @@ public final class SpongeAdventure {
             }
             case KeybindContents kc -> Component.keybind().keybind(kc.getName());
             case ScoreContents sc ->
-                Component.score().name(sc.name().mapLeft(SelectorPattern::pattern).orThrow()).objective(sc.objective());
+                Component.score().name(sc.name().mapLeft(CompilableString::source).orThrow()).objective(sc.objective());
             case SelectorContents sc ->
-                Component.selector().pattern(sc.selector().pattern()).separator(SpongeAdventure.asAdventure(sc.separator()));
+                Component.selector().pattern(sc.selector().source()).separator(SpongeAdventure.asAdventure(sc.separator()));
             case NbtContents nbt -> {
-                final NBTComponentBuilder<?, ?> nbtBuilder = switch (nbt.getDataSource()) {
+                final NBTComponentBuilder<?, ?> nbtBuilder = switch (nbt.dataSource()) {
                     case BlockDataSource bds ->
-                        Component.blockNBT().pos(BlockNBTComponent.Pos.fromString(bds.posPattern()));
-                    case EntityDataSource eds -> Component.entityNBT().selector(eds.selectorPattern());
+                        Component.blockNBT().pos(BlockNBTComponent.Pos.fromString(bds.coordinates().source()));
+                    case EntityDataSource eds -> Component.entityNBT().selector(eds.selector().source());
                     case StorageDataSource sds -> Component.storageNBT().storage(SpongeAdventure.asAdventure(sds.id()));
                     default ->
-                        throw new UnsupportedOperationException("Cannot convert NBTContents with DataSource " + nbt.getDataSource().getClass());
+                        throw new UnsupportedOperationException("Cannot convert NBTContents with DataSource " + nbt.dataSource().getClass());
                 };
-                yield nbtBuilder.nbtPath(nbt.getNbtPath())
-                    .interpret(nbt.isInterpreting())
-                    .separator(SpongeAdventure.asAdventure(nbt.getSeparator()));
+                yield nbtBuilder.nbtPath(nbt.nbtPath().source())
+                    .interpret(nbt.interpreting())
+                    .separator(SpongeAdventure.asAdventure(nbt.separator()));
             }
             case ObjectContents obj -> Component.object().contents(SpongeAdventure.asAdventure(obj.contents()));
             default ->
@@ -640,7 +659,7 @@ public final class SpongeAdventure {
         } else if (action == HoverEvent.Action.SHOW_ITEM) {
             final HoverEvent.ShowItem value = (HoverEvent.ShowItem) event.value();
             final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
-            final var item = Holder.direct(itemRegistry.getValue(SpongeAdventure.asVanilla(value.item())));
+            final var item = itemRegistry.wrapAsHolder(itemRegistry.getValue(SpongeAdventure.asVanilla(value.item())));
             return new net.minecraft.network.chat.HoverEvent.ShowItem(new ItemStackTemplate(item, value.count(), SpongeAdventure.asVanilla(value.dataComponents())));
         }
         throw new IllegalArgumentException(event.toString());

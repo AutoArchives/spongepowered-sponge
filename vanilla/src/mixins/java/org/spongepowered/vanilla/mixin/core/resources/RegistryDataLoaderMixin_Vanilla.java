@@ -79,14 +79,34 @@ public class RegistryDataLoaderMixin_Vanilla {
                 } else {
                     registryHolder = (RegistryHolder) k;
                 }
+                // Build a combined registry list: new batch registries replace any existing ones
+                // with the same key (e.g., on re-join, the second load produces fresh registries
+                // for the same keys that were already in the root from the first load).
+                final var batchRegistries = v.stream()
+                    .map(RegistryLoadTaskAccessor.class::cast)
+                    .map(RegistryLoadTaskAccessor::accessor$registry)
+                    .toList();
+                final var batchKeys = batchRegistries.stream()
+                    .map(net.minecraft.core.Registry::key)
+                    .collect(java.util.stream.Collectors.toSet());
                 ((SpongeRegistryHolder) registryHolder).setRootMinecraftRegistry(new RegistryAccess.ImmutableRegistryAccess(
-                    (List) Stream.concat(registryHolder.streamRegistries(RegistryRoots.MINECRAFT), v.stream()
-                        .map(RegistryLoadTaskAccessor.class::cast)
-                        .map(RegistryLoadTaskAccessor::accessor$registry)).toList()));
-                lifecycle.processServerRegistries(registryHolder, v.stream()
-                        .map(RegistryLoadTaskAccessor.class::cast)
-                    .filter(l -> !RegistryDataLoader.DIMENSION_REGISTRIES.contains(l.accessor$data())) // NOTE: DIMENSION_REGISTRIES are special!
-                    .map(l -> (Registry<?>) l.accessor$registry()));
+                    (List) Stream.concat(
+                        registryHolder.streamRegistries(RegistryRoots.MINECRAFT)
+                            .filter(r -> !batchKeys.contains(((net.minecraft.core.Registry<?>) r).key())),
+                        batchRegistries.stream()
+                    ).toList()));
+
+                // Only fire plugin registry events on the server side (ResourceManager-backed loads).
+                // Client-side network loads only receive SYNCHRONIZED_REGISTRIES and lack server-only
+                // registries (placed_feature, configured_feature, etc.) that plugins may declare as
+                // dependencies, causing freeze validation to fail.
+                if (k != ResourceManager.Empty.INSTANCE) {
+                    lifecycle.processServerRegistries(registryHolder, v.stream()
+                            .map(RegistryLoadTaskAccessor.class::cast)
+                        .filter(l -> !RegistryDataLoader.DIMENSION_REGISTRIES.contains(l.accessor$data())) // NOTE: DIMENSION_REGISTRIES are special!
+                        .map(l -> (Registry<?>) l.accessor$registry()));
+                }
+
                 v
                     .stream().map(RegistryLoadTaskAccessor.class::cast)
                     .forEach(l -> dependencies.addEntry(((Registry<?>) l.accessor$registry()).type(),

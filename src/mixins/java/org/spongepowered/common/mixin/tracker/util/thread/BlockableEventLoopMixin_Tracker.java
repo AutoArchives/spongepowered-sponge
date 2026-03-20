@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.launch.Launch;
 
 @Mixin(BlockableEventLoop.class)
 public abstract class BlockableEventLoopMixin_Tracker<R extends Runnable> {
@@ -54,7 +55,8 @@ public abstract class BlockableEventLoopMixin_Tracker<R extends Runnable> {
         }
 
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.getInstance())
-                .source(instance)) {
+                .source(instance)
+                .container(Launch.instance().minecraftPlugin())) {
             context.buildAndSwitch();
              original.call(instance);
         }
