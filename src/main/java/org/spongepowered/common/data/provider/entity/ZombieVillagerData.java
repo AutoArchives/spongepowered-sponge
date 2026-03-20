@@ -46,13 +46,13 @@ public final class ZombieVillagerData {
                         .get(h -> h.getVillagerData().level())
                         .set((h, v) -> h.setVillagerData(h.getVillagerData().withLevel(v)))
                     .create(Keys.PROFESSION_TYPE)
-                        .get(h -> (ProfessionType) (Object) h.getVillagerData().profession())
+                        .get(h -> (ProfessionType) (Object) h.getVillagerData().profession().value())
                         .set((h, v) -> {
                             final var villagerProfession = SpongeCommon.vanillaRegistry(Registries.VILLAGER_PROFESSION).wrapAsHolder((VillagerProfession) (Object) v);
                             h.setVillagerData(h.getVillagerData().withProfession(villagerProfession));
                         })
                     .create(Keys.VILLAGER_TYPE)
-                        .get(h -> (VillagerType) (Object) h.getVillagerData().type())
+                        .get(h -> (VillagerType) (Object) h.getVillagerData().type().value())
                         .set((h, v) -> {
                             final var villagerType = SpongeCommon.vanillaRegistry(Registries.VILLAGER_TYPE).wrapAsHolder((net.minecraft.world.entity.npc.villager.VillagerType) (Object) v);
                             h.setVillagerData(h.getVillagerData().withType(villagerType));
