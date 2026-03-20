@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.gamerules.GameRuleMap;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -41,6 +42,7 @@ import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.bridge.world.level.storage.ServerLevelDataBridge;
 import org.spongepowered.common.util.Constants;
@@ -116,6 +118,7 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
     @Override
     default void setDayTime(final MinecraftDayTime dayTime) {
         this.shadow$setDayTime(dayTime.asTicks().ticks());
+        this.world().ifPresent(w -> ((MinecraftServerAccessor) ((ServerLevel) w).getServer()).invoker$synchronizeTime((ServerLevel) w));
     }
 
     @Override

@@ -66,4 +66,6 @@ public interface MinecraftServerAccessor {
     @Invoker("forceDifficulty") void invoker$forceDifficulty();
 
     @Invoker("waitUntilNextTick") void accessor$waitUntilNextTick();
+
+    @Invoker("synchronizeTime") void invoker$synchronizeTime(ServerLevel level);
 }
