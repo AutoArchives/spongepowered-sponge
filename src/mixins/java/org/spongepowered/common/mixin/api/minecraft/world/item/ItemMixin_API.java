@@ -25,10 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.world.item;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,7 +36,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 
 import java.util.Arrays;
@@ -92,11 +89,9 @@ public abstract class ItemMixin_API implements ItemType, SpongeImmutableDataHold
 
     @Override
     public Optional<ItemType> container() {
-        return this.craftingRemainingItem.item().unwrap()
-            .mapLeft(key ->  SpongeCommon.server().registryAccess().lookupOrThrow(Registries.ITEM).get(key))
-            .mapLeft(ref -> ref.map(Holder::value))
-            .mapRight(Optional::of)
-            .map(l -> l, o -> o)
-            .map(ItemType.class::cast);
+        if (this.craftingRemainingItem == null) {
+            return Optional.empty();
+        }
+        return Optional.of((ItemType) this.craftingRemainingItem.item().value());
     }
 }

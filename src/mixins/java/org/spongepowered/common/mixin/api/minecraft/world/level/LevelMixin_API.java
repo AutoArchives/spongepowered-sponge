@@ -33,7 +33,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -473,7 +473,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public int light(final LightType type, final int x, final int y, final int z) {
-        var thisLevel = ((BlockAndTintGetter) this);
+        var thisLevel = ((BlockAndLightGetter) this);
         return thisLevel.getBrightness((LightLayer) (Object) type, new BlockPos(x, y, z));
     }
 }

@@ -33,6 +33,7 @@ import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.clock.WorldClock;
 import net.minecraft.world.clock.WorldClocks;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -131,7 +132,7 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
                     ambientLighting,
                     new DimensionType.MonsterSettings(monsterSpawnLightTest, monsterSpawnBlockLightLimit),
                     DimensionType.Skybox.OVERWORLD,
-                    DimensionType.CardinalLightType.DEFAULT,
+                    CardinalLighting.Type.DEFAULT,
                     attributes.build(),
                     HolderSet.empty(),
                     clocks.get(WorldClocks.OVERWORLD).map(r -> (Holder<WorldClock>) r)

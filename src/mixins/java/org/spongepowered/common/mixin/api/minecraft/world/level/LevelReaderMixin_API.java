@@ -28,7 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -122,7 +122,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default boolean canSeeSky(final int x, final int y, final int z) {
-        return ((BlockAndTintGetter) this).canSeeSky(new BlockPos(x, y, z));
+        return ((BlockAndLightGetter) this).canSeeSky(new BlockPos(x, y, z));
     }
 
     @Override
