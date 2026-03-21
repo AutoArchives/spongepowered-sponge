@@ -64,7 +64,7 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect<BlockPi
         //      (param2 & 128) == 0 // this is handled above as flag.updateLighting()
         //      && var3 != var2
         //      && (
-        //          var3.getLightBlock(this, param0) != var2.getLightBlock(this, param0)
+        //          var3.getLightDampening() != var2.getLightDampening()
         //          || var3.getLightEmission() != var2.getLightEmission()
         //          || var3.useShapeForLightOcclusion()
         //          || var2.useShapeForLightOcclusion()

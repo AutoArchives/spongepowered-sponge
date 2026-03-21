@@ -117,7 +117,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
         method = "tick()V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;discard()V"),
         slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;updateInWaterStateAndDoFluidPushing()Z"),
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;updateFluidInteraction()Z"),
             to = @At("TAIL")
         )
     )

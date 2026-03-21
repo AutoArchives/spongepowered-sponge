@@ -99,7 +99,7 @@ public final class WorldPipeline implements BlockPipeline {
         if (oldState == null) {
             return false;
         }
-        final int oldOpacity = oldState.getLightBlock();
+        final int oldOpacity = oldState.getLightDampening();
         PipelineCursor formerState = new PipelineCursor(oldState, pos, existing, destroyer, limit);
 
         for (final ResultingTransactionBySideEffect<BlockPipeline, PipelineCursor, BlockChangeArgs, BlockState> effect : this.worldEffects) {

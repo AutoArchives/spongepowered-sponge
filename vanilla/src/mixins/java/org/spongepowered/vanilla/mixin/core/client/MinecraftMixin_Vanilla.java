@@ -40,8 +40,6 @@ import org.spongepowered.vanilla.client.VanillaClient;
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin_Vanilla implements MinecraftBridge, VanillaClient {
 
-    @Shadow public abstract void resizeDisplay();
-
     @Override
     public ClientType bridge$getClientType() {
         return ClientType.SPONGE_VANILLA;

@@ -112,7 +112,7 @@ public final class ChunkPipeline implements BlockPipeline {
             return null;
         }
         final ServerLevel serverWorld = this.serverWorld.get();
-        final int oldOpacity = currentState.getLightBlock();
+        final int oldOpacity = currentState.getLightDampening();
         final SpongeBlockChangeFlag flag = this.transaction.getBlockChangeFlag();
         final @Nullable BlockEntity existing = this.chunkSupplier.get().getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
         PipelineCursor formerState = new PipelineCursor(currentState, pos, existing, (Entity) null, limit);
