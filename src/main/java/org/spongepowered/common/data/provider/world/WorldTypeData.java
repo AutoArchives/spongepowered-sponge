@@ -92,7 +92,7 @@ public final class WorldTypeData {
     // @formatter:on
 
     private static Range<Integer> lightRange(IntProvider provider) {
-        return Range.intRange(provider.getMinValue(), provider.getMaxValue());
+        return Range.intRange(provider.minInclusive(), provider.maxInclusive());
     }
 
     private static WorldTypeEffect worldTypeEffect(final DimensionType type) {

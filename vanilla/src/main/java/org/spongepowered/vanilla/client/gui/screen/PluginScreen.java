@@ -26,7 +26,7 @@ package org.spongepowered.vanilla.client.gui.screen;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -104,10 +104,9 @@ public final class PluginScreen extends Screen {
     }
 
     @Override
-    public void render(final GuiGraphics stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
-        this.renderBackground(stack, p_render_1_, p_render_2_, p_render_3_);
-        super.render(stack, p_render_1_, p_render_2_, p_render_3_); // render the widgets
-        stack.drawCenteredString(this.font, this.title.getString(), this.width / 2, 8, 16777215);
+    public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float partialTicks) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
+        // TODO: drawCenteredString needs GuiGraphicsExtractor rewrite (see .docs/plugin-gui-rewrite-plan.md)
     }
 
     private void generateEntries(final List<PluginMetadata> metadatas) {

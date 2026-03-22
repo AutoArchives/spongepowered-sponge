@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.state;
 
-import com.mojang.serialization.MapCodec;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -42,8 +40,8 @@ import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 @Mixin(BlockState.class)
 public abstract class BlockStateMixin extends BlockBehaviour.BlockStateBase implements BlockStateBridge {
 
-    protected BlockStateMixin(Block $$0, Reference2ObjectArrayMap<Property<?>, Comparable<?>> $$1, MapCodec<BlockState> $$2) {
-        super($$0, $$1, $$2);
+    protected BlockStateMixin(Block owner, Property<?>[] propertyKeys, Comparable<?>[] propertyValues) {
+        super(owner, propertyKeys, propertyValues);
     }
 
     @Override

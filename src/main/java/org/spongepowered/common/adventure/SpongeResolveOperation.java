@@ -31,6 +31,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.ResolutionContext;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,10 +82,13 @@ public abstract class SpongeResolveOperation implements ResolveOperation {
             public Component resolve(final Component input, final CommandCause senderContext, final @Nullable Entity viewer) {
                 try {
                     // TODO: Have a pure-Adventure implementation of this
-                    return SpongeAdventure.asAdventure(ComponentUtils.updateForEntity(
-                        (CommandSourceStack) senderContext,
+                    final var source = (CommandSourceStack) senderContext;
+                    final var context = viewer != null
+                        ? ResolutionContext.createWithEntityOverride(source, (net.minecraft.world.entity.Entity) viewer)
+                        : ResolutionContext.create(source);
+                    return SpongeAdventure.asAdventure(ComponentUtils.resolve(
+                        context,
                         ((ComponentBridge) input).bridge$asVanillaComponent(),
-                        (net.minecraft.world.entity.Entity) viewer,
                         /* depth = */ 0
                     ));
                 } catch (final CommandSyntaxException ex) {

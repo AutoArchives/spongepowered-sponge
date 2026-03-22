@@ -62,14 +62,17 @@ public abstract class AbstractSpongeStateMatcher<S extends State<@NonNull S>, T 
     protected final boolean isValid(final StateHolder<?, ?> stateHolder) {
         for (final Map.Entry<StateProperty<@NonNull ?>, Object> entry : this.properties.entrySet()) {
             final Property<?> property = (Property<?>) entry.getKey();
-            final Object value = stateHolder.getValues().get(property);
-            if (value == null || !value.equals(entry.getValue())) {
+            if (!stateHolder.hasProperty(property)) {
+                return false;
+            }
+            final Object value = stateHolder.getValue((Property) property);
+            if (!value.equals(entry.getValue())) {
                 return false;
             }
         }
         for (final StateProperty<@NonNull ?> entry : this.requiredProperties) {
             final Property<?> property = (Property<?>) entry;
-            if (stateHolder.getValues().get(property) == null) {
+            if (!stateHolder.hasProperty(property)) {
                 return false;
             }
         }

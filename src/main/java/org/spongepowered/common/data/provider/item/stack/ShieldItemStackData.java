@@ -25,7 +25,9 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BlocksAttacks;
@@ -40,6 +42,7 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.tags.TagBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
@@ -152,16 +155,22 @@ public final class ShieldItemStackData {
                             if (blocksAttacks == null || blocksAttacks.bypassedBy().isEmpty()) {
                                 return null;
                             }
-                            return (Tag<DamageType>) (Object) blocksAttacks.bypassedBy().get();
+                            final HolderSet<net.minecraft.world.damagesource.DamageType> holderSet = blocksAttacks.bypassedBy().get();
+                            if (holderSet instanceof HolderSet.Named<net.minecraft.world.damagesource.DamageType> named) {
+                                return (Tag<DamageType>) (Object) named.key();
+                            }
+                            return null;
                         })
                         .set((h, v) -> {
                             final @Nullable BlocksAttacks blocksAttacks = h.getOrDefault(DataComponents.BLOCKS_ATTACKS, BLOCKS_ATTACKS_DEFAULTS);
+                            final var tagKey = ((TagBridge<net.minecraft.world.damagesource.DamageType>) v).bridge$asVanillaTag();
+                            final var holderSet = SpongeCommon.vanillaRegistry(Registries.DAMAGE_TYPE).getOrThrow(tagKey);
                             h.set(DataComponents.BLOCKS_ATTACKS, new BlocksAttacks(
                                 blocksAttacks.blockDelaySeconds(),
                                 blocksAttacks.disableCooldownScale(),
                                 blocksAttacks.damageReductions(),
                                 blocksAttacks.itemDamage(),
-                                Optional.of(((TagBridge<net.minecraft.world.damagesource.DamageType>) v).bridge$asVanillaTag()),
+                                Optional.of(holderSet),
                                 blocksAttacks.blockSound(),
                                 blocksAttacks.disableSound()
                             ));

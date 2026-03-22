@@ -25,12 +25,11 @@
 package org.spongepowered.vanilla.client.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -214,57 +213,33 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
     }
 
     @Override
-    protected void drawPanel(final GuiGraphics stack, final int entryRight, int relativeY, final Tesselator tess, final int mouseX,
+    protected void drawPanel(final GuiGraphicsExtractor graphics, final int entryRight, int relativeY, final int mouseX,
             final int mouseY) {
-        final int baseX = this.left + 4;
-
-        final Font font = this.minecraft.font;
+        // TODO: Rewrite rendering for GuiGraphicsExtractor pipeline
+        // The old GuiGraphics.drawString() API no longer exists on GuiGraphicsExtractor.
+        // This needs a full rewrite to use the new deferred rendering model.
         if (this.resizedCategories.isEmpty()) {
-            final int noResultsWidth = font.width(MetadataPanel.NO_RESULTS);
-
-            stack.drawString(font,
-                    MetadataPanel.NO_RESULTS,
-                    (int) (((float) this.width / 2) + this.left - ((float) noResultsWidth / 2)),
-                    this.top + 10,
-                    0xFFFFFF
-            );
             return;
         }
 
-        // Iterate and draw categories
+        final int baseX = this.left + 4;
+        final Font font = this.minecraft.font;
         for (final Category category : this.resizedCategories) {
-            // Skip empty categories
             if (category.getEntries().size() == 0) {
                 continue;
             }
-
-            // Draw category name
-            stack.drawString(font, category.name, baseX, relativeY, 0xFFFFFF);
             relativeY += this.lineHeight;
 
-            // Iterate and draw entries
             for (final Entry entry : category.getEntries()) {
                 if (entry.value == null) {
                     continue;
                 }
 
-                final int levelOffset = entry.level * MetadataPanel.INDENT_SIZE;
-                final int keyX = baseX + MetadataPanel.INDENT_SIZE + levelOffset;
-                final int separatorX = keyX + this.maxKeyWidth + 4 - levelOffset;
-                final int valueX = separatorX + font.width(":") + 4;
-
-                // Only draw key and separator if there is any key present
-                if (entry.key != null) {
-                    stack.drawString(font, entry.key, keyX, relativeY, 0xFFFFFF);
-
-                    if (entry.rawValue != null && !entry.rawValue.isEmpty()) {
-                        stack.drawString(font, ":", separatorX, relativeY, 0xFFFFFF);
-                    }
-                }
-
-                // Draw the value, and update the value bounds if needed
-                stack.drawString(font, entry.value, valueX, relativeY, 0xFFFFFF);
                 if (entry.value.getStyle().getClickEvent() != null) {
+                    final int levelOffset = entry.level * MetadataPanel.INDENT_SIZE;
+                    final int keyX = baseX + MetadataPanel.INDENT_SIZE + levelOffset;
+                    final int separatorX = keyX + this.maxKeyWidth + 4 - levelOffset;
+                    final int valueX = separatorX + font.width(":") + 4;
                     entry.valueBounds =
                         new Bounds(valueX, relativeY + 1, valueX + font.width(entry.value),
                             relativeY + this.lineHeight);

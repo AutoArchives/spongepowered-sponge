@@ -27,15 +27,15 @@ package org.spongepowered.common.util;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
 
-import java.util.Map;
-
 @SuppressWarnings(value = {"unchecked", "rawtypes"})
 public final class StateUtil {
 
     public static <O, S extends StateHolder<O, S>> S copyStatesFrom(S original, final StateHolder<?,?> from) {
-        for (final Map.Entry<Property<?>, Comparable<?>> entry : from.getValues().entrySet()) {
-            if (original.hasProperty(entry.getKey())) {
-                original = (S) original.setValue((Property) entry.getKey(), (Comparable) entry.getValue());
+        final var values = from.getValues().iterator();
+        while (values.hasNext()) {
+            final Property.Value<?> entry = values.next();
+            if (original.hasProperty(entry.property())) {
+                original = (S) original.setValue((Property) entry.property(), (Comparable) entry.value());
             }
         }
         return original;

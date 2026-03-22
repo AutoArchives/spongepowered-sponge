@@ -24,10 +24,9 @@
  */
 package org.spongepowered.vanilla.client.gui.widget.list;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -161,45 +160,8 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
         }
     }
 
-    @Override
-    protected void renderListItems(final GuiGraphics $$0, final int $$1, final int $$2, final float $$3) {
-        // Most of this is based on AbstractList::renderList logic
-        final List<E> filteredList = this.filterSupplier == null ? this.children() : this.filterSupplier.get();
-
-        if (filteredList.isEmpty()) {
-            final Font font = this.minecraft.font;
-            final String noResults = "No results...";
-            final int noResultsWidth = font.width(noResults);
-
-            $$0.drawString(font, noResults, (this.width / 2) + this.getX() - (noResultsWidth / 2), this.getY() + 10, ChatFormatting.GRAY.getColor());
-
-            return;
-        }
-
-        final int $$4 = this.getRowLeft();
-        final int $$5 = this.getRowWidth();
-//        final int $$6 = this.itemHeight - 4;
-        final int $$7 = filteredList.size();
-
-//        for (int $$8 = 0; $$8 < $$7; ++$$8) {
-//            final int $$9 = this.getRowTop($$8);
-//            final int $$10 = this.getRowBottom($$8);
-//            if ($$10 >= this.getY() && $$9 <= this.getBottom()) {
-//                this.renderItemFromList(filteredList, $$0, $$1, $$2, $$3, $$8, $$4, $$9, $$5, $$6);
-//            }
-//        }
-    }
-
-    private void renderItemFromList(final List<E> list, final GuiGraphics $$0, final int $$1, final int $$2, final float $$3, final int $$4, final int $$5, final int $$6, final int $$7, final int $$8) {
-        final E $$9 = list.get($$4);
-//        $$9.render($$0, $$4, $$6, $$5, $$7, $$8, $$1, $$2, Objects.equals(this.getHovered(), $$9), $$3);
-//        if (this.($$4)) {
-//            final int $$10 = this.isFocused() ? -1 : -8355712;
-//            this.renderSelection($$0, $$6, $$7, $$8, $$10, -16777216);
-//        }
-
-//        $$9.render($$0, $$4, $$6, $$5, $$7, $$8, $$1, $$2, Objects.equals(this.getHovered(), $$9), $$3);
-    }
+    // TODO: renderListItems was removed in pre-1 — rendering now handled by extractContent on entries
+    // See .docs/plugin-gui-rewrite-plan.md
 
     @Override
     protected void updateWidgetNarration(final NarrationElementOutput narrationConsumer) {
@@ -234,16 +196,9 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
 
         public abstract Bounds getInteractBounds();
 
-//        @SuppressWarnings("unchecked")
-//        @Override
-//        public void render(final GuiGraphics stack, final int p_render_1_, final int renderY, final int renderX, final int p_render_4_,
-//                final int p_render_5_, final int mouseX, final int mouseY, final boolean p_render_8_,
-//            final float p_render_9_) {
-//            if (this.getInteractBounds().isInBounds(mouseX, mouseY, renderX, renderY)) {
-//                this.parentList.currentHoveredEntry = (E) this;
-//            } else if (this.parentList.getCurrentHoveredEntry() == this) {
-//                this.parentList.currentHoveredEntry = null;
-//            }
-//        }
+        @Override
+        public void extractContent(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final boolean hovered, final float partialTicks) {
+            // TODO: Implement rendering via GuiGraphicsExtractor (see .docs/plugin-gui-rewrite-plan.md)
+        }
     }
 }

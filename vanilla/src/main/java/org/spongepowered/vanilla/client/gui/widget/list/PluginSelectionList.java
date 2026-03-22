@@ -24,7 +24,7 @@
  */
 package org.spongepowered.vanilla.client.gui.widget.list;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
@@ -55,21 +55,10 @@ public final class PluginSelectionList extends FilterableList<PluginSelectionLis
         }
 
         @Override
-        public void renderContent(GuiGraphics var1, int var2, int var3, boolean var4, float var5) {
-
+        public void extractContent(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final boolean hovered, final float partialTicks) {
+            // TODO: Implement rendering via GuiGraphicsExtractor (see .docs/plugin-gui-rewrite-plan.md)
+            // Should draw: plugin name (or ID), and ID below if name is present
         }
-
-        //        @Override
-//        public void render(final GuiGraphics stack, final int p_render_1_, final int renderY, final int renderX, final int p_render_4_,
-//                final int p_render_5_, final int mouseX, final int mouseY, final boolean p_render_8_, final float p_render_9_) {
-//            // Draw the name, or ID if name is not present
-//            stack.drawString(this.list.fontRenderer, this.metadata.name().orElse(this.metadata.id()), renderX + 2, renderY + 1, 16777215);
-//
-//            // Draw the ID if the name is present
-//            if (this.metadata.name().isPresent()) {
-//                stack.drawString(this.list.fontRenderer, this.metadata.id(), renderX + 2, renderY + 12, 8421504);
-//            }
-//        }
 
         @Override
         public boolean mouseClicked(final MouseButtonEvent event, final boolean repeated) {

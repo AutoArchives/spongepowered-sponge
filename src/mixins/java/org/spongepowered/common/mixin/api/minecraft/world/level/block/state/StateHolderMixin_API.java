@@ -45,9 +45,9 @@ import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.PortionTypeUtil;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Mixin(StateHolder.class)
 public abstract class StateHolderMixin_API<S extends State<S>, C> implements State<S>, SpongeImmutableDataHolder<S> {
@@ -57,7 +57,7 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     @Shadow public abstract <T extends Comparable<T>> T shadow$getValue(Property<T> property);
     @Shadow public abstract <T extends Comparable<T>, V extends T> C shadow$setValue(Property<T> property, V value);
     @Shadow public abstract <T extends Comparable<T>> C shadow$cycle(Property<T> property);
-    @Shadow public abstract Map<Property<?>, Comparable<?>> shadow$getValues();
+    @Shadow public abstract Stream<Property.Value<?>> shadow$getValues();
     // @formatter:on
 
     @SuppressWarnings("unchecked")
@@ -79,7 +79,7 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
 
     private <ApiT extends Comparable<ApiT>, T extends Comparable<T>, V extends T> V api$mapFromApi(final StateProperty<ApiT> stateProperty, final ApiT value) {
         if (value instanceof final Axis axis) {
-            return (V) AxisUtil.getFor(axis);
+            return (V) (Object) AxisUtil.getFor(axis);
         }
         if (value instanceof final org.spongepowered.api.util.Direction dir) {
             final V mappedValue = (V) DirectionUtil.getFor(dir);
@@ -152,16 +152,16 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
 
     @Override
     public Collection<StateProperty<?>> stateProperties() {
-        return (Collection) this.shadow$getValues().keySet();
+        return (Collection) this.shadow$getValues().map(Property.Value::property).collect(Collectors.toList());
     }
 
     @Override
     public Collection<?> statePropertyValues() {
-        return this.shadow$getValues().values().stream().map(this::api$mapToApi).toList();
+        return this.shadow$getValues().map(v -> this.api$mapToApi(v.value())).toList();
     }
 
     @Override
-    public Map<StateProperty<?>, ?> statePropertyMap() {
-        return (Map) this.shadow$getValues().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> this.api$mapToApi(e.getValue())));
+    public java.util.Map<StateProperty<?>, ?> statePropertyMap() {
+        return (java.util.Map) this.shadow$getValues().collect(Collectors.toMap(v -> v.property(), v -> this.api$mapToApi(v.value())));
     }
 }

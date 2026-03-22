@@ -298,12 +298,16 @@ public final class ItemStackData {
                             if (resist == null) {
                                 return false;
                             }
-                            return resist.types().location().equals(DamageTypes.IN_FIRE.identifier());
+                            if (resist.types() instanceof net.minecraft.core.HolderSet.Named<net.minecraft.world.damagesource.DamageType> named) {
+                                return named.key().location().equals(DamageTypes.IN_FIRE.identifier());
+                            }
+                            return false;
                         })
                         .set((h, value) -> {
                             if (value) {
+                                final var holderSet = SpongeCommon.vanillaRegistry(net.minecraft.core.registries.Registries.DAMAGE_TYPE).getOrThrow(DamageTypeTags.IS_FIRE);
                                 h.applyComponents(DataComponentPatch.builder()
-                                    .set(DataComponents.DAMAGE_RESISTANT, new DamageResistant(DamageTypeTags.IS_FIRE))
+                                    .set(DataComponents.DAMAGE_RESISTANT, new DamageResistant(holderSet))
                                     .build());
                             } else {
                                 h.remove(DataComponents.DAMAGE_RESISTANT);
