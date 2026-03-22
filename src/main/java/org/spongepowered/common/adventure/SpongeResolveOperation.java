@@ -83,9 +83,11 @@ public abstract class SpongeResolveOperation implements ResolveOperation {
                 try {
                     // TODO: Have a pure-Adventure implementation of this
                     final var source = (CommandSourceStack) senderContext;
-                    final var context = viewer != null
-                        ? ResolutionContext.createWithEntityOverride(source, (net.minecraft.world.entity.Entity) viewer)
-                        : ResolutionContext.create(source);
+                    final var builder = ResolutionContext.builder().withSource(source);
+                    if (viewer != null) {
+                        builder.withEntityOverride((net.minecraft.world.entity.Entity) viewer);
+                    }
+                    final var context = builder.build();
                     return SpongeAdventure.asAdventure(ComponentUtils.resolve(
                         context,
                         ((ComponentBridge) input).bridge$asVanillaComponent(),
