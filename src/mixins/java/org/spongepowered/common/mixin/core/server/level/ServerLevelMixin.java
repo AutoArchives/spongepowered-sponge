@@ -35,7 +35,6 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -44,7 +43,6 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Util;
@@ -676,16 +674,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             .add("key=" + this.shadow$dimension())
             .add("worldType=" + worldTypeKey.map(ResourceKey::toString).orElse("inline"))
             .toString();
-    }
-
-    @Redirect(
-        method = "advanceWeatherCycle",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"),
-        require = 0 // already done in Neo
-    )
-    private void impl$broadcastAllCurrentDimensionOnly(final PlayerList instance, final Packet<?> packet) {
-        // Weather is per world in Sponge.
-        instance.broadcastAll(packet, this.shadow$dimension());
     }
 
     @Inject(method = "close", at = @At("HEAD"))

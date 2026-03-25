@@ -30,7 +30,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.permissions.PermissionSet;
@@ -45,14 +44,22 @@ import java.util.List;
 @Mixin(ReloadableServerResources.class)
 public abstract class ReloadableServerResourcesMixin_Neo {
 
-    @WrapOperation(method = "lambda$loadResources$3", at = @At(value = "NEW",
-        target = "(Lnet/minecraft/core/LayeredRegistryAccess;Lnet/minecraft/core/HolderLookup$Provider;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;Ljava/util/List;Lnet/minecraft/server/permissions/PermissionSet;)Lnet/minecraft/server/ReloadableServerResources;"))
+    @WrapOperation(method = "lambda$loadResources$2", at = @At(value = "NEW",
+        target = "(Lnet/minecraft/core/LayeredRegistryAccess;Lnet/minecraft/core/HolderLookup$Provider;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;Ljava/util/List;Lnet/minecraft/server/permissions/PermissionSet;Ljava/util/List;)Lnet/minecraft/server/ReloadableServerResources;"))
     private static ReloadableServerResources impl$onCreateResources(
-        final LayeredRegistryAccess<RegistryLayer> $$0, final HolderLookup.Provider $$1, final FeatureFlagSet $$2,
-        final Commands.CommandSelection $$3, final List<?> $$4, final PermissionSet $$5,
-        final Operation<ReloadableServerResources> original, final @Local(argsOnly = true) ResourceManager resourceManager) {
-        final ReloadableServerResources instance = original.call($$0, $$1, $$2, $$3, $$4, $$5);
-        if (instance.getCommands().getDispatcher() instanceof final DelegatingCommandDispatcher delegatingCommandDispatcher) {
+        final LayeredRegistryAccess fullLayers,
+        final HolderLookup.Provider loadingContext,
+        final FeatureFlagSet enabledFeatures,
+        final Commands.CommandSelection commandSelection,
+        final List postponedTags,
+        final PermissionSet functionCompilationPermissions,
+        final List newComponents,
+        final Operation<ReloadableServerResources> original,
+        final @Local(argsOnly = true) ResourceManager resourceManager
+    ) {
+        final ReloadableServerResources instance = original.call(fullLayers, loadingContext, enabledFeatures, commandSelection, postponedTags, functionCompilationPermissions, newComponents);
+        if (instance.getCommands().getDispatcher() instanceof
+            final DelegatingCommandDispatcher delegatingCommandDispatcher) {
             delegatingCommandDispatcher.permissionService(((ResourceManagerBridge) resourceManager).bridge$services().permissionService());
         }
         return instance;
