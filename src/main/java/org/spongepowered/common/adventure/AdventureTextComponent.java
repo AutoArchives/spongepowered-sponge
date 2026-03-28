@@ -28,14 +28,11 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.renderer.ComponentRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
@@ -92,15 +89,27 @@ public class AdventureTextComponent implements net.minecraft.network.chat.Compon
         return converted;
     }
 
-    @OnlyIn(Dist.CLIENT)
     net.minecraft.network.chat.Component deepConvertedLocalized() {
+        // Client-only: resolve locale from Minecraft settings.
+        // On the server, fall back to non-localized conversion.
+        final Locale target = AdventureTextComponent.clientLocale();
+        if (target == null) {
+            return this.deepConverted();
+        }
         net.minecraft.network.chat.Component converted = this.converted;
-        final Locale target = LocaleCache.getLocale(Minecraft.getInstance().options.languageCode);
         if (converted == null || this.deepConvertedLocalized != target) {
             converted = this.converted = this.rendered(target, null).deepConverted();
             this.deepConvertedLocalized = target;
         }
         return converted;
+    }
+
+    private static @Nullable Locale clientLocale() {
+        try {
+            return LocaleCache.getLocale(net.minecraft.client.Minecraft.getInstance().options.languageCode);
+        } catch (final NoClassDefFoundError | NullPointerException e) {
+            return null;
+        }
     }
 
     public net.minecraft.network.chat.@Nullable Component deepConvertedIfPresent() {
@@ -146,13 +155,11 @@ public class AdventureTextComponent implements net.minecraft.network.chat.Compon
         return this.deepConverted().copy();
     }
 
-    @OnlyIn(Dist.CLIENT)
     @Override
     public FormattedCharSequence getVisualOrderText() {
         return this.deepConvertedLocalized().getVisualOrderText();
     }
 
-    @OnlyIn(Dist.CLIENT)
     @Override
     public <T> Optional<T> visit(final StyledContentConsumer<T> visitor, final Style style) {
         return this.deepConvertedLocalized().visit(visitor, style);

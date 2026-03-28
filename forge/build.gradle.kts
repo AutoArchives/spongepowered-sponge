@@ -62,6 +62,8 @@ val gameShadedLibrariesConfig = configurations.register("gameShadedLibraries")
 
 val productionExcludedLibrariesConfig = configurations.register("productionExcludedLibraries")
 
+val testModulesConfig = configurations.register("testModules")
+
 // ModLauncher layers
 val bootLayerConfig = configurations.register("bootLayer") {
     extendsFrom(bootLibrariesConfig.get())
@@ -174,6 +176,10 @@ val testSources = sourceSets.named("test") {
 
     spongeImpl.addDependencyToImplementation(bootstrapMain.get(), this)
     spongeImpl.addDependencyToImplementation(bootstrapForge.get(), this)
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(testModulesConfig.get())
+    }
 }
 
 configurations.configureEach {
@@ -233,7 +239,8 @@ dependencies {
     testImplementation(apiLibs.junit.launcher)
     testRuntimeOnly(apiLibs.junit.engine)
 
-    testImplementation(apiLibs.mockito)
+    val test = testModulesConfig.name
+    test(apiLibs.mockito)
 
     testRuntimeOnly(libs.jacoco.core) {
         exclude(group = "org.ow2.asm")
@@ -438,8 +445,13 @@ tasks {
 
         val runServer = minecraft.runs.getByName("server")
         jvmArgs(runServer.jvmArgs.get())
-        jvmArgs("-Dsponge.test.args=" + runServer.args.get().joinToString(" "))
-        jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
+        jvmArgs("--module-path=" + testModulesConfig.get().asPath)
+        jvmArgs("--add-modules=net.bytebuddy.agent,net.bytebuddy")
+        jvmArgs("-Dsponge.test.args=--launchTarget forge_userdev_server " + runServer.args.get().joinToString(" "))
+        // Don't set sponge.jacoco.packages — the JaCoCo agent is disabled
+        // and Sponge's JacocoTransformer would inject Offline references
+        // that can't be resolved without the agent runtime.
+        // jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
         jvmArgs("-Djunit.platform.launcher.interceptors.enabled=true")
         jvmArgs("-Djunit.jupiter.extensions.autodetection.enabled=true")
         workingDir = layout.buildDirectory.dir("test-run").get().asFile

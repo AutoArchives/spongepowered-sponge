@@ -35,8 +35,6 @@ import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.locale.Language;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.spongepowered.common.accessor.client.KeyMappingAccessor;
 import org.spongepowered.common.launch.Launch;
 
@@ -105,7 +103,7 @@ final class ComponentFlattenerProvider {
         INSTANCE = builder.build();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    // Client-only: guarded by !Launch.instance().dedicatedServer() in the static initializer
     private static String resolveKeybind(final KeybindComponent component) {
         final KeyMapping mapping = KeyMappingAccessor.accessor$ALL().get(component.keybind());
         if (mapping != null) {
