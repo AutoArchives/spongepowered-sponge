@@ -587,16 +587,13 @@ public final class SpongeCommonEventFactory {
             if (movingObjectType == HitResult.Type.BLOCK) {
                 final BlockHitResult blockMovingObjectPosition = (BlockHitResult) movingObjectPosition;
                 final BlockPos blockPos = blockMovingObjectPosition.getBlockPos();
-                if (blockPos.getY() < projectile.level().getMinY()) {
-                    return false;
-                }
-
                 final BlockSnapshot targetBlock = ((ServerWorld) projectile.level()).createSnapshot(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                final ServerLocation targetLocation = ServerLocation.of((ServerWorld) projectile.level(), VecHelper.toVector3d(blockMovingObjectPosition.getBlockPos()));
                 final Direction side = DirectionFacingProvider.INSTANCE.getKey(blockMovingObjectPosition.getDirection()).get();
 
                 final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.currentCause(),
                         impactPoint, targetBlock.state(),
-                        targetBlock.location().get(), side);
+                        targetLocation, side);
                 cancelled = SpongeCommon.post(event);
                 // Track impact block if event is not cancelled
                 if (!cancelled && creator.isPresent()) {
