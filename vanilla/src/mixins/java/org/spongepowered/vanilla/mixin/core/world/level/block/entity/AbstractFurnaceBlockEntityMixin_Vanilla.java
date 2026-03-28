@@ -74,7 +74,7 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
     @Shadow private int cookingTimer;
     // @formatter:on
 
-    private static RecipeContext switched;
+    private static final ThreadLocal<RecipeContext> switched = new ThreadLocal<>();
     private boolean vanilla$filledWaterBucket;
 
     // Tick up and Start
@@ -111,7 +111,7 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
             .furnace(entityIn)
             .provideItem(items.get(1))
             .buildAndSwitch();
-        switched = context;
+        switched.set(context);
         if (entity.cookingTimer == 0) { // Start
             final CookingEvent.Start event = SpongeEventFactory.createCookingEventStart(cause, (FurnaceBlockEntity) entityIn, Optional.of(fuel),
                 Optional.of((CookingRecipe) cookingRecipe), Optional.of((ResourceKey) (Object) identifier));
@@ -132,11 +132,11 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
         final BlockPos pos, final BlockState state,
         final AbstractFurnaceBlockEntity entity,
         final CallbackInfo ci) {
-        if (switched != null && PhaseTracker.getInstance().getPhaseContext() != switched) {
+        if (switched.get() != null && PhaseTracker.getInstance().getPhaseContext() != switched.get()) {
             SpongeCommon.logger().warn("Closed a recipe context that wasn't open!");
         }
-        final var closing = switched;
-        switched = null;
+        final var closing = switched.get();
+        switched.remove();
         if (closing != null) {
             closing.close();
         }
@@ -150,16 +150,16 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
         final AbstractFurnaceBlockEntity entityIn) {
         final int clampedCookTime = Mth.clamp(newCookTime, zero, totalCookTime);
         final var entity = (AbstractFurnaceBlockEntityMixin_Vanilla) (Object) entityIn;
-        if (PhaseTracker.getInstance().getPhaseContext() != switched) {
+        if (PhaseTracker.getInstance().getPhaseContext() != switched.get()) {
             // we're in an invariant state
             return clampedCookTime;
         }
-        final var fuel = switched.usedItem();
+        final var fuel = switched.get().usedItem();
         final Cause cause = PhaseTracker.getInstance().currentCause();
-        final var recipe = switched.recipe();
+        final var recipe = switched.get().recipe();
         final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(entity.items.get(0));
         final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entityIn, cooking, Optional.of(fuel),
-           Optional.of((CookingRecipe) recipe), Optional.of((ResourceKey) (Object) switched.recipeID()));
+           Optional.of((CookingRecipe) recipe), Optional.of((ResourceKey) (Object) switched.get().recipeID()));
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             return entity.cookingTimer; // dont tick down
@@ -189,14 +189,14 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
     ) {
         final ItemStack itemIn = items.get(0);
         final ItemStack itemOut = items.get(2);
-        if (PhaseTracker.getInstance().getPhaseContext() != switched) {
+        if (PhaseTracker.getInstance().getPhaseContext() != switched.get()) {
             return;
         }
 
         final Cause cause = PhaseTracker.getInstance().currentCause();
-        final FurnaceBlockEntity entity = (FurnaceBlockEntity) switched.furnace();
-        final var recipe = switched.recipe();
-        final var recipeID = switched.recipeID();
+        final FurnaceBlockEntity entity = (FurnaceBlockEntity) switched.get().furnace();
+        final var recipe = switched.get().recipe();
+        final var recipeID = switched.get().recipeID();
         final List<SlotTransaction> transactions = new ArrayList<>();
         itemIn.grow(1);
         final ItemStackSnapshot originalSmeltItem = ItemStackUtil.snapshotOf(itemIn);
