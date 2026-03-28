@@ -1,8 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import net.minecraftforge.gradle.common.util.RunConfig
-import org.gradle.internal.DefaultTaskExecutionRequest
 import org.spongepowered.gradle.impl.AWToAT
-import org.spongepowered.gradle.impl.IdeHelper
 
 buildscript {
     repositories {
@@ -37,20 +34,23 @@ val projectUrl: String by project
 description = "The SpongeAPI implementation for MinecraftForge"
 version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion, forgeVersion)
 
+val fg = the<net.minecraftforge.gradle.ForgeGradleExtension>()
+
 repositories {
-    maven("https://libraries.minecraft.net/") {
-        name = "Mojang"
-    }
+    minecraft.mavenizer(this)
+    maven(fg.forgeMaven)
+    maven(fg.minecraftLibsMaven)
     maven("https://repo.spongepowered.org/repository/maven-public/") {
         name = "sponge"
     }
 }
 
+// Dedicated configuration for the Forge/Minecraft dependency (replaces old configurations.minecraft from FG 6.x)
+val minecraftLibsConfig = configurations.register("minecraftLibs")
+
 // SpongeForge libraries
 val bootLibrariesConfig = configurations.register("bootLibraries") {
-    // Ideally we would filter minecraft itself and only keep its dependencies for this layer,
-    // but I couldn't find a way to do it without breaking ForgeGradle.
-    extendsFrom(configurations.minecraft.get())
+    extendsFrom(minecraftLibsConfig.get())
 }
 val serviceLibrariesConfig = configurations.register("serviceLibraries")
 val gameLibrariesConfig = configurations.register("gameLibraries")
@@ -187,8 +187,11 @@ configurations.testRuntimeOnly {
     exclude(module = "testplugins")
 }
 
+val forgeDep = minecraft.dependency("net.minecraftforge:forge:$minecraftVersion-$forgeVersion")
+
 dependencies {
-    "minecraft"("net.minecraftforge:forge:$minecraftVersion-$forgeVersion")
+    implementation(forgeDep)
+    minecraftLibsConfig.name(forgeDep)
 
     val service = serviceLibrariesConfig.name
     service(apiLibs.pluginSpi)
@@ -246,22 +249,24 @@ val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
 minecraft {
     mappings("official", minecraftVersion)
     accessTransformers.from(atFile)
-    reobf = false
 
     runs {
         configureEach {
-            ideaModule("Sponge.SpongeForge.main")
-
-            // jvmArgs("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
-            main("org.spongepowered.bootstrap.forge.ForgeBootstrap")
+//             jvmArgs("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
+            jvmArgs("-Dmixin.debug=true", "-Dmixin.debug.export=true", "-Dmixin.dumpTargetOnFailure=true")
+            mainClass.set("org.spongepowered.bootstrap.forge.ForgeBootstrap")
 
             args(mixinConfigs.flatMap { sequenceOf("--mixin.config", it) })
             environment("MOD_CLASSES", "nop")
         }
 
-        create("client")
+        register("client") {
+            if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+                jvmArgs("-XstartOnFirstThread")
+            }
+        }
 
-        create("server") {
+        register("server") {
             args("--nogui")
         }
     }
@@ -272,10 +277,12 @@ afterEvaluate {
         // Configure bootstrap dev
         val bootFileNames = spongeImpl.buildRuntimeFileNames(serviceLayerConfig.get()) // service in boot during dev
         val gameShadedFileNames = spongeImpl.buildRuntimeFileNames(gameShadedLibrariesConfig.get())
-        runs.configureEach {
-            jvmArgs("-Dsponge.dev.root=" + project.rootDir)
-            jvmArgs("-Dsponge.dev.boot=$bootFileNames")
-            jvmArgs("-Dsponge.dev.gameShaded=$gameShadedFileNames")
+        runs {
+            configureEach {
+                jvmArgs("-Dsponge.dev.root=" + project.rootDir)
+                jvmArgs("-Dsponge.dev.boot=$bootFileNames")
+                jvmArgs("-Dsponge.dev.gameShaded=$gameShadedFileNames")
+            }
         }
     }
 }
@@ -319,7 +326,7 @@ sourceSets {
 
 tasks {
     withType(JavaExec::class) {
-        if (group == RunConfig.RUNS_GROUP) {
+        if (group == "Slime Launcher") {
             standardInput = System.`in`
         }
     }
@@ -430,8 +437,8 @@ tasks {
         testClassesDirs = commonTest.get().output.classesDirs + testSources.get().output.classesDirs
 
         val runServer = minecraft.runs.getByName("server")
-        jvmArgs(runServer.jvmArgs)
-        jvmArgs("-Dsponge.test.args=" + runServer.args.joinToString(" "))
+        jvmArgs(runServer.jvmArgs.get())
+        jvmArgs("-Dsponge.test.args=" + runServer.args.get().joinToString(" "))
         jvmArgs("-Dsponge.jacoco.packages=org.spongepowered")
         jvmArgs("-Djunit.platform.launcher.interceptors.enabled=true")
         jvmArgs("-Djunit.jupiter.extensions.autodetection.enabled=true")
@@ -458,11 +465,7 @@ tasks {
     }
 }
 
-if (IdeHelper.isIdeaSync()) {
-    afterEvaluate {
-        gradle.startParameter.taskRequests.add(DefaultTaskExecutionRequest(listOf(":SpongeForge:genIntellijRuns")))
-    }
-}
+
 
 publishing {
     publications {

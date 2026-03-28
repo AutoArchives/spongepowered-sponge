@@ -64,7 +64,7 @@ public final class SpongeForgeMod {
         // modBus: add all FML events with it
         FMLCommonSetupEvent.getBus(group).addListener(this::onCommonSetup);
         FMLClientSetupEvent.getBus(group).addListener(this::onClientSetup);
-        EntityAttributeCreationEvent.getBus(group).addListener(this::onEntityAttributeCreationEvent);
+        EntityAttributeCreationEvent.BUS.addListener(this::onEntityAttributeCreationEvent);
 
         // annotation events, for non-FML things
         MinecraftForge.EVENT_BUS.register(this);

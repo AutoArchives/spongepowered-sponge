@@ -68,7 +68,7 @@ public class ForgeAccessWidenerTransformer extends AccessWidenerTransformer impl
     @Override
     protected Collection<URL> collectResources() {
         final Collection<URL> resources = new ArrayList<>();
-        for (ModFileInfo fileInfo : LoadingModList.get().getModFiles()) {
+        for (ModFileInfo fileInfo : LoadingModList.getModFiles()) {
             final SecureJar jar = fileInfo.getFile().getSecureJar();
             final Attributes attributes = jar.moduleDataProvider().getManifest().getMainAttributes();
 

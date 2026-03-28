@@ -10,6 +10,8 @@ dist
 lib
 out
 run
+## ForgeGradle 7 moves the run configurations to runs instead of run.
+runs
 run_snap
 /target
 *.com

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
+import com.llamalad7.mixinextras.expression.Expression;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -45,6 +47,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.event.cause.entity.damage.DamageStepTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -134,9 +137,12 @@ public abstract class LivingEntityMixin_Damage extends EntityMixin implements Li
         this.damage$inventoryChanged = true;
     }
 
-    @ModifyVariable(method = "hurtServer", at = @At("STORE"), slice = @Slice(
+    // The expression is "vague" due to a Forge bug in 26.1 that it strips the LVT entirely
+    // leaving us with little options to target the local variable assignment
+    @Expression("? > 0.0")
+    @ModifyExpressionValue(method = "hurtServer", at = @At("MIXINEXTRAS:EXPRESSION"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F"),
-        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/DamageTypeTags;IS_FREEZING:Lnet/minecraft/tags/TagKey;"))
+        to = @At(value = "FIELD", target = "Lnet/minecraft/tags/DamageTypeTags;IS_FREEZING:Lnet/minecraft/tags/TagKey;", opcode = Opcodes.GETSTATIC))
     )
     private boolean damage$setBlockedFlag(final boolean blocked) {
         final SpongeDamageTracker tracker = this.damage$tracker();

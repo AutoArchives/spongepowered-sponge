@@ -652,7 +652,7 @@ public class SpongeWorldManager implements WorldManager {
             //After vanilla has detected a new dimension from a data pack it "promotes" it
             //to the overworld's level data where the level persist even when the data pack is removed.
             //This forcible removes it from there too.
-            final Registry<LevelStem> levelStemRegistry = SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM);
+            final Registry<LevelStem> levelStemRegistry = SpongeCommon.server().registryAccess().lookupOrThrow(Registries.LEVEL_STEM);
             final net.minecraft.resources.ResourceKey<LevelStem> levelStemKey = Registries.levelToLevelStem(registryKey);
             if (levelStemRegistry.containsKey(levelStemKey)) {
                 ((MappedRegistryBridge<LevelStem>) levelStemRegistry).bridge$forceRemoveValue(Registries.levelToLevelStem(registryKey));
@@ -721,7 +721,10 @@ public class SpongeWorldManager implements WorldManager {
         // Migration from old SpongeData format is handled by FileFixerUpperMixin
         // which runs BEFORE any ServerLevel is created, preserving UUIDs in
         // per-dimension data/sponge/registry.dat files.
-        final Registry<LevelStem> registry = SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM);
+        // LEVEL_STEM is a dimension registry, loaded separately from worldgen registries.
+        // It's in the server's composite registryAccess() but NOT in Sponge's scoped holder
+        // (which explicitly excludes DIMENSION_REGISTRIES during RegistryDataLoader processing).
+        final Registry<LevelStem> registry = PlatformHooks.INSTANCE.getWorldHooks().earlyRegistryAccess(Registries.LEVEL_STEM);
         for (final LevelStem levelStem : registry) {
             final ResourceKey worldKey = (ResourceKey) (Object) registry.getKey(levelStem);
             if (DefaultWorldKeys.DEFAULT.equals(worldKey)) {

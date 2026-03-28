@@ -191,7 +191,14 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void establishServerFeatures() {
-        Sponge.server().serviceProvider().contextService().registerContextCalculator(new SpongeContextCalculator());
+        // In 26.1, the service provider may not yet be available during ServerAboutToStartEvent
+        // on the integrated server path (NeoForge/Forge). The service provider is set in
+        // MinecraftServer.<init> TAIL from the WorldStem's resource manager, but on integrated
+        // servers the event can fire before the services propagate. Guard against this.
+        final var serviceProvider = Sponge.server().serviceProvider();
+        if (serviceProvider != null) {
+            serviceProvider.contextService().registerContextCalculator(new SpongeContextCalculator());
+        }
         // Yes this looks odd but prevents having to do sided lifecycle solely to always point at the Server
         ((SpongeServer) this.game.server()).getUsernameCache().load();
     }

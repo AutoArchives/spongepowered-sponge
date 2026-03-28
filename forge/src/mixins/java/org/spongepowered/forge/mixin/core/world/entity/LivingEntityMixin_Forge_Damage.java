@@ -25,9 +25,7 @@
 package org.spongepowered.forge.mixin.core.world.entity;
 
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -37,10 +35,6 @@ import org.spongepowered.common.bridge.world.entity.TrackedDamageBridge;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_Forge_Damage implements TrackedDamageBridge {
-
-    //@formatter:off
-    @Shadow public abstract ItemStack shadow$getUseItem();
-    //@formatter:on
 
     @ModifyConstant(method = "actuallyHurt", constant = @Constant(floatValue = 0), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;onLivingHurt(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;F)F"),

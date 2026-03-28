@@ -24,13 +24,18 @@
  */
 package org.spongepowered.forge.hook;
 
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraftforge.event.level.LevelEvent;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.hooks.WorldHooks;
 
 public class ForgeWorldHooks implements WorldHooks {
@@ -66,5 +71,10 @@ public class ForgeWorldHooks implements WorldHooks {
     public void preUnloadWorld(final ServerLevel world) {
         LevelEvent.Unload.BUS.post(new LevelEvent.Unload(world));
         world.getServer().markWorldsDirty();
+    }
+
+    @Override
+    public Registry<LevelStem> earlyRegistryAccess(ResourceKey<Registry<LevelStem>> levelStem) {
+        return SpongeCommon.server().registryAccess().lookupOrThrow(Registries.LEVEL_STEM);
     }
 }

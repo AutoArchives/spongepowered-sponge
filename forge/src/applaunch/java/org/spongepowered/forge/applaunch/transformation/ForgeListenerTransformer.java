@@ -62,7 +62,7 @@ public class ForgeListenerTransformer extends ListenerTransformer implements ITr
         final Type listenerType = Type.getType(ListenerTransformer.ANNOTATION_DESC);
 
         final Set<Type> listenerClasses = new HashSet<>();
-        for (ModFileInfo fileInfo : LoadingModList.get().getModFiles()) {
+        for (ModFileInfo fileInfo : LoadingModList.getModFiles()) {
             for (ModFileScanData.AnnotationData annotation : fileInfo.getFile().getScanResult().getAnnotations()) {
                 if (listenerType.equals(annotation.annotationType())) {
                     listenerClasses.add(annotation.clazz());

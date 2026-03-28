@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.hooks;
 
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.LevelStem;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public interface WorldHooks {
@@ -42,4 +46,8 @@ public interface WorldHooks {
     default void postLoadWorld(ServerLevel world) { }
 
     default void preUnloadWorld(ServerLevel world) { }
+
+    default Registry<LevelStem> earlyRegistryAccess(ResourceKey<Registry<LevelStem>> levelStem) {
+        return SpongeCommon.vanillaRegistry(levelStem);
+    }
 }

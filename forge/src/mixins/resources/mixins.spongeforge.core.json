@@ -5,6 +5,7 @@
   "priority": 1301,
   "mixins": [
     "commands.CommandsMixin_Forge",
+    "minecraftforge.ForgeHooksMixin_Forge",
     "minecraftforge.MinecraftForgeMixin_Forge",
     "minecraftforge.internal.BrandingControlMixin_Forge",
     "minecraftforge.registries.ForgeRegistryMixin_Forge",

@@ -118,6 +118,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -507,12 +508,13 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         return original.call(instance);
     }
 
+    // We need to stick with the local capture and coercion in 26.1 due to Forge stripping the LVT
     @Inject(method = "advanceWeatherCycle",
         locals = LocalCapture.CAPTURE_FAILEXCEPTION,
         at = @At(value = "FIELD", target = "Lnet/minecraft/server/level/ServerLevel;oRainLevel:F", shift = At.Shift.BEFORE, ordinal = 1))
-    public void impl$onSetWeatherParameters(final CallbackInfo ci, final boolean $$0) {
+    public void impl$onSetWeatherParameters(final CallbackInfo ci, final @Coerce boolean wasRaining) {
         final boolean isRaining = this.shadow$isRaining();
-        if (this.oRainLevel != this.rainLevel || this.oThunderLevel != this.thunderLevel || $$0 != isRaining) {
+        if (this.oRainLevel != this.rainLevel || this.oThunderLevel != this.thunderLevel || wasRaining != isRaining) {
             Weather newWeather = ((ServerWorld) this).properties().weather();
             final Cause currentCause = PhaseTracker.getInstance().currentCause();
             final Transaction<Weather> weatherTransaction = new Transaction<>(this.impl$prevWeather, newWeather);

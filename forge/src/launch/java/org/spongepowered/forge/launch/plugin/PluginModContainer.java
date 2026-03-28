@@ -82,11 +82,11 @@ public final class PluginModContainer extends ModContainer {
             final ForgePluginContainer pluginContainer = ForgePluginContainer.of(this);
             pluginContainer.metadata().dependencies().stream()
                 .filter(d -> d.loadOrder() == PluginDependency.LoadOrder.AFTER)
-                .flatMap(d -> ModList.get().getModContainerById(d.id()).stream())
+                .flatMap(d -> ModList.getModContainerById(d.id()).stream())
                 .filter(m -> m instanceof PluginModContainer)
                 .forEach(m -> ((PluginModContainer) m).waitForInitialization());
 
-            ModList.get().forEachModInOrder(m -> {
+            ModList.forEachModInOrder(m -> {
                 if (m instanceof PluginModContainer p && ForgePluginContainer.of(m).metadata().dependencies().stream()
                     .anyMatch(d -> d.id().equals(this.getModId()) && d.loadOrder() == PluginDependency.LoadOrder.BEFORE)) {
                     p.waitForInitialization();

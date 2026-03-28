@@ -40,23 +40,23 @@ public final class ForgePluginManager implements SpongePluginManager {
 
     @Override
     public Optional<PluginContainer> fromInstance(final Object instance) {
-        return ModList.get().getModContainerByObject(Objects.requireNonNull(instance, "instance")).map(ForgePluginContainer::of);
+        return ModList.getModContainerByObject(Objects.requireNonNull(instance, "instance")).map(ForgePluginContainer::of);
     }
 
     @Override
     public Optional<PluginContainer> plugin(final String id) {
-        return ModList.get().getModContainerById(Objects.requireNonNull(id, "id")).map(ForgePluginContainer::of);
+        return ModList.getModContainerById(Objects.requireNonNull(id, "id")).map(ForgePluginContainer::of);
     }
 
     @Override
     public Collection<PluginContainer> plugins() {
         final ImmutableList.Builder<PluginContainer> builder = ImmutableList.builder();
-        ModList.get().forEachModInOrder(mod -> builder.add(ForgePluginContainer.of(mod)));
+        ModList.forEachModInOrder(mod -> builder.add(ForgePluginContainer.of(mod)));
         return builder.build();
     }
 
     @Override
     public boolean isReady() {
-        return ModList.get() != null;
+        return ModList.size() > 0;
     }
 }
