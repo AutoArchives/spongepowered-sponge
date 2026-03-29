@@ -35,7 +35,6 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
