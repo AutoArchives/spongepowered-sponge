@@ -31,6 +31,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.commands.AdvancementCommands;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -58,7 +59,7 @@ public abstract class CommandsMixin implements CommandsBridge {
             return new CommandDispatcher<>();
         }
         final SpongeCommandManager manager = Launch.instance().lifecycle().platformInjector().getInstance(SpongeCommandManager.class);
-        manager.init(SpongeCommon.game());
+        manager.init((RegistryHolder) context);
         this.impl$commandManager = manager;
         return new DelegatingCommandDispatcher(manager.getBrigadierRegistrar());
     }
