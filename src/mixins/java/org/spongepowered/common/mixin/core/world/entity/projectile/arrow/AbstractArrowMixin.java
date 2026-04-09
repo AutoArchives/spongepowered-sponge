@@ -57,7 +57,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin implements Abst
     @Shadow @Nullable private BlockState lastState;
 
     @Shadow public abstract void shadow$setCritArrow(boolean critical);
-    @Shadow public abstract void shadow$setPierceLevel(byte level);
+    @Shadow protected abstract void shadow$setPierceLevel(byte level);
     @Shadow protected abstract ItemStack shadow$getPickupItem();
     @Shadow protected abstract void resetPiercedEntities();
     @Shadow protected abstract void shadow$setInGround(boolean $$0);

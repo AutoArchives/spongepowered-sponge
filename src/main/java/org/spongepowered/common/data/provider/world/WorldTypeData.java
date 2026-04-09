@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.data.provider.world;
 
+import net.minecraft.core.HolderSet;
 import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.attribute.BedRule;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -67,7 +69,9 @@ public final class WorldTypeData {
                     .create(Keys.RESPAWN_ANCHOR_USABLE)
                         .get(d -> d.attributes().applyModifier(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, false))
                     .create(Keys.INFINIBURN)
-                        .get(dimensionType -> (Tag<BlockType>) (Object) dimensionType.infiniburn())
+                        .get(dimensionType -> dimensionType.infiniburn() instanceof HolderSet.Named<Block> named
+                            ? (Tag<BlockType>) (Object) named.key()
+                            : null)
                     .create(Keys.WORLD_FLOOR)
                         .get(DimensionType::minY)
                     .create(Keys.HAS_RAIDS)

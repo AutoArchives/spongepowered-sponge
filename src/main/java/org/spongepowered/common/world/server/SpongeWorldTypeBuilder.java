@@ -113,6 +113,10 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
         final SpongeDimensionTypes.SpongeDataSection spongeData = new SpongeDimensionTypes.SpongeDataSection(createDragonFight);
         try {
             final var clocks = SpongeCommon.vanillaRegistry(Registries.WORLD_CLOCK);
+            final var blocks = SpongeCommon.vanillaRegistry(Registries.BLOCK);
+            final HolderSet<Block> infiniburnSet = infiniburn == null
+                ? HolderSet.empty()
+                : blocks.get(((TagBridge<Block>) infiniburn).bridge$asVanillaTag()).map(h -> (HolderSet<Block>) h).orElse(HolderSet.empty());
             final var attributes = EnvironmentAttributeMap.builder();
             attributes.set(EnvironmentAttributes.PIGLINS_ZOMBIFY, !piglinSafe);
             attributes.set(EnvironmentAttributes.BED_RULE, bedsUsable ? BedRule.CAN_SLEEP_WHEN_DARK : BedRule.EXPLODES);
@@ -128,7 +132,7 @@ public final class SpongeWorldTypeBuilder implements WorldType.Builder {
                     floor,
                     height,
                     logicalHeight,
-                    ((TagBridge<Block>) infiniburn).bridge$asVanillaTag(),
+                    infiniburnSet,
                     ambientLighting,
                     new DimensionType.MonsterSettings(monsterSpawnLightTest, monsterSpawnBlockLightLimit),
                     DimensionType.Skybox.OVERWORLD,

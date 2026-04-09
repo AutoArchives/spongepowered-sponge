@@ -57,7 +57,7 @@ public abstract class TitleScreenMixin_Vanilla extends Screen {
 
         // Plugins Button
         this.addRenderableWidget(Button.builder(Component.literal("Plugins"),
-                        b -> this.minecraft.setScreen(new PluginScreen(this)))
+                        b -> this.minecraft.setScreenAndShow(new PluginScreen(this)))
                 .pos(this.width / 2 - 100, realmsButton.map(b -> b.getY()).orElse(0))
                 .size(98, 20)
                 .build());

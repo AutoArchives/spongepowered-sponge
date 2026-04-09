@@ -55,7 +55,7 @@ import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPools;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorList;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorLists;
-import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorTypes;
+import org.spongepowered.api.world.generation.structure.jigsaw.Processors;
 import org.spongepowered.api.world.server.ServerLocation;
 
 import java.io.IOException;
@@ -248,8 +248,12 @@ public class StructureTest {
 
 
         ctx.sendMessage(Identity.nil(), Component.text("Processor Types:", NamedTextColor.DARK_AQUA));
-        ProcessorTypes.registry().streamEntries().filter(e -> invert == e.key().toString().toUpperCase().contains(filter))
-                .forEach(e -> ctx.sendMessage(Identity.nil(), Component.text(" - " + e.key(), NamedTextColor.GRAY)));
+        java.util.stream.Stream.of(
+                Processors.BLACKSTONE_REPLACE, Processors.BLOCK_AGE, Processors.BLOCK_IGNORE, Processors.BLOCK_ROT,
+                Processors.CAPPED, Processors.GRAVITY, Processors.JIGSAW_REPLACEMENT, Processors.LAVA_SUBMERGED_BLOCK,
+                Processors.NOP, Processors.PROTECTED_BLOCKS, Processors.RULE)
+                .filter(k -> invert == k.toString().toUpperCase().contains(filter))
+                .forEach(k -> ctx.sendMessage(Identity.nil(), Component.text(" - " + k, NamedTextColor.GRAY)));
 
         return CommandResult.success();
     }

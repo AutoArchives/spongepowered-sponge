@@ -143,14 +143,6 @@ public class LevelDataRegistries {
                 $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
-                "world.generation.structure.jigsaw",
-                "ProcessorTypes",
-                "PROCESSOR_TYPE",
-                context.relativeClass("world.generation.structure.jigsaw", "ProcessorType"),
-                Registries.STRUCTURE_PROCESSOR,
-                $ -> true, RegistryScope.GAME
-            ),
-            new RegistryEntriesGenerator<>(
                 "world.generation.feature",
                 "PlacedFeatures",
                 "PLACED_FEATURE",

@@ -49,7 +49,7 @@ import net.minecraft.world.level.block.state.properties.ComparatorMode;
 import net.minecraft.world.level.block.state.properties.CreakingHeartState;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.block.state.properties.DripstoneThickness;
+import net.minecraft.world.level.block.state.properties.SpeleothemThickness;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -146,7 +146,7 @@ public class BlockStatePropertyKeysGenerator implements Generator {
         vanillaEnumTypeMapping.put(DoorHingeSide.class, BlockStatePropertyKeysGenerator.inDataTypePkg("DoorHinge"));
         vanillaEnumTypeMapping.put(NoteBlockInstrument.class, BlockStatePropertyKeysGenerator.inDataTypePkg("InstrumentType"));
         vanillaEnumTypeMapping.put(StairsShape.class, BlockStatePropertyKeysGenerator.inDataTypePkg("StairShape"));
-        vanillaEnumTypeMapping.put(DripstoneThickness.class, BlockStatePropertyKeysGenerator.inDataTypePkg("DripstoneSegment"));
+        vanillaEnumTypeMapping.put(SpeleothemThickness.class, BlockStatePropertyKeysGenerator.inDataTypePkg("DripstoneSegment"));
         vanillaEnumTypeMapping.put(FrontAndTop.class, BlockStatePropertyKeysGenerator.inDataTypePkg("JigsawBlockOrientation"));
         vanillaEnumTypeMapping.put(ComparatorMode.class, BlockStatePropertyKeysGenerator.inDataTypePkg("ComparatorMode"));
         vanillaEnumTypeMapping.put(TrialSpawnerState.class, BlockStatePropertyKeysGenerator.inDataTypePkg("TrialSpawnerState"));

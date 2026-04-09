@@ -101,6 +101,7 @@ import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement;
+import org.spongepowered.api.world.generation.structure.jigsaw.Processor;
 import org.spongepowered.api.world.portal.PortalLogic;
 import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -174,6 +175,7 @@ import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
 import org.spongepowered.common.world.generation.config.flat.SpongeLayerConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeSurfaceRulesFactory;
 import org.spongepowered.common.world.generation.structure.jigsaw.SpongeJigsawFactory;
+import org.spongepowered.common.world.generation.structure.jigsaw.SpongeProcessorFactory;
 import org.spongepowered.common.world.portal.SpongePortalLogicFactory;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.server.SpongeServerLocation;
@@ -287,6 +289,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(DefaultWorldKeys.Factory.class, new SpongeDefaultWorldKeysFactory())
                 .registerFactory(PositionSource.Factory.class, new SpongePositionSourceFactory())
                 .registerFactory(JigsawPoolElement.Factory.class, new SpongeJigsawFactory())
+                .registerFactory(Processor.Factory.class, new SpongeProcessorFactory())
                 .registerFactory(ParticleConfig.Factory.class, new SpongeParticleConfigFactory())
                 .registerFactory(SoundConfig.Factory.class, new SpongeSoundConfigFactory())
                 .registerFactory(NaturalSpawnCost.Factory.class, new SpongeNaturalSpawnerCostFactory())

@@ -100,7 +100,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         this.impl$temporaryIntegratedServer = server;
     }
 
-    @Inject(method = "destroy", at = @At("HEAD"))
+    @Inject(method = "exitWorldAndClose()V", at = @At("HEAD"))
     private void impl$callStoppingEngineEvent(CallbackInfo ci) {
         Launch.instance().lifecycle().callStoppingEngineEvent(this);
     }
@@ -112,8 +112,8 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         this.singleplayerServer = null;
     }
 
-    @Inject(method = "disconnect", at = @At("TAIL"))
-    private void impl$nullServerRefAndPhaseTracker(Screen screenIn, boolean keepResourcePacks, CallbackInfo ci) {
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At("TAIL"))
+    private void impl$nullServerRefAndPhaseTracker(Screen screenIn, boolean keepResourcePacks, boolean stopSound, CallbackInfo ci) {
         ((MinecraftBridge) this).bridge$setTemporaryIntegratedServer(null);
         try {
             PhaseTracker.getServerInstanceExplicitly().setThread(null);

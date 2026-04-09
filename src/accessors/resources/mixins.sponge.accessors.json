@@ -109,7 +109,6 @@
     "world.entity.monster.PatrollingMonsterAccessor",
     "world.entity.monster.PhantomAccessor",
     "world.entity.monster.RavagerAccessor",
-    "world.entity.monster.SlimeAccessor",
     "world.entity.monster.VexAccessor",
     "world.entity.monster.illager.EvokerAccessor",
     "world.entity.monster.illager.PillagerAccessor",

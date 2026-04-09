@@ -47,7 +47,7 @@ import org.spongepowered.common.util.PrettyPrinter;
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin_Tracker {
 
-    @Shadow @Final ServerLevel level;
+    @Shadow @Final private ServerLevel level;
 
     @Redirect(method = "addEntity(Lnet/minecraft/world/entity/Entity;)V",
         at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))

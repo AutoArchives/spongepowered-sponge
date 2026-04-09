@@ -33,9 +33,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ProblemReporter;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -58,6 +58,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
@@ -120,7 +121,7 @@ public final class VolumeStreamUtils {
         return (org.spongepowered.api.registry.Registry) registry;
     }
 
-    public static Predicate<org.spongepowered.api.util.Tuple<Vector3d, EntityArchetype>> entityArchetypePositionFilter(final Vector3i min, final Vector3i max) {
+    public static Predicate<Tuple<Vector3d, EntityArchetype>> entityArchetypePositionFilter(final Vector3i min, final Vector3i max) {
         return VolumeStreamUtils.filterPositions(tuple -> tuple.first().toInt(), min, max);
     }
 
@@ -253,7 +254,7 @@ public final class VolumeStreamUtils {
                 cloned,
                 () -> String.format(
                     "EntityType[%s] creates a null Entity!",
-                    net.minecraft.world.entity.EntityType.getKey(entity.getType())
+                    EntityType.getKey(entity.getType())
                 )
             ).load(input);
             backingVolume.spawnEntity((org.spongepowered.api.entity.Entity) cloned);
@@ -623,8 +624,8 @@ public final class VolumeStreamUtils {
         // without consideration, assuming the MC variant is always mixed in to implement the API variant.
         // Then constructs the VolumeElement
         final Function<Tuple<BlockPos, MC>, VolumeElement<R, API>> elementGenerator = (tuple) -> {
-            final Supplier<API> blockEntitySupplier = VolumeStreamUtils.createWeaklyReferencedSupplier((API) tuple.getB(), "Element");
-            final Vector3d blockEntityPos = VecHelper.toVector3d(tuple.getA());
+            final Supplier<API> blockEntitySupplier = VolumeStreamUtils.createWeaklyReferencedSupplier((API) tuple.second(), "Element");
+            final Vector3d blockEntityPos = VecHelper.toVector3d(tuple.first());
             return VolumeElement.of(worldSupplier, blockEntitySupplier, blockEntityPos);
         };
         // Fairly trivial, but just acts as a filter and provides the set of filtered references back to the `poses`
@@ -668,7 +669,7 @@ public final class VolumeStreamUtils {
         final Stream<VolumeElement<R, API>> volumeStreamBacker = filteredPosStream
             .map(pos -> filteredPositionEntityAccessor.apply(pos, worldSupplier.get()))
             .filter(Objects::nonNull)
-            .filter(tuple -> Objects.nonNull(tuple.getB()))
+            .filter(tuple -> Objects.nonNull(tuple.first()))
             .map(elementGenerator);
         return new SpongeVolumeStream<>(volumeStreamBacker, worldSupplier);
     }

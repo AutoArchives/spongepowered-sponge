@@ -25,7 +25,7 @@
 package org.spongepowered.common.world.level.chunk.storage;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
+
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -33,6 +33,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.chunk.EntityChunk;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;

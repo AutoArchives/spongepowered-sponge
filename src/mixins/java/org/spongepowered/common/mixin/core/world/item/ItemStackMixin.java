@@ -122,7 +122,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
         }
     }
 
-    @Inject(method = "set", at = @At("RETURN"))
+    @Inject(method = "set(Lnet/minecraft/core/component/DataComponentType;Ljava/lang/Object;)Ljava/lang/Object;", at = @At("RETURN"))
     private <T> void impl$onSetCustomData(final DataComponentType<? super T> type, final T value, final CallbackInfoReturnable<T> cir) {
         if (type.equals(DataComponents.CUSTOM_DATA)) {
             this.bridge$clear();

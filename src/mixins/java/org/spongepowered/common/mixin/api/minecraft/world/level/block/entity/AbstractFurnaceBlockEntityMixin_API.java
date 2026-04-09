@@ -42,10 +42,10 @@ import java.util.Set;
 public abstract class AbstractFurnaceBlockEntityMixin_API extends BaseContainerBlockEntityMixin_API implements FurnaceBlockEntity {
 
     // @formatter:off
-    @Shadow int litTimeRemaining;
-    @Shadow int litTotalTime;
-    @Shadow int cookingTimer;
-    @Shadow int cookingTotalTime;
+    @Shadow private int litTimeRemaining;
+    @Shadow private int litTotalTime;
+    @Shadow private int cookingTimer;
+    @Shadow private int cookingTotalTime;
     @Shadow protected NonNullList<ItemStack> items;
     // @formatter:on
 

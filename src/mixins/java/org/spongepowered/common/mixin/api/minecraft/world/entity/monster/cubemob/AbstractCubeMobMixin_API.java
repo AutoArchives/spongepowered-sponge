@@ -22,13 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.monster.cubemob;
 
-import net.minecraft.world.entity.animal.FlyingAnimal;
-import org.spongepowered.api.entity.Aerial;
+import net.minecraft.world.entity.monster.cubemob.AbstractCubeMob;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.AgeableMobMixin_API;
 
-@Mixin(FlyingAnimal.class)
-public interface FlyingAnimalMixin_API extends Aerial {
+import java.util.Set;
 
+@Mixin(AbstractCubeMob.class)
+public abstract class AbstractCubeMobMixin_API extends AgeableMobMixin_API {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.SCALE).asImmutable());
+        values.add(this.requireValue(Keys.SIZE).asImmutable());
+
+        return values;
+    }
 }

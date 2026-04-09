@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.CreakingHeartState;
-import net.minecraft.world.level.block.state.properties.DripstoneThickness;
+import net.minecraft.world.level.block.state.properties.SpeleothemThickness;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import net.minecraft.world.level.block.state.properties.SideChainPart;
@@ -69,7 +69,7 @@ public class BlockRegistries {
             new EnumEntriesValidator<>(
                 "data.type",
                 "DripstoneSegments",
-                DripstoneThickness.class,
+                SpeleothemThickness.class,
                 "getSerializedName",
                 "sponge"
             ),

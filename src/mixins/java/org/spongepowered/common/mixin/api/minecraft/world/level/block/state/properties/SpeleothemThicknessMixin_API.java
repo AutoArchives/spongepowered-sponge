@@ -22,12 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block.state.properties;
 
-import net.minecraft.world.entity.animal.FlyingAnimal;
-import org.spongepowered.api.entity.Aerial;
+import net.minecraft.world.level.block.state.properties.SpeleothemThickness;
+import org.spongepowered.api.data.type.DripstoneSegment;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(FlyingAnimal.class)
-public interface FlyingAnimalMixin_API extends Aerial {
+@Mixin(SpeleothemThickness.class)
+public abstract class SpeleothemThicknessMixin_API implements DripstoneSegment {
+
 }

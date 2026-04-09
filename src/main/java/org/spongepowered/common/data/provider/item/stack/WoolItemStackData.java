@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.data.loot.packs.LootData;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
@@ -43,7 +42,7 @@ public final class WoolItemStackData {
                 .asImmutable(ItemStack.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_WOOL.get(((BlockItem) h.getItem()).getBlock()))
-                        .supports(h -> h.getItem() instanceof BlockItem && LootData.WOOL_ITEM_BY_DYE.containsValue(((BlockItem) h.getItem()).getBlock()));
+                        .supports(h -> h.getItem() instanceof BlockItem && DyeColorUtil.COLOR_BY_WOOL.containsKey(((BlockItem) h.getItem()).getBlock()));
     }
     // @formatter:on
 }

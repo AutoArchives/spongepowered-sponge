@@ -75,7 +75,7 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DOWN, BlockStateProperties.DOWN);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DRAG, BlockStateProperties.DRAG);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DRIED_GHAST_HYDRATION_LEVELS, BlockStateProperties.DRIED_GHAST_HYDRATION_LEVELS);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DRIPSTONE_THICKNESS, BlockStateProperties.DRIPSTONE_THICKNESS);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DRIPSTONE_THICKNESS, BlockStateProperties.SPELEOTHEM_THICKNESS);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DUSTED, BlockStateProperties.DUSTED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.EAST, BlockStateProperties.EAST);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.EAST_REDSTONE, BlockStateProperties.EAST_REDSTONE);

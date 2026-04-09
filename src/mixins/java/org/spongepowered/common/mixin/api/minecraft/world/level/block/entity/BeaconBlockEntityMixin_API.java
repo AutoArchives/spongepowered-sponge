@@ -41,9 +41,9 @@ import java.util.Set;
 public abstract class BeaconBlockEntityMixin_API extends BlockEntityMixin_API implements Beacon {
 
     // @formatter:off
-    @Shadow int levels;
-    @Shadow @Nullable Holder<MobEffect> primaryPower;
-    @Shadow @Nullable Holder<MobEffect> secondaryPower;
+    @Shadow private int levels;
+    @Shadow private @Nullable Holder<MobEffect> primaryPower;
+    @Shadow private @Nullable Holder<MobEffect> secondaryPower;
     // @formatter:on
 
     @Override

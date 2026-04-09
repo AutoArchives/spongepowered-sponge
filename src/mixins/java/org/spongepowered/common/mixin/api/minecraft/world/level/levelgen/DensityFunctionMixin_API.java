@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
@@ -65,6 +66,6 @@ public interface DensityFunctionMixin_API extends org.spongepowered.api.world.ge
 
     @Override
     default Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
-        return DataPackUtil.toDataContainer(registryHolder, DensityFunction.DIRECT_CODEC, (DensityFunction) this);
+        return DataPackUtil.toDataContainer(registryHolder, DensityFunctions.DIRECT_CODEC, (DensityFunction) this);
     }
 }

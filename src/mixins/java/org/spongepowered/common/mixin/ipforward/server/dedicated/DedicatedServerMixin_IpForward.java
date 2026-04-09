@@ -42,7 +42,7 @@ public class DedicatedServerMixin_IpForward {
 
     @Shadow
     @Final
-    static Logger LOGGER;
+    private static Logger LOGGER;
 
     @Inject(method = "initServer", at = @At(value = "INVOKE_STRING", remap = false, target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;)V",
         args = "ldc=**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!"))

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.data.loot.packs.LootData;
 import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
@@ -42,7 +41,7 @@ public final class WoolData {
                 .asImmutable(Block.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_WOOL.get(h))
-                        .supports(LootData.WOOL_ITEM_BY_DYE::containsValue);
+                        .supports(DyeColorUtil.COLOR_BY_WOOL::containsKey);
     }
     // @formatter:on
 }

@@ -26,13 +26,14 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.struct
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.resources.RegistryOps;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.world.generation.structure.jigsaw.Processor;
-import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
@@ -40,25 +41,35 @@ import org.spongepowered.common.SpongeCommon;
 import java.io.IOException;
 
 @Mixin(StructureProcessor.class)
-public abstract class StructureProcessorMixin_API implements Processor {
+public interface StructureProcessorMixin_API extends Processor {
 
     // @formatter:off
-    @Shadow protected abstract <P extends StructureProcessor> StructureProcessorType<P> shadow$getType();
+    @Shadow MapCodec<? extends StructureProcessor> codec();
     // @formatter:on
 
     @Override
-    public ProcessorType type() {
-        return (ProcessorType) this.shadow$getType();
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    default ResourceKey type() {
+        final Identifier api$location = SpongeCommon.server().registryAccess()
+            .lookupOrThrow(Registries.STRUCTURE_PROCESSOR)
+            .getKey((MapCodec) this.codec());
+        if (api$location == null) {
+            throw new IllegalStateException("Processor codec is not registered: " + this.codec());
+        }
+        return (ResourceKey) (Object) api$location;
     }
 
     @Override
-    public DataContainer toContainer() {
-        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
-        final JsonElement serialized = this.shadow$getType().codec().codec().encodeStart(ops, (StructureProcessor) (Object) this).getOrThrow();
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    default DataContainer toContainer() {
+        final MapCodec api$codec = this.codec();
+        final JsonElement api$serialized = (JsonElement) api$codec.codec()
+            .encodeStart(SpongeCommon.server().registryAccess().createSerializationContext(JsonOps.INSTANCE), this)
+            .getOrThrow();
         try {
-            return DataFormats.JSON.get().read(serialized.toString());
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not read deserialized Processor:\n" + serialized, e);
+            return DataFormats.JSON.get().read(api$serialized.toString());
+        } catch (final IOException e) {
+            throw new IllegalStateException("Could not read deserialized Processor:\n" + api$serialized, e);
         }
     }
 }

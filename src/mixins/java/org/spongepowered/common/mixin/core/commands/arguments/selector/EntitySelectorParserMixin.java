@@ -105,7 +105,7 @@ public abstract class EntitySelectorParserMixin implements EntitySelectorParserB
         return this.reader;
     }
 
-    @Inject(method = "allowSelectors", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "allowSelectors(Ljava/lang/Object;)Z", at = @At("HEAD"), cancellable = true)
     private static <S> void impl$onAllowSelectors(final S $$0, final CallbackInfoReturnable<Boolean> cir) {
         if ($$0 instanceof final CommandCause cause && cause.hasPermission(Constants.Permissions.SELECTOR_PERMISSION)) {
             cir.setReturnValue(true);
