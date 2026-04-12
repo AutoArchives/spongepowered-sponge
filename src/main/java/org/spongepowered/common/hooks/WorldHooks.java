@@ -48,6 +48,9 @@ public interface WorldHooks {
     default void preUnloadWorld(ServerLevel world) { }
 
     default Registry<LevelStem> earlyRegistryAccess(ResourceKey<Registry<LevelStem>> levelStem) {
-        return SpongeCommon.vanillaRegistry(levelStem);
+        // LEVEL_STEM lives in the server's composite registryAccess() but not in Sponge's scoped
+        // holder (which excludes DIMENSION_REGISTRIES during RegistryDataLoader processing), so we
+        // must bypass SpongeCommon.vanillaRegistry() and hit server().registryAccess() directly.
+        return SpongeCommon.server().registryAccess().lookupOrThrow(levelStem);
     }
 }
