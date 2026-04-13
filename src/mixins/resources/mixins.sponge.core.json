@@ -231,6 +231,7 @@
     "world.level.block.BaseFireBlockMixin",
     "world.level.block.CactusBlockMixin",
     "world.level.block.CampfireBlockMixin",
+    "world.level.block.ColorCollectionMixin",
     "world.level.block.CarvedPumpkinBlockMixin",
     "world.level.block.CommandBlockMixin",
     "world.level.block.EndPortalBlockMixin",
