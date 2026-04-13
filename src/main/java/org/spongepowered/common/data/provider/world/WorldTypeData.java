@@ -26,9 +26,9 @@ package org.spongepowered.common.data.provider.world;
 
 import net.minecraft.core.HolderSet;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.attribute.BedRule;
 import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockType;

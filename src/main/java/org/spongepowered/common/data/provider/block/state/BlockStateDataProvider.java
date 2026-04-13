@@ -75,7 +75,6 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DOWN, BlockStateProperties.DOWN);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DRAG, BlockStateProperties.DRAG);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DRIED_GHAST_HYDRATION_LEVELS, BlockStateProperties.DRIED_GHAST_HYDRATION_LEVELS);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DRIPSTONE_THICKNESS, BlockStateProperties.SPELEOTHEM_THICKNESS);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DUSTED, BlockStateProperties.DUSTED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.EAST, BlockStateProperties.EAST);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.EAST_REDSTONE, BlockStateProperties.EAST_REDSTONE);
@@ -147,6 +146,7 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SOUTH, BlockStateProperties.SOUTH);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SOUTH_REDSTONE, BlockStateProperties.SOUTH_REDSTONE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SOUTH_WALL, BlockStateProperties.SOUTH_WALL);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.SPELEOTHEM_THICKNESS, BlockStateProperties.SPELEOTHEM_THICKNESS);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.STABILITY_DISTANCE, BlockStateProperties.STABILITY_DISTANCE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.STAGE, BlockStateProperties.STAGE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.STAIRS_SHAPE, BlockStateProperties.STAIRS_SHAPE);

@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.level.chunk.storage;
 
 import net.minecraft.server.level.ServerLevel;
-
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
