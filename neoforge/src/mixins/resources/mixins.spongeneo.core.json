@@ -37,6 +37,7 @@
     "world.entity.projectile.FishingHookMixin_Neo",
     "world.entity.vehicle.boat.AbstractBoatMixin_Neo",
     "world.level.ServerExplosionMixin_NeoForge",
+    "world.item.crafting.RecipeManagerMixin_Neo",
     "world.level.block.FireBlockMixin_Neo",
     "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Neo"
   ],
