@@ -39,12 +39,12 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 public abstract class MobEffectMixin_API implements PotionEffectType {
 
     // @formatter:off
-    @Shadow public abstract boolean shadow$isInstantenous();
+    @Shadow public abstract boolean shadow$isInstantaneous();
     @Shadow public abstract net.minecraft.network.chat.Component shadow$getDisplayName();
     // @formatter:on
 
     public boolean potionEffectType$isInstant() {
-        return this.shadow$isInstantenous();
+        return this.shadow$isInstantaneous();
     }
 
     @Override
