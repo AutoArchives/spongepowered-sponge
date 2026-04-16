@@ -31,7 +31,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.TypedEntityData;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.entity.SignText;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
@@ -88,7 +88,7 @@ public final class SignItemStackData {
                                 .resultOrPartial(SpongeCommon.logger()::error)
                                 .ifPresent($$1x -> tag.put("front_text", $$1x));
 
-                            h.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(BlockEntityType.SIGN, tag));
+                            h.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(BlockEntityTypes.SIGN, tag));
                         })
                         .delete(h -> h.remove(DataComponents.BLOCK_ENTITY_DATA));
     }

@@ -686,7 +686,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Override
     @SuppressWarnings("unchecked")
     public <E extends org.spongepowered.api.entity.Entity> E bridge$createEntity(final EntityType<E> type, final Vector3d position, final boolean naturally) throws IllegalArgumentException, IllegalStateException {
-        if (type == net.minecraft.world.entity.EntityType.PLAYER) {
+        if (type == net.minecraft.world.entity.EntityTypes.PLAYER) {
             // Unable to construct these
             throw new IllegalArgumentException("A Player cannot be created by the API!");
         }
@@ -697,13 +697,13 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final double z = position.z();
         final Level thisWorld = (Level) (Object) this;
         // Not all entities have a single World parameter as their constructor
-        if (type == net.minecraft.world.entity.EntityType.LIGHTNING_BOLT) {
-            entity = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(thisWorld, EntitySpawnReason.EVENT);
+        if (type == net.minecraft.world.entity.EntityTypes.LIGHTNING_BOLT) {
+            entity = net.minecraft.world.entity.EntityTypes.LIGHTNING_BOLT.create(thisWorld, EntitySpawnReason.EVENT);
             entity.snapTo(x, y, z);
             ((LightningBolt) entity).setVisualOnly(false);
         }
         // TODO - archetypes should solve the problem of calling the correct constructor
-        if (type == net.minecraft.world.entity.EntityType.ENDER_PEARL) {
+        if (type == net.minecraft.world.entity.EntityTypes.ENDER_PEARL) {
             final ArmorStand tempEntity = new ArmorStand(thisWorld, x, y, z);
             tempEntity.setPos(tempEntity.getX(), tempEntity.getY() - tempEntity.getEyeHeight(), tempEntity.getZ());
             entity = new ThrownEnderpearl(thisWorld, tempEntity, Items.ENDER_PEARL.getDefaultInstance());
@@ -711,10 +711,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
         // Some entities need to have non-null fields (and the easiest way to
         // set them is to use the more specialised constructor).
-        if (type == net.minecraft.world.entity.EntityType.FALLING_BLOCK) {
+        if (type == net.minecraft.world.entity.EntityTypes.FALLING_BLOCK) {
             entity = FallingBlockEntityAccessor.invoker$new(thisWorld, x, y, z, Blocks.SAND.defaultBlockState());
         }
-        if (type == net.minecraft.world.entity.EntityType.ITEM) {
+        if (type == net.minecraft.world.entity.EntityTypes.ITEM) {
             entity = new ItemEntity(thisWorld, x, y, z, new ItemStack(Blocks.STONE));
         }
 

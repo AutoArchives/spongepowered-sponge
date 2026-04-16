@@ -25,8 +25,8 @@
 package org.spongepowered.common.advancement.criterion;
 
 
-import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.triggers.CriterionTrigger;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.common.util.Preconditions;
 

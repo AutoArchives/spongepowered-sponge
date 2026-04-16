@@ -22,6 +22,7 @@ dependencies {
 }
 
 val apiBase = rootProject.file("SpongeAPI/src/main/java/")
+val implBase = rootProject.file("src/main/java/")
 val temporaryLicenseHeader = project.layout.buildDirectory.file("api-gen-license-header.txt")
 tasks.register("generateApiData", JavaExec::class) {
     group = "sponge"
@@ -30,7 +31,7 @@ tasks.register("generateApiData", JavaExec::class) {
 
     classpath(sourceSets.main.map { it.output }, sourceSets.main.map { it.runtimeClasspath })
     mainClass.set("org.spongepowered.vanilla.generator.GeneratorMain")
-    args(apiBase.canonicalPath, temporaryLicenseHeader.get().asFile.canonicalPath)
+    args(apiBase.canonicalPath, implBase.canonicalPath, temporaryLicenseHeader.get().asFile.canonicalPath)
 
     doFirst {
         // Write a template-expanded license header to the temporary file

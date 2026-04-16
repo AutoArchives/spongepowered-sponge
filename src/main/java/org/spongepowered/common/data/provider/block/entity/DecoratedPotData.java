@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
@@ -36,9 +38,18 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.accessor.world.level.block.entity.DecoratedPotBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public final class DecoratedPotData {
+
+    private static final Set<ResourceKey<Item>> POTTERY_SHERD_ITEMS;
+    static {
+        final Set<ResourceKey<Item>> set = new HashSet<>();
+        DecoratedPotPatterns.itemToPatternMappings((itemKey, patternKey) -> set.add(itemKey));
+        POTTERY_SHERD_ITEMS = Set.copyOf(set);
+    }
 
     public static void register(final DataProviderRegistrator registrator) {
         // @formatter:off
@@ -67,7 +78,8 @@ public final class DecoratedPotData {
             h.setChanged();
             return true;
         }
-        if (DecoratedPotPatterns.getPatternFromItem((Item) v) == null) {
+        final var itemKey = BuiltInRegistries.ITEM.getResourceKey((Item) v).orElse(null);
+        if (itemKey == null || !POTTERY_SHERD_ITEMS.contains(itemKey)) {
             return false;
         }
         var current = h.getDecorations();

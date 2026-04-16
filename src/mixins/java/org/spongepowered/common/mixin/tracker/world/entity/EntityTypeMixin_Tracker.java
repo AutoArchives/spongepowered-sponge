@@ -26,32 +26,14 @@ package org.spongepowered.common.mixin.tracker.world.entity;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.tracker.TrackerCategory;
 
 @Mixin(EntityType.class)
 public abstract class EntityTypeMixin_Tracker implements RegistryBackedTrackableBridge<EntityType<?>> {
-
-    @Redirect(method = "register(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/entity/EntityType$Builder;)Lnet/minecraft/world/entity/EntityType;",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/core/Registry;register(Lnet/minecraft/core/Registry;Lnet/minecraft/resources/ResourceKey;Ljava/lang/Object;)Ljava/lang/Object;"
-        )
-    )
-    private static <V> V impl$initializeTrackerState(final Registry<V> registry, final ResourceKey<V> key, final V toRegister) {
-        final V registered = Registry.register(registry, key, toRegister);
-
-        final RegistryBackedTrackableBridge<EntityType<?>> trackableBridge = (RegistryBackedTrackableBridge<EntityType<?>>) toRegister;
-        trackableBridge.bridge$refreshTrackerStates();
-
-        return registered;
-    }
 
     @Override
     public TrackerCategory bridge$trackerCategory() {

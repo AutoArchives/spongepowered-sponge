@@ -22,31 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.world.level.block.entity;
+package org.spongepowered.common.mixin.tracker.world.entity;
 
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
-import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.common.config.tracker.TrackerCategory;
 
-@Mixin(BlockEntityType.class)
-public abstract class BlockEntityTypeMixin_Tracker implements RegistryBackedTrackableBridge<BlockEntityType<?>> {
+@Mixin(EntityTypes.class)
+public abstract class EntityTypesMixin_Tracker {
 
-    @Override
-    public TrackerCategory bridge$trackerCategory() {
-        return SpongeGameConfigs.getTracker().get().blockEntity;
-    }
+    @Redirect(method = "register(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/entity/EntityType$Builder;)Lnet/minecraft/world/entity/EntityType;",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/core/Registry;register(Lnet/minecraft/core/Registry;Lnet/minecraft/resources/ResourceKey;Ljava/lang/Object;)Ljava/lang/Object;"
+        )
+    )
+    private static <V> V impl$initializeTrackerState(final Registry<V> registry, final ResourceKey<V> key, final V toRegister) {
+        final V registered = Registry.register(registry, key, toRegister);
 
-    @Override
-    public Registry<BlockEntityType<?>> bridge$trackerRegistryBacking() {
-        return BuiltInRegistries.BLOCK_ENTITY_TYPE;
-    }
+        final RegistryBackedTrackableBridge<EntityType<?>> trackableBridge = (RegistryBackedTrackableBridge<EntityType<?>>) toRegister;
+        trackableBridge.bridge$refreshTrackerStates();
 
-    @Override
-    public void bridge$saveTrackerConfig() {
-        SpongeGameConfigs.getTracker().save();
+        return registered;
     }
 }

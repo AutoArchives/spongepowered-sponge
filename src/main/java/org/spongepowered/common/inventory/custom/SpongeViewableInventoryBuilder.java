@@ -25,7 +25,7 @@
 package org.spongepowered.common.inventory.custom;
 
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
@@ -379,7 +379,7 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
 
         SpongeViewableInventoryBuilder.register(ContainerTypes.MERCHANT, ContainerTypeInfo.of(sp -> new DefaultEmptyLens(), 0, 0,
                 (id, i, p, vi) -> {
-                    final Villager merchant = new Villager(EntityType.VILLAGER, p.level());
+                    final Villager merchant = new Villager(EntityTypes.VILLAGER, p.level());
                     merchant.setPos(p.position());
                     merchant.setVillagerData(merchant.getVillagerData().withLevel(5));
                     return new MerchantMenu(id, i, vi.applyTradeOffers(merchant));

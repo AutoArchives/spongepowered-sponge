@@ -22,25 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
+package org.spongepowered.common.mixin.tracker.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.BedBlockEntity;
-import org.spongepowered.api.block.entity.Bed;
-import org.spongepowered.api.data.value.Value;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 
-import java.util.Set;
+@Mixin(BlockEntityTypes.class)
+public abstract class BlockEntityTypesMixin_Tracker {
 
-@Mixin(BedBlockEntity.class)
-public abstract class BedBlockEntityMixin_API extends BlockEntityMixin_API implements Bed {
+    @Redirect(method = "register",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/core/Registry;register(Lnet/minecraft/core/Registry;Lnet/minecraft/resources/ResourceKey;Ljava/lang/Object;)Ljava/lang/Object;"
+        )
+    )
+    private static Object impl$initializeTrackerState(final Registry<Object> registry, final ResourceKey<Object> key, final Object toRegister) {
+        final Object registered = Registry.register(registry, key, toRegister);
 
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+        final RegistryBackedTrackableBridge<BlockEntityType<?>> trackableBridge = (RegistryBackedTrackableBridge<BlockEntityType<?>>) toRegister;
+        trackableBridge.bridge$refreshTrackerStates();
 
-        values.add(this.color().asImmutable());
-
-        return values;
+        return registered;
     }
-
 }

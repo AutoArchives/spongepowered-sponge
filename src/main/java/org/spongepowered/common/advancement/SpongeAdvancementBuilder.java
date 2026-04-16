@@ -27,7 +27,7 @@ package org.spongepowered.common.advancement;
 
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.triggers.Criterion;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.Identifier;
 import org.checkerframework.checker.nullness.qual.Nullable;

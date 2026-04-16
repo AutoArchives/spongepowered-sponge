@@ -22,20 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity;
+package org.spongepowered.common.mixin.api.minecraft.item;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.AirItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Blocks;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.mixin.api.minecraft.world.item.ItemMixin_API;
 
-@Mixin(EntityType.class)
-public interface EntityTypeAccessor {
+@Mixin(AirItem.class)
+public abstract class AirItemMixin_API extends ItemMixin_API {
 
-    @Invoker("register")
-    static EntityType<Entity> invoker$register(final String key, final EntityType.Builder<Entity> builder) {
-        throw new UntransformedAccessorError();
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    private void api$setBlockType(Item.Properties builder, CallbackInfo ci) {
+        this.api$blockType = (BlockType) Blocks.AIR;
     }
-
 }

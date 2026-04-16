@@ -42,10 +42,10 @@ import java.util.function.Function;
 public abstract class ColorCollectionMixin {
 
     @Inject(method = "registerBlocks", at = @At("RETURN"))
-    private static <T extends Block> void impl$stampDyeColor(
-        final String id,
-        final TriFunction<String, Function<BlockBehaviour.Properties, Block>, BlockBehaviour.Properties, Block> register,
-        final BiFunction<DyeColor, BlockBehaviour.Properties, T> colorBlockFactory,
+    private static <B extends Block, Id> void impl$stampDyeColor(
+        final ColorCollection<Id> ids,
+        final TriFunction<Id, Function<BlockBehaviour.Properties, Block>, BlockBehaviour.Properties, Block> register,
+        final BiFunction<DyeColor, BlockBehaviour.Properties, B> colorBlockFactory,
         final Function<DyeColor, BlockBehaviour.Properties> propertiesSupplier,
         final CallbackInfoReturnable<ColorCollection<Block>> cir
     ) {

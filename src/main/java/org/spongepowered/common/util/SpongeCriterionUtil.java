@@ -26,7 +26,7 @@ package org.spongepowered.common.util;
 
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.triggers.Criterion;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.OperatorCriterion;
 import org.spongepowered.api.util.Tuple;

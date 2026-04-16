@@ -74,13 +74,13 @@ public final class GeneratorMain {
     /**
      * The entry point.
      *
-     * @param args arguments, expected to be {@code <output directory> }
+     * @param args arguments, expected to be {@code <apiOutputDir> <implOutputDir> <licenseHeader>}
      */
     public static void main(final String[] args) {
         Logger.info("Begining bootstrap");
         Log.setAdapter(new JavaparserLog());
-        if (args.length != 2) {
-            Logger.error("Invalid arguments. Usage: generator <outputDir> <licenseHeader>");
+        if (args.length != 3) {
+            Logger.error("Invalid arguments. Usage: generator <apiOutputDir> <implOutputDir> <licenseHeader>");
             System.exit(1);
             return;
         }
@@ -91,8 +91,9 @@ public final class GeneratorMain {
 
         // Create a generator context based on arguments
         final var outputDir = Path.of(args[0]);
+        final var implOutputDir = Path.of(args[1]);
         final String licenseHeader;
-        try (final var reader = Files.newBufferedReader(Path.of(args[1]), StandardCharsets.UTF_8)) {
+        try (final var reader = Files.newBufferedReader(Path.of(args[2]), StandardCharsets.UTF_8)) {
             licenseHeader = reader.lines().map(line -> (" * " + line).stripTrailing()).collect(Collectors.joining("\n", "\n", "\n "));
         } catch (final IOException ex) {
             Logger.error("Failed to read license header file!", ex);
@@ -101,7 +102,7 @@ public final class GeneratorMain {
         }
 
         final var dataPacks = GeneratorMain.loadVanillaDatapack();
-        final var context = new Context(outputDir, dataPacks.getFirst(), dataPacks.getSecond(), licenseHeader);
+        final var context = new Context(outputDir, implOutputDir, dataPacks.getFirst(), dataPacks.getSecond(), licenseHeader);
         Logger.info("Generating data for Minecraft version {}", context.gameVersion());
 
         // Execute every generator

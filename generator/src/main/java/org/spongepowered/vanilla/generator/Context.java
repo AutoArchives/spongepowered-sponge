@@ -47,23 +47,30 @@ public final class Context {
 
     static final String INDENT = "    ";
     static final String BASE_PACKAGE = "org.spongepowered.api";
+    static final String IMPL_BASE_PACKAGE = "org.spongepowered.common";
     private final Path outputDirectory;
+    private final Path implOutputDirectory;
     private final RegistryAccess registries;
     private final ReloadableServerResources resources;
     private final String licenseHeader;
     private final SourceRoot sourceRoot;
+    private final SourceRoot implSourceRoot;
 
-    Context(final Path outputDirectory, final RegistryAccess registries, final ReloadableServerResources resources, final String licenseHeader) {
+    Context(final Path outputDirectory, final Path implOutputDirectory, final RegistryAccess registries, final ReloadableServerResources resources, final String licenseHeader) {
         this.outputDirectory = outputDirectory;
+        this.implOutputDirectory = implOutputDirectory;
         this.registries = registries;
         this.resources = resources;
         this.licenseHeader = licenseHeader;
-        this.sourceRoot = new SourceRoot(outputDirectory);
-        this.sourceRoot.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_16);
         final var config = new DefaultPrinterConfiguration();
         config.addOption(new DefaultConfigurationOption(DefaultPrinterConfiguration.ConfigOption.PRINT_COMMENTS, true));
         final var printer = new DefaultPrettyPrinter(config);
+        this.sourceRoot = new SourceRoot(outputDirectory);
+        this.sourceRoot.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_16);
         this.sourceRoot.setPrinter(printer::print);
+        this.implSourceRoot = new SourceRoot(implOutputDirectory);
+        this.implSourceRoot.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_16);
+        this.implSourceRoot.setPrinter(printer::print);
     }
 
     public String gameVersion() {
@@ -87,6 +94,17 @@ public final class Context {
         final String pkg = relativePackage.isBlank() ? Context.BASE_PACKAGE : String.join(".", Context.BASE_PACKAGE, relativePackage);
         try {
             final CompilationUnit unit = this.sourceRoot.parse(pkg, simpleName + ".java");
+            LexicalPreservingPrinter.setup(unit);
+            return unit;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse " + simpleName + ".java", e);
+        }
+    }
+
+    public CompilationUnit implCompilationUnit(final String relativePackage, final String simpleName) {
+        final String pkg = relativePackage.isBlank() ? Context.IMPL_BASE_PACKAGE : String.join(".", Context.IMPL_BASE_PACKAGE, relativePackage);
+        try {
+            final CompilationUnit unit = this.implSourceRoot.parse(pkg, simpleName + ".java");
             LexicalPreservingPrinter.setup(unit);
             return unit;
         } catch (Exception e) {
@@ -140,5 +158,6 @@ public final class Context {
      */
     void complete() {
         this.sourceRoot.saveAll(StandardCharsets.UTF_8);
+        this.implSourceRoot.saveAll(StandardCharsets.UTF_8);
     }
 }

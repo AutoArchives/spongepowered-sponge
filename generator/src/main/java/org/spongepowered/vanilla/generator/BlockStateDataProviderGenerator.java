@@ -24,11 +24,14 @@
  */
 package org.spongepowered.vanilla.generator;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -37,10 +40,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import javax.lang.model.element.Modifier;
-
 /**
- * Generates the registration of catalog classes for {@link BlockState} properties.
+ * Updates the register method of the {@code BlockStateDataProvider} in the Sponge implementation
+ * source set with the current set of {@link BlockState} properties.
  */
 public class BlockStateDataProviderGenerator implements Generator {
 
@@ -51,25 +53,44 @@ public class BlockStateDataProviderGenerator implements Generator {
 
     @Override
     public void generate(Context ctx) throws IOException {
-        final var clazz = Types.utilityClass(
-                "BlockStateDataProvider",
-                "<!-- Copy to the register method of BlockStateDataProvider -->"
-        );
+        final var cu = ctx.implCompilationUnit("data.provider.block.state", "BlockStateDataProvider");
+        final var primaryType = cu.getPrimaryType()
+            .orElseThrow(() -> new IllegalStateException("Could not find primary type in BlockStateDataProvider"));
 
-        final var codeBlock = CodeBlock.builder();
+        final var registerMethod = primaryType.getMembers().stream()
+            .filter(m -> m instanceof MethodDeclaration)
+            .map(m -> (MethodDeclaration) m)
+            .filter(m -> m.getNameAsString().equals("register"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Could not find register method in BlockStateDataProvider"));
+
+        final var body = registerMethod.getBody()
+            .orElseThrow(() -> new IllegalStateException("register method has no body"));
+
+        // Collect all non-registerProperty statements (e.g. the trailing registrator.asImmutable block)
+        final var trailingStatements = body.getStatements().stream()
+            .filter(stmt -> {
+                if (stmt instanceof ExpressionStmt es) {
+                    return !es.toString().contains("registerProperty");
+                }
+                return true;
+            })
+            .toList();
+
+        // Rebuild the body: registerProperty calls first, then trailing statements
+        final var newBody = new BlockStmt();
         for (final String property : this.vanillaProperties()) {
-            codeBlock.addStatement("BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.$L, BlockStateProperties.$L)", property, property);
+            newBody.addStatement(StaticJavaParser.parseStatement(
+                "BlockStateDataProvider.registerProperty(registrator, BlockStateKeys." + property + ", BlockStateProperties." + property + ");"
+            ));
+        }
+        for (final var stmt : trailingStatements) {
+            newBody.addStatement(stmt.clone());
         }
 
-        clazz.addMethod(MethodSpec.methodBuilder("register")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addCode(codeBlock.build())
-                .build()
-        );
+        registerMethod.setBody(newBody);
 
-        ctx.write("data", clazz.build());
-
-        final var cu = ctx.compilationUnit("data", "BlockStateDataProvider");
+        Logger.info("Updated BlockStateDataProvider.register() with {} property registrations", this.vanillaProperties().size());
     }
 
     private Set<String> vanillaProperties() {

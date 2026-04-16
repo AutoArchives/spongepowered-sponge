@@ -56,6 +56,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
@@ -310,7 +311,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     @Override
     protected HoverEvent createHoverEvent() {
-        return new HoverEvent.ShowEntity(new HoverEvent.EntityTooltipInfo(EntityType.PLAYER, this.getUUID(), this.getName()));
+        return new HoverEvent.ShowEntity(new HoverEvent.EntityTooltipInfo(EntityTypes.PLAYER, this.getUUID(), this.getName()));
     }
 
     private void setProfileName(final net.minecraft.network.chat.@Nullable Component newName) {
@@ -515,7 +516,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity $$0) {
         final ClientboundAddEntityPacket packet = new ClientboundAddEntityPacket(this, $$0);
-        ((ClientboundAddEntityPacketAccessor) packet).accessor$type(EntityType.PLAYER);
+        ((ClientboundAddEntityPacketAccessor) packet).accessor$type(EntityTypes.PLAYER);
         return packet;
     }
 }

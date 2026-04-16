@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.item;
 
-import net.minecraft.world.item.AirItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -35,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.api.minecraft.world.item.ItemMixin_API;
 
-@Mixin(value = { BlockItem.class, AirItem.class })
+@Mixin(BlockItem.class)
 public abstract class BlockItemMixin_API extends ItemMixin_API {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
