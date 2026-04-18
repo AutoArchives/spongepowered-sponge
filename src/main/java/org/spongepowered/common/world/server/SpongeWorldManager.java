@@ -941,6 +941,7 @@ public class SpongeWorldManager implements WorldManager {
             border.setWarningTime(legacy.warningTime());
             border.setWarningBlocks(legacy.warningBlocks());
         });
+        levelData.setLegacyWorldBorderSettings(Optional.empty());
         PlatformHooks.INSTANCE.getWorldHooks().postLoadWorld(world);
         return world;
     }
