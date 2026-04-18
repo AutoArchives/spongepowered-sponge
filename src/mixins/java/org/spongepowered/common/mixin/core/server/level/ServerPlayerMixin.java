@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
@@ -38,6 +39,8 @@ import io.netty.channel.Channel;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.OutgoingChatMessage;
@@ -45,6 +48,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ClientInformation;
@@ -70,6 +74,8 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.scores.PlayerTeam;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -99,6 +105,7 @@ import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -106,6 +113,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -122,11 +130,13 @@ import org.spongepowered.common.accessor.server.network.ServerCommonPacketListen
 import org.spongepowered.common.accessor.world.level.portal.TeleportTransitionAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.TransientBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
+import org.spongepowered.common.bridge.world.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.type.SpongeSkinPart;
@@ -138,26 +148,31 @@ import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
+import org.spongepowered.math.vector.Vector3d;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 // See also: SubjectMixin_API and SubjectMixin
 @SuppressWarnings("ConstantConditions")
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
-public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBridge, ServerPlayerBridge {
+public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBridge, ServerPlayerBridge, BedLocationHolderBridge {
 
     // @formatter:off
     @Shadow public ServerGamePacketListenerImpl connection;
     @Shadow @Final public ServerPlayerGameMode gameMode;
     @Shadow @Final private MinecraftServer server;
     @Shadow private int lastRecordedExperience;
+    @Shadow @javax.annotation.Nullable private net.minecraft.server.level.ServerPlayer.RespawnConfig respawnConfig;
 
     @Shadow public abstract ServerLevel shadow$level();
     @Shadow public abstract void shadow$doCloseContainer();
     @Shadow public abstract boolean shadow$setGameMode(GameType param0);
     @Shadow public abstract void shadow$setCamera(@org.jetbrains.annotations.Nullable final Entity $$0);
+    @Shadow public abstract void shadow$setRespawnPosition(@javax.annotation.Nullable net.minecraft.server.level.ServerPlayer.RespawnConfig config, boolean sendMessage);
     // @formatter:on
 
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
@@ -178,6 +193,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Nullable
     private WorldBorder impl$worldBorder;
     private ServerLevel impl$respawnLevel;
+    private final Map<org.spongepowered.api.ResourceKey, RespawnLocation> impl$bedLocations = new HashMap<>();
+    private boolean impl$syncingRespawn;
 
     @Override
     public net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend() {
@@ -769,6 +786,20 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final Operation<net.minecraft.server.level.ServerPlayer.RespawnConfig> original,
         @Share("sponge:overridden-respawn") final LocalRef<ResourceKey<Level>> dimension
     ) {
+        // Prefer a forced Keys.RESPAWN_LOCATIONS entry for the world the player died in, even if vanilla's single
+        // slot points elsewhere. Mirror it into vanilla's respawnConfig up front so findRespawnPositionAndUseSpawnBlock
+        // reads the correct position when locating the bed/anchor.
+        final org.spongepowered.api.ResourceKey dyingWorldKey = (org.spongepowered.api.ResourceKey) (Object) player.level().dimension().location();
+        final RespawnLocation forcedInDyingWorld = this.impl$bedLocations.get(dyingWorldKey);
+        if (forcedInDyingWorld != null && forcedInDyingWorld.isForced()) {
+            this.impl$syncingRespawn = true;
+            try {
+                this.shadow$setRespawnPosition(this.impl$toRespawnConfig(forcedInDyingWorld), false);
+            } finally {
+                this.impl$syncingRespawn = false;
+            }
+        }
+
         final var config = original.call(player);
         final var defaulted = config == null ? Level.OVERWORLD : config.respawnData().dimension();
 
@@ -812,5 +843,127 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Redirect(method = "saveParentVehicle", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hasExactlyOnePlayerPassenger()Z"))
     private boolean impl$skipUnserializableRootVehicle(final Entity instance) {
         return instance.hasExactlyOnePlayerPassenger() && !((TransientBridge) instance).bridge$isTransient();
+    }
+
+    @Override
+    public Map<org.spongepowered.api.ResourceKey, RespawnLocation> bridge$getBedlocations() {
+        return new HashMap<>(this.impl$bedLocations);
+    }
+
+    @Override
+    public boolean bridge$setBedLocations(final Map<org.spongepowered.api.ResourceKey, RespawnLocation> value) {
+        for (final Map.Entry<org.spongepowered.api.ResourceKey, RespawnLocation> entry : value.entrySet()) {
+            if (!Objects.equals(entry.getKey(), entry.getValue().worldKey())) {
+                throw new IllegalArgumentException("RespawnLocation world key " + entry.getValue().worldKey()
+                        + " does not match map key " + entry.getKey());
+            }
+        }
+        this.impl$bedLocations.clear();
+        this.impl$bedLocations.putAll(value);
+        this.impl$syncingRespawn = true;
+        try {
+            final RespawnLocation active = this.impl$pickActiveRespawn(value);
+            this.shadow$setRespawnPosition(active == null ? null : this.impl$toRespawnConfig(active), false);
+        } finally {
+            this.impl$syncingRespawn = false;
+        }
+        if (!((SpongeDataHolderBridge) this).brigde$isDeserializing()) {
+            if (value.isEmpty()) {
+                ((SpongeDataHolderBridge) this).bridge$remove(Keys.RESPAWN_LOCATIONS);
+            } else {
+                ((SpongeDataHolderBridge) this).bridge$offer(Keys.RESPAWN_LOCATIONS, new HashMap<>(value));
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public ImmutableMap<org.spongepowered.api.ResourceKey, RespawnLocation> bridge$removeAllBeds() {
+        final ImmutableMap<org.spongepowered.api.ResourceKey, RespawnLocation> snapshot = ImmutableMap.copyOf(this.impl$bedLocations);
+        this.impl$bedLocations.clear();
+        this.impl$syncingRespawn = true;
+        try {
+            this.shadow$setRespawnPosition(null, false);
+        } finally {
+            this.impl$syncingRespawn = false;
+        }
+        ((SpongeDataHolderBridge) this).bridge$remove(Keys.RESPAWN_LOCATIONS);
+        return snapshot;
+    }
+
+    @Unique
+    private @Nullable RespawnLocation impl$pickActiveRespawn(final Map<org.spongepowered.api.ResourceKey, RespawnLocation> map) {
+        if (map.isEmpty()) {
+            return null;
+        }
+        if (this.respawnConfig != null) {
+            final org.spongepowered.api.ResourceKey vanillaKey = (org.spongepowered.api.ResourceKey) (Object) this.respawnConfig.respawnData().dimension().location();
+            final RespawnLocation forVanilla = map.get(vanillaKey);
+            if (forVanilla != null) {
+                return forVanilla;
+            }
+        }
+        final org.spongepowered.api.ResourceKey currentLevelKey = (org.spongepowered.api.ResourceKey) (Object) this.shadow$level().dimension().location();
+        final RespawnLocation forCurrent = map.get(currentLevelKey);
+        if (forCurrent != null) {
+            return forCurrent;
+        }
+        return map.values().iterator().next();
+    }
+
+    @Unique
+    private net.minecraft.server.level.ServerPlayer.RespawnConfig impl$toRespawnConfig(final RespawnLocation location) {
+        final ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION,
+            (ResourceLocation) (Object) location.worldKey());
+        final Vector3d pos = location.position();
+        // Vector3d -> BlockPos via floor (BlockPos.containing uses floor semantics).
+        // RespawnLocation has no yaw/pitch — keep the player's current orientation so sleep angle isn't clobbered.
+        final LevelData.RespawnData data = LevelData.RespawnData.of(
+            dim, BlockPos.containing(pos.x(), pos.y(), pos.z()), this.shadow$getYRot(), this.shadow$getXRot());
+        return new net.minecraft.server.level.ServerPlayer.RespawnConfig(data, location.isForced());
+    }
+
+    @Inject(method = "setRespawnPosition(Lnet/minecraft/server/level/ServerPlayer$RespawnConfig;Z)V", at = @At("RETURN"))
+    private void impl$mirrorVanillaRespawnToBedLocations(
+            final @javax.annotation.Nullable net.minecraft.server.level.ServerPlayer.RespawnConfig config,
+            final boolean sendMessage, final CallbackInfo ci) {
+        if (this.impl$syncingRespawn) {
+            return;
+        }
+        if (config == null) {
+            // Vanilla cleared respawn — drop every entry (vanilla only tracks one slot anyway)
+            this.impl$bedLocations.clear();
+        } else {
+            final GlobalPos globalPos = config.respawnData().globalPos();
+            final BlockPos pos = globalPos.pos();
+            final org.spongepowered.api.ResourceKey apiKey = (org.spongepowered.api.ResourceKey) (Object) globalPos.dimension().location();
+            final RespawnLocation location = RespawnLocation.builder()
+                .world(apiKey)
+                .position(new Vector3d(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D))
+                .forceSpawn(config.forced())
+                .build();
+            this.impl$bedLocations.put(apiKey, location);
+        }
+        if (this.impl$bedLocations.isEmpty()) {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.RESPAWN_LOCATIONS);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.RESPAWN_LOCATIONS, new HashMap<>(this.impl$bedLocations));
+        }
+    }
+
+    @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
+    private void impl$seedBedLocationsFromVanilla(final ValueInput input, final CallbackInfo ci) {
+        if (this.respawnConfig == null || !this.impl$bedLocations.isEmpty()) {
+            return;
+        }
+        final GlobalPos globalPos = this.respawnConfig.respawnData().globalPos();
+        final BlockPos pos = globalPos.pos();
+        final org.spongepowered.api.ResourceKey apiKey = (org.spongepowered.api.ResourceKey) (Object) globalPos.dimension().location();
+        final RespawnLocation location = RespawnLocation.builder()
+            .world(apiKey)
+            .position(new Vector3d(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D))
+            .forceSpawn(this.respawnConfig.forced())
+            .build();
+        this.impl$bedLocations.put(apiKey, location);
     }
 }
