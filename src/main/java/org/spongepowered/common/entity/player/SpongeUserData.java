@@ -395,6 +395,12 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public boolean bridge$setBedLocations(final Map<ResourceKey, RespawnLocation> value) {
+        for (final Map.Entry<ResourceKey, RespawnLocation> entry : value.entrySet()) {
+            if (!Objects.equals(entry.getKey(), entry.getValue().worldKey())) {
+                throw new IllegalArgumentException("RespawnLocation world key " + entry.getValue().worldKey()
+                        + " does not match map key " + entry.getKey());
+            }
+        }
         final Optional<ServerPlayer> player = this.player();
         if (player.isPresent()) {
             return ((BedLocationHolderBridge) player.get()).bridge$setBedLocations(value);
