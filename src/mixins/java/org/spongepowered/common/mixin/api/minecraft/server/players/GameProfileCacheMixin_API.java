@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.server.players;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import net.minecraft.server.players.NameAndId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
@@ -57,7 +58,7 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
     @Shadow @Final @Mutable private final Map<String, GameProfileCache_GameProfileInfoAccessor> profilesByName = new ConcurrentHashMap<>();
     @Shadow @Final @Mutable private final Map<UUID, GameProfileCache_GameProfileInfoAccessor> profilesByUUID = new ConcurrentHashMap<>();
 
-    @Shadow public abstract Optional<com.mojang.authlib.GameProfile> shadow$get(UUID uniqueId);
+    @Shadow public abstract Optional<NameAndId> shadow$get(UUID uniqueId);
     @Shadow protected abstract long shadow$getNextOperation();
     // @formatter:on
 

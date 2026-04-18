@@ -475,9 +475,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
         if (behavior != SerializationBehavior.NONE) {
             original.call(self, flush);
-            // In 26.1, per-world WorldBorder, BossEvents, Weather, and GameRules are all
-            // SavedData instances in per-dimension SavedDataStorage. They are automatically
-            // saved by vanilla's saveLevelData() → SavedDataStorage.saveAndJoin().
         }
     }
 
