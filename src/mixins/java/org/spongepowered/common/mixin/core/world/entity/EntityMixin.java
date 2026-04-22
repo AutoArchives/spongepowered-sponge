@@ -376,7 +376,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 if ((Entity) (Object) this instanceof ServerPlayer player) {
                     entityPlayerMP.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(player)));
                 }
-                trackerAccessor.accessor$updatePlayer(entityPlayerMP);
+                if (this.shadow$level() == entityPlayerMP.level()) {
+                    trackerAccessor.accessor$updatePlayer(entityPlayerMP);
+                }
             }
         }
     }
