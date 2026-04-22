@@ -36,6 +36,7 @@ import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.Noise;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,17 +45,17 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule overworld() {
-        return (SurfaceRule) SurfaceRuleData.overworld();
+        return (SurfaceRule) SurfaceRuleData.overworld(SpongeCommon.vanillaRegistry(Registries.BIOME));
     }
 
     @Override
     public SurfaceRule overworldLike(final boolean nearSurface, final boolean bedrockRoof, final boolean bedrockFloor) {
-        return (SurfaceRule) SurfaceRuleData.overworldLike(nearSurface, bedrockRoof, bedrockFloor);
+        return (SurfaceRule) SurfaceRuleData.overworldLike(SpongeCommon.vanillaRegistry(Registries.BIOME), nearSurface, bedrockRoof, bedrockFloor);
     }
 
     @Override
     public SurfaceRule nether() {
-        return (SurfaceRule) SurfaceRuleData.nether();
+        return (SurfaceRule) SurfaceRuleData.nether(SpongeCommon.vanillaRegistry(Registries.BIOME));
     }
 
     @Override
@@ -111,7 +112,7 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
         final var stream = biomes.stream()
                 .map(r -> net.minecraft.resources.ResourceKey.create(Registries.BIOME, ((Identifier) (Object) r.location())));
         final net.minecraft.resources.ResourceKey<net.minecraft.world.level.biome.Biome>[] keys = stream.toArray(net.minecraft.resources.ResourceKey[]::new);
-        return (SurfaceRule.Condition) SurfaceRules.isBiome(keys);
+        return (SurfaceRule.Condition) SurfaceRules.isBiome(SpongeCommon.vanillaRegistry(Registries.BIOME), keys);
     }
 
     @Override

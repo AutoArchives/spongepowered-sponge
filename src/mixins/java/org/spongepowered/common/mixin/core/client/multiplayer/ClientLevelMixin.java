@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.client.multiplayer;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.extract.LevelExtractor;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -43,7 +43,7 @@ public abstract class ClientLevelMixin extends LevelMixin {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$onInit(
         final ClientPacketListener listener, final ClientLevel.ClientLevelData data, final ResourceKey<Level> key,
-        final Holder<DimensionType> holder, final int storageRange, final int serverSimulationDistance, final LevelRenderer renderer, final boolean isDebug,
+        final Holder<DimensionType> holder, final int storageRange, final int serverSimulationDistance, final LevelExtractor levelExtractor, final boolean isDebug,
         final long biomeZoomSeed, final int seaLevel, final CallbackInfo ci) {
         this.bridge$adjustDimensionLogic(holder.value());
     }
