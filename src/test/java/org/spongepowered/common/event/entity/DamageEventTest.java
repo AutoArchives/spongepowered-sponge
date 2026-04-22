@@ -63,7 +63,8 @@ public class DamageEventTest {
 
         sheep.damage(15, damageSource);
 
-        assertEquals(1, listener.events, "events count");
+        // There's a Pre and Post
+        assertEquals(2, listener.events, "events count");
         assertNotNull(listener.lastEvent, "last event");
         assertEquals(15, listener.lastEvent.baseDamage(), "base damage");
         assertEquals(damageSource, listener.lastEvent.cause().root(), "root cause");
