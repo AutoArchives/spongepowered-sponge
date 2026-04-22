@@ -41,6 +41,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
@@ -657,6 +658,18 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
             original.call(message, mcFilter, player, boundChatType);
         }
+    }
+
+    @ModifyExpressionValue(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/OutgoingChatMessage;create(Lnet/minecraft/network/chat/PlayerChatMessage;)Lnet/minecraft/network/chat/OutgoingChatMessage;"))
+    private OutgoingChatMessage impl$useDisguisedChatPacketForInvisibleSenders(
+        final OutgoingChatMessage original, final @Local(argsOnly = true) PlayerChatMessage message,
+        final @Local(argsOnly = true) net.minecraft.server.level.@Nullable ServerPlayer player
+    ) {
+        if (player != null && ((VanishableBridge) player).bridge$vanishState().invisible()) {
+            return new OutgoingChatMessage.Disguised(message.decoratedContent());
+        }
+        return original;
     }
 
     @ModifyExpressionValue(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V",
