@@ -6,7 +6,8 @@
     "mixins": [
         "world.entity.LivingEntityMixin_Shared_Damage",
         "world.entity.player.PlayerMixin_Shared_Damage",
-        "world.entity.projectile.FishingHookMixin_Shared"
+        "world.entity.projectile.FishingHookMixin_Shared",
+        "world.item.crafting.RecipeManagerMixin_Shared"
     ],
     "overwrites": {
         "conformVisibility": true

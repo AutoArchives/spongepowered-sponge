@@ -36,7 +36,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.WorldArchetype;
@@ -79,9 +78,6 @@ public final class WorldPropertiesData {
                         .get(ServerLevelData::isAllowCommands)
                     .create(Keys.INITIALIZED)
                         .get(ServerLevelData::isInitialized)
-                    .create(Keys.WORLD_BORDER)
-                        // TODO - 26.1 changes how borders are decided
-                        .get(h -> (WorldBorder) (Object) ((ServerLevelDataBridge)h).bridge$level().getWorldBorder())
                 .asMutable(ServerLevelDataBridge.class)
                     .create(Keys.WORLD_TYPE)
                         .get(h -> (WorldType) (Object) h.bridge$dimensionType())
@@ -99,6 +95,8 @@ public final class WorldPropertiesData {
                         .get(ServerLevelDataBridge::bridge$loadOnStartup)
                     .create(Keys.WORLD_ARCHETYPE_TYPE)
                         .get(h -> (WorldArchetypeType) (Object) h.bridge$levelStem())
+                    .create(Keys.WORLD_BORDER)
+                        .get(h -> h.bridge$worldBorder().bridge$asImmutable())
                 .asMutable(PrimaryLevelData.class)
                     .create(Keys.WORLD_DIFFICULTY)
                         .set((h, v) -> h.setDifficulty((net.minecraft.world.Difficulty) (Object) v))
