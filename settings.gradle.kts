@@ -10,7 +10,7 @@ pluginManagement {
         }
     }
     plugins {
-        id("org.spongepowered.gradle.vanilla") version "0.3.0"
+        id("org.spongepowered.gradle.vanilla") version "0.3.2"
         id("implementation-structure")
     }
 }
