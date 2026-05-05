@@ -54,6 +54,7 @@ import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.PistonType;
+import net.minecraft.world.level.block.state.properties.PotentSulfurState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.block.state.properties.RedstoneSide;
@@ -133,6 +134,7 @@ public class BlockStatePropertyKeysGenerator implements Generator {
     static {
         vanillaEnumTypeMapping.put(StructureMode.class, BlockStatePropertyKeysGenerator.inDataTypePkg("StructureMode"));
         vanillaEnumTypeMapping.put(PistonType.class, BlockStatePropertyKeysGenerator.inDataTypePkg("PistonType"));
+        vanillaEnumTypeMapping.put(PotentSulfurState.class, BlockStatePropertyKeysGenerator.inDataTypePkg("PotentSulfurState"));
         vanillaEnumTypeMapping.put(BambooLeaves.class, BlockStatePropertyKeysGenerator.inDataTypePkg("BambooLeavesType"));
         vanillaEnumTypeMapping.put(WallSide.class, BlockStatePropertyKeysGenerator.inDataTypePkg("WallConnectionState"));
         vanillaEnumTypeMapping.put(RailShape.class, BlockStatePropertyKeysGenerator.inDataTypePkg("RailDirection"));

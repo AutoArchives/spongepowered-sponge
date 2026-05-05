@@ -83,6 +83,7 @@ import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.PistonType;
+import net.minecraft.world.level.block.state.properties.PotentSulfurState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.block.state.properties.RedstoneSide;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
@@ -199,6 +200,7 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.CHAT_VISIBILITY, ChatVisiblity.values());
         this.automaticName(RegistryTypes.PISTON_TYPE, PistonType.values());
         this.automaticName(RegistryTypes.PORTION_TYPE, Half.values());
+        this.automaticName(RegistryTypes.POTENT_SULFUR_STATE, PotentSulfurState.values());
         this.automaticName(RegistryTypes.RAID_STATUS, Raid.RaidStatus.values());
         this.automaticName(RegistryTypes.ROTATION, Rotation.values());
         this.automaticName(RegistryTypes.RAIL_DIRECTION, RailShape.values());

@@ -22,16 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block.state.properties;
 
-import net.minecraft.ChatFormatting;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.level.block.state.properties.PotentSulfurState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ChatFormatting.class)
-public interface ChatFormattingAccessor {
-
-    @Accessor("color") @Nullable Integer accessor$color();
+@Mixin(PotentSulfurState.class)
+public abstract class PotentSulfurStateMixin_API implements org.spongepowered.api.data.type.PotentSulfurState {
 
 }

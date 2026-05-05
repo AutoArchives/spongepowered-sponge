@@ -105,6 +105,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.world.scores.TeamColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -519,15 +520,104 @@ public final class SpongeAdventure {
         return TextColor.color(color.getValue());
     }
 
-    public static @Nullable TextColor asAdventure(final ChatFormatting formatting) {
+    public static @Nullable TeamColor asVanillaTeamColor(final @Nullable ChatFormatting formatting) {
         if (formatting == null) {
             return null;
         }
-        final Integer color = formatting.getColor();
+        return switch (formatting) {
+            case BLACK -> TeamColor.BLACK;
+            case DARK_BLUE -> TeamColor.DARK_BLUE;
+            case DARK_GREEN -> TeamColor.DARK_GREEN;
+            case DARK_AQUA -> TeamColor.DARK_AQUA;
+            case DARK_RED -> TeamColor.DARK_RED;
+            case DARK_PURPLE -> TeamColor.DARK_PURPLE;
+            case GOLD -> TeamColor.GOLD;
+            case GRAY -> TeamColor.GRAY;
+            case DARK_GRAY -> TeamColor.DARK_GRAY;
+            case BLUE -> TeamColor.BLUE;
+            case GREEN -> TeamColor.GREEN;
+            case AQUA -> TeamColor.AQUA;
+            case RED -> TeamColor.RED;
+            case LIGHT_PURPLE -> TeamColor.LIGHT_PURPLE;
+            case YELLOW -> TeamColor.YELLOW;
+            case WHITE -> TeamColor.WHITE;
+            default -> null;
+        };
+    }
+
+    public static @Nullable TextColor asAdventure(final @Nullable ChatFormatting formatting) {
+        return SpongeAdventure.asAdventure(SpongeAdventure.asVanillaTeamColor(formatting));
+    }
+
+    public static @Nullable TeamColor asVanillaTeamColor(final @Nullable NamedTextColor color) {
         if (color == null) {
             return null;
         }
-        return TextColor.color(color);
+        if (color == NamedTextColor.BLACK) {
+            return TeamColor.BLACK;
+        } else if (color == NamedTextColor.DARK_BLUE) {
+            return TeamColor.DARK_BLUE;
+        } else if (color == NamedTextColor.DARK_GREEN) {
+            return TeamColor.DARK_GREEN;
+        } else if (color == NamedTextColor.DARK_AQUA) {
+            return TeamColor.DARK_AQUA;
+        } else if (color == NamedTextColor.DARK_RED) {
+            return TeamColor.DARK_RED;
+        } else if (color == NamedTextColor.DARK_PURPLE) {
+            return TeamColor.DARK_PURPLE;
+        } else if (color == NamedTextColor.GOLD) {
+            return TeamColor.GOLD;
+        } else if (color == NamedTextColor.GRAY) {
+            return TeamColor.GRAY;
+        } else if (color == NamedTextColor.DARK_GRAY) {
+            return TeamColor.DARK_GRAY;
+        } else if (color == NamedTextColor.BLUE) {
+            return TeamColor.BLUE;
+        } else if (color == NamedTextColor.GREEN) {
+            return TeamColor.GREEN;
+        } else if (color == NamedTextColor.AQUA) {
+            return TeamColor.AQUA;
+        } else if (color == NamedTextColor.RED) {
+            return TeamColor.RED;
+        } else if (color == NamedTextColor.LIGHT_PURPLE) {
+            return TeamColor.LIGHT_PURPLE;
+        } else if (color == NamedTextColor.YELLOW) {
+            return TeamColor.YELLOW;
+        } else if (color == NamedTextColor.WHITE) {
+            return TeamColor.WHITE;
+        }
+        return null;
+    }
+
+    public static @Nullable TextColor asAdventure(final @Nullable TeamColor color) {
+        if (color == null) {
+            return null;
+        }
+        return TextColor.color(color.rgb());
+    }
+
+    public static @Nullable NamedTextColor asAdventureNamed(final @Nullable TeamColor color) {
+        if (color == null) {
+            return null;
+        }
+        return switch (color) {
+            case BLACK -> NamedTextColor.BLACK;
+            case DARK_BLUE -> NamedTextColor.DARK_BLUE;
+            case DARK_GREEN -> NamedTextColor.DARK_GREEN;
+            case DARK_AQUA -> NamedTextColor.DARK_AQUA;
+            case DARK_RED -> NamedTextColor.DARK_RED;
+            case DARK_PURPLE -> NamedTextColor.DARK_PURPLE;
+            case GOLD -> NamedTextColor.GOLD;
+            case GRAY -> NamedTextColor.GRAY;
+            case DARK_GRAY -> NamedTextColor.DARK_GRAY;
+            case BLUE -> NamedTextColor.BLUE;
+            case GREEN -> NamedTextColor.GREEN;
+            case AQUA -> NamedTextColor.AQUA;
+            case RED -> NamedTextColor.RED;
+            case LIGHT_PURPLE -> NamedTextColor.LIGHT_PURPLE;
+            case YELLOW -> NamedTextColor.YELLOW;
+            case WHITE -> NamedTextColor.WHITE;
+        };
     }
 
     public static @Nullable NamedTextColor asAdventureNamed(final @Nullable ChatFormatting color) {

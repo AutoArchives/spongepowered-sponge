@@ -42,6 +42,7 @@ import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.LevelLoadListener;
+import net.minecraft.server.notifications.NotificationManager;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.players.PlayerList;
@@ -199,7 +200,8 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     private void impl$setThreadOnServerPhaseTracker(
         Thread serverThread, LevelStorageSource.LevelStorageAccess storageSource, PackRepository packRepository,
         WorldStem worldStem, Optional<GameRules> gameRules, Proxy proxy, DataFixer fixerUpper, Services services,
-        LevelLoadListener levelLoadListener, boolean propagatesCrashes, CallbackInfo ci
+        LevelLoadListener levelLoadListener, boolean propagatesCrashes,
+        NotificationManager notificationManager, CallbackInfo ci
     ) {
         try {
             PhaseTracker.getServerInstanceExplicitly().setThread(serverThread);
@@ -527,7 +529,14 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void impl$onInit(final CallbackInfo ci, final @Local(argsOnly = true) WorldStem levelStem) {
-        this.bridge$reloadedServerRegistries(((SpongeRegistryHolder) levelStem.resourceManager()).registryHolder());
+        final SpongeRegistryHolder rmHolder = (SpongeRegistryHolder) levelStem.resourceManager();
+        // The integrated server's "create new world" path constructs a fresh resource manager
+        // in WorldOpenFlows.createLevelFromExistingSettings that bypasses
+        // ReloadableServerResourcesMixin#impl$onLoadResources, so its RegistryHolderLogic has
+        // no Minecraft root populated. Seed it from the server's frozen registry access — for
+        // the dedicated path this is a no-op since the same data was already wired.
+        rmHolder.setRootMinecraftRegistry(this.shadow$registryAccess());
+        this.bridge$reloadedServerRegistries(rmHolder.registryHolder());
         this.impl$serviceProvider = ((ResourceManagerBridge) levelStem.resourceManager()).bridge$services();
     }
 

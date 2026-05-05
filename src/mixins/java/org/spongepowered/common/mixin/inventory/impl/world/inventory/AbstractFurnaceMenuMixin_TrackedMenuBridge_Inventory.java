@@ -32,7 +32,6 @@ import net.minecraft.world.inventory.AbstractFurnaceMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.RecipeBookType;
-import net.minecraft.world.item.crafting.RecipeType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -43,11 +42,11 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBrid
 public abstract class AbstractFurnaceMenuMixin_TrackedMenuBridge_Inventory {
 
     @Inject(
-        method = "<init>(Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/inventory/RecipeBookType;ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/inventory/ContainerData;)V",
+        method = "<init>(Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/inventory/RecipeBookType;ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/inventory/ContainerData;)V",
         at = @At("RETURN"))
     private void inventory$attachContainerMenu(
-        final MenuType $$0, final RecipeType $$1, final ResourceKey $$2,
-        final RecipeBookType $$3, final int $$4, final Inventory inventory, final Container container, final ContainerData $$7,
+        final MenuType $$0, final ResourceKey $$1,
+        final RecipeBookType $$2, final int $$3, final Inventory inventory, final Container container, final ContainerData $$6,
         final CallbackInfo ci) {
         if (inventory instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);

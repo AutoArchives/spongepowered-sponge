@@ -100,22 +100,9 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Shadow private int startPosition;
     @Shadow @Nullable private UUID entityUUID;
     @Shadow private BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> suggestions;
-    @Shadow private boolean hasNameEquals;
-    @Shadow private boolean hasNameNotEquals;
-    @Shadow private boolean isLimited;
-    @Shadow private boolean isSorted;
-    @Shadow private boolean hasGamemodeEquals;
-    @Shadow private boolean hasGamemodeNotEquals;
-    @Shadow private boolean hasTeamEquals;
-    @Shadow private boolean hasTeamNotEquals;
     @Shadow private net.minecraft.world.entity.@Nullable EntityType<?> type;
-    @Shadow private boolean typeInverse;
-    @Shadow private boolean hasScores;
-    @Shadow private boolean hasAdvancements;
     @Shadow private boolean usesSelectors;
 
-    @Shadow public abstract void shadow$setLimited(boolean value);
-    @Shadow public abstract void shadow$setSorted(boolean value);
     @Shadow public abstract void shadow$setX(double xIn);
     @Shadow public abstract void shadow$setY(double yIn);
     @Shadow public abstract void shadow$setZ(double zIn);
@@ -159,7 +146,6 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Override
     public Selector.@NonNull Builder limit(final int limit) {
         this.maxResults = limit;
-        this.shadow$setLimited(limit != Integer.MAX_VALUE);
         return this;
     }
 
@@ -210,7 +196,6 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Override
     public Selector.@NonNull Builder sortAlgorithm(final @NonNull SelectorSortAlgorithm algorithm) {
         org.spongepowered.common.util.Preconditions.checkArgument(algorithm instanceof SpongeSelectorSortAlgorithm, "Must be a SpongeSelectorSortAlgorithm");
-        this.shadow$setSorted(true);
         this.order = ((SpongeSelectorSortAlgorithm) algorithm).getSortAlgorithm();
         return this;
     }
@@ -444,18 +429,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         this.playerName = null;
         this.startPosition = 0;
         this.entityUUID = null;
-        this.hasNameEquals = false;
-        this.hasNameNotEquals = false;
-        this.isLimited = false;
-        this.isSorted = false;
-        this.hasGamemodeEquals = false;
-        this.hasGamemodeNotEquals = false;
-        this.hasTeamEquals = false;
-        this.hasTeamNotEquals = false;
         this.type = null;
-        this.typeInverse = false;
-        this.hasScores = false;
-        this.hasAdvancements = false;
         this.usesSelectors = false;
         this.reader.setCursor(0);
         this.suggestions = EntitySelectorParser.SUGGEST_NOTHING;

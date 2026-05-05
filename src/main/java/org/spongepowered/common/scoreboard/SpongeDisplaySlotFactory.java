@@ -25,6 +25,7 @@
 package org.spongepowered.common.scoreboard;
 
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.world.scores.TeamColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -36,8 +37,11 @@ public final class SpongeDisplaySlotFactory implements DisplaySlot.Factory {
     @Override
     @NonNull
     public Optional<DisplaySlot> findByTeamColor(final @NonNull NamedTextColor color) {
-        var displaySlot = net.minecraft.world.scores.DisplaySlot.teamColorToSlot(SpongeAdventure.asVanilla(color));
-        return Optional.ofNullable(displaySlot).map(DisplaySlot.class::cast);
+        final TeamColor teamColor = SpongeAdventure.asVanillaTeamColor(color);
+        if (teamColor == null) {
+            return Optional.empty();
+        }
+        return Optional.of((DisplaySlot) (Object) teamColor.displaySlot());
     }
 
 }

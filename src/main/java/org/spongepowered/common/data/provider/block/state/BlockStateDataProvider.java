@@ -123,6 +123,7 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.PERSISTENT, BlockStateProperties.PERSISTENT);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.PICKLES, BlockStateProperties.PICKLES);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.PISTON_TYPE, BlockStateProperties.PISTON_TYPE);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.POTENT_SULFUR_STATE, BlockStateProperties.POTENT_SULFUR_STATE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.POWER, BlockStateProperties.POWER);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.POWERED, BlockStateProperties.POWERED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.RAIL_SHAPE, BlockStateProperties.RAIL_SHAPE);

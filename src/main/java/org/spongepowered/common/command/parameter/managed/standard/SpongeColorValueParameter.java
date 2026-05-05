@@ -30,8 +30,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.Component;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.arguments.ColorArgument;
+import net.minecraft.commands.arguments.TeamColorArgument;
+import net.minecraft.world.scores.TeamColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
@@ -39,12 +39,10 @@ import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.accessor.ChatFormattingAccessor;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -67,11 +65,10 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
             .append(Component.text("* Comma separated RGB color, surrounded by double quotes, with values from 0 to 255 (such as \"0,128,255\")"))
             .build();
     private final static Pattern HEX_CODE = Pattern.compile("(#?)(?<colorcode>[0-9A-Fa-f]{6})");
-    private final static Collection<String> CHAT_FORMATTING_NAMES = Arrays.stream(ChatFormatting.values())
-            .filter(x -> x.isColor())
-            .map(x -> x.getName().toLowerCase(Locale.ROOT))
-            .collect(Collectors.toList());
-    private final ColorArgument colorArgumentType = ColorArgument.color();
+    private final static Collection<String> TEAM_COLOR_NAMES = TeamColor.VALUES.stream()
+            .map(TeamColor::getSerializedName)
+            .toList();
+    private final TeamColorArgument colorArgumentType = TeamColorArgument.teamColor();
 
     public SpongeColorValueParameter(final ResourceKey key) {
         super(key);
@@ -92,13 +89,8 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
         final ArgumentReader.Immutable state = reader.immutable();
         // First, is the argument type giving the correct return type?
         try {
-            final ChatFormatting formatting = this.colorArgumentType.parse((StringReader) reader);
-            final Integer colorCode = ((ChatFormattingAccessor) (Object) formatting).accessor$color();
-            if (colorCode != null) {
-                return Optional.of(Color.ofRgb(colorCode));
-            }
-            // "reset" slips through the net here.
-            throw reader.createException(Component.text().content(String.format("%s is not a valid color", formatting.getName())).build());
+            final TeamColor parsed = this.colorArgumentType.parse((StringReader) reader);
+            return Optional.of(Color.ofRgb(parsed.rgb()));
         } catch (final CommandSyntaxException e) {
             // ignored
         }
@@ -130,7 +122,7 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
 
     @Override
     public List<CommandCompletion> complete(final CommandCause context, final String currentInput) {
-        return SpongeColorValueParameter.CHAT_FORMATTING_NAMES
+        return SpongeColorValueParameter.TEAM_COLOR_NAMES
                 .stream()
                 .filter(x -> x.startsWith(currentInput.toLowerCase(Locale.ROOT)))
                 .map(SpongeCommandCompletion::new)

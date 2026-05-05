@@ -8,7 +8,6 @@
     "world.level.entity.TransientEntitySectionManagerAccessor"
   ],
   "mixins": [
-    "ChatFormattingAccessor",
     "advancements.CriteriaTriggersAccessor",
     "commands.CommandSourceStackAccessor",
     "commands.arguments.DimensionArgumentAccessor",

@@ -247,7 +247,8 @@ public final class CommandRegistryLoader {
             l.add(CommandTreeNodeTypes.BLOCK_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ITEM_STACK, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ITEM_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.COLOR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.TEAM_COLOR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.HEX_COLOR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.COMPONENT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.MESSAGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.NBT_COMPOUND_TAG, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));

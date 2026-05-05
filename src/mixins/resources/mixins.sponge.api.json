@@ -459,6 +459,7 @@
     "minecraft.world.level.block.state.properties.HalfMixin_API",
     "minecraft.world.level.block.state.properties.NoteBlockInstrumentMixin_API",
     "minecraft.world.level.block.state.properties.PistonTypeMixin_API",
+    "minecraft.world.level.block.state.properties.PotentSulfurStateMixin_API",
     "minecraft.world.level.block.state.properties.RailShapeMixin_API",
     "minecraft.world.level.block.state.properties.RedstoneSideMixin_API",
     "minecraft.world.level.block.state.properties.SculkSensorPhaseMixin_API",

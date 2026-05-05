@@ -28,10 +28,10 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.ChatFormatting;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.scores.TeamColor;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -57,7 +57,7 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
     // @formatter:off
     @Shadow @Final @Mutable @Nullable private Scoreboard scoreboard;
     @Shadow private net.minecraft.network.chat.Component displayName;
-    @Shadow private ChatFormatting color;
+    @Shadow private Optional<TeamColor> color;
     @Shadow private net.minecraft.network.chat.Component playerPrefix;
     @Shadow private net.minecraft.network.chat.Component playerSuffix;
     @Shadow public abstract Collection<String> getPlayers();
@@ -79,7 +79,7 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
         this.bridge$displayName = LegacyComponentSerializer.legacySection().deserialize(name);
         this.bridge$prefix = SpongeAdventure.asAdventure(this.playerPrefix);
         this.bridge$suffix = SpongeAdventure.asAdventure(this.playerSuffix);
-        this.bridge$color = SpongeAdventure.asAdventureNamed(this.color);
+        this.bridge$color = this.color.map(SpongeAdventure::asAdventureNamed).orElse(NamedTextColor.WHITE);
     }
 
     @Redirect(
@@ -135,8 +135,8 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
     }
 
     @Inject(method = "setColor", at = @At("RETURN"))
-    private void impl$trackColorChange(final ChatFormatting color, final CallbackInfo ci) {
-        this.bridge$color = SpongeAdventure.asAdventureNamed(color);
+    private void impl$trackColorChange(final Optional<TeamColor> color, final CallbackInfo ci) {
+        this.bridge$color = color.map(SpongeAdventure::asAdventureNamed).orElse(NamedTextColor.WHITE);
     }
 
     @Override
@@ -183,7 +183,7 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
     @Override
     public void bridge$setColor(final NamedTextColor color) {
         this.bridge$color = color;
-        this.color = SpongeAdventure.asVanilla(color);
+        this.color = Optional.ofNullable(SpongeAdventure.asVanillaTeamColor(color));
         this.impl$teamChanged();
     }
 
