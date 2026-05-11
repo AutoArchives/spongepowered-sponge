@@ -31,6 +31,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EndPortalBlock;
 import net.minecraft.world.level.levelgen.feature.EndPlatformFeature;
 import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.portal.Portal;
@@ -71,7 +72,7 @@ public abstract class EndPortalBlockMixin implements PortalBlockBridge {
         }
 
         final var sharedSpawnPos = toLevel.getRespawnData().pos();
-        final var spawnPos = ((net.minecraft.world.entity.Entity) entity).adjustSpawnLocation(toLevel, sharedSpawnPos).getBottomCenter();
+        final var spawnPos = Vec3.atBottomCenterOf(((net.minecraft.world.entity.Entity) entity).adjustSpawnLocation(toLevel, sharedSpawnPos));
         return ServerLocation.of((ServerWorld) toLevel, VecHelper.toVector3d(spawnPos));
     }
 
@@ -90,7 +91,7 @@ public abstract class EndPortalBlockMixin implements PortalBlockBridge {
         final var level = (ServerLevel) at.world();
         // If a target dimension is set assume we always want to generate a portal otherwise we could have used a spawn teleporter
         if (level.dimension() == Level.END) {
-            final var bottomCenter = VecHelper.toBlockPos(at.blockPosition()).getBottomCenter();
+            final var bottomCenter = Vec3.atBottomCenterOf(VecHelper.toBlockPos(at.blockPosition()));
             EndPlatformFeature.createEndPlatform(level, BlockPos.containing(bottomCenter).below(), true);
             return Optional.of(new SpongePortal(at, (PortalLogic) this));
         }

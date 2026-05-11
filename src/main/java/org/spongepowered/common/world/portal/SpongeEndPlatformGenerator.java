@@ -27,6 +27,7 @@ package org.spongepowered.common.world.portal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.feature.EndPlatformFeature;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalLogic;
@@ -43,7 +44,7 @@ public final class SpongeEndPlatformGenerator implements PortalLogic.PortalGener
     @Override
     public Optional<Portal> generatePortal(final ServerLocation location, final Axis axis) {
         final var level = (ServerLevel) location.world();
-        final var bottomCenter = VecHelper.toBlockPos(location.blockPosition()).getBottomCenter();
+        final var bottomCenter = Vec3.atBottomCenterOf(VecHelper.toBlockPos(location.blockPosition()));
         EndPlatformFeature.createEndPlatform(level, BlockPos.containing(bottomCenter).below(), true);
         return Optional.of(new SpongePortal(location, null)); // TODO set portallogic?
     }

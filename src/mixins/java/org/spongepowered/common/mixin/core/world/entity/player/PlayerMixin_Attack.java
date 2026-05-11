@@ -291,18 +291,18 @@ public abstract class PlayerMixin_Attack extends LivingEntityMixin_Damage implem
         "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;F)V",
         // NeoForge changes where this gets invoked in a new method, so we add it as a target
         "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;FLnet/minecraft/world/phys/AABB;)V"
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDD)V"), slice = @Slice(
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDDLnet/minecraft/world/damagesource/DamageSource;F)V"), slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;doPostAttackEffects(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;)V")),
         require = 1
     )
     private void sweepAttack$knockbackModifier(
-        final LivingEntity sweepTarget, double modifier, final double dirX, final double dirZ, final Operation<Void> operation) {
+        final LivingEntity sweepTarget, double modifier, final double dirX, final double dirZ, final DamageSource source, final float damage, final Operation<Void> operation) {
         final SpongeAttackTracker sweepTracker = this.attack$tracker();
         if (sweepTracker != null) {
             modifier = sweepTracker.postEvent().knockbackModifier();
         }
-        operation.call(sweepTarget, modifier, dirX, dirZ);
+        operation.call(sweepTarget, modifier, dirX, dirZ, source, damage);
     }
 
     @WrapOperation(method = {

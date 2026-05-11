@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
+import net.minecraft.world.inventory.ArmorSlot;
 import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(targets = "net/minecraft/world/inventory/ArmorSlot")
+@Mixin(ArmorSlot.class)
 public abstract class ArmorSlot_Inventory_API implements EquipmentSlot {
 }

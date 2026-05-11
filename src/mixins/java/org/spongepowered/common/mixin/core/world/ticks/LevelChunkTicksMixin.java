@@ -72,7 +72,7 @@ public abstract class LevelChunkTicksMixin<T> implements LevelChunkTicksBridge<T
     }
 
     @ModifyExpressionValue(method = "pack(J)Ljava/util/List;",
-        at = @At(value = "INVOKE", target = "Ljava/util/Queue;iterator()Ljava/util/Iterator;"))
+        at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
     private Iterator<ScheduledTick<T>> impl$onSaveSkipCancelled(final Iterator<ScheduledTick<T>> original) {
         return Iterators.filter(original, t -> ((TickNextTickDataBridge<T>) (Object) t).bridge$internalState() != ScheduledUpdate.State.CANCELLED);
     }
