@@ -32,9 +32,11 @@ import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.level.WorldDataConfiguration;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
 
 @Mixin(WorldOpenFlows.class)
 public abstract class WorldOpenFlowsMixin {
@@ -43,10 +45,21 @@ public abstract class WorldOpenFlowsMixin {
      * The integrated-server "create new world" path constructs a fresh
      * {@link CloseableResourceManager} via {@link WorldLoader.PackConfig#createResourceManager()}
      * outside of {@link WorldLoader#load} — bypassing {@code WorldLoaderMixin}'s
-     * {@code establishServerServices} hook. Without it the resource manager that ends up
-     * in the {@link net.minecraft.server.WorldStem} has no service provider attached,
-     * and {@code MinecraftServerMixin#impl$onInit} stores {@code null} into the server's
-     * {@code impl$serviceProvider}, which subsequently NPEs at login time.
+     * {@code establishServerServices} and {@code beginEstablishServerRegistries} hooks.
+     *
+     * <p>Without the services hook the resource manager that ends up in the
+     * {@link net.minecraft.server.WorldStem} has no service provider attached, and
+     * {@code MinecraftServerMixin#impl$onInit} stores {@code null} into the server's
+     * {@code impl$serviceProvider}, which subsequently NPEs at login time.</p>
+     *
+     * <p>Without the registries hook the new holder has an empty sponge root —
+     * neither the built-in sponge registries nor any plugin-defined
+     * {@link org.spongepowered.api.event.lifecycle.RegisterRegistryEvent.EngineScoped}
+     * registrations are present — so engine-scoped lookups (e.g. from
+     * {@code StartingEngineEvent} listeners) raise
+     * {@link org.spongepowered.api.registry.ValueNotFoundException}. Re-posting the
+     * event here is intentional: plugin handlers register against {@code event.getHolder()},
+     * so each holder ends up with its own copy and the discarded #1 holder is harmless.</p>
      */
     @WrapOperation(method = "createLevelFromExistingSettings",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldLoader$PackConfig;createResourceManager()Lcom/mojang/datafixers/util/Pair;"))
@@ -54,7 +67,9 @@ public abstract class WorldOpenFlowsMixin {
         final WorldLoader.PackConfig packConfig, final Operation<Pair<WorldDataConfiguration, CloseableResourceManager>> original
     ) {
         final Pair<WorldDataConfiguration, CloseableResourceManager> pair = original.call(packConfig);
-        Launch.instance().lifecycle().establishServerServices(pair.getSecond(), PermissionLevel.ALL);
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.establishServerServices(pair.getSecond(), PermissionLevel.ALL);
+        lifecycle.beginEstablishServerRegistries((RegistryHolder) pair.getSecond());
         return pair;
     }
 }
