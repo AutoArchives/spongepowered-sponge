@@ -429,6 +429,7 @@
     "minecraft.world.level.block.entity.JigsawBlockEntityMixin_API",
     "minecraft.world.level.block.entity.JukeboxBlockEntityMixin_API",
     "minecraft.world.level.block.entity.LecternBlockEntityMixin_API",
+    "minecraft.world.level.block.entity.PotentSulfurBlockEntityMixin_API",
     "minecraft.world.level.block.entity.RandomizableContainerBlockEntityMixin_API",
     "minecraft.world.level.block.entity.SculkSensorBlockEntityMixin_API",
     "minecraft.world.level.block.entity.ShulkerBoxBlockEntityMixin_API",

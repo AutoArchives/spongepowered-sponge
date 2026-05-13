@@ -22,32 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.entity;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
-import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
+import net.minecraft.world.level.block.entity.PotentSulfurBlockEntity;
+import org.spongepowered.api.block.entity.PotentSulfur;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public final class BlockEntityDataProviders extends DataProviderRegistratorBuilder {
+import java.util.Set;
+
+@Mixin(PotentSulfurBlockEntity.class)
+public abstract class PotentSulfurBlockEntityMixin_API extends BlockEntityMixin_API implements PotentSulfur {
+
+    @Shadow public abstract void resetCountdown();
 
     @Override
-    public void registerProviders() {
-        BannerData.register(this.registrator);
-        BeaconData.register(this.registrator);
-        BrewingStandData.register(this.registrator);
-        CommandBlockData.register(this.registrator);
-        ConduitData.register(this.registrator);
-        EndGatewayData.register(this.registrator);
-        AbstractFurnaceData.register(this.registrator);
-        HopperData.register(this.registrator);
-        JukeBoxData.register(this.registrator);
-        LecternData.register(this.registrator);
-        LockableData.register(this.registrator);
-        MobSpawnerData.register(this.registrator);
-        PotentSulfurData.register(this.registrator);
-        TrialSpawnerDataProvider.register(this.registrator);
-        SignData.register(this.registrator);
-        SkullData.register(this.registrator);
-        StructureBlockData.register(this.registrator);
-        CrafterData.register(this.registrator);
-        DecoratedPotData.register(this.registrator);
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+        this.getValue(Keys.ERUPTION_COUNTDOWN).map(Value::asImmutable).ifPresent(values::add);
+        return values;
     }
 }

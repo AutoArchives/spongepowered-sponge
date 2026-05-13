@@ -24,30 +24,34 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
+import net.minecraft.world.level.block.entity.PotentSulfurBlockEntity;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
-public final class BlockEntityDataProviders extends DataProviderRegistratorBuilder {
+public final class PotentSulfurData {
 
-    @Override
-    public void registerProviders() {
-        BannerData.register(this.registrator);
-        BeaconData.register(this.registrator);
-        BrewingStandData.register(this.registrator);
-        CommandBlockData.register(this.registrator);
-        ConduitData.register(this.registrator);
-        EndGatewayData.register(this.registrator);
-        AbstractFurnaceData.register(this.registrator);
-        HopperData.register(this.registrator);
-        JukeBoxData.register(this.registrator);
-        LecternData.register(this.registrator);
-        LockableData.register(this.registrator);
-        MobSpawnerData.register(this.registrator);
-        PotentSulfurData.register(this.registrator);
-        TrialSpawnerDataProvider.register(this.registrator);
-        SignData.register(this.registrator);
-        SkullData.register(this.registrator);
-        StructureBlockData.register(this.registrator);
-        CrafterData.register(this.registrator);
-        DecoratedPotData.register(this.registrator);
+    private PotentSulfurData() {
     }
+
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+                .asMutable(PotentSulfurBlockEntity.class)
+                    .create(Keys.ERUPTION_COUNTDOWN)
+                        .get(h -> h.waitingCountdown < 0 ? null : new SpongeTicks(h.waitingCountdown))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (ticks < 0) {
+                                return false;
+                            }
+                            h.waitingCountdown = ticks;
+                            return true;
+                        })
+                        .delete(PotentSulfurBlockEntity::resetCountdown);
+    }
+    // @formatter:on
 }
