@@ -114,8 +114,7 @@ public final class PluginScreen extends Screen {
             return;
         }
 
-        this.selectionList.children().clear();
-        this.selectionList.children().addAll(metadatas.stream()
+        this.selectionList.replaceEntries(metadatas.stream()
             .map(metadata -> new PluginSelectionList.Entry(this.selectionList, metadata))
             .collect(Collectors.toList()));
         this.selectionList.setSelected(this.selectionList.children().stream().findFirst().orElse(null));
