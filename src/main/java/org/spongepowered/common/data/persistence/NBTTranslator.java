@@ -72,19 +72,19 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
         // from the instance of checks.
         Objects.requireNonNull(container);
         Objects.requireNonNull(compound);
-        for (Map.Entry<DataQuery, Object> entry : container.values(false).entrySet()) {
+        container.streamRootValues().forEach(entry -> {
             Object value = entry.getValue();
-            String key = entry.getKey().asString('.');
+            String key = entry.getKey();
             if (value instanceof DataView) {
                 CompoundTag inner = new CompoundTag();
-                NBTTranslator.containerToCompound(container.getView(entry.getKey()).get(), inner);
+                NBTTranslator.containerToCompound(container.getView(DataQuery.of(entry.getKey())).get(), inner);
                 compound.put(key, inner);
             } else if (value instanceof Boolean) {
                 compound.put(key + NBTTranslator.BOOLEAN_IDENTIFIER, ByteTag.valueOf((Boolean) value));
             } else {
                 compound.put(key, NBTTranslator.getBaseFromObject(value));
             }
-        }
+        });
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
