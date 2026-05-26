@@ -53,7 +53,7 @@ public final class DataStoreRegistry {
 
     private final Map<LookupKey<Key<?>>, DataStore> dataStoreCache = new ConcurrentHashMap<>();
     private final Map<LookupKey<ResourceKey>, Optional<DataStore>> dataStoreByResourceKeyCache = new ConcurrentHashMap<>();
-    private final Multimap<Type, DataStore> dataStoreByTokenCache = HashMultimap.create();
+    private final Map<Type, Collection<DataStore>> dataStoreByTokenCache =  new ConcurrentHashMap<>();
 
     public void register(final DataStore dataStore, Iterable<Key<?>> keys) {
         keys.forEach(k -> this.dataStoreByValueKey.put(k, dataStore));
@@ -107,15 +107,18 @@ public final class DataStoreRegistry {
                 .collect(Collectors.toList());
     }
 
-    public Collection<DataStore> getDataStoresForType(Class<? extends DataHolder> holderType) {
-        if (!this.dataStoreByTokenCache.containsKey(holderType)) {
-            for (DataStore dataStore : this.allDataStores) {
-                if (dataStore.supportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType))) {
-                    this.dataStoreByTokenCache.put(holderType, dataStore);
-                }
+    public Collection<DataStore> getDataStoresForType(final Class<? extends DataHolder> holderType) {
+        return this.dataStoreByTokenCache.computeIfAbsent(holderType, this::loadDataStoresType);
+    }
+
+    private Collection<DataStore> loadDataStoresType(final Type holderType) {
+        final ArrayList<DataStore> dataStores = new ArrayList<>();
+        for (DataStore dataStore : this.allDataStores) {
+            if (dataStore.supportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType))) {
+                dataStores.add(dataStore);
             }
         }
-        return this.dataStoreByTokenCache.get(holderType);
+        return dataStores;
     }
 
     private static final class LookupKey<T> {
