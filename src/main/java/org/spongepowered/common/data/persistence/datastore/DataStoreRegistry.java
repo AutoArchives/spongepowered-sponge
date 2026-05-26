@@ -51,7 +51,8 @@ public final class DataStoreRegistry {
     private final Multimap<ResourceKey, DataStore> dataStoreByDataStoreKey = HashMultimap.create();
     private final List<DataStore> allDataStores = new ArrayList<>();
 
-    private final Map<LookupKey, DataStore> dataStoreCache = new ConcurrentHashMap<>();
+    private final Map<LookupKey<Key<?>>, DataStore> dataStoreCache = new ConcurrentHashMap<>();
+    private final Map<LookupKey<ResourceKey>, Optional<DataStore>> dataStoreByResourceKeyCache = new ConcurrentHashMap<>();
     private final Multimap<Type, DataStore> dataStoreByTokenCache = HashMultimap.create();
 
     public void register(final DataStore dataStore, Iterable<Key<?>> keys) {
@@ -74,19 +75,14 @@ public final class DataStoreRegistry {
     }
 
     public DataStore getDataStore(final Key<?> dataKey, final Type holderType) {
-        return this.dataStoreCache.computeIfAbsent(new LookupKey(holderType, dataKey), this::loadDataStore);
+        return this.dataStoreCache.computeIfAbsent(new LookupKey<>(holderType, dataKey), this::loadDataStoreKey);
     }
 
     public Optional<DataStore> getDataStore(final ResourceKey key, final Type holderType) {
-        // TODO do we need caching for this too?
-        final List<DataStore> dataStores = this.filterDataStoreCandidates(this.dataStoreByDataStoreKey.get(key), holderType);
-        if (dataStores.size() > 1) {
-            throw new IllegalStateException("Multiple data-stores registered for the same key (" + key + ") and data-holder " + holderType.toString());
-        }
-        return dataStores.stream().findAny();
+        return this.dataStoreByResourceKeyCache.computeIfAbsent(new LookupKey<>(holderType, key), this::loadDataStoreResourceKey);
     }
 
-    private DataStore loadDataStore(final LookupKey lookupKey) {
+    private DataStore loadDataStoreKey(final LookupKey<Key<?>> lookupKey) {
         final List<DataStore> dataStores = filterDataStoreCandidates(this.dataStoreByValueKey.get(lookupKey.key), lookupKey.holderType);
         if (dataStores.size() > 1) {
             throw new IllegalStateException("Multiple data-stores registered for the same data-key (" + lookupKey.key.key() + ") and data-holder " + lookupKey.holderType.toString());
@@ -95,6 +91,14 @@ public final class DataStoreRegistry {
             dataStores.add(this.NO_OP_DATASTORE);
         }
         return dataStores.get(0);
+    }
+
+    private Optional<DataStore> loadDataStoreResourceKey(final LookupKey<ResourceKey> lookupKey) {
+        final List<DataStore> dataStores = this.filterDataStoreCandidates(this.dataStoreByDataStoreKey.get(lookupKey.key), lookupKey.holderType);
+        if (dataStores.size() > 1) {
+            throw new IllegalStateException("Multiple data-stores registered for the same key (" + lookupKey.key + ") and data-holder " + lookupKey.holderType.toString());
+        }
+        return dataStores.stream().findAny();
     }
 
     private List<DataStore> filterDataStoreCandidates(Collection<DataStore> candidates, Type holderType) {
@@ -114,12 +118,12 @@ public final class DataStoreRegistry {
         return this.dataStoreByTokenCache.get(holderType);
     }
 
-    private static class LookupKey {
+    private static final class LookupKey<T> {
 
         private final Type holderType;
-        private final Key<?> key;
+        private final T key;
 
-        public LookupKey(final Type holderType, final Key<?> key) {
+        public LookupKey(final Type holderType, final T key) {
             this.holderType = holderType;
             this.key = key;
         }
@@ -132,7 +136,7 @@ public final class DataStoreRegistry {
             if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
-            final LookupKey lookupKey = (LookupKey) o;
+            final LookupKey<?> lookupKey = (LookupKey<?>) o;
             return this.holderType.equals(lookupKey.holderType) &&
                     this.key.equals(lookupKey.key);
         }
