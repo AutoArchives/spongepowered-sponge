@@ -225,8 +225,8 @@ public final class DataUtil {
     }
 
     public static Optional<DataView> getSpongeData(final DataView allData, final DataQuery dataStoreKey, final int version) {
-        return allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT
-                .then(dataStoreKey)
-                .then(Constants.Sponge.Data.V3.CONTENT));
+        return allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT)
+            .flatMap(spongeData -> spongeData.getView(dataStoreKey))
+            .flatMap(dataStore -> dataStore.getView(Constants.Sponge.Data.V3.CONTENT));
     }
 }
