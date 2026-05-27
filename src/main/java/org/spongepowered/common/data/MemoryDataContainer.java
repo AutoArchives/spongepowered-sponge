@@ -74,7 +74,87 @@ public final class MemoryDataContainer extends MemoryDataView implements DataCon
     }
 
     @Override
+    public DataContainer set(final DataQuery path, final String value) {
+        return (DataContainer) super.set(path, value);
+    }
+
+    @Override
+    public DataContainer set(final DataQuery path, final boolean value) {
+        return (DataContainer) super.set(path, value);
+    }
+
+    @Override
+    public DataContainer set(final DataQuery path, final byte value) {
+        return (DataContainer) super.set(path, value);
+    }
+
+    @Override
+    public DataContainer set(final DataQuery path, final short value) {
+        return (DataContainer) super.set(path, value);
+    }
+
+    @Override
+    public DataContainer set(final DataQuery path, final int value) {
+        return (DataContainer) super.set(path, value);
+    }
+
+    @Override
+    public DataContainer set(final DataQuery path, final long value) {
+        return (DataContainer) super.set(path, value);
+    }
+
+    @Override
+    public DataContainer set(final DataQuery path, final float value) {
+        return (DataContainer) super.set(path, value);
+    }
+
+    @Override
+    public DataContainer set(final DataQuery path, final double value) {
+        return (DataContainer) super.set(path, value);
+    }
+
+    @Override
     public DataContainer set(final String key, final Object value) {
+        return (DataContainer) super.set(key, value);
+    }
+
+    @Override
+    public DataContainer set(final String key, final String value) {
+        return (DataContainer) super.set(key, value);
+    }
+
+    @Override
+    public DataContainer set(final String key, final boolean value) {
+        return (DataContainer) super.set(key, value);
+    }
+
+    @Override
+    public DataContainer set(final String key, final byte value) {
+        return (DataContainer) super.set(key, value);
+    }
+
+    @Override
+    public DataContainer set(final String key, final short value) {
+        return (DataContainer) super.set(key, value);
+    }
+
+    @Override
+    public DataContainer set(final String key, final int value) {
+        return (DataContainer) super.set(key, value);
+    }
+
+    @Override
+    public DataContainer set(final String key, final long value) {
+        return (DataContainer) super.set(key, value);
+    }
+
+    @Override
+    public DataContainer set(final String key, final float value) {
+        return (DataContainer) super.set(key, value);
+    }
+
+    @Override
+    public DataContainer set(final String key, final double value) {
         return (DataContainer) super.set(key, value);
     }
 

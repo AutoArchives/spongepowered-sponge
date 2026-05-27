@@ -232,6 +232,82 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
+    public DataView set(final DataQuery path, final Object value) {
+        Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(value, "value");
+        Preconditions.checkState(this.container != null);
+        Preconditions.checkState(!path.parts().isEmpty(), "The path is empty");
+        Preconditions.checkArgument(value != this, "Cannot set a DataView to itself.");
+
+        if (path.parts().size() == 1) {
+            return this.set0(path.parts().getFirst(), value);
+        }
+
+        return this.setChild(path, value);
+    }
+
+    @Override
+    public DataView set(final DataQuery path, final String value) {
+        Objects.requireNonNull(value, "value");
+        return this.setScalar(path, value);
+    }
+
+    @Override
+    public DataView set(final DataQuery path, final boolean value) {
+        return this.setScalar(path, value);
+    }
+
+    @Override
+    public DataView set(final DataQuery path, final byte value) {
+        return this.setScalar(path, value);
+    }
+
+    @Override
+    public DataView set(final DataQuery path, final short value) {
+        return this.setScalar(path, value);
+    }
+
+    @Override
+    public DataView set(final DataQuery path, final int value) {
+        return this.setScalar(path, value);
+    }
+
+    @Override
+    public DataView set(final DataQuery path, final long value) {
+        return this.setScalar(path, value);
+    }
+
+    @Override
+    public DataView set(final DataQuery path, final float value) {
+        return this.setScalar(path, value);
+    }
+
+    @Override
+    public DataView set(final DataQuery path, final double value) {
+        return this.setScalar(path, value);
+    }
+
+    private DataView setScalar(final DataQuery path, final Object value) {
+        Objects.requireNonNull(path, "path");
+        Preconditions.checkState(this.container != null);
+        Preconditions.checkState(!path.parts().isEmpty(), "The path is empty");
+
+        if (path.parts().size() == 1) {
+            this.map.put(path.parts().getFirst(), value);
+            return this;
+        }
+
+        return this.setChild(path, value);
+    }
+
+    private DataView setChild(final DataQuery path, final Object value) {
+        final DataQuery subQuery = DataQuery.of(path.parts().getFirst());
+        final DataView subView = this.getUnsafeView(subQuery).orElseGet(() -> this.createView(subQuery));
+        subView.set(path.popFirst(), value);
+        return this;
+    }
+
+    @Override
     public DataView set(final String key, final Object value) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(value, "value");
@@ -243,31 +319,53 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public DataView set(final DataQuery path, final Object value) {
-        Objects.requireNonNull(path, "path");
+    public DataView set(final String key, final String value) {
         Objects.requireNonNull(value, "value");
+        return this.setScalar(key, value);
+    }
+
+    @Override
+    public DataView set(final String key, final boolean value) {
+        return this.setScalar(key, value);
+    }
+
+    @Override
+    public DataView set(final String key, final byte value) {
+        return this.setScalar(key, value);
+    }
+
+    @Override
+    public DataView set(final String key, final short value) {
+        return this.setScalar(key, value);
+    }
+
+    @Override
+    public DataView set(final String key, final int value) {
+        return this.setScalar(key, value);
+    }
+
+    @Override
+    public DataView set(final String key, final long value) {
+        return this.setScalar(key, value);
+    }
+
+    @Override
+    public DataView set(final String key, final float value) {
+        return this.setScalar(key, value);
+    }
+
+    @Override
+    public DataView set(final String key, final double value) {
+        return this.setScalar(key, value);
+    }
+
+    private DataView setScalar(final String key, final Object value) {
+        Objects.requireNonNull(key, "key");
         Preconditions.checkState(this.container != null);
-        Preconditions.checkState(!path.parts().isEmpty(), "The path is empty");
-        Preconditions.checkArgument(value != this, "Cannot set a DataView to itself.");
+        Preconditions.checkState(!key.isEmpty(), "The key is empty");
 
-        final List<String> parts = path.parts();
-        final String key = parts.get(0);
-        if (parts.size() > 1) {
-            final DataQuery subQuery = DataQuery.of(key);
-            final Optional<DataView> subViewOptional = this.getUnsafeView(subQuery);
-            final DataView subView;
-            if (!subViewOptional.isPresent()) {
-                this.createView(subQuery);
-                subView = (DataView) this.map.get(key);
-            } else {
-                subView = subViewOptional.get();
-            }
-            subView.set(path.popFirst(), value);
-            return this;
-        }
-
-        return this.set0(key, value);
+        this.map.put(key, value);
+        return this;
     }
 
     private DataView set0(final String key, final Object value) {
