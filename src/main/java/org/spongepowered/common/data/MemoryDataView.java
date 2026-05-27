@@ -860,7 +860,7 @@ public class MemoryDataView implements DataView {
         final MemoryDataView other = (MemoryDataView) obj;
 
         return Objects.equals(this.map.entrySet(), other.map.entrySet())
-                && Objects.equals(this.currentPath(), other.path);
+                && Objects.equals(this.currentPath(), other.currentPath());
     }
 
     @Override
