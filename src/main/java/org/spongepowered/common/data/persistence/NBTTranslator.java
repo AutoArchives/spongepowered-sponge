@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import static org.spongepowered.api.data.persistence.DataQuery.of;
-
 import com.google.common.collect.Lists;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.nbt.ByteArrayTag;
@@ -77,7 +75,7 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
             String key = entry.getKey();
             if (value instanceof DataView) {
                 CompoundTag inner = new CompoundTag();
-                NBTTranslator.containerToCompound(container.getView(DataQuery.of(entry.getKey())).get(), inner);
+                NBTTranslator.containerToCompound(container.getView(entry.getKey()).get(), inner);
                 compound.put(key, inner);
             } else if (value instanceof Boolean) {
                 compound.put(key + NBTTranslator.BOOLEAN_IDENTIFIER, ByteTag.valueOf((Boolean) value));
@@ -182,31 +180,31 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
         switch (type) {
             case Constants.NBT.TAG_BYTE:
                 if (key.contains(NBTTranslator.BOOLEAN_IDENTIFIER)) {
-                    view.set(of(key.replace(NBTTranslator.BOOLEAN_IDENTIFIER, "")), (((ByteTag) base).getAsByte() != 0));
+                    view.set(key.replace(NBTTranslator.BOOLEAN_IDENTIFIER, ""), (((ByteTag) base).getAsByte() != 0));
                 } else {
-                    view.set(of(key), ((ByteTag) base).getAsByte());
+                    view.set(key, ((ByteTag) base).getAsByte());
                 }
                 break;
             case Constants.NBT.TAG_SHORT:
-                view.set(of(key), ((ShortTag) base).getAsShort());
+                view.set(key, ((ShortTag) base).getAsShort());
                 break;
             case Constants.NBT.TAG_INT:
-                view.set(of(key), ((IntTag) base).getAsInt());
+                view.set(key, ((IntTag) base).getAsInt());
                 break;
             case Constants.NBT.TAG_LONG:
-                view.set(of(key), ((LongTag) base).getAsLong());
+                view.set(key, ((LongTag) base).getAsLong());
                 break;
             case Constants.NBT.TAG_FLOAT:
-                view.set(of(key), ((FloatTag) base).getAsFloat());
+                view.set(key, ((FloatTag) base).getAsFloat());
                 break;
             case Constants.NBT.TAG_DOUBLE:
-                view.set(of(key), ((DoubleTag) base).getAsDouble());
+                view.set(key, ((DoubleTag) base).getAsDouble());
                 break;
             case Constants.NBT.TAG_BYTE_ARRAY:
-                view.set(of(key), ((ByteArrayTag) base).getAsByteArray());
+                view.set(key, ((ByteArrayTag) base).getAsByteArray());
                 break;
             case Constants.NBT.TAG_STRING:
-                view.set(of(key), base.getAsString());
+                view.set(key, base.getAsString());
                 break;
             case Constants.NBT.TAG_LIST:
                 ListTag list = (ListTag) base;
@@ -216,10 +214,10 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
                 for (final Tag inbt : list) {
                     objectList.add(NBTTranslator.fromTagBase(inbt, listType));
                 }
-                view.set(of(key), objectList);
+                view.set(key, objectList);
                 break;
             case Constants.NBT.TAG_COMPOUND:
-                DataView internalView = view.createView(of(key));
+                DataView internalView = view.createView(key);
                 CompoundTag compound = (CompoundTag) base;
                 for (String internalKey : compound.getAllKeys()) {
                     Tag internalBase = compound.get(internalKey);
@@ -232,10 +230,10 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
                 }
                 break;
             case Constants.NBT.TAG_INT_ARRAY:
-                view.set(of(key), ((IntArrayTag) base).getAsIntArray());
+                view.set(key, ((IntArrayTag) base).getAsIntArray());
                 break;
             case Constants.NBT.TAG_LONG_ARRAY:
-                view.set(of(key), ((LongArrayTag) base).getAsLongArray());
+                view.set(key, ((LongArrayTag) base).getAsLongArray());
                 break;
             default:
                 throw new IllegalArgumentException("Unknown NBT type " + type);
