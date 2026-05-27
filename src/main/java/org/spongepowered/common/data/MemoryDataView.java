@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ArrayUtils;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -68,22 +69,23 @@ public class MemoryDataView implements DataView {
     protected final Map<String, Object> map = Maps.newLinkedHashMap();
     private final DataContainer container;
     private final DataView parent;
-    private final DataQuery path;
+    private final @Nullable String key;
     private final DataView.SafetyMode safety;
+    private @MonotonicNonNull DataQuery path;
 
     MemoryDataView(final DataView.SafetyMode safety) {
         Preconditions.checkState(this instanceof DataContainer, "Cannot construct a root MemoryDataView without a container!");
-        this.path = DataQuery.of();
+        this.key = null;
         this.parent = this;
         this.container = (DataContainer) this;
         this.safety = Objects.requireNonNull(safety, "Safety mode");
     }
 
-    private MemoryDataView(final DataView parent, final DataQuery path, final DataView.SafetyMode safety) {
-        Preconditions.checkArgument(path.parts().size() >= 1, "Path must have at least one part");
+    private MemoryDataView(final DataView parent, final String key, final DataView.SafetyMode safety) {
+        Preconditions.checkArgument(!key.isEmpty(), "Key must have at least one part");
         this.parent = parent;
         this.container = parent.container();
-        this.path = parent.currentPath().then(path);
+        this.key = key;
         this.safety = Objects.requireNonNull(safety, "Safety mode");
     }
 
@@ -94,12 +96,19 @@ public class MemoryDataView implements DataView {
 
     @Override
     public DataQuery currentPath() {
+        if (this.path == null) {
+            if (this.key != null) {
+                this.path = this.parent.currentPath().then(this.key);
+            } else {
+                this.path = DataQuery.of();
+            }
+        }
         return this.path;
     }
 
     @Override
     public String name() {
-        final List<String> parts = this.path.parts();
+        final List<String> parts = this.currentPath().parts();
         return parts.isEmpty() ? "" : parts.get(parts.size() - 1);
     }
 
@@ -425,7 +434,7 @@ public class MemoryDataView implements DataView {
         final DataQuery subQuery = path.popFirst();
         DataView subView = (DataView) this.map.get(key);
         if (subView == null) {
-            subView = new MemoryDataView(this.parent, DataQuery.of(key), this.safety);
+            subView = new MemoryDataView(this.parent, key, this.safety);
             this.map.put(key, subView);
         }
         return subView.createView(subQuery);
@@ -433,7 +442,7 @@ public class MemoryDataView implements DataView {
 
     @Override
     public DataView createView(final String key) {
-        final DataView result = new MemoryDataView(this, DataQuery.of(key), this.safety);
+        final DataView result = new MemoryDataView(this, key, this.safety);
         this.map.put(key, result);
         return result;
     }
@@ -837,7 +846,7 @@ public class MemoryDataView implements DataView {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.map, this.path);
+        return Objects.hash(this.map, this.currentPath());
     }
 
     @Override
@@ -851,14 +860,14 @@ public class MemoryDataView implements DataView {
         final MemoryDataView other = (MemoryDataView) obj;
 
         return Objects.equals(this.map.entrySet(), other.map.entrySet())
-                && Objects.equals(this.path, other.path);
+                && Objects.equals(this.currentPath(), other.path);
     }
 
     @Override
     public String toString() {
         final StringJoiner helper = new StringJoiner(", ", MemoryDataView.class.getSimpleName() + "[", "]");
-        if (!this.path.toString().isEmpty()) {
-            helper.add("path=" + this.path);
+        if (!this.currentPath().toString().isEmpty()) {
+            helper.add("path=" + this.currentPath());
         }
         helper.add("safety=" + this.safety.name());
         return helper.add("map=" + this.map).toString();
