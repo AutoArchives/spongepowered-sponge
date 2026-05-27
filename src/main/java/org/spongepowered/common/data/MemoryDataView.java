@@ -369,6 +369,11 @@ public class MemoryDataView implements DataView {
     }
 
     private DataView set0(final String key, final Object value) {
+        if (value.getClass() == String.class || value.getClass() == Integer.class) {
+            this.map.put(key, value);
+            return this;
+        }
+
         final Object serialized = DataSerializer.serialize(this.safetyMode(), value);
 
         Preconditions.checkArgument(this.isEmpty() || !this.equals(serialized), "Cannot insert self-referencing DataView!");
