@@ -431,7 +431,8 @@ public class MemoryDataView implements DataView {
         return subView.createView(subQuery);
     }
 
-    private DataView createView(final String key) {
+    @Override
+    public DataView createView(final String key) {
         final DataView result = new MemoryDataView(this, DataQuery.of(key), this.safety);
         this.map.put(key, result);
         return result;
@@ -455,6 +456,15 @@ public class MemoryDataView implements DataView {
     @Override
     public Optional<DataView> getView(final DataQuery path) {
         return this.get(path).filter(obj -> obj instanceof DataView).map(obj -> (DataView) obj);
+    }
+
+    @Override
+    public Optional<DataView> getView(final String key) {
+        final Object object = this.map.get(key);
+        if (object instanceof final DataView dataView) {
+            return Optional.of(dataView);
+        }
+        return Optional.empty();
     }
 
     @Override
