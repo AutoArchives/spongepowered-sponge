@@ -72,11 +72,10 @@ public final class DataUtil {
         final Class<? extends DataHolder> typeToken = dataHolder.getClass().asSubclass(DataHolder.class);
         allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).ifPresent(customData -> {
             customData.streamRootKeys().forEach(namespace -> {
-                final DataQuery keyNamespace = DataQuery.of(namespace);
-                final DataView keyedData = customData.getView(keyNamespace).get();
+                final DataView keyedData = customData.getView(namespace).get();
                 keyedData.streamRootKeys().forEach(keyValue -> {
                     final ResourceKey dataStoreKey = ResourceKey.of(namespace, keyValue);
-                    final DataView dataStoreData = keyedData.getView(DataQuery.of(keyValue)).get();
+                    final DataView dataStoreData = keyedData.getView(keyValue).get();
                     final Integer contentVersion = dataStoreData.getInt(Constants.Sponge.Data.V3.CONTENT_VERSION).orElse(1);
                     final Optional<DataStore> dataStore = SpongeDataManager.getDatastoreRegistry().getDataStore(dataStoreKey, typeToken);
                     if (dataStore.isPresent()) {
@@ -87,7 +86,7 @@ public final class DataUtil {
                             });
                         }
                     } else {
-                        dataHolder.bridge$addFailedData(keyNamespace.then(keyValue), dataStoreData);
+                        dataHolder.bridge$addFailedData(DataQuery.of(namespace).then(keyValue), dataStoreData);
                     }
                 });
             });
