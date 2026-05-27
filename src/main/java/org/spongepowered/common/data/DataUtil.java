@@ -34,6 +34,7 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.nbt.CompoundTagAccessor;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
@@ -177,10 +178,18 @@ public final class DataUtil {
         if (compound == null) {
             compound = new CompoundTag();
         } else {
-            compound = compound.copy(); // do not modify the original as it might be shared
+            // do not modify the original as it might be shared
+            // Copy everything but the sponge root data, we are overwriting.
+            compound = ((CompoundTagAccessor) compound).invoker$entrySet()
+                .stream()
+                .filter(e -> !e.getKey().equals(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT.asString(".")))
+                .collect(
+                    CompoundTag::new,
+                    (t, e) -> t.put(e.getKey(), e.getValue().copy()),
+                    (t, o) -> ((CompoundTagAccessor) o).invoker$entrySet().forEach(e -> t.put(e.getKey(), e.getValue().copy()))
+                );
         }
         dataHolder.data$setCompound(compound);
-        compound.remove(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT.asString(".")); // Remove all previous SpongeData
 
         final DataContainer allData = NBTTranslator.INSTANCE.translate(compound);
 

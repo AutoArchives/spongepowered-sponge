@@ -20,6 +20,7 @@
     "commands.arguments.selector.options.EntitySelectorOptionsAccessor",
     "core.MappedRegistryAccessor",
     "entity.passive.AbstractChestedHorseEntityAccessor",
+    "nbt.CompoundTagAccessor",
     "network.ConnectionAccessor",
     "network.chat.HoverEvent_ItemStackInfoAccessor",
     "network.chat.StyleAccessor",
