@@ -34,13 +34,14 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataStore;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -49,11 +50,11 @@ public final class DataStoreRegistry {
     private final DataStore NO_OP_DATASTORE = new VanillaDataStore(Collections.emptyMap(), Collections.emptyList());
     private final Multimap<Key<?>, DataStore> dataStoreByValueKey = HashMultimap.create();
     private final Multimap<ResourceKey, DataStore> dataStoreByDataStoreKey = HashMultimap.create();
-    private final List<DataStore> allDataStores = new ArrayList<>();
+    private final Set<DataStore> allDataStores = new HashSet<>();
 
     private final Map<LookupKey<Key<?>>, DataStore> dataStoreCache = new ConcurrentHashMap<>();
     private final Map<LookupKey<ResourceKey>, Optional<DataStore>> dataStoreByResourceKeyCache = new ConcurrentHashMap<>();
-    private final Map<Type, Collection<DataStore>> dataStoreByTokenCache =  new ConcurrentHashMap<>();
+    private final Map<Type, Set<DataStore>> dataStoreByTokenCache =  new ConcurrentHashMap<>();
 
     public void register(final DataStore dataStore, Iterable<Key<?>> keys) {
         keys.forEach(k -> this.dataStoreByValueKey.put(k, dataStore));
@@ -111,8 +112,8 @@ public final class DataStoreRegistry {
         return this.dataStoreByTokenCache.computeIfAbsent(holderType, this::loadDataStoresType);
     }
 
-    private Collection<DataStore> loadDataStoresType(final Type holderType) {
-        final ArrayList<DataStore> dataStores = new ArrayList<>();
+    private Set<DataStore> loadDataStoresType(final Type holderType) {
+        final Set<DataStore> dataStores = new HashSet<>();
         for (DataStore dataStore : this.allDataStores) {
             if (dataStore.supportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType))) {
                 dataStores.add(dataStore);
