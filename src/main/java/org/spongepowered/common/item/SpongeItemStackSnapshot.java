@@ -311,4 +311,9 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
         return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.showItem(resourceKey, this.quantity(), SpongeAdventure.asAdventure(this.getComponentsPatch()))));
     }
+
+    @Override
+    public int maxStackQuantity() {
+        return this.privateStack.maxStackQuantity();
+    }
 }

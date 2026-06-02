@@ -210,4 +210,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         return HoverEvent.showItem(Objects.requireNonNull(op, "op").apply(event));
     }
 
+    public int itemStack$maxStackQuantity() {
+        return this.shadow$getMaxStackSize();
+    }
 }
