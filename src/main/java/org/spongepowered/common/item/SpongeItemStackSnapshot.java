@@ -181,7 +181,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public ItemStack asMutable() {
-        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
+        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(this.privateStack);
         if (this.components != null) {
             nativeStack.applyComponents(this.components);
         }
