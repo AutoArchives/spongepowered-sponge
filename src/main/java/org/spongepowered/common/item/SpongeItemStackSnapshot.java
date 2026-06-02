@@ -316,4 +316,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public int maxStackQuantity() {
         return this.privateStack.maxStackQuantity();
     }
+
+    public net.minecraft.world.item.ItemStack underlyingNativeStack() {
+        return ItemStackUtil.toNative(this.privateStack);
+    }
 }
