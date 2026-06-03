@@ -39,6 +39,7 @@ import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
@@ -50,6 +51,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 public final class NBTTranslator implements DataTranslator<CompoundTag> {
 
@@ -86,7 +88,7 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Tag getBaseFromObject(final Object value) {
+    public static Tag getBaseFromObject(final Object value) {
         Objects.requireNonNull(value);
         if (value instanceof Boolean) {
             return ByteTag.valueOf((Boolean) value);
@@ -240,10 +242,21 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
         }
     }
 
+    public static Object fromTagBase(final Tag base, final @Nullable String key, final BiFunction<@Nullable String, CompoundTag, Object> compoundFunction) {
+        return NBTTranslator.fromTagBase(base, base.getId(), key, compoundFunction);
+    }
+
+    private static Object fromTagBase(final Tag base, final byte type) {
+        return NBTTranslator.fromTagBase(base, type, null, (k, c) -> NBTTranslator.getViewFromCompound(c));
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Object fromTagBase(Tag base, byte type) {
+    private static Object fromTagBase(final Tag base, final byte type, final @Nullable String key, final BiFunction<@Nullable String, CompoundTag, Object> compoundFunction) {
         switch (type) {
             case Constants.NBT.TAG_BYTE:
+                if (key != null && key.contains(NBTTranslator.BOOLEAN_IDENTIFIER)) {
+                    return ((ByteTag) base).getAsByte() != 0;
+                }
                 return ((ByteTag) base).getAsByte();
             case Constants.NBT.TAG_SHORT:
                 return (((ShortTag) base)).getAsShort();
@@ -265,16 +278,16 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
                 int count = list.size();
                 List objectList = Lists.newArrayListWithCapacity(count);
                 for (Tag inbt : list) {
-                    objectList.add(NBTTranslator.fromTagBase(inbt, listType));
+                    objectList.add(NBTTranslator.fromTagBase(inbt, listType, null, compoundFunction));
                 }
                 return objectList;
             case Constants.NBT.TAG_COMPOUND:
-                return NBTTranslator.getViewFromCompound((CompoundTag) base);
+                return compoundFunction.apply(key, (CompoundTag) base);
             case Constants.NBT.TAG_INT_ARRAY:
                 return ((IntArrayTag) base).getAsIntArray();
             case Constants.NBT.TAG_LONG_ARRAY:
                 return ((LongArrayTag) base).getAsLongArray();
-            default :
+            default:
                 return null;
         }
     }
