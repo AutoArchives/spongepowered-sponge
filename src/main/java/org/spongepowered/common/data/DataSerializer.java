@@ -44,14 +44,12 @@ import java.util.UUID;
 public class DataSerializer {
 
     public static Object serialize(final DataView.SafetyMode safetyMode, final Object value) {
-        if (value instanceof DataView) {
+        if (value instanceof final DataView dataView) {
             switch (safetyMode) {
                 case ALL_DATA_CLONED:
                 case CLONED_ON_SET:
                     final MemoryDataView view = new MemoryDataContainer(safetyMode);
-                    for (final Map.Entry<DataQuery, Object> entry : ((DataView) value).values(false).entrySet()) {
-                        view.set(entry.getKey(), entry.getValue());
-                    }
+                    dataView.streamRootValues().forEach(e -> view.set(e.getKey(), e.getValue()));
                     return view;
                 default:
                     return value;
