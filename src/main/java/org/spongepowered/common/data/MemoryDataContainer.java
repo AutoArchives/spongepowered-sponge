@@ -64,11 +64,6 @@ public final class MemoryDataContainer extends MemoryDataView implements DataCon
     }
 
     @Override
-    public final DataContainer container() {
-        return this;
-    }
-
-    @Override
     public DataContainer set(final DataQuery path, final Object value) {
         return (DataContainer) super.set(path, value);
     }
