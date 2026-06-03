@@ -232,4 +232,11 @@ public final class DataUtil {
             .flatMap(spongeData -> spongeData.getView(dataStoreKey))
             .flatMap(dataStore -> dataStore.getView(Constants.Sponge.Data.V3.CONTENT));
     }
+
+    public static DataView createSpongeData(final DataView allData, final DataQuery dataStoreKey, final int version) {
+        final DataView root = allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).orElseGet(() -> allData.createView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT));
+        final DataView store = root.getView(dataStoreKey).orElseGet(() -> root.createView(dataStoreKey));
+        store.set(Constants.Sponge.Data.V3.CONTENT_VERSION, version);
+        return store.getView(Constants.Sponge.Data.V3.CONTENT).orElseGet(() -> store.createView(Constants.Sponge.Data.V3.CONTENT));
+    }
 }
