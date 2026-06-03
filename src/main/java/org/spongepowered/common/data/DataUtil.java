@@ -37,7 +37,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.nbt.CompoundTagAccessor;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
-import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStore;
 import org.spongepowered.common.util.Constants;
 
@@ -65,7 +64,7 @@ public final class DataUtil {
         if (compound == null) {
             return;
         }
-        final DataContainer allData = NBTTranslator.INSTANCE.translate(compound);
+        final DataContainer allData = new CompoundTagDataContainer(compound);
 
         DataUtil.upgradeDataVersion(compound, allData); // Upgrade v2->v3
 
@@ -189,9 +188,8 @@ public final class DataUtil {
                     (t, o) -> ((CompoundTagAccessor) o).invoker$entrySet().forEach(e -> t.put(e.getKey(), e.getValue().copy()))
                 );
         }
-        dataHolder.data$setCompound(compound);
 
-        final DataContainer allData = NBTTranslator.INSTANCE.translate(compound);
+        final DataContainer allData = new CompoundTagDataContainer(compound);
 
         // Clear old custom data root
         final DataView customDataRoot = allData.createView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT);
@@ -204,25 +202,22 @@ public final class DataUtil {
                 .map(key -> SpongeDataManager.getDatastoreRegistry().getDataStore(key, dataHolderType))
                 .forEach(dataStore -> dataStore.serialize(manipulator, allData));
 
-        // If data is still present after cleanup merge it back into nbt
-        if (DataUtil.cleanupEmptySpongeData(allData)) {
-            compound.merge(NBTTranslator.INSTANCE.translate(allData));
-        }
+        DataUtil.cleanupEmptySpongeData(allData);
         if (compound.isEmpty()) {
             dataHolder.data$setCompound(null);
             return false;
+        } else {
+            dataHolder.data$setCompound(compound);
         }
         return true;
     }
 
-    private static boolean cleanupEmptySpongeData(final DataContainer allData) {
-        return allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).map(spongeData -> {
+    private static void cleanupEmptySpongeData(final DataContainer allData) {
+        allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).ifPresent(spongeData -> {
                 if (spongeData.isEmpty()) {
                     allData.remove(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT);
-                    return false;
                 }
-                return true;
-            }).orElse(false);
+            });
     }
 
     public static void setSpongeData(final DataView allData, final DataQuery dataStoreKey, final DataView pluginData, final int version) {
