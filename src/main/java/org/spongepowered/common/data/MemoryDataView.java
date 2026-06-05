@@ -301,15 +301,7 @@ public class MemoryDataView extends SpongeDataView {
             return this;
         }
 
-        final Object serialized = DataSerializer.serialize(this.safetyMode(), value);
-        if (serialized instanceof final DataView serializedDataView) {
-            // always have to copy a data view to avoid overwriting existing
-            // views and to set the interior path correctly.
-            final DataView view = this.createView(key);
-            serializedDataView.streamRootValues().forEach(entry -> view.set(entry.getKey(), entry.getValue()));
-        } else {
-            this.map.put(key, serialized);
-        }
+        DataSerializer.serialize(this.safetyMode(), value, () -> this.createView(key), v ->  this.map.put(key, v));
 
         return this;
     }

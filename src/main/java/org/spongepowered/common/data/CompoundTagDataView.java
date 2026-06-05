@@ -237,17 +237,10 @@ public class CompoundTagDataView extends SpongeDataView {
             return this;
         }
 
-        // Don't clone the child twice, as the set method will clone it again if needed.
-        final Object serialized = DataSerializer.serialize(SafetyMode.NO_DATA_CLONED, value);
-        if (serialized instanceof final DataView serializedDataView) {
-            // always have to copy a data view to avoid overwriting existing
-            // views and to set the interior path correctly.
-            final DataView view = this.createView(key);
-            serializedDataView.streamRootValues().forEach(entry -> view.set(entry.getKey(), entry.getValue()));
-        } else {
+        DataSerializer.serialize(this.safetyMode(), value, () -> this.createView(key), v -> {
             this.compound.remove(key + NBTTranslator.BOOLEAN_IDENTIFIER);
-            this.compound.put(key, NBTTranslator.getBaseFromObject(serialized));
-        }
+            this.compound.put(key, NBTTranslator.getBaseFromObject(v));
+        });
 
         return this;
     }
