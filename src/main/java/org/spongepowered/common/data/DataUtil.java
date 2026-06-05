@@ -198,7 +198,7 @@ public final class DataUtil {
 
         final DataManipulator.Mutable manipulator = dataHolder.bridge$getManipulator();
         final Type dataHolderType = dataHolder.getClass();
-        manipulator.getKeys().stream()
+        manipulator.streamKeys()
                 .map(key -> SpongeDataManager.getDatastoreRegistry().getDataStore(key, dataHolderType))
                 .forEach(dataStore -> dataStore.serialize(manipulator, allData));
 
