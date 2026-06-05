@@ -92,17 +92,15 @@ public final class DataUtil {
             });
         });
 
-        dataHolder.bridge$mergeDeserialized(DataManipulator.mutableOf()); // Initialize sponge data holder
-        for (final DataStore dataStore : SpongeDataManager.getDatastoreRegistry().getDataStoresForType(typeToken)) {
-            // Deserialize to Manipulator
-            final DataManipulator.Mutable deserialized = dataStore.deserialize(allData);
-            try {
-                // and set data in CustomDataHolderBridge
-                dataHolder.bridge$mergeDeserialized(deserialized);
-            } catch (final Exception e) {
-                SpongeCommon.logger().error("Could not merge data from datastore: {}", deserialized, e);
+        dataHolder.bridge$deserialize(manipulator -> {
+            for (final DataStore dataStore : SpongeDataManager.getDatastoreRegistry().getDataStoresForType(typeToken)) {
+                try {
+                    dataStore.deserialize(manipulator, allData);
+                } catch (final Exception e) {
+                    SpongeCommon.logger().error("Could not merge data from datastore: {}", dataStore.deserialize(allData), e);
+                }
             }
-        }
+        });
     }
 
     @SuppressWarnings("deprecation")
