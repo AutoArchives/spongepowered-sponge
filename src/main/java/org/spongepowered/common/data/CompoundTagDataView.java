@@ -336,15 +336,14 @@ public class CompoundTagDataView extends SpongeDataView {
     @Override
     public Optional<DataView> getView(final DataQuery path) {
         Objects.requireNonNull(path, "path");
-        final List<String> parts = path.parts();
-        if (parts.isEmpty()) {
-            return Optional.of(this);
+        Optional<DataView> view = Optional.of(this);
+        for (final String part : path.parts()) {
+            view = view.get().getView(part);
+            if (view.isEmpty()) {
+                break;
+            }
         }
-        final Optional<DataView> view = this.getView(parts.getFirst());
-        if (parts.size() == 1) {
-            return view;
-        }
-        return view.flatMap(child -> child.getView(path.popFirst()));
+        return view;
     }
 
     @Override
