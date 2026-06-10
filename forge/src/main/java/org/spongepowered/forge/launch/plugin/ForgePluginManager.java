@@ -35,7 +35,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Singleton
-@SuppressWarnings("unchecked")
 public final class ForgePluginManager implements SpongePluginManager {
 
     @Override

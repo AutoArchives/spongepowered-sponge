@@ -41,7 +41,7 @@ public final class NeoPluginManager implements SpongePluginManager {
     @Override
     public Optional<PluginContainer> fromInstance(final Object instance) {
         for (final ModContainer mod : ModList.get().getSortedMods()) {
-            final NeoPluginContainer plugin = NeoPluginContainer.of(mod);
+            final PluginContainer plugin = NeoPluginContainer.of(mod);
             if (plugin.instance() == instance) {
                 return Optional.of(plugin);
             }
