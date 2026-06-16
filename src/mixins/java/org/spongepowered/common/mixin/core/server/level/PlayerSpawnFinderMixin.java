@@ -61,7 +61,7 @@ public abstract class PlayerSpawnFinderMixin {
     @Shadow @Final private int coprime;
 
     @Shadow private static Vec3 fixupSpawnHeight(CollisionGetter level, BlockPos pos) { return null; }
-    @Shadow @Nullable protected static BlockPos getOverworldRespawnPos(ServerLevel level, int x, int z) { return null; }
+    @Shadow @Nullable protected static BlockPos getLevelRespawnPos(ServerLevel level, int x, int z) { return null; }
     @Shadow private static boolean noCollisionNoLiquid(CollisionGetter level, BlockPos pos) { return false; }
 
     /**
@@ -86,7 +86,7 @@ public abstract class PlayerSpawnFinderMixin {
             final int z = this.spawnSuggestion.getZ() + relZ - this.radius;
 
             if (this.scheduleCandidate(x, z, i, () -> {
-                final BlockPos pos = getOverworldRespawnPos(this.level, x, z);
+                final BlockPos pos = getLevelRespawnPos(this.level, x, z);
                 return pos != null && noCollisionNoLiquid(this.level, pos) ? Optional.of(Vec3.atBottomCenterOf(pos)) : Optional.empty();
             })) {
                 return;
