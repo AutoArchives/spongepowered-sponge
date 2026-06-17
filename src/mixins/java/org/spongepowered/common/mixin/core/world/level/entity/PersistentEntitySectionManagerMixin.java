@@ -56,6 +56,15 @@ public class PersistentEntitySectionManagerMixin {
         final EntityAccess entity, final boolean callCreateCallback,
         final CallbackInfoReturnable<Boolean> cir
     ) {
+        // Section manager additions outside the main thread are an API misuse (vanilla worldgen
+        // routes entities through WorldGenRegion#addFreshEntity, which is chunk-scoped). If we
+        // somehow get here off-thread anyway (e.g. a buggy mod calling ServerLevel#addFreshEntity
+        // from a worldgen worker), skip the construct event rather than tripping the cause-stack
+        // main-thread guard. Other Sponge entity mixins (ItemEntityMixin, EntityMixin_Tracker,
+        // ServerLevelMixin_Tracker, ...) follow the same pattern.
+        if (!PhaseTracker.getWorldInstance().onSidedThread()) {
+            return;
+        }
         if (!(entity instanceof final EntityBridge bridge)) {
             return;
         }
