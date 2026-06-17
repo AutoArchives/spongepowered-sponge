@@ -32,6 +32,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntitySpawnRequest;
 import net.minecraft.world.entity.Mob;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -148,7 +149,7 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
         compound.put(Constants.Entity.ENTITY_POSITION, pos);
         compound.remove(Constants.Entity.ENTITY_UUID);
 
-        final @Nullable Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, level, EntitySpawnReason.LOAD, e -> {
+        final @Nullable Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, level, new EntitySpawnRequest(EntitySpawnReason.LOAD, false), e -> {
             e.snapTo(location.x(), location.y(), location.z());
             if (e instanceof Mob mobentity) {
                 mobentity.yHeadRot = mobentity.getYRot();
