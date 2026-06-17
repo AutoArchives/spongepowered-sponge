@@ -28,7 +28,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.Event;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operation;
@@ -54,7 +54,7 @@ public interface ChangeBlockEvent_AllMixin_Neo extends SpongeEventBridge_Neo {
         final List<Event> forgeEvents = new ArrayList<>();
         for (final BlockTransaction transaction : thisEvent.transactions()) {
             if (player != null && transaction.operation() == breakOp) {
-                forgeEvents.add(new BlockEvent.BreakEvent((Level) thisEvent.world(),
+                forgeEvents.add(new BreakBlockEvent((Level) thisEvent.world(),
                         VecHelper.toBlockPos(transaction.original().position()),
                         (BlockState) transaction.original().state(), player));
             }

@@ -26,7 +26,7 @@ package org.spongepowered.neoforge.mixin.core.neoforge.event.world;
 
 import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.bus.api.ICancellableEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
@@ -44,7 +44,7 @@ import org.spongepowered.neoforge.launch.bridge.event.NeoEventBridge_Neo;
 
 import java.util.Collections;
 
-@Mixin(value = BlockEvent.BreakEvent.class, remap = false)
+@Mixin(value = BreakBlockEvent.class, remap = false)
 public abstract class BlockEvent_BreakEventMixin_Neo extends BlockEventMixin_Neo implements NeoEventBridge_Neo<ChangeBlockEvent.All>, ICancellableEvent {
 
     @Override
