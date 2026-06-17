@@ -210,7 +210,6 @@
     "world.item.ItemStackMixin",
     "world.item.MapItemMixin",
     "world.item.ServerItemCooldownsMixin",
-    "world.item.TeleportRandomlyConsumeEffectMixin",
     "world.item.crafting.AbstractCookingRecipeMixin",
     "world.item.crafting.IngredientMixin",
     "world.item.crafting.RecipeManagerMixin",

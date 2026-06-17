@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.item;
+package org.spongepowered.forge.mixin.core.world.item;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
@@ -35,15 +35,15 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(TeleportRandomlyConsumeEffect.class)
-public abstract class TeleportRandomlyConsumeEffectMixin {
+public abstract class TeleportRandomlyConsumeEffectMixin_Forge {
 
     @Redirect(method = "apply", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;randomTeleport(DDDZ)Z"))
-    private boolean impl$createCauseFrameForTeleport(final LivingEntity entity, final double x, final double y, final double z,
-                                                     final boolean p_213373_7_) {
+    private boolean forge$createCauseFrameForTeleport(final LivingEntity entity, final double x, final double y, final double z,
+                                                      final boolean changeState) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.CHORUS_FRUIT.get());
 
-            return entity.randomTeleport(x, y, z, p_213373_7_);
+            return entity.randomTeleport(x, y, z, changeState);
         }
     }
 }
