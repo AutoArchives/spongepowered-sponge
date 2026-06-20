@@ -65,7 +65,7 @@ public final class PluginFileConfigurable implements IConfigurable {
 
         if ("license".equals(query)) {
             return (Optional<T>) Optional.of(this.plugins.values().stream()
-                .map(m -> m.container().license()).distinct().collect(Collectors.joining(", ")));
+                .flatMap(m -> m.license().stream()).distinct().collect(Collectors.joining(", ")));
         }
 
         if (key.length == 2) {
