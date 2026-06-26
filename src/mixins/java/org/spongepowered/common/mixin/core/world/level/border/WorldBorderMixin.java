@@ -39,9 +39,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -83,13 +83,13 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
     }
 
     @Inject(method = "lerpSizeBetween", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onLerping(final double initial, final double target, final long milliseconds, final long delay, final CallbackInfo ci) {
+    private void impl$onLerping(final double initial, final double target, final long ticks, final long delay, final CallbackInfo ci) {
         if (this.impl$fireEvent) {
             final Supplier<org.spongepowered.api.world.border.WorldBorder> proposed =
                 () -> new SpongeWorldBorderBuilder().from(this)
                     .initialDiameter(initial)
                     .targetDiameter(target)
-                    .timeToTargetDiameter(Duration.ofMillis(milliseconds))
+                    .timeToTargetDiameter(SpongeTicks.ticksOrInfinite(ticks))
                     .build();
             if (this.impl$suppressOriginalAction(proposed)) {
                 ci.cancel();
@@ -141,7 +141,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
         if (this.impl$fireEvent) {
             final Supplier<org.spongepowered.api.world.border.WorldBorder> proposed =
                 () -> new SpongeWorldBorderBuilder().from(this)
-                    .warningTime(Duration.ofSeconds(warningTime))
+                    .warningTime(SpongeTicks.ticksOrInfinite(warningTime))
                     .build();
             if (this.impl$suppressOriginalAction(proposed)) {
                 ci.cancel();
@@ -225,7 +225,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
             // TODO - figure out how to get the appropriate game time
             ((WorldBorder) (Object) this).lerpSizeBetween(worldBorder.size(), worldBorder.lerpTarget(), worldBorder.lerpTime(), SpongeCommon.server().overworld().getGameTime());
         } else {
-            ((WorldBorder) (Object) this).setSize(worldBorder.size());
+            ((WorldBorder) (Object) this).setSize(worldBorder.lerpTime() == -1 ? worldBorder.size() : worldBorder.lerpTarget());
         }
     }
 
