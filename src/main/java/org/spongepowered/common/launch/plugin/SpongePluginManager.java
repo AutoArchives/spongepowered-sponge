@@ -25,11 +25,26 @@
 package org.spongepowered.common.launch.plugin;
 
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.plugin.PluginContainer;
+
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * This marker is required to handle injection in the core Sponge module
  */
 public interface SpongePluginManager extends PluginManager {
+
+    @Override
+    default Optional<PluginContainer> fromInstance(final Object instance) {
+        Objects.requireNonNull(instance, "instance");
+        for (final PluginContainer container : this.plugins()) {
+            if (container.instances().contains(instance)) {
+                return Optional.of(container);
+            }
+        }
+        return Optional.empty();
+    }
 
     boolean isReady();
 }

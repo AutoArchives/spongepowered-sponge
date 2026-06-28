@@ -38,11 +38,6 @@ import java.util.Optional;
 public final class ForgePluginManager implements SpongePluginManager {
 
     @Override
-    public Optional<PluginContainer> fromInstance(final Object instance) {
-        return ModList.get().getModContainerByObject(Objects.requireNonNull(instance, "instance")).map(ForgePluginContainer::of);
-    }
-
-    @Override
     public Optional<PluginContainer> plugin(final String id) {
         return ModList.get().getModContainerById(Objects.requireNonNull(id, "id")).map(ForgePluginContainer::of);
     }

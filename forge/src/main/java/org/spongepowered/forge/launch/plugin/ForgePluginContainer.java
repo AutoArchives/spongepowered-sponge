@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ForgePluginContainer implements PluginContainer {
@@ -76,8 +77,8 @@ public class ForgePluginContainer implements PluginContainer {
     }
 
     @Override
-    public Object instance() {
-        return this.modContainer.getMod();
+    public Set<Object> instances() {
+        return Set.of(this.modContainer.getMod());
     }
 
     private static final Map<ModContainer, ForgePluginContainer> mods = new MapMaker().weakKeys().makeMap();

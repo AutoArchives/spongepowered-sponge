@@ -29,10 +29,12 @@ import org.spongepowered.plugin.builtin.StandardPluginContainer;
 import org.spongepowered.plugin.discovery.PluginResource;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class SpongePluginContainer extends StandardPluginContainer {
-
+    private final Set<Object> instances = new LinkedHashSet<>();
     private Injector injector;
 
     public SpongePluginContainer(final PluginResource resource, final PluginMetadata metadata) {
@@ -40,8 +42,12 @@ public class SpongePluginContainer extends StandardPluginContainer {
     }
 
     @Override
-    public void initializeInstance(final Object instance) {
-        super.initializeInstance(instance);
+    public Set<Object> instances() {
+        return this.instances;
+    }
+
+    public void addInstance(final Object instance) {
+        this.instances.add(instance);
     }
 
     public Optional<Injector> injector() {

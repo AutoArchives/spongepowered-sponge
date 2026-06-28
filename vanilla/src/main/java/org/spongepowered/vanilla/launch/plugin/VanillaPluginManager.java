@@ -48,7 +48,6 @@ import java.util.stream.Collectors;
 public final class VanillaPluginManager implements SpongePluginManager {
     private final VanillaLaunch launch;
     private final Map<String, PluginContainer> plugins;
-    private final Map<Object, PluginContainer> instancesToPlugins;
     private final List<PluginContainer> sortedPlugins;
     private final Map<PluginContainer, PluginResource> containerToResource;
     private boolean ready = false;
@@ -56,14 +55,8 @@ public final class VanillaPluginManager implements SpongePluginManager {
     public VanillaPluginManager(final VanillaLaunch launch) {
         this.launch = launch;
         this.plugins = new Object2ObjectOpenHashMap<>();
-        this.instancesToPlugins = new IdentityHashMap<>();
         this.sortedPlugins = new ArrayList<>();
         this.containerToResource = new Object2ObjectOpenHashMap<>();
-    }
-
-    @Override
-    public Optional<PluginContainer> fromInstance(final Object instance) {
-        return Optional.ofNullable(this.instancesToPlugins.get(Objects.requireNonNull(instance, "instance")));
     }
 
     @Override
@@ -157,10 +150,6 @@ public final class VanillaPluginManager implements SpongePluginManager {
     public void addPlugin(final PluginContainer plugin) {
         this.plugins.put(plugin.metadata().id(), Objects.requireNonNull(plugin, "plugin"));
         this.sortedPlugins.add(plugin);
-
-        if (!(plugin instanceof VanillaDummyPluginContainer)) {
-            this.instancesToPlugins.put(plugin.instance(), plugin);
-        }
     }
 
     @Nullable
