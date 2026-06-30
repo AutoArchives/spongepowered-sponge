@@ -266,6 +266,7 @@
     "world.level.border.WorldBorderMixin",
     "world.level.chunk.ChunkGeneratorMixin",
     "world.level.chunk.ChunkSerializerMixin",
+    "world.level.chunk.ChunkSourceMixin",
     "world.level.chunk.ChunkStatusTasksMixin",
     "world.level.chunk.LevelChunkMixin",
     "world.level.chunk.storage.EntityStorageMixin",
