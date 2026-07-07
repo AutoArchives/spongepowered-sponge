@@ -815,15 +815,15 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    @Redirect(method = "spawnSprintParticle",
+    @WrapOperation(method = "spawnSprintParticle",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
     private void impl$runningSpawnParticle(
         final Level instance, final ParticleOptions particleOptions, final double xCoord, final double yCoord,
-        final double zCoord, final double xOffset, final double yOffset, final double zOffset
+        final double zCoord, final double xOffset, final double yOffset, final double zOffset, final Operation<Void> original
     ) {
         if (this.bridge$vanishState().createsParticles()) {
-            instance.addParticle(particleOptions, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
+            original.call(instance, particleOptions, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 
