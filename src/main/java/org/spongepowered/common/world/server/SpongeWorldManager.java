@@ -40,11 +40,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
-import net.minecraft.util.Unit;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
@@ -94,7 +92,6 @@ import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
-import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
@@ -769,15 +766,25 @@ public class SpongeWorldManager implements WorldManager {
 
             PlatformHooks.INSTANCE.getWorldHooks().preUnloadWorld(level);
 
-            final int lastSpawnChunkRadius = ((ServerLevelAccessor) level).accessor$lastSpawnChunkRadius();
-            if (lastSpawnChunkRadius > 1) {
-                level.getChunkSource().removeRegionTicket(TicketType.START, new ChunkPos(level.getSharedSpawnPos()), lastSpawnChunkRadius, Unit.INSTANCE);
-                ((ServerLevelAccessor) level).accessor$setLastSpawnChunkRadius(1);
-            }
-
             final var configAdapter = ((ServerLevelDataBridge) level.getLevelData()).bridge$spongeData().configAdapter();
             if (configAdapter != null) {
                 configAdapter.save();
+            }
+
+            while (level.getChunkSource().chunkMap.hasWork()) {
+                level.getChunkSource().removeTicketsOnClosing();
+
+                final boolean noSave = level.noSave;
+                level.noSave = false;
+                try {
+                    level.getChunkSource().tick(() -> true, false);
+                } finally {
+                    level.noSave = noSave;
+                }
+
+                while (level.getChunkSource().pollTask()) {
+                    // Consumes main thread task on poll
+                }
             }
 
             try {

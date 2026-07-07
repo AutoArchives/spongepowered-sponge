@@ -36,9 +36,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.bridge.server.level.ChunkHolderBridge;
 import org.spongepowered.common.mixin.core.world.level.chunk.ChunkSourceMixin;
@@ -48,7 +46,6 @@ public abstract class ServerChunkCacheMixin extends ChunkSourceMixin {
 
     // @formatter:off
     @Shadow @Final private ServerLevel level;
-    @Shadow @Final private ServerChunkCache.MainThreadExecutor mainThreadProcessor;
 
     @Shadow @Nullable protected abstract ChunkHolder shadow$getVisibleChunkIfPresent(long $$0);
     // @formatter:on
@@ -60,11 +57,6 @@ public abstract class ServerChunkCacheMixin extends ChunkSourceMixin {
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
             ((ChunkMapAccessor) chunkManager).invoker$saveAllChunks(flush);
         }
-    }
-
-    @Inject(method = "close", at = @At("TAIL"))
-    private void impl$onClose(final CallbackInfo ci) {
-        this.mainThreadProcessor.close();
     }
 
     @Override
