@@ -316,10 +316,7 @@ tasks {
     }
 
     val langJar by existing(Jar::class) {
-        manifest.attributes(
-            "Automatic-Module-Name" to "spongeforge.lang",
-            "FMLModType" to "LANGPROVIDER"
-        )
+        manifest.attributes("Automatic-Module-Name" to "spongeforge.lang")
     }
 
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")

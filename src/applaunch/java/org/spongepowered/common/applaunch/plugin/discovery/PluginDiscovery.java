@@ -128,6 +128,10 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
 
     protected abstract void appendDiscoveryServices(final List<SpongeJVMPluginResource> resources, final int batch) throws Exception;
 
+    protected @Nullable String languageServiceName() {
+        return null;
+    }
+
     public final Collection<Candidate> candidates() {
         return Collections.unmodifiableCollection(this.candidates.values());
     }
@@ -185,7 +189,7 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
         private final List<PluginResourceLocator> locators = new ArrayList<>();
         private @MonotonicNonNull UnknownResourceStrategy unknownResourceStrategy;
         private final SequencedMap<String, PluginMetadata> metadata = new LinkedHashMap<>();
-        private boolean locatorFound, readerFound, loaderFound, modFound;
+        private boolean locatorFound, readerFound, languageFound, loaderFound, modFound;
         private boolean newDiscoveryServiceFound;
 
         public Candidate(final PluginResource resource, final UnknownResourceStrategy unknownResourceStrategy) {
@@ -205,10 +209,10 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
                 }
                 final List<String> locators = providers.getOrDefault(PluginResourceLocator.class.getName(), Collections.emptyList());
                 final List<String> readers = providers.getOrDefault(PluginMetadataReader.class.getName(), Collections.emptyList());
-                final List<String> loaders = providers.getOrDefault(PluginLoader.class.getName(), Collections.emptyList());
                 this.locatorFound = !locators.isEmpty();
                 this.readerFound = !readers.isEmpty();
-                this.loaderFound = !loaders.isEmpty();
+                this.languageFound = !providers.getOrDefault(PluginDiscovery.this.languageServiceName(), Collections.emptyList()).isEmpty();
+                this.loaderFound = !providers.getOrDefault(PluginLoader.class.getName(), Collections.emptyList()).isEmpty();
                 this.newDiscoveryServiceFound = locators.stream().anyMatch(key -> !existingLocators.contains(key)) || readers.stream().anyMatch(key -> !existingReaders.contains(key));
             }
         }
@@ -220,6 +224,9 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
             }
             if (this.readerFound) {
                 joiner.add("reader");
+            }
+            if (this.languageFound) {
+                joiner.add("language");
             }
             if (this.loaderFound) {
                 joiner.add("loader");
@@ -262,6 +269,9 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
         public ResourceLoading loading() {
             if (this.pluginFound() || this.loaderFound) {
                 return ResourceLoading.GAME_LIBRARY;
+            }
+            if (this.languageFound) {
+                return ResourceLoading.LIBRARY;
             }
             if (this.locatorFound || this.readerFound) {
                 return ResourceLoading.IGNORED;

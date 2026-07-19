@@ -25,6 +25,7 @@
 package org.spongepowered.forge.applaunch.plugin.discovery;
 
 import cpw.mods.jarhandling.SecureJar;
+import net.minecraftforge.forgespi.language.IModLanguageProvider;
 import net.minecraftforge.securemodules.SecureModuleClassLoader;
 import net.minecraftforge.securemodules.SecureModuleFinder;
 import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
@@ -73,5 +74,10 @@ public class ForgePluginDiscovery extends PluginDiscovery {
         this.currentLoader = loader;
 
         this.environment.logger().debug("Built new service layer {} on top of {}.", loader.getName(), parentLoader.getName());
+    }
+
+    @Override
+    protected String languageServiceName() {
+        return IModLanguageProvider.class.getName();
     }
 }

@@ -26,6 +26,7 @@ package org.spongepowered.neoforge.applaunch.plugin.discovery;
 
 import net.neoforged.fml.jarcontents.CompositeJarContents;
 import net.neoforged.fml.jarcontents.JarContents;
+import net.neoforged.neoforgespi.language.IModLanguageLoader;
 import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.common.applaunch.plugin.discovery.SpongeJVMPluginResource;
 import org.spongepowered.plugin.Environment;
@@ -70,5 +71,10 @@ public class NeoPluginDiscovery extends PluginDiscovery {
         final ClassLoader loader = new URLClassLoader("SPONGE-DISCOVERY-BATCH-" + batch, rootUrls.toArray(URL[]::new), parentLoader);
         this.currentLoader = loader;
         this.environment.logger().debug("Built new service layer {} on top of {}.", loader.getName(), parentLoader.getName());
+    }
+
+    @Override
+    protected String languageServiceName() {
+        return IModLanguageLoader.class.getName();
     }
 }
