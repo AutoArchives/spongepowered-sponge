@@ -22,40 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.level;
+package org.spongepowered.forge.mixin.core.world.item;
 
-import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.util.thread.BlockableEventLoop;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
-@Mixin(ServerChunkCache.MainThreadExecutor.class)
-public abstract class ServerChunkCache_MainThreadExecutorMixin extends BlockableEventLoop<Runnable> {
+@Mixin(TeleportRandomlyConsumeEffect.class)
+public abstract class TeleportRandomlyConsumeEffectMixin_Forge {
 
-    private volatile boolean impl$closed;
+    @Redirect(method = "apply", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;randomTeleport(DDDZ)Z"))
+    private boolean forge$createCauseFrameForTeleport(final LivingEntity entity, final double x, final double y, final double z,
+                                                      final boolean changeState) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.CHORUS_FRUIT.get());
 
-    protected ServerChunkCache_MainThreadExecutorMixin(final String $$0) {
-        super($$0, false);
-    }
-
-    @Override
-    public void schedule(final Runnable $$0) {
-        if (this.impl$closed) {
-            $$0.run();
-            return;
+            return entity.randomTeleport(x, y, z, changeState);
         }
-
-        super.schedule($$0);
-
-        if (this.impl$closed) {
-            this.runAllTasks();
-        }
-    }
-
-    @Override
-    public void close() {
-        super.close();
-
-        this.impl$closed = true;
-        this.runAllTasks();
     }
 }

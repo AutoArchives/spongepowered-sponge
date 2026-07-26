@@ -22,28 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.item;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block.state.properties;
 
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.MovementTypes;
+import net.minecraft.world.level.block.state.properties.TestBlockMode;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
-@Mixin(TeleportRandomlyConsumeEffect.class)
-public abstract class TeleportRandomlyConsumeEffectMixin {
-
-    @Redirect(method = "apply", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;randomTeleport(DDDZ)Z"))
-    private boolean impl$createCauseFrameForTeleport(final LivingEntity entity, final double x, final double y, final double z,
-                                                     final boolean p_213373_7_) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.CHORUS_FRUIT.get());
-
-            return entity.randomTeleport(x, y, z, p_213373_7_);
-        }
-    }
+@Mixin(TestBlockMode.class)
+public abstract class TestBlockModeMixin_API implements org.spongepowered.api.data.type.TestBlockMode {
 }

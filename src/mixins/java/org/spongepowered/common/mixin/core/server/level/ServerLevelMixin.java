@@ -190,7 +190,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
-    private boolean impl$closed = false;
     @Unique private @Nullable GameRules impl$gameRules;
 
     /**
@@ -314,7 +313,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Override
     public boolean bridge$isLoaded() {
-        if (((LevelBridge) this).bridge$isFake() || this.impl$closed) {
+        if (((LevelBridge) this).bridge$isFake()) {
             return false;
         }
 
@@ -673,11 +672,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             .add("key=" + this.shadow$dimension())
             .add("worldType=" + worldTypeKey.map(ResourceKey::toString).orElse("inline"))
             .toString();
-    }
-
-    @Inject(method = "close", at = @At("HEAD"))
-    private void impl$onClose(final CallbackInfo ci) {
-        this.impl$closed = true;
     }
 
     @Override

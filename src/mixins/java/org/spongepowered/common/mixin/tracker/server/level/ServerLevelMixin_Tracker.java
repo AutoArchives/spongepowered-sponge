@@ -789,4 +789,25 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         }
     }
 
+    /**
+     * Salvage for buggy-mod-async-world-adding-entities: some mods (e.g. Aether II's
+     * MoaNestFeature) call {@link ServerLevel#addFreshEntity(Entity)} directly from a
+     * worldgen worker thread instead of going through the {@link net.minecraft.world.level.WorldGenLevel}
+     * (concretely {@link net.minecraft.server.level.WorldGenRegion#addFreshEntity}) they were given.
+     *
+     * <p>The vanilla call chain ({@code ServerLevel#addFreshEntity} →
+     * {@code PersistentEntitySectionManager#addEntity}) is main-thread-only and races without
+     * Sponge in the picture. Rather than crash worldgen, capture the entity via
+     * {@link PhaseTracker#captureAsyncEntity(Entity)} so the per-tick drain task on the main
+     * thread can re-add it via the proper path. The boolean return is optimistic, mirroring how
+     * {@code WorldGenRegion#addFreshEntity} unconditionally returns {@code true}.</p>
+     */
+    @Inject(method = "addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), cancellable = true)
+    private void tracker$deferBuggyModAsyncWorldAddingEntities(final Entity entity, final CallbackInfoReturnable<Boolean> cir) {
+        if (!PhaseTracker.getWorldInstance((ServerLevel) (Object) this).onSidedThread()) {
+            PhaseTracker.captureAsyncEntity(entity);
+            cir.setReturnValue(true);
+        }
+    }
+
 }

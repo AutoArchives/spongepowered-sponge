@@ -96,6 +96,16 @@ public final class PhaseTracker implements CauseStackManager {
     private static final PhaseTracker SERVER = new PhaseTracker();
     public static final Logger LOGGER = LogManager.getLogger(PhaseTracker.class);
     static final CopyOnWriteArrayList<net.minecraft.world.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
+
+    /**
+     * Queue an entity that was offered to a main-thread-only entity addition API from an
+     * off-thread context (typically a worldgen worker invoking {@code ServerLevel#addFreshEntity}
+     * directly instead of going through the {@code WorldGenLevel} it was given). The per-tick
+     * drain task in {@link #init()} re-adds these on the main thread under a forced spawn cause.
+     */
+    public static void captureAsyncEntity(final net.minecraft.world.entity.Entity entity) {
+        PhaseTracker.ASYNC_CAPTURED_ENTITIES.add(entity);
+    }
     private static final Map<Thread, PhaseTracker> SPINOFF_TRACKERS = new MapMaker().weakKeys().concurrencyLevel(8).makeMap();
     private static final boolean DEBUG_CAUSE_FRAMES = Boolean.parseBoolean(System.getProperty("sponge.debugcauseframes", "false"));
     private static final String INITIAL_POOL_SIZE_PROPERTY = "sponge.cause.initialFramePoolSize";

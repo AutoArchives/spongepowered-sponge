@@ -55,8 +55,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.SleepingEvent;
-import org.spongepowered.api.event.cause.entity.MovementTypes;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Ticks;
@@ -74,7 +72,6 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
-import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
@@ -121,7 +118,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     // @formatter:on
 
     @Nullable private ItemStack impl$activeItemStackCopy;
-    @Nullable private Vector3d impl$preTeleportPosition;
     private int impl$deathEventsPosted;
 
 
@@ -189,44 +185,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
 
-
-    @Inject(method = "randomTeleport", at = @At("HEAD"))
-    private void impl$snapshotPositionBeforeVanillaTeleportLogic(final double x, final double y, final double z, final boolean changeState,
-                                                                 final CallbackInfoReturnable<Boolean> cir) {
-        this.impl$preTeleportPosition = new Vector3d(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
-    }
-
-    @Inject(method = "randomTeleport", at = @At(value = "RETURN", ordinal = 0, shift = At.Shift.BY, by = 2), cancellable = true)
-    private void impl$callMoveEntityEventForTeleport(final double x, final double y, final double z, final boolean changeState,
-                                                     final CallbackInfoReturnable<Boolean> cir) {
-        if (!ShouldFire.MOVE_ENTITY_EVENT) {
-            return;
-        }
-
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
-            frame.pushCause(this);
-
-            // ENTITY_TELEPORT is our fallback context
-            if (!frame.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
-                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENTITY_TELEPORT);
-            }
-
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
-                    (org.spongepowered.api.entity.Entity) this, this.impl$preTeleportPosition, new Vector3d(this.shadow$getX(), this.shadow$getY(),
-                            this.shadow$getZ()),
-                    new Vector3d(x, y, z));
-
-            if (SpongeCommon.post(event)) {
-                this.shadow$teleportTo(this.impl$preTeleportPosition.x(), this.impl$preTeleportPosition.y(),
-                        this.impl$preTeleportPosition.z());
-                cir.setReturnValue(false);
-                return;
-            }
-
-            this.shadow$teleportTo(event.destinationPosition().x(), event.destinationPosition().y(),
-                    event.destinationPosition().z());
-        }
-    }
 
     /**
      * @author gabizou - January 4th, 2016

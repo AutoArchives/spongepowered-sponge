@@ -26,50 +26,47 @@ package org.spongepowered.common.mixin.core.client.gui.screens.worldselection;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
+import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
-import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.WorldDataConfiguration;
-import org.spongepowered.api.registry.RegistryHolder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.Lifecycle;
+import org.spongepowered.common.bridge.server.ReloadableServerResourcesBridge;
+import org.spongepowered.common.bridge.server.packs.resources.MultiPackResourceManagerBridge;
+import org.spongepowered.common.bridge.server.packs.resources.ResourceManagerBridge;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
+import org.spongepowered.common.tag.SpongePluginTags;
 
 @Mixin(WorldOpenFlows.class)
 public abstract class WorldOpenFlowsMixin {
 
-    /**
-     * The integrated-server "create new world" path constructs a fresh
-     * {@link CloseableResourceManager} via {@link WorldLoader.PackConfig#createResourceManager()}
-     * outside of {@link WorldLoader#load} — bypassing {@code WorldLoaderMixin}'s
-     * {@code establishServerServices} and {@code beginEstablishServerRegistries} hooks.
-     *
-     * <p>Without the services hook the resource manager that ends up in the
-     * {@link net.minecraft.server.WorldStem} has no service provider attached, and
-     * {@code MinecraftServerMixin#impl$onInit} stores {@code null} into the server's
-     * {@code impl$serviceProvider}, which subsequently NPEs at login time.</p>
-     *
-     * <p>Without the registries hook the new holder has an empty sponge root —
-     * neither the built-in sponge registries nor any plugin-defined
-     * {@link org.spongepowered.api.event.lifecycle.RegisterRegistryEvent.EngineScoped}
-     * registrations are present — so engine-scoped lookups (e.g. from
-     * {@code StartingEngineEvent} listeners) raise
-     * {@link org.spongepowered.api.registry.ValueNotFoundException}. Re-posting the
-     * event here is intentional: plugin handlers register against {@code event.getHolder()},
-     * so each holder ends up with its own copy and the discarded #1 holder is harmless.</p>
-     */
+    // Since 26.1 this path hands the WorldStem a fresh resource manager instead of the one
+    // WorldLoader.load created, so the Sponge state established during datapack loading
+    // (server-scoped plugin registries, services, plugin tags) must carry over to it.
     @WrapOperation(method = "createLevelFromExistingSettings",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldLoader$PackConfig;createResourceManager()Lcom/mojang/datafixers/util/Pair;"))
-    private Pair<WorldDataConfiguration, CloseableResourceManager> impl$establishIntegratedServerServices(
-        final WorldLoader.PackConfig packConfig, final Operation<Pair<WorldDataConfiguration, CloseableResourceManager>> original
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/WorldLoader$PackConfig;createResourceManager()Lcom/mojang/datafixers/util/Pair;"))
+    private Pair<WorldDataConfiguration, CloseableResourceManager> impl$transferSpongeState(
+        final WorldLoader.PackConfig config, final Operation<Pair<WorldDataConfiguration, CloseableResourceManager>> original,
+        final @Local(argsOnly = true) ReloadableServerResources serverResources
     ) {
-        final Pair<WorldDataConfiguration, CloseableResourceManager> pair = original.call(packConfig);
-        final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishServerServices(pair.getSecond(), PermissionLevel.ALL);
-        lifecycle.beginEstablishServerRegistries((RegistryHolder) pair.getSecond());
+        final Pair<WorldDataConfiguration, CloseableResourceManager> pair = original.call(config);
+        final @Nullable ResourceManager originalManager = ((ReloadableServerResourcesBridge) serverResources).bridge$resourceManager();
+        final CloseableResourceManager newManager = pair.getSecond();
+        if (originalManager != null && originalManager != newManager) {
+            ((MultiPackResourceManagerBridge) newManager).bridge$setRegistryHolder(((SpongeRegistryHolder) originalManager).registryHolder());
+            ((ResourceManagerBridge) newManager).bridge$services(((ResourceManagerBridge) originalManager).bridge$services());
+            final @Nullable SpongePluginTags tags = ((ResourceManagerBridge) originalManager).bridge$pluginProvidedTags();
+            if (tags != null) {
+                ((ResourceManagerBridge) newManager).bridge$pluginProvidedTags(tags);
+            }
+        }
         return pair;
     }
 }

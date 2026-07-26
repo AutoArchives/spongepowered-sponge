@@ -37,12 +37,14 @@ import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.flag.FeatureFlagSet;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.common.accessor.core.MappedRegistryAccessor;
+import org.spongepowered.common.bridge.server.ReloadableServerResourcesBridge;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
@@ -52,7 +54,19 @@ import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
 @Mixin(ReloadableServerResources.class)
-public abstract class ReloadableServerResourcesMixin {
+public abstract class ReloadableServerResourcesMixin implements ReloadableServerResourcesBridge {
+
+    private @Nullable ResourceManager impl$resourceManager;
+
+    @Override
+    public void bridge$resourceManager(final ResourceManager resourceManager) {
+        this.impl$resourceManager = resourceManager;
+    }
+
+    @Override
+    public @Nullable ResourceManager bridge$resourceManager() {
+        return this.impl$resourceManager;
+    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @ModifyExpressionValue(method = "loadResources", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ReloadableServerRegistries;reload(Lnet/minecraft/core/LayeredRegistryAccess;Ljava/util/List;Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"))
@@ -92,6 +106,7 @@ public abstract class ReloadableServerResourcesMixin {
         final Executor $$6, final Executor $$7
     ) {
         return original.thenApply(r -> {
+            ((ReloadableServerResourcesBridge) r).bridge$resourceManager($$0);
             Launch.instance().lifecycle().endEstablishServerRegistries((RegistryHolder) $$0);
             return r;
         });

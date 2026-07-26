@@ -28,16 +28,22 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.server.packs.resources.MultiPackResourceManagerBridge;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
 @Mixin(MultiPackResourceManager.class)
-public abstract class MultiPackResourceManagerMixin_API implements SpongeRegistryHolder {
+public abstract class MultiPackResourceManagerMixin_API implements SpongeRegistryHolder, MultiPackResourceManagerBridge {
 
     private RegistryHolderLogic api$registryHolder = new RegistryHolderLogic(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
 
     @Override
     public RegistryHolderLogic registryHolder() {
         return this.api$registryHolder;
+    }
+
+    @Override
+    public void bridge$setRegistryHolder(final RegistryHolderLogic holder) {
+        this.api$registryHolder = holder;
     }
 }

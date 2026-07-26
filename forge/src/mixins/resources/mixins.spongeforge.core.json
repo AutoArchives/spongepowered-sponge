@@ -27,6 +27,7 @@
     "world.entity.item.ItemEntityMixin_Forge",
     "world.entity.player.PlayerMixin_Forge_Damage",
     "world.entity.vehicle.boat.BoatMixin_Forge",
+    "world.item.TeleportRandomlyConsumeEffectMixin_Forge",
     "world.level.ServerExplosionMixin_Forge",
     "world.level.block.FireBlockMixin_Forge",
     "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Forge"
