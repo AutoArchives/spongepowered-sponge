@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.world.border;
 
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.common.accessor.world.level.border.WorldBorder_SettingsAccessor;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.math.vector.Vector2d;
-
-import java.time.Duration;
 
 public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
 
     private double diameter = -1;
     private double initialDiameter = -1;
-    private Duration time = Duration.ZERO;
+    private Ticks time = Ticks.zero();
     private Vector2d center = Vector2d.ZERO; //use a default value otherwise null is used
-    private Duration warningTime = Duration.ZERO;
+    private Ticks warningTime = Ticks.zero();
     private double warningDistance;
     private double safeZone;
     private double damagePerBlock;
@@ -77,11 +77,8 @@ public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
     }
 
     @Override
-    public WorldBorder.Builder timeToTargetDiameter(final Duration time) {
-        if (time.isNegative()) {
-            throw new IllegalArgumentException("time cannot be negative");
-        }
-        this.time = time;
+    public WorldBorder.Builder timeToTargetDiameter(final Ticks ticks) {
+        this.time = ticks;
         return this;
     }
 
@@ -122,10 +119,7 @@ public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
     }
 
     @Override
-    public WorldBorder.Builder warningTime(final Duration warningTime) {
-        if (warningTime.isNegative()) {
-            throw new IllegalArgumentException("warning time cannot be negative");
-        }
+    public WorldBorder.Builder warningTime(final Ticks warningTime) {
         this.warningTime = warningTime;
         return this;
     }
@@ -151,9 +145,9 @@ public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
                 this.damagePerBlock,
                 this.safeZone,
                 (int) this.warningDistance,
-                (int) this.warningTime.getSeconds(),
+                SpongeTicks.toSaturatedIntOrInfinite(this.warningTime),
                 this.initialDiameter == -1 ? this.diameter : this.initialDiameter,
-                this.time.toMillis(),
+                SpongeTicks.toSaturatedLongOrInfinite(this.time),
                 this.diameter
         );
     }
@@ -165,9 +159,9 @@ public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
         this.safeZone = 0;
         this.diameter = -1;
         this.initialDiameter = -1;
-        this.time = Duration.ZERO;
+        this.time = Ticks.zero();
         this.warningDistance = 0;
-        this.warningTime = Duration.ZERO;
+        this.warningTime = Ticks.zero();
         return this;
     }
 

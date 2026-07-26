@@ -22,40 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.level;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block.state.properties;
 
-import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.util.thread.BlockableEventLoop;
+import net.minecraft.world.level.block.state.properties.TestBlockMode;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(ServerChunkCache.MainThreadExecutor.class)
-public abstract class ServerChunkCache_MainThreadExecutorMixin extends BlockableEventLoop<Runnable> {
-
-    private volatile boolean impl$closed;
-
-    protected ServerChunkCache_MainThreadExecutorMixin(final String $$0) {
-        super($$0, false);
-    }
-
-    @Override
-    public void schedule(final Runnable $$0) {
-        if (this.impl$closed) {
-            $$0.run();
-            return;
-        }
-
-        super.schedule($$0);
-
-        if (this.impl$closed) {
-            this.runAllTasks();
-        }
-    }
-
-    @Override
-    public void close() {
-        super.close();
-
-        this.impl$closed = true;
-        this.runAllTasks();
-    }
+@Mixin(TestBlockMode.class)
+public abstract class TestBlockModeMixin_API implements org.spongepowered.api.data.type.TestBlockMode {
 }
