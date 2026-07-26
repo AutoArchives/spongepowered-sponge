@@ -3,6 +3,9 @@
   "parent": "mixins.sponge.parent.json",
   "package": "org.spongepowered.forge.mixin.core",
   "priority": 1301,
+  "injectors": {
+    "maxShiftBy": 3
+  },
   "mixins": [
     "commands.CommandsMixin_Forge",
     "minecraftforge.ForgeHooksMixin_Forge",

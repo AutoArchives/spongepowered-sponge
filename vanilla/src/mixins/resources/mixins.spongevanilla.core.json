@@ -3,6 +3,9 @@
   "parent": "mixins.sponge.parent.json",
   "package": "org.spongepowered.vanilla.mixin.core",
   "priority": 1301,
+  "injectors": {
+    "maxShiftBy": 3
+  },
   "client": [
     "client.ClientBrandRetrieverMixin_Vanilla",
     "client.MinecraftMixin_Vanilla",

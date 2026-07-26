@@ -39,9 +39,11 @@ import org.spongepowered.common.network.channel.PacketSender;
 @Mixin(Connection.class)
 public abstract class ConnectionMixin_Forge {
 
+    // Forge 26.2 adds a second addListener call (packet logger) right after this one — pin to the first.
     @WrapOperation(method = "doSendPacket", at = @At(
         value = "INVOKE",
         target = "Lio/netty/channel/ChannelFuture;addListener(Lio/netty/util/concurrent/GenericFutureListener;)Lio/netty/channel/ChannelFuture;",
+        ordinal = 0,
         remap = false
     ))
     public ChannelFuture impl$onPacketSent(
@@ -56,6 +58,6 @@ public abstract class ConnectionMixin_Forge {
                 }
             });
         }
-        return original.call(instance, listener);
+        return original.call(instance, genericFutureListener);
     }
 }

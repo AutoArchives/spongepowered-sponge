@@ -3,6 +3,9 @@
   "parent": "mixins.sponge.parent.json",
   "package": "org.spongepowered.neoforge.mixin.core",
   "priority": 1301,
+  "injectors": {
+    "maxShiftBy": 3
+  },
   "mixins": [
     "api.event.EventMixin_Neo",
     "api.event.block.ChangeBlockEvent_AllMixin_Neo",

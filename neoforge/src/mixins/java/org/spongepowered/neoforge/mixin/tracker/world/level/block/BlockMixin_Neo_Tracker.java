@@ -25,14 +25,17 @@
 package org.spongepowered.neoforge.mixin.tracker.world.level.block;
 
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 import org.spongepowered.neoforge.mixin.tracker.world.level.block.state.BlockBehaviorMixin_Neo_Tracker;
+
+import java.util.Optional;
 
 @Mixin(Block.class)
 public abstract class BlockMixin_Neo_Tracker extends BlockBehaviorMixin_Neo_Tracker implements RegistryBackedTrackableBridge<Block> {
@@ -42,7 +45,7 @@ public abstract class BlockMixin_Neo_Tracker extends BlockBehaviorMixin_Neo_Trac
     //@formatter:on
 
     @Override
-    protected void forgeTracker$initializeTrackingState(CallbackInfoReturnable<Identifier> cir) {
+    protected void forgeTracker$initializeTrackingState(CallbackInfoReturnable<Optional<ResourceKey<LootTable>>> cir) {
         // TODO Not the best check but the tracker options only matter during block ticks...
         if (this.isRandomlyTicking(this.defaultBlockState())) {
             this.bridge$refreshTrackerStates();

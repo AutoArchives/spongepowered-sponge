@@ -50,11 +50,12 @@ public abstract class LivingEntityMixin_Neo {
     @Unique
     @Nullable private Vector3d neo$preTeleportPosition;
 
+    // Neo 26.2 replaced the vanilla hurtAndBreak call with its IItemStackExtension glide-damage hook.
     @Inject(
             method = "updateFallFlying",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;)V",
+                    target = "Lnet/minecraft/world/item/ItemStack;onGlideDamage(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;)V",
                     shift = At.Shift.AFTER
             )
     )

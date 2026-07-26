@@ -49,7 +49,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,14 +75,16 @@ public abstract class ServerExplosionMixin_NeoForge {
     @Redirect(method = "hurtEntities(Ljava/util/List;)V", at = @At(value = "INVOKE",
         target = "net/minecraft/server/level/ServerLevel.getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"))
     private List<Entity> neo$throwEventForHurtEntities(final ServerLevel instance, final Entity sourceEntity, final AABB aabb) {
+        // NeoForge hands this list to EventHooks.onExplosionDetonate where mods may mutate it,
+        // so every list returned here must be mutable.
         final List<Entity> entities;
         if (this.impl$shouldDamageEntities) {
             // filter out invulnerable entities before event
             entities = instance.getEntities(sourceEntity, aabb).stream()
                 .filter(e -> !e.ignoreExplosion((net.minecraft.world.level.Explosion) this))
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
         } else {
-            entities = Collections.emptyList();
+            entities = new ArrayList<>();
         }
 
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
@@ -94,13 +95,13 @@ public abstract class ServerExplosionMixin_NeoForge {
             final ExplosionEvent.Detonate event = SpongeEventFactory.createExplosionEventDetonate(cause, apiBlockPositions, apiEntities, (Explosion) this, apiWorld);
             if (SpongeCommon.post(event)) {
                 this.impl$affectedBlocks.clear(); // no blocks affected
-                return Collections.emptyList(); // no entities affected
+                return new ArrayList<>(); // no entities affected
             }
             if (this.shadow$interactsWithBlocks()) {
                 this.impl$affectedBlocks = event.affectedLocations().stream().map(VecHelper::toBlockPos).collect(Collectors.toList());
             }
             if (this.impl$shouldDamageEntities) {
-                return event.entities().stream().map(Entity.class::cast).toList();
+                return event.entities().stream().map(Entity.class::cast).collect(Collectors.toCollection(ArrayList::new));
             }
         }
         return entities;

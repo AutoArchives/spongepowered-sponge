@@ -62,7 +62,9 @@ public abstract class PlayerMixin_Neo_Damage extends LivingEntityMixin_Neo_Damag
         return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }
 
-    @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), ordinal = 3, slice = @Slice(
+    // Neo 26.2 reuses the dmg parameter as the post-absorption damage; the old float ordinal 3
+    // (absorbedDamage) is never loaded inside this slice anymore — target the parameter instead.
+    @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), argsOnly = true, slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/Identifier;I)V"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;causeFoodExhaustion(F)V")))
     private float damage$firePostEvent_Player(final float damage) {

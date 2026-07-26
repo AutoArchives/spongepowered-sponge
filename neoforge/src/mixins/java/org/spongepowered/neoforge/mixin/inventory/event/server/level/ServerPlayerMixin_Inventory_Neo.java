@@ -77,7 +77,12 @@ public abstract class ServerPlayerMixin_Inventory_Neo  extends PlayerMixin_Inven
         this.inventory$menuProvider = menuProvider;
     }
 
-    @Inject(method = "openMenu(Lnet/minecraft/world/MenuProvider;Ljava/util/function/Consumer;)Ljava/util/OptionalInt;", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;closeContainer()V", shift = At.Shift.AFTER), cancellable = true)
+    // Neo 26.2 splits the close path on MenuProvider#shouldTriggerClientSideContainerClosingOnOpen,
+    // so a cancelled close must be detected after either branch.
+    @Inject(method = "openMenu(Lnet/minecraft/world/MenuProvider;Ljava/util/function/Consumer;)Ljava/util/OptionalInt;", at = {
+        @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;closeContainer()V", shift = At.Shift.AFTER),
+        @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;doCloseContainer()V", shift = At.Shift.AFTER)
+    }, cancellable = true)
     private void impl$openMenuCloseCancelled(final CallbackInfoReturnable<OptionalInt> cir) {
         if (this.containerMenu != this.inventoryMenu) {
             cir.setReturnValue(OptionalInt.empty());

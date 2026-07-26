@@ -70,7 +70,9 @@ public abstract class LivingEntityMixin_Neo_Damage implements TrackedDamageBridg
         return tracker == null || !tracker.isSkipped(DamageStepTypes.ABSORPTION);
     }
 
-    @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), ordinal = 3, slice = @Slice(
+    // Neo 26.2 reuses the dmg parameter as the post-absorption damage (no separate local anymore),
+    // mirroring vanilla — target the parameter like LivingEntityMixin_Vanilla_Damage does.
+    @ModifyVariable(method = "actuallyHurt", at = @At("LOAD"), argsOnly = true, slice = @Slice(
         from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/Identifier;I)V"),
         to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getCombatTracker()Lnet/minecraft/world/damagesource/CombatTracker;")))
     private float damage$firePostEvent_Living(final float damage) {
