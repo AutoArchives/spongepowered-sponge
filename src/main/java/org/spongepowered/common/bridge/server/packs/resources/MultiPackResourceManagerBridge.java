@@ -22,28 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.server.packs.resources;
+package org.spongepowered.common.bridge.server.packs.resources;
 
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.server.packs.resources.MultiPackResourceManager;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.server.packs.resources.MultiPackResourceManagerBridge;
 import org.spongepowered.common.registry.RegistryHolderLogic;
-import org.spongepowered.common.registry.SpongeRegistryHolder;
 
-@Mixin(MultiPackResourceManager.class)
-public abstract class MultiPackResourceManagerMixin_API implements SpongeRegistryHolder, MultiPackResourceManagerBridge {
+public interface MultiPackResourceManagerBridge {
 
-    private RegistryHolderLogic api$registryHolder = new RegistryHolderLogic(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
-
-    @Override
-    public RegistryHolderLogic registryHolder() {
-        return this.api$registryHolder;
-    }
-
-    @Override
-    public void bridge$setRegistryHolder(final RegistryHolderLogic holder) {
-        this.api$registryHolder = holder;
-    }
+    void bridge$setRegistryHolder(RegistryHolderLogic holder);
 }

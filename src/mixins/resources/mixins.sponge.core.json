@@ -294,6 +294,7 @@
   ],
   "client": [
     "client.MinecraftMixin",
+    "client.gui.screens.worldselection.WorldOpenFlowsMixin",
     "client.multiplayer.ClientCommonPacketListenerImplMixin",
     "client.multiplayer.ClientHandshakePacketListenerImplMixin",
     "client.multiplayer.ClientLevelMixin",
