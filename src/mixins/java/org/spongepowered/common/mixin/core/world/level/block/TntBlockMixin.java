@@ -64,12 +64,13 @@ public abstract class TntBlockMixin extends BlockMixin {
         return removed;
     }
 
-    @Inject(method = "prime(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/LivingEntity;)Z",
+    @Inject(method = "prime(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)Z",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"),
         cancellable = true
     )
     private static void impl$ThrowPrimeAndMaybeCancel(
-        final Level level, final BlockPos pos, final LivingEntity igniter, final CallbackInfoReturnable<Boolean> cir,
+        final Level level, final BlockPos pos, final LivingEntity igniter, final net.minecraft.world.item.ItemStack ignitedWith,
+        final CallbackInfoReturnable<Boolean> cir,
         @Local final PrimedTnt tnt) {
         ((PrimedTntBridge) tnt).bridge$setDetonator(igniter);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {

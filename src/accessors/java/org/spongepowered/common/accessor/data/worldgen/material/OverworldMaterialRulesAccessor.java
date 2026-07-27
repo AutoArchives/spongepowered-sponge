@@ -22,12 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure;
+package org.spongepowered.common.accessor.data.worldgen.material;
 
-import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.data.worldgen.material.OverworldMaterialRules;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-@Mixin(StructurePlacement.class)
-public interface StructurePlacementMixin_API extends org.spongepowered.api.world.generation.structure.StructurePlacement {
+@Mixin(OverworldMaterialRules.class)
+public interface OverworldMaterialRulesAccessor {
 
+    @Accessor("SURFACE") static ResourceKey<SurfaceRules.RuleSource> accessor$SURFACE() {
+        throw new UntransformedInvokerError();
+    }
+
+    @Accessor("UNDERGROUND") static ResourceKey<SurfaceRules.RuleSource> accessor$UNDERGROUND() {
+        throw new UntransformedInvokerError();
+    }
+
+    @Invoker("createOverworldLike") static SurfaceRules.RuleSource invoker$createOverworldLike(
+        final HolderGetter<SurfaceRules.RuleSource> rules, final boolean doPreliminarySurfaceCheck, final boolean bedrockRoof,
+        final boolean bedrockFloor, final SurfaceRules.RuleSource mainRuleCloseToSurface, final SurfaceRules.RuleSource underground
+    ) {
+        throw new UntransformedInvokerError();
+    }
 }

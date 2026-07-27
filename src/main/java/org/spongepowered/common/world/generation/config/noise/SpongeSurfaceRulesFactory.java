@@ -25,7 +25,10 @@
 package org.spongepowered.common.world.generation.config.noise;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.SurfaceRuleData;
+import net.minecraft.data.worldgen.material.EndMaterialRules;
+import net.minecraft.data.worldgen.material.NetherMaterialRules;
+import net.minecraft.data.worldgen.material.OverworldMaterialRules;
+import net.minecraft.data.worldgen.material.VanillaMaterialConditions;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
@@ -37,30 +40,46 @@ import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.Noise;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.data.worldgen.material.OverworldMaterialRulesAccessor;
 
 import java.util.Arrays;
 import java.util.List;
 
 public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
+    private static SurfaceRules.RuleSource rule(final net.minecraft.resources.ResourceKey<SurfaceRules.RuleSource> key) {
+        return SurfaceRules.getRule(SpongeCommon.vanillaRegistry(Registries.MATERIAL_RULE), key);
+    }
+
+    private static SurfaceRules.ConditionSource condition(final net.minecraft.resources.ResourceKey<SurfaceRules.ConditionSource> key) {
+        return SurfaceRules.getCondition(SpongeCommon.vanillaRegistry(Registries.MATERIAL_CONDITION), key);
+    }
+
     @Override
     public SurfaceRule overworld() {
-        return (SurfaceRule) SurfaceRuleData.overworld(SpongeCommon.vanillaRegistry(Registries.BIOME));
+        return (SurfaceRule) SpongeSurfaceRulesFactory.rule(OverworldMaterialRules.OVERWORLD);
     }
 
     @Override
     public SurfaceRule overworldLike(final boolean nearSurface, final boolean bedrockRoof, final boolean bedrockFloor) {
-        return (SurfaceRule) SurfaceRuleData.overworldLike(SpongeCommon.vanillaRegistry(Registries.BIOME), nearSurface, bedrockRoof, bedrockFloor);
+        return (SurfaceRule) OverworldMaterialRulesAccessor.invoker$createOverworldLike(
+            SpongeCommon.vanillaRegistry(Registries.MATERIAL_RULE),
+            nearSurface,
+            bedrockRoof,
+            bedrockFloor,
+            SpongeSurfaceRulesFactory.rule(OverworldMaterialRulesAccessor.accessor$SURFACE()),
+            SpongeSurfaceRulesFactory.rule(OverworldMaterialRulesAccessor.accessor$UNDERGROUND())
+        );
     }
 
     @Override
     public SurfaceRule nether() {
-        return (SurfaceRule) SurfaceRuleData.nether(SpongeCommon.vanillaRegistry(Registries.BIOME));
+        return (SurfaceRule) SpongeSurfaceRulesFactory.rule(NetherMaterialRules.NETHER);
     }
 
     @Override
     public SurfaceRule end() {
-        return (SurfaceRule) SurfaceRuleData.end();
+        return (SurfaceRule) SpongeSurfaceRulesFactory.rule(EndMaterialRules.END);
     }
 
     @Override
@@ -144,7 +163,7 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule.Condition onFloor() {
-        return (SurfaceRule.Condition) SurfaceRules.ON_FLOOR;
+        return (SurfaceRule.Condition) SpongeSurfaceRulesFactory.condition(VanillaMaterialConditions.ON_FLOOR);
     }
 
     @Override
@@ -159,7 +178,7 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
 
     @Override
     public SurfaceRule.Condition onCeiling() {
-        return (SurfaceRule.Condition) SurfaceRules.ON_CEILING;
+        return (SurfaceRule.Condition) SpongeSurfaceRulesFactory.condition(VanillaMaterialConditions.ON_CEILING);
     }
 
     @Override

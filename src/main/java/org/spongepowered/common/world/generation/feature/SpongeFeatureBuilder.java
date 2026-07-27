@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.world.generation.feature;
 
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.FeatureType;
 
@@ -33,8 +34,10 @@ import java.util.Objects;
 
 public final class SpongeFeatureBuilder implements Feature.Builder {
 
-    private net.minecraft.world.level.levelgen.feature.Feature<?> type;
-    private FeatureConfiguration config;
+    private static final DataQuery TYPE = DataQuery.of("type");
+
+    private @Nullable FeatureType type;
+    private @Nullable Feature prototype;
 
     public SpongeFeatureBuilder() {
         this.reset();
@@ -42,28 +45,31 @@ public final class SpongeFeatureBuilder implements Feature.Builder {
 
     @Override
     public Feature.Builder type(final FeatureType type) {
-        this.type = (net.minecraft.world.level.levelgen.feature.Feature<?>) type;
+        this.type = type;
         return this;
     }
 
     @Override
     public Feature.Builder reset() {
         this.type = null;
-        this.config = null;
+        this.prototype = null;
         return this;
     }
 
     @Override
-    public Feature.Builder from(final org.spongepowered.api.world.generation.feature.Feature feature) {
-        this.type(feature.type());
-        this.config = ((ConfiguredFeature) (Object) feature).config();
+    public Feature.Builder from(final Feature feature) {
+        this.prototype = feature;
+        this.type = null;
         return this;
     }
 
     @Override
     public Feature build() {
-        Objects.requireNonNull(this.type, "config");
-        Objects.requireNonNull(this.config, "config");
-        return (Feature) (Object) new ConfiguredFeature<>((net.minecraft.world.level.levelgen.feature.Feature<? super FeatureConfiguration>) this.type, this.config);
+        final Feature source = Objects.requireNonNull(this.prototype, "feature");
+        // Round-tripping produces a distinct instance, which registries require: they reject
+        // a value that is already registered under another key by identity.
+        final DataView config = source.toContainer();
+        config.remove(SpongeFeatureBuilder.TYPE);
+        return (this.type == null ? source.type() : this.type).configure(config);
     }
 }

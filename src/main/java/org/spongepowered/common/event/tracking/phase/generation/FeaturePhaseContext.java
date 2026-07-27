@@ -34,19 +34,19 @@ import java.util.Objects;
 
 public final class FeaturePhaseContext extends GenerationContext<FeaturePhaseContext> {
 
-    private @Nullable Feature<?> feature;
+    private @Nullable Feature feature;
     private @Nullable BlockPos origin;
 
     FeaturePhaseContext(final IPhaseState<FeaturePhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 
-    public FeaturePhaseContext feature(final Feature<?> feature) {
+    public FeaturePhaseContext feature(final Feature feature) {
         this.feature = Objects.requireNonNull(feature);
         return this;
     }
 
-    public Feature<?> getFeature() {
+    public Feature getFeature() {
         return Objects.requireNonNull(this.feature);
     }
 

@@ -25,41 +25,72 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.FeatureType;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.DataPackUtil;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.generation.feature.SpongeFeatureType;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Mixin(net.minecraft.world.level.levelgen.feature.Feature.class)
-public abstract class FeatureMixin_API<FC extends FeatureConfiguration> implements FeatureType {
+public interface FeatureMixin_API extends Feature {
 
-    //@formatter:off
-    @Shadow @Final private MapCodec<ConfiguredFeature<FC, net.minecraft.world.level.levelgen.feature.Feature<FC>>> configuredCodec;
-    //@formatter:on
+    // @formatter:off
+    @Shadow MapCodec<? extends net.minecraft.world.level.levelgen.feature.Feature> shadow$codec();
+    @Shadow boolean shadow$place(final WorldGenLevel $$0, final ChunkGenerator $$1, final RandomSource $$2, final BlockPos $$3);
+    // @formatter:on
 
     @Override
-    public Feature configure(final DataView config) {
-        try {
-            final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(config));
-            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
-            return (Feature) (Object) this.configuredCodec.codec().parse(ops, json).getOrThrow();
+    default FeatureType type() {
+        final Identifier location = BuiltInRegistries.FEATURE_TYPE.getKey(this.shadow$codec());
+        return Sponge.game().registry(RegistryTypes.FEATURE_TYPE).value((ResourceKey) (Object) location);
+    }
 
+    @Override
+    default DataView toContainer() {
+        final JsonElement serialized = net.minecraft.world.level.levelgen.feature.Feature.DIRECT_CODEC
+            .encodeStart(SpongeFeatureType.ops(), (net.minecraft.world.level.levelgen.feature.Feature) this).getOrThrow();
+        try {
+            return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {
-            throw new IllegalStateException("Could not read configuration: " + config, e);
+            throw new IllegalStateException("Could not read deserialized Feature: " + serialized, e);
         }
     }
 
+    @Override
+    default boolean place(final ServerWorld world, final Vector3i pos) {
+        return this.shadow$place(((WorldGenLevel) world), (ChunkGenerator) world.generator(), ((WorldGenLevel) world).getRandom(), VecHelper.toBlockPos(pos));
+    }
 
+    @Override
+    default boolean place(final ServerLocation location) {
+        return this.place(location.world(), location.blockPosition());
+    }
+
+    @Override
+    default Optional<DataContainer> toDataPack(final RegistryHolder registryHolder) {
+        return DataPackUtil.toDataContainer(registryHolder, net.minecraft.world.level.levelgen.feature.Feature.DIRECT_CODEC,
+            (net.minecraft.world.level.levelgen.feature.Feature) this);
+    }
 }

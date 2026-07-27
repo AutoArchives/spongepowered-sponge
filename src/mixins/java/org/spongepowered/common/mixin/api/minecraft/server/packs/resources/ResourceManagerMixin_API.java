@@ -50,7 +50,7 @@ public interface ResourceManagerMixin_API extends org.spongepowered.api.resource
 
     // @formatter:off
     @Shadow List<net.minecraft.server.packs.resources.Resource> shadow$getResourceStack(Identifier var1);
-    @Shadow Map<Identifier, net.minecraft.server.packs.resources.Resource> shadow$listResources(String var1, Predicate<Identifier> var2);
+    @Shadow Map<Identifier, net.minecraft.server.packs.resources.Resource> shadow$listResources(String var1, ResourceManager.Selector var2);
     // @formatter:on
 
     @Override

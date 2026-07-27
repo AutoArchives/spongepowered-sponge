@@ -27,8 +27,9 @@ package org.spongepowered.vanilla.server.packs;
 import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.AbstractPackResources;
+import net.minecraft.server.packs.AbstractPackMetadataResources;
 import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.metadata.pack.PackFormat;
@@ -53,7 +54,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class PluginPackResources extends AbstractPackResources {
+public final class PluginPackResources extends AbstractPackMetadataResources implements PackResources {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final PluginContainer container;

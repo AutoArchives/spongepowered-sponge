@@ -45,6 +45,9 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
     public int seaLevel;
     public boolean aquifers, oreVeins, legacyRandomSource, disableMobGeneration;
     public SurfaceRule surfaceRule;
+    // Copied straight from the source settings so that a from()/build() round trip does not
+    // resolve the material rule while its registry is still loading.
+    private net.minecraft.core.@org.checkerframework.checker.nullness.qual.Nullable Holder<net.minecraft.world.level.levelgen.SurfaceRules.RuleSource> materialRule;
     private NoiseRouter router;
     private List<BiomeAttributes> spawnTargets;
 
@@ -73,6 +76,7 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
     @Override
     public NoiseGeneratorConfig.Builder surfaceRule(SurfaceRule rule) {
         this.surfaceRule = rule;
+        this.materialRule = null;
         return this;
     }
 
@@ -125,6 +129,7 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         this.defaultBlock = BlockTypes.STONE.get().defaultState();
         this.defaultFluid = BlockTypes.WATER.get().defaultState();
         this.surfaceRule = SurfaceRule.overworld();
+        this.materialRule = null;
         this.seaLevel = 63;
         this.aquifers = false;
         this.oreVeins = false;
@@ -139,7 +144,8 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         this.noiseConfig = value.noiseConfig();
         this.defaultBlock = value.defaultBlock();
         this.defaultFluid = value.defaultFluid();
-        this.surfaceRule = value.surfaceRule();
+        this.materialRule = ((net.minecraft.world.level.levelgen.NoiseGeneratorSettings) (Object) value).materialRule();
+        this.surfaceRule = null;
         this.seaLevel = value.seaLevel();
         this.aquifers = value.aquifers();
         this.oreVeins = value.oreVeins();
@@ -156,7 +162,8 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
             (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
             (net.minecraft.world.level.block.state.BlockState) this.defaultFluid,
             (net.minecraft.world.level.levelgen.NoiseRouter) (Object) Objects.requireNonNull(this.router, "router"),
-            (net.minecraft.world.level.levelgen.SurfaceRules.RuleSource) this.surfaceRule,
+            this.materialRule != null ? this.materialRule
+                : net.minecraft.core.Holder.direct((net.minecraft.world.level.levelgen.SurfaceRules.RuleSource) this.surfaceRule),
             (List) this.spawnTargets,
             this.seaLevel,
             this.disableMobGeneration,

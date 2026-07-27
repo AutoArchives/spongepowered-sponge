@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.generation.feature;
 
 import net.minecraft.core.Holder;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
@@ -35,7 +34,7 @@ import java.util.List;
 
 public final class SpongePlacedFeatureBuilder implements PlacedFeature.Builder {
 
-    private Holder<ConfiguredFeature<?, ?>> feature;
+    private Holder<net.minecraft.world.level.levelgen.feature.Feature> feature;
     private List<PlacementModifier> modifiers = new ArrayList<>();
 
     public SpongePlacedFeatureBuilder() {
@@ -59,7 +58,7 @@ public final class SpongePlacedFeatureBuilder implements PlacedFeature.Builder {
 
     @Override
     public PlacedFeature.Builder feature(final Feature feature) {
-        this.feature = Holder.direct((ConfiguredFeature<?, ?>) (Object) feature);
+        this.feature = Holder.direct((net.minecraft.world.level.levelgen.feature.Feature) feature);
         return this;
     }
 

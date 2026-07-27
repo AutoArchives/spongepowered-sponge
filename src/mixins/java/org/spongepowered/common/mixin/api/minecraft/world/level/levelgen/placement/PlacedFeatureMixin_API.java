@@ -51,14 +51,14 @@ import java.util.Optional;
 public abstract class PlacedFeatureMixin_API implements org.spongepowered.api.world.generation.feature.PlacedFeature {
 
     // @formatter:off
-    @Shadow @Final private Holder<net.minecraft.world.level.levelgen.feature.ConfiguredFeature<?, ?>> feature;
+    @Shadow @Final private Holder<net.minecraft.world.level.levelgen.feature.Feature> feature;
     @Shadow @Final private List<net.minecraft.world.level.levelgen.placement.PlacementModifier> placement;
     @Shadow public abstract boolean shadow$place(final WorldGenLevel $$0, final ChunkGenerator $$1, final RandomSource $$2, final BlockPos $$3);
     // @formatter:on
 
     @Override
     public <F extends FeatureType> Feature feature() {
-        return (Feature) (Object) this.feature.value();
+        return (Feature) this.feature.value();
     }
 
     @Override

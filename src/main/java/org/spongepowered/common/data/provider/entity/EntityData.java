@@ -231,13 +231,13 @@ public final class EntityData {
                         .resetOnDelete(Vector3d.ZERO)
                         .set((h, v) -> {
                             h.setDeltaMovement(VecHelper.toVanillaVector3d(v));
-                            h.hurtMarked = true;
+                            h.syncVelocity = true;
                         })
                     .create(Keys.SWIFTNESS)
                         .get(m -> m.getDeltaMovement().length())
                         .set((m, v) -> {
                             m.setDeltaMovement(m.getDeltaMovement().normalize().scale(v));
-                            m.hurtMarked = true;
+                            m.syncVelocity = true;
                         })
                         .supports(m -> m.getDeltaMovement().lengthSqr() > 0)
                     .create(Keys.PORTAL)

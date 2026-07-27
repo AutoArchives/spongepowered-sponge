@@ -69,7 +69,7 @@ import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelDataAndDimensions;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -1104,7 +1104,7 @@ public class SpongeWorldManager implements WorldManager {
                         }
                     } else if (spongeLevelData.worldGenOptions().generateBonusChest()) {
                         final BlockPos pos = levelData.getRespawnData().pos();
-                        final ConfiguredFeature<?, ?> bonusChestFeature = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE).getValue(MiscOverworldFeatures.BONUS_CHEST);
+                        final Feature bonusChestFeature = SpongeCommon.vanillaRegistry(Registries.FEATURE).getValue(MiscOverworldFeatures.BONUS_CHEST);
                         bonusChestFeature.place(level, level.getChunkSource().getGenerator(), level.getRandom(), pos);
                     }
                     levelData.setInitialized(true);

@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.server.packs;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackMetadataResources;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
@@ -44,6 +45,7 @@ import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public final class PluginRepositorySource implements RepositorySource {
 
@@ -75,13 +77,13 @@ public final class PluginRepositorySource implements RepositorySource {
             final Pack.ResourcesSupplier packSupplier = new Pack.ResourcesSupplier() {
 
                 @Override
-                public PackResources openPrimary(final PackLocationInfo var1) {
+                public PackMetadataResources openMetadata(final PackLocationInfo var1) {
                     return packResources;
                 }
 
                 @Override
-                public PackResources openFull(final PackLocationInfo var1, final Pack.Metadata var2) {
-                    return packResources;
+                public Stream<PackResources> openResources(final PackLocationInfo var1, final Pack.Metadata var2) {
+                    return Stream.of(packResources);
                 }
             };
             final Pack pack = Pack.readMetaAndCreate(info, packSupplier, PackType.SERVER_DATA, PLUGIN_SELECTION_CONFIG);

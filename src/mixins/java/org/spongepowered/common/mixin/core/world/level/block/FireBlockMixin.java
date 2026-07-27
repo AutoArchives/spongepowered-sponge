@@ -45,9 +45,8 @@ public abstract class FireBlockMixin extends BaseFireBlockMixin {
     @Redirect(method = "tick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerLevel;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z",
-            ordinal = 1))
-    private boolean impl$onFireSpread(final net.minecraft.server.level.ServerLevel world, final BlockPos pos, final BlockState newState, final int flags) {
+            target = "Lnet/minecraft/server/level/ServerLevel;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"))
+    private boolean impl$onFireSpread(final net.minecraft.server.level.ServerLevel world, final BlockPos pos, final BlockState newState) {
         if (!((LevelBridge) world).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.FIRE_SPREAD, (ServerWorld) world);
@@ -57,7 +56,7 @@ public abstract class FireBlockMixin extends BaseFireBlockMixin {
             }
 
         }
-        return world.setBlock(pos, newState, flags);
+        return world.setBlockAndUpdate(pos, newState);
     }
 
 }

@@ -35,7 +35,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.end.DragonRespawnStage;
 import net.minecraft.world.level.dimension.end.EnderDragonFight;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -56,9 +56,9 @@ public abstract class EndDragonFightMixin_Tracker {
     // @formatter:on
 
     @Redirect(method = "lambda$spawnNewGateway$1",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/feature/ConfiguredFeature;place(Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;)Z"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/feature/Feature;place(Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;)Z"))
     private boolean tracker$switchToFeatureState(
-        final ConfiguredFeature<?, ?> configuredFeature, final WorldGenLevel worldIn, final ChunkGenerator generator,
+        final Feature feature, final WorldGenLevel worldIn, final ChunkGenerator generator,
         final RandomSource rand, final BlockPos pos
     ) {
 
@@ -66,12 +66,12 @@ public abstract class EndDragonFightMixin_Tracker {
             context
                 .world((ServerLevel) worldIn)
                 .generator(generator)
-                .feature(configuredFeature.feature())
+                .feature(feature)
                 .origin(pos)
             ;
             context.buildAndSwitch();
 
-            return configuredFeature.place(worldIn, generator, rand, pos);
+            return feature.place(worldIn, generator, rand, pos);
         }
     }
 

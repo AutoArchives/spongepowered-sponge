@@ -479,7 +479,7 @@ public final class ItemStackData {
         if (contents == null) {
             return null;
         }
-        var slots = contents.allItemsCopyStream().map(ItemStackUtil::fromNative).toList();
+        var slots = contents.itemCopies().map(ItemStackUtil::fromNative).toList();
         if (slots.isEmpty()) {
             return null;
         }

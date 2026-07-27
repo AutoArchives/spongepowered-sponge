@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -90,7 +91,7 @@ public final class BlockData {
                         })
                         .supports(h -> h.hasProperty(ChestBlock.TYPE))
                     .create(Keys.IS_PASSABLE)
-                        .get(h -> !h.blocksMotion())
+                        .get(h -> !h.is(BlockTags.BLOCKS_MOTION))
                     .create(Keys.IS_FLAMMABLE)
                         .get(((BaseFireBlockAccessor) Blocks.FIRE)::invoker$canBurn)
                     .create(Keys.IS_SOLID)

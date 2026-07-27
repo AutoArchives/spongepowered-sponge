@@ -155,7 +155,7 @@ public class LevelDataRegistries {
                 "Features",
                 "FEATURE",
                 context.relativeClass("world.generation.feature", "Feature"),
-                Registries.CONFIGURED_FEATURE,
+                Registries.FEATURE,
                 $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -163,8 +163,8 @@ public class LevelDataRegistries {
                 "FeatureTypes",
                 "FEATURE_TYPE",
                 context.relativeClass("world.generation.feature", "FeatureType"),
-                Registries.FEATURE,
-                $ -> true, RegistryScope.SERVER
+                Registries.FEATURE_TYPE,
+                $ -> true, RegistryScope.GAME
             ),
             new RegistryEntriesGenerator<>(
                 "world.generation.feature",

@@ -28,6 +28,7 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.Difficulty;
@@ -111,9 +112,11 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
+import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.common.accessor.world.entity.boss.enderdragon.phases.EnderDragonPhaseAccessor;
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
+import org.spongepowered.common.world.generation.feature.SpongeFeatureType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -162,6 +165,12 @@ public final class VanillaRegistryLoader {
 
         this.naming(RegistryTypes.ARMOR_MATERIAL, materials.keySet().toArray(new ArmorMaterial[]{}), materials);
         this.holder.createRegistry(RegistryTypes.ITEM_TIER, VanillaRegistryLoader.itemTier());
+        this.holder.createRegistry(RegistryTypes.FEATURE_TYPE, VanillaRegistryLoader.featureType());
+    }
+
+    private static RegistryLoader<FeatureType> featureType() {
+        return RegistryLoader.of(l -> BuiltInRegistries.FEATURE_TYPE.registryKeySet().forEach(
+            key -> l.add((ResourceKey) (Object) key.identifier(), new SpongeFeatureType(key))));
     }
 
     private void loadEnumRegistries() {

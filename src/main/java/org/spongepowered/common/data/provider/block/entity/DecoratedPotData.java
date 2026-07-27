@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
-import net.minecraft.world.level.block.entity.DecoratedPotPatterns;
 import net.minecraft.world.level.block.entity.PotDecorations;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
@@ -38,36 +37,31 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.accessor.world.level.block.entity.DecoratedPotBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 public final class DecoratedPotData {
-
-    private static final Set<ResourceKey<Item>> POTTERY_SHERD_ITEMS;
-    static {
-        final Set<ResourceKey<Item>> set = new HashSet<>();
-        DecoratedPotPatterns.itemToPatternMappings((itemKey, patternKey) -> set.add(itemKey));
-        POTTERY_SHERD_ITEMS = Set.copyOf(set);
-    }
 
     public static void register(final DataProviderRegistrator registrator) {
         // @formatter:off
         registrator.asMutable(DecoratedPotBlockEntity.class)
             .create(Keys.POT_FRONT_DECORATION)
-                .get((h) -> h.getDecorations().front().map(ItemType.class::cast).orElseGet(ItemTypes.BRICK))
+                .get((h) -> DecoratedPotData.itemType(h.getDecorations().front()))
                 .setAnd((h, v) -> DecoratedPotData.setPotDirection(h, PotDirection.FRONT, v))
             .create(Keys.POT_BACK_DECORATION)
-                .get((h) -> h.getDecorations().back().map(ItemType.class::cast).orElseGet(ItemTypes.BRICK))
+                .get((h) -> DecoratedPotData.itemType(h.getDecorations().back()))
                 .setAnd((h, v) -> DecoratedPotData.setPotDirection(h, PotDirection.BACK, v))
             .create(Keys.POT_LEFT_DECORATION)
-                .get((h) -> h.getDecorations().left().map(ItemType.class::cast).orElseGet(ItemTypes.BRICK))
+                .get((h) -> DecoratedPotData.itemType(h.getDecorations().left()))
                 .setAnd((h, v) -> DecoratedPotData.setPotDirection(h, PotDirection.LEFT, v))
             .create(Keys.POT_RIGHT_DECORATION)
-                .get((h) -> h.getDecorations().right().map(ItemType.class::cast).orElseGet(ItemTypes.BRICK))
+                .get((h) -> DecoratedPotData.itemType(h.getDecorations().right()))
                 .setAnd((h, v) -> DecoratedPotData.setPotDirection(h, PotDirection.RIGHT, v))
             ;
         // @formatter:on
+    }
+
+    private static ItemType itemType(final Optional<ItemStackTemplate> decoration) {
+        return decoration.<ItemType>map(template -> (ItemType) template.item().value()).orElseGet(ItemTypes.BRICK);
     }
 
     static boolean setPotDirection(DecoratedPotBlockEntity h, PotDirection direction, ItemType v) {
@@ -78,12 +72,12 @@ public final class DecoratedPotData {
             h.setChanged();
             return true;
         }
-        final var itemKey = BuiltInRegistries.ITEM.getResourceKey((Item) v).orElse(null);
-        if (itemKey == null || !POTTERY_SHERD_ITEMS.contains(itemKey)) {
+        final var item = (Item) v;
+        if (!item.builtInRegistryHolder().is(ItemTags.DECORATED_POT_SHERDS)) {
             return false;
         }
         var current = h.getDecorations();
-        var newDecorations = direction.applyToDirection(current, (Item) v);
+        var newDecorations = direction.applyToDirection(current, item);
         ((DecoratedPotBlockEntityAccessor) h).accessor$setDecorations(newDecorations);
         h.setChanged();
         return true;
@@ -97,7 +91,7 @@ public final class DecoratedPotData {
                     existing.back(),
                     existing.left(),
                     existing.right(),
-                    Optional.ofNullable(value)
+                    Optional.ofNullable(value).map(ItemStackTemplate::new)
                 );
             }
         },
@@ -105,7 +99,7 @@ public final class DecoratedPotData {
             @Override
             PotDecorations applyToDirection(PotDecorations existing, @Nullable Item value) {
                 return new PotDecorations(
-                    Optional.ofNullable(value),
+                    Optional.ofNullable(value).map(ItemStackTemplate::new),
                     existing.left(),
                     existing.right(),
                     existing.front()
@@ -117,7 +111,7 @@ public final class DecoratedPotData {
             PotDecorations applyToDirection(PotDecorations existing, @Nullable Item value) {
                 return new PotDecorations(
                     existing.back(),
-                    Optional.ofNullable(value),
+                    Optional.ofNullable(value).map(ItemStackTemplate::new),
                     existing.right(),
                     existing.front()
                 );
@@ -129,7 +123,7 @@ public final class DecoratedPotData {
                 return new PotDecorations(
                     existing.back(),
                     existing.left(),
-                    Optional.ofNullable(value),
+                    Optional.ofNullable(value).map(ItemStackTemplate::new),
                     existing.front()
                 );
             }

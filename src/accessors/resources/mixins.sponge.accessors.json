@@ -16,6 +16,7 @@
     "commands.arguments.selector.options.EntitySelectorOptions_OptionAccessor",
     "commands.arguments.selector.options.EntitySelectorOptionsAccessor",
     "core.MappedRegistryAccessor",
+    "data.worldgen.material.OverworldMaterialRulesAccessor",
     "entity.animal.equine.AbstractChestedHorseEntityAccessor",
     "entity.animal.frog.FrogAccessor",
     "entity.vehicle.minecart.AbstractMinecartAccessor",

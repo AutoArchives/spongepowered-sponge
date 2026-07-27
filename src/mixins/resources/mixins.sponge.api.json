@@ -495,7 +495,6 @@
     "minecraft.world.level.levelgen.WorldOptionsMixin_API",
     "minecraft.world.level.levelgen.carver.ConfiguredWorldCarverMixin_API",
     "minecraft.world.level.levelgen.carver.WorldCarverMixin_API",
-    "minecraft.world.level.levelgen.feature.ConfiguredFeatureMixin_API",
     "minecraft.world.level.levelgen.feature.FeatureMixin_API",
     "minecraft.world.level.levelgen.flat.FlatLayerInfoMixin_API",
     "minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettingsMixin_API",

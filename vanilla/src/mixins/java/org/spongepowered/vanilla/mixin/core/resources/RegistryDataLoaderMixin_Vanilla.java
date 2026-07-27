@@ -98,7 +98,7 @@ public class RegistryDataLoaderMixin_Vanilla {
 
                 // Only fire plugin registry events on the server side (ResourceManager-backed loads).
                 // Client-side network loads only receive SYNCHRONIZED_REGISTRIES and lack server-only
-                // registries (placed_feature, configured_feature, etc.) that plugins may declare as
+                // registries (placed_feature, worldgen/feature, etc.) that plugins may declare as
                 // dependencies, causing freeze validation to fail.
                 if (k != ResourceManager.Empty.INSTANCE) {
                     lifecycle.processServerRegistries(registryHolder, v.stream()

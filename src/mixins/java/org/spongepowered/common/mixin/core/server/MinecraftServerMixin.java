@@ -452,7 +452,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
                 // Sponge end
 
                 if (log) {
-                    LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", level.getChunkSource().chunkMap.getStorageName());
+                    LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", level.getChunkSource().chunkMap.storageInfo().level());
                 }
             }
 

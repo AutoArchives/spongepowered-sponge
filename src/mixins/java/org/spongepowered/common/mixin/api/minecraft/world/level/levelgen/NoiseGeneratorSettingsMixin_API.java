@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouter;
@@ -57,7 +58,7 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow @Final private net.minecraft.world.level.block.state.BlockState defaultBlock;
     @Shadow @Final private net.minecraft.world.level.block.state.BlockState defaultFluid;
     @Shadow @Final private NoiseRouter noiseRouter;
-    @Shadow @Final private SurfaceRules.RuleSource surfaceRule;
+    @Shadow @Final private Holder<SurfaceRules.RuleSource> materialRule;
     @Shadow @Final private List<Climate.ParameterPoint> spawnTarget;
     @Shadow @Final private int seaLevel;
     @Shadow @Final private boolean disableMobGeneration;
@@ -116,9 +117,8 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
         return !this.disableMobGeneration;
     }
 
-    @Intrinsic
     public SurfaceRule surfaceRule() {
-        return (SurfaceRule) this.surfaceRule;
+        return (SurfaceRule) this.materialRule.value();
     }
 
     @Override

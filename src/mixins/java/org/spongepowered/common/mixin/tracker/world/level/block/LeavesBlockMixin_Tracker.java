@@ -30,12 +30,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -49,16 +46,14 @@ import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
 
     // @formatter:off
-    @Shadow @Final public static BooleanProperty PERSISTENT;
-    @Shadow @Final public static IntegerProperty DISTANCE;
     @Shadow protected abstract boolean shadow$decaying(final net.minecraft.world.level.block.state.BlockState $$0);
     // @formatter:on
 
     @WrapOperation(method = "tick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/server/level/ServerLevel;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"))
+                    target = "Lnet/minecraft/server/level/ServerLevel;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"))
     private boolean tracker$switchContextForDecay(final net.minecraft.server.level.ServerLevel serverWorld, final BlockPos pos,
-            final net.minecraft.world.level.block.state.BlockState newState, final int flags, final Operation<Boolean> original) {
+            final net.minecraft.world.level.block.state.BlockState newState, final Operation<Boolean> original) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         try (final PhaseContext<@NonNull ?> context = BlockPhase.State.BLOCK_DECAY.createPhaseContext(instance)
                                            .source(new SpongeLocatableBlockBuilder()
@@ -69,7 +64,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
             if (context != null) {
                 context.buildAndSwitch();
             }
-            return original.call(serverWorld, pos, newState, flags);
+            return original.call(serverWorld, pos, newState);
         }
     }
 

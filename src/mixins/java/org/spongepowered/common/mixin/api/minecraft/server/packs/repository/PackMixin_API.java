@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.server.packs.repository;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.server.packs.OverlayedPackResources;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
@@ -36,6 +37,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
+import java.util.stream.Stream;
+
 @Mixin(Pack.class)
 public abstract class PackMixin_API implements org.spongepowered.api.resource.pack.Pack {
 
@@ -46,7 +49,7 @@ public abstract class PackMixin_API implements org.spongepowered.api.resource.pa
     @Shadow public abstract PackCompatibility shadow$getCompatibility();
     @Shadow public abstract boolean shadow$isRequired();
     @Shadow public abstract boolean shadow$isFixedPosition();
-    @Shadow public abstract PackResources shadow$open();
+    @Shadow public abstract Stream<PackResources> shadow$open();
     // @formatter:on
 
 
@@ -57,7 +60,11 @@ public abstract class PackMixin_API implements org.spongepowered.api.resource.pa
 
     @Override
     public PackContents contents() {
-        return (PackContents) this.shadow$open();
+        final java.util.List<PackResources> opened = this.shadow$open().toList();
+        if (opened.size() == 1) {
+            return (PackContents) opened.get(0);
+        }
+        return (PackContents) new OverlayedPackResources(opened.get(0), opened.subList(1, opened.size()));
     }
 
     @Override

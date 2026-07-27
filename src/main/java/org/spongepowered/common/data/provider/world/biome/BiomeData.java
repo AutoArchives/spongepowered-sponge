@@ -139,7 +139,9 @@ public final class BiomeData {
     public static List<Carver> carvers(final Biome biome) {
         final var settings = biome.getGenerationSettings();
         final var carvers = settings.getCarvers();
+        // Biomes can be read while the registries they reference are still loading.
         return StreamSupport.stream(carvers.spliterator(), false)
+                .filter(Holder::isBound)
                 .map(carver -> (Carver) (Object) carver.value())
                 .collect(Collectors.toList());
     }
@@ -157,7 +159,7 @@ public final class BiomeData {
             return List.of();
         }
         final var holders = features.get(step.ordinal());
-        return holders.stream().map(Holder::value).map(f -> (PlacedFeature) (Object) f).toList();
+        return holders.stream().filter(Holder::isBound).map(Holder::value).map(f -> (PlacedFeature) (Object) f).toList();
     }
 
     private static Map<EntityCategory, List<NaturalSpawner>> naturalSpawners(Biome biome) {
