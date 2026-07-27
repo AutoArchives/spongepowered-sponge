@@ -24,8 +24,13 @@
  */
 package org.spongepowered.common.world.generation.config.noise;
 
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.biome.OverworldBiomeBuilder;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.NoiseRouterData;
+import net.minecraft.world.level.levelgen.NoiseSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.biome.BiomeAttributes;
@@ -34,6 +39,7 @@ import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfigs;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseRouter;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.List;
 import java.util.Objects;
@@ -135,7 +141,14 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         this.oreVeins = false;
         this.legacyRandomSource = false;
         this.router = null;
-        this.spawnTargets = (List) new OverworldBiomeBuilder().spawnTarget();
+        final HolderGetter<DensityFunction> functions =
+            SpongeCommon.scopedHolder().registryHolder().lookupOrThrow(Registries.DENSITY_FUNCTION);
+        this.spawnTargets = (List) new OverworldBiomeBuilder().spawnTarget(
+            functions.getOrThrow(NoiseRouterData.TEMPERATURE),
+            functions.getOrThrow(NoiseRouterData.VEGETATION),
+            functions.getOrThrow(NoiseRouterData.CONTINENTS),
+            functions.getOrThrow(NoiseRouterData.EROSION),
+            functions.getOrThrow(NoiseRouterData.RIDGES));
         return this;
     }
 
@@ -144,7 +157,7 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
         this.noiseConfig = value.noiseConfig();
         this.defaultBlock = value.defaultBlock();
         this.defaultFluid = value.defaultFluid();
-        this.materialRule = ((net.minecraft.world.level.levelgen.NoiseGeneratorSettings) (Object) value).materialRule();
+        this.materialRule = ((NoiseGeneratorSettings) (Object) value).materialRule();
         this.surfaceRule = null;
         this.seaLevel = value.seaLevel();
         this.aquifers = value.aquifers();
@@ -158,7 +171,7 @@ public final class SpongeNoiseGeneratorConfigBuilder implements NoiseGeneratorCo
     @Override
     public NoiseGeneratorConfig build() {
         final NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
-            (net.minecraft.world.level.levelgen.NoiseSettings) (Object) this.noiseConfig,
+            (NoiseSettings) (Object) this.noiseConfig,
             (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
             (net.minecraft.world.level.block.state.BlockState) this.defaultFluid,
             (net.minecraft.world.level.levelgen.NoiseRouter) (Object) Objects.requireNonNull(this.router, "router"),

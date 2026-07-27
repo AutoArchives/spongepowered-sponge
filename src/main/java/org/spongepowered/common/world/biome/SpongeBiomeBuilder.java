@@ -39,7 +39,7 @@ import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
@@ -151,7 +151,7 @@ public final class SpongeBiomeBuilder implements Biome.Builder {
         final BiomeGenerationSettings.PlainBuilder generationBuilder = new BiomeGenerationSettings.PlainBuilder();
         features.forEach((step, list) -> list.forEach(feature -> generationBuilder.addFeature((GenerationStep.Decoration) (Object) step,
             Holder.direct((net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) feature))));
-        carvers.forEach((carver) -> generationBuilder.addCarver(Holder.direct((ConfiguredWorldCarver<?>) (Object) carver)));
+        carvers.forEach((carver) -> generationBuilder.addCarver(Holder.direct((WorldCarver) (Object) carver)));
 
         final net.minecraft.world.level.biome.Biome.BiomeBuilder vanillaBuilder = new net.minecraft.world.level.biome.Biome.BiomeBuilder()
             .hasPrecipitation(precipitation)

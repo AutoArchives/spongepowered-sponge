@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
+import net.minecraft.util.Interval;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.DensityFunctions;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -39,19 +40,18 @@ import java.util.Optional;
 public interface DensityFunctionMixin_API extends org.spongepowered.api.world.generation.config.noise.DensityFunction {
 
     // @formatter:off
-    @Shadow double shadow$minValue();
-    @Shadow double shadow$maxValue();
+    @Shadow Interval shadow$range();
     @Shadow double shadow$compute(final DensityFunction.FunctionContext var1);
     // @formatter:on
 
     @Override
     default double min() {
-        return this.shadow$minValue();
+        return this.shadow$range().min();
     }
 
     @Override
     default double max() {
-        return this.shadow$maxValue();
+        return this.shadow$range().max();
     }
 
     @Override

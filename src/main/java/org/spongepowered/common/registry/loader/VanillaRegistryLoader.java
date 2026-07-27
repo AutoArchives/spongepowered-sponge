@@ -112,11 +112,15 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
+import org.spongepowered.api.world.generation.carver.CarverType;
 import org.spongepowered.api.world.generation.feature.FeatureType;
+import org.spongepowered.api.world.generation.feature.PlacementModifierType;
 import org.spongepowered.common.accessor.world.entity.boss.enderdragon.phases.EnderDragonPhaseAccessor;
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
+import org.spongepowered.common.world.generation.carver.SpongeCarverType;
 import org.spongepowered.common.world.generation.feature.SpongeFeatureType;
+import org.spongepowered.common.world.generation.feature.SpongePlacementModifierType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -166,11 +170,23 @@ public final class VanillaRegistryLoader {
         this.naming(RegistryTypes.ARMOR_MATERIAL, materials.keySet().toArray(new ArmorMaterial[]{}), materials);
         this.holder.createRegistry(RegistryTypes.ITEM_TIER, VanillaRegistryLoader.itemTier());
         this.holder.createRegistry(RegistryTypes.FEATURE_TYPE, VanillaRegistryLoader.featureType());
+        this.holder.createRegistry(RegistryTypes.CARVER_TYPE, VanillaRegistryLoader.carverType());
+        this.holder.createRegistry(RegistryTypes.PLACEMENT_MODIFIER, VanillaRegistryLoader.placementModifierType());
     }
 
     private static RegistryLoader<FeatureType> featureType() {
         return RegistryLoader.of(l -> BuiltInRegistries.FEATURE_TYPE.registryKeySet().forEach(
             key -> l.add((ResourceKey) (Object) key.identifier(), new SpongeFeatureType(key))));
+    }
+
+    private static RegistryLoader<CarverType> carverType() {
+        return RegistryLoader.of(l -> BuiltInRegistries.CARVER_TYPE.registryKeySet().forEach(
+            key -> l.add((ResourceKey) (Object) key.identifier(), new SpongeCarverType(key))));
+    }
+
+    private static RegistryLoader<PlacementModifierType> placementModifierType() {
+        return RegistryLoader.of(l -> BuiltInRegistries.PLACEMENT_MODIFIER_TYPE.registryKeySet().forEach(
+            key -> l.add((ResourceKey) (Object) key.identifier(), new SpongePlacementModifierType(key))));
     }
 
     private void loadEnumRegistries() {

@@ -24,17 +24,20 @@
  */
 package org.spongepowered.common.world.generation.carver;
 
-import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
-import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.world.generation.carver.Carver;
 import org.spongepowered.api.world.generation.carver.CarverType;
 
+import java.util.Objects;
+
 public final class SpongeCarverBuilder implements Carver.Builder {
 
-    @Nullable private WorldCarver<?> type;
-    @Nullable private CarverConfiguration config;
+    private static final DataQuery TYPE = DataQuery.of("type");
+
+    private @Nullable CarverType type;
+    private @Nullable Carver prototype;
 
     public SpongeCarverBuilder() {
         this.reset();
@@ -43,25 +46,30 @@ public final class SpongeCarverBuilder implements Carver.Builder {
     @Override
     public Carver.Builder reset() {
         this.type = null;
-        this.config = null;
+        this.prototype = null;
         return this;
     }
 
     @Override
     public Carver.Builder type(final CarverType type) {
-        this.type = (WorldCarver<?>) type;
+        this.type = type;
         return this;
     }
 
     @Override
     public Carver.Builder from(final Carver carver) {
-        this.type(carver.type());
-        this.config = ((ConfiguredWorldCarver<?>) (Object) carver).config();
+        this.prototype = carver;
+        this.type = null;
         return this;
     }
 
     @Override
     public Carver build() {
-        return (Carver) (Object) new ConfiguredWorldCarver<>((WorldCarver<? super CarverConfiguration>) this.type, this.config);
+        final Carver source = Objects.requireNonNull(this.prototype, "carver");
+        // Round-tripping produces a distinct instance, which registries require: they reject
+        // a value that is already registered under another key by identity.
+        final DataView config = source.toContainer();
+        config.remove(SpongeCarverBuilder.TYPE);
+        return (this.type == null ? source.type() : this.type).configure(config);
     }
 }

@@ -24,21 +24,27 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.placement;
 
+import com.mojang.serialization.MapCodec;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.generation.feature.PlacementModifierType;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(PlacementModifier.class)
-public abstract class PlacementModifierMixin_API implements org.spongepowered.api.world.generation.feature.PlacementModifier {
+public interface PlacementModifierMixin_API extends org.spongepowered.api.world.generation.feature.PlacementModifier {
 
     //@formatter:off
-    @Shadow public abstract net.minecraft.world.level.levelgen.placement.PlacementModifierType<?> shadow$type();
+    @Shadow MapCodec<? extends PlacementModifier> shadow$codec();
     //@formatter:on
 
-    @Intrinsic
-    public PlacementModifierType type() {
-        return (PlacementModifierType) this.shadow$type();
+    @Override
+    default PlacementModifierType type() {
+        final Identifier location = BuiltInRegistries.PLACEMENT_MODIFIER_TYPE.getKey(this.shadow$codec());
+        return Sponge.game().registry(RegistryTypes.PLACEMENT_MODIFIER).value((ResourceKey) (Object) location);
     }
 }

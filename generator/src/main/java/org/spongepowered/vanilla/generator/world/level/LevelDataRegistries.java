@@ -63,14 +63,15 @@ public class LevelDataRegistries {
                 "CarverTypes",
                 "CARVER_TYPE",
                 context.relativeClass("world.generation.carver", "CarverType"),
-                Registries.CARVER
+                Registries.CARVER_TYPE,
+                $ -> true, RegistryScope.GAME
             ),
             new RegistryEntriesGenerator<>(
                 "world.generation.carver",
                 "Carvers",
                 "CARVER",
                 context.relativeClass("world.generation.carver", "Carver"),
-                Registries.CONFIGURED_CARVER,
+                Registries.CARVER,
                 a -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -172,7 +173,7 @@ public class LevelDataRegistries {
                 "PLACEMENT_MODIFIER",
                 context.relativeClass("world.generation.feature", "PlacementModifierType"),
                 Registries.PLACEMENT_MODIFIER_TYPE,
-                $ -> true, RegistryScope.SERVER
+                $ -> true, RegistryScope.GAME
             ),
             new RegistryEntriesGenerator<>(
                 "world",

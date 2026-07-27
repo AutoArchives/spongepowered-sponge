@@ -34,7 +34,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.ProfileLookupCallback;
-import com.mojang.authlib.yggdrasil.ProfileResult;
+import com.mojang.authlib.services.ProfileResult;
 import com.mojang.util.UndashedUuid;
 import net.minecraft.server.players.NameAndId;
 import org.apache.commons.io.IOUtils;
@@ -295,7 +295,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
 
         @Override
         public void onProfileLookupFailed(final String profileName, final Exception exception) {
-            if (exception instanceof com.mojang.authlib.yggdrasil.ProfileNotFoundException) {
+            if (exception instanceof com.mojang.authlib.services.ProfileNotFoundException) {
                 this.result.completeExceptionally(new ProfileNotFoundException(profileName, exception.getCause()));
             } else {
                 this.result.completeExceptionally(exception);
@@ -340,7 +340,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
 
         @Override
         public void onProfileLookupFailed(final String profileName, final Exception exception) {
-            if (exception instanceof com.mojang.authlib.yggdrasil.ProfileNotFoundException) {
+            if (exception instanceof com.mojang.authlib.services.ProfileNotFoundException) {
                 return;
             }
             this.resultMap = null;
