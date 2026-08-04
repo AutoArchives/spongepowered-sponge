@@ -22,39 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.bootstrap.forge.classloader;
+package org.spongepowered.common.data.provider.entity;
 
-import java.lang.module.ModuleReference;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.monster.Strider;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public final class FilteringPassthroughClassLoader extends ClassLoader {
+public final class StriderData {
 
-    private final Set<String> filteredPackages = new HashSet<>();
-
-    static {
-        ClassLoader.registerAsParallelCapable();
+    private StriderData() {
     }
 
-    public FilteringPassthroughClassLoader(final ClassLoader parent, final Collection<ModuleReference> modules) {
-        super(parent);
-        modules.forEach(m -> this.filteredPackages.addAll(m.descriptor().packages()));
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+                .asMutable(Strider.class)
+                    .create(Keys.IS_SADDLED)
+                        .get(Strider::isSaddled)
+                        .set((h, v) -> {
+                            if (v) {
+                                h.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+                            } else {
+                                h.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);
+                            }
+                        });
     }
-
-    @Override
-    protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
-        if (!this.filteredPackages.contains(FilteringPassthroughClassLoader.nameToPackage(name))) {
-            return super.loadClass(name, resolve);
-        }
-        throw new ClassNotFoundException(name);
-    }
-
-    private static String nameToPackage(final String name) {
-        final int index = name.lastIndexOf('.');
-        if (index == -1 || index == name.length() - 1) {
-            return "";
-        }
-        return name.substring(0, index);
-    }
+    // @formatter:on
 }

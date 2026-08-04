@@ -22,39 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.bootstrap.forge.classloader;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.happyghast;
 
-import java.lang.module.ModuleReference;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import org.spongepowered.api.entity.living.animal.HappyGhast;
+import org.spongepowered.asm.mixin.Mixin;
 
-public final class FilteringPassthroughClassLoader extends ClassLoader {
-
-    private final Set<String> filteredPackages = new HashSet<>();
-
-    static {
-        ClassLoader.registerAsParallelCapable();
-    }
-
-    public FilteringPassthroughClassLoader(final ClassLoader parent, final Collection<ModuleReference> modules) {
-        super(parent);
-        modules.forEach(m -> this.filteredPackages.addAll(m.descriptor().packages()));
-    }
-
-    @Override
-    protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
-        if (!this.filteredPackages.contains(FilteringPassthroughClassLoader.nameToPackage(name))) {
-            return super.loadClass(name, resolve);
-        }
-        throw new ClassNotFoundException(name);
-    }
-
-    private static String nameToPackage(final String name) {
-        final int index = name.lastIndexOf('.');
-        if (index == -1 || index == name.length() - 1) {
-            return "";
-        }
-        return name.substring(0, index);
-    }
+@Mixin(net.minecraft.world.entity.animal.happyghast.HappyGhast.class)
+public abstract class HappyGhastMixin_API implements HappyGhast {
 }
