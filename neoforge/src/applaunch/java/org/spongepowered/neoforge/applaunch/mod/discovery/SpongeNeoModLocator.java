@@ -60,7 +60,6 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
                     candidate.logResult();
                     continue;
                 }
-                resource.paths().forEach(context::addLocated);
 
                 // attempt to load as mod or plugin
                 IModFile modFile = null;
@@ -79,6 +78,7 @@ public final class SpongeNeoModLocator implements IModFileCandidateLocator {
                     candidate.setModFound();
                 }
 
+                resource.paths().forEach(context::addLocated);
                 pipeline.addModFile(modFile);
             } else {
                 candidate.readMetadata();
