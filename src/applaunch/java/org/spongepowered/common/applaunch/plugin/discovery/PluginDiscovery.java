@@ -199,8 +199,16 @@ public abstract class PluginDiscovery extends PluginServiceLoader {
 
         private void detectServices(final Set<String> existingLocators, final Set<String> existingReaders) {
             if (this.resource instanceof SpongeJVMPluginResource jvmResource) {
+                final ModuleDescriptor descriptor;
+                try {
+                    descriptor = jvmResource.module();
+                } catch (Exception ex) {
+                    PluginDiscovery.this.environment.logger().warn("Cannot read module descriptor of {}", jvmResource, ex);
+                    return;
+                }
+
                 final Map<String, List<String>> providers = new HashMap<>();
-                for (final ModuleDescriptor.Provides provides : jvmResource.module().provides()) {
+                for (final ModuleDescriptor.Provides provides : descriptor.provides()) {
                     providers.put(provides.service(), provides.providers());
                 }
                 final List<String> locators = providers.getOrDefault(PluginResourceLocator.class.getName(), Collections.emptyList());
