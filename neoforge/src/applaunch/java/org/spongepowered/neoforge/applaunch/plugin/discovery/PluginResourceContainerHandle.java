@@ -22,32 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.neoforge.applaunch.mod.metadata;
+package org.spongepowered.neoforge.applaunch.plugin.discovery;
 
-import net.neoforged.neoforgespi.language.IConfigurable;
+import org.spongepowered.asm.launch.platform.container.IContainerHandle;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
-public final class PluginMixinConfigurable implements IConfigurable {
-    private final String config;
+public class PluginResourceContainerHandle implements IContainerHandle {
+    private final JarContentsPluginResource resource;
 
-    public PluginMixinConfigurable(final String config) {
-        this.config = config;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> Optional<T> getConfigElement(final String... key) {
-        if (key.length == 1 && "config".equals(key[0])) {
-            return Optional.of((T) this.config);
-        }
-        return Optional.empty();
+    public PluginResourceContainerHandle(final JarContentsPluginResource resource) {
+        this.resource = resource;
     }
 
     @Override
-    public List<? extends IConfigurable> getConfigList(final String... key) {
-        return Collections.emptyList();
+    public String getAttribute(final String name) {
+        return this.resource.property(name).orElse(null);
+    }
+
+    @Override
+    public Collection<IContainerHandle> getNestedContainers() {
+        return List.of();
+    }
+
+    @Override
+    public String getId() {
+        return this.resource.module().name();
+    }
+
+    @Override
+    public String getDescription() {
+        return this.resource.toString();
     }
 }

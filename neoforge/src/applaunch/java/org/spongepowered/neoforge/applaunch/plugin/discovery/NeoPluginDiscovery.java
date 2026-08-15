@@ -26,6 +26,8 @@ package org.spongepowered.neoforge.applaunch.plugin.discovery;
 
 import net.neoforged.fml.jarcontents.CompositeJarContents;
 import net.neoforged.fml.jarcontents.JarContents;
+import net.neoforged.fml.loading.mixin.FMLMixinService;
+import org.spongepowered.asm.service.MixinService;
 import org.spongepowered.common.applaunch.plugin.discovery.PluginDiscovery;
 import org.spongepowered.common.applaunch.plugin.discovery.SpongeJVMPluginResource;
 import org.spongepowered.plugin.Environment;
@@ -70,5 +72,15 @@ public class NeoPluginDiscovery extends PluginDiscovery {
         final ClassLoader loader = new URLClassLoader("SPONGE-DISCOVERY-BATCH-" + batch, rootUrls.toArray(URL[]::new), parentLoader);
         this.currentLoader = loader;
         this.environment.logger().debug("Built new service layer {} on top of {}.", loader.getName(), parentLoader.getName());
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public void registerMixinContainers() {
+        final FMLMixinService mixinService = (FMLMixinService) MixinService.getService();
+        for (final PluginDiscovery.Candidate candidate : this.candidates()) {
+            if (candidate.pluginFound() && candidate.resource() instanceof JarContentsPluginResource jarResource) {
+                mixinService.addMixinContainer(new PluginResourceContainerHandle(jarResource));
+            }
+        }
     }
 }

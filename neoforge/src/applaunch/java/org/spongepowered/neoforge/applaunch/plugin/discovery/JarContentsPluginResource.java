@@ -26,6 +26,7 @@ package org.spongepowered.neoforge.applaunch.plugin.discovery;
 
 import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.fml.jarmoduleinfo.JarModuleInfo;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.common.applaunch.plugin.discovery.SpongeJVMPluginResource;
 
 import java.io.IOException;
@@ -41,6 +42,7 @@ import java.util.jar.Manifest;
 public final class JarContentsPluginResource implements SpongeJVMPluginResource {
     private final List<Path> paths;
     private final JarContents jar;
+    private @MonotonicNonNull ModuleDescriptor descriptor;
 
     public JarContentsPluginResource(final Path[] paths) {
         Objects.requireNonNull(paths, "paths");
@@ -82,7 +84,10 @@ public final class JarContentsPluginResource implements SpongeJVMPluginResource 
 
     @Override
     public ModuleDescriptor module() {
-        return JarModuleInfo.from(this.jar).createDescriptor(this.jar);
+        if (this.descriptor == null) {
+            this.descriptor = JarModuleInfo.from(this.jar).createDescriptor(this.jar);
+        }
+        return this.descriptor;
     }
 
     @Override

@@ -111,19 +111,6 @@ public final class PluginFileConfigurable implements IConfigurable {
             return this.plugins.values().stream().map(PluginMetadataConfigurable::new).toList();
         }
 
-        if ("mixins".equals(query)) {
-            final Optional<String> mixinConfigs = this.resource.property("MixinConfigs");
-            if (mixinConfigs.isEmpty()) {
-                return Collections.emptyList();
-            }
-
-            final List<IConfigurable> mixinConfigurables = new ArrayList<>();
-            for (final String config : mixinConfigs.get().split(",")) {
-                mixinConfigurables.add(new PluginMixinConfigurable(config.trim()));
-            }
-            return mixinConfigurables;
-        }
-
         if (key.length != 2) {
             return Collections.emptyList();
         }

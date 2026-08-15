@@ -33,6 +33,8 @@ import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.language.ModFileScanData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.neoforge.applaunch.plugin.NeoPluginPlatform;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -40,6 +42,10 @@ import java.util.NoSuchElementException;
 
 public final class SpongeLanguageLoader extends BuiltInLanguageLoader {
     private static final Logger LOGGER = LogManager.getLogger();
+
+    public SpongeLanguageLoader() {
+        AppLaunch.<NeoPluginPlatform>pluginPlatform().discovery().registerMixinContainers();
+    }
 
     @Override
     public String name() {
