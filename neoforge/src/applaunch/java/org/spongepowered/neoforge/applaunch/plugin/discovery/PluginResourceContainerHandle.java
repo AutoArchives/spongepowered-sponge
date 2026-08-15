@@ -25,16 +25,12 @@
 package org.spongepowered.neoforge.applaunch.plugin.discovery;
 
 import org.spongepowered.asm.launch.platform.container.IContainerHandle;
+import org.spongepowered.plugin.discovery.PluginResource;
 
 import java.util.Collection;
 import java.util.List;
 
-public class PluginResourceContainerHandle implements IContainerHandle {
-    private final JarContentsPluginResource resource;
-
-    public PluginResourceContainerHandle(final JarContentsPluginResource resource) {
-        this.resource = resource;
-    }
+public record PluginResourceContainerHandle(String id, PluginResource resource) implements IContainerHandle {
 
     @Override
     public String getAttribute(final String name) {
@@ -48,11 +44,11 @@ public class PluginResourceContainerHandle implements IContainerHandle {
 
     @Override
     public String getId() {
-        return this.resource.module().name();
+        return this.id;
     }
 
     @Override
     public String getDescription() {
-        return this.resource.toString();
+        return this.toString();
     }
 }

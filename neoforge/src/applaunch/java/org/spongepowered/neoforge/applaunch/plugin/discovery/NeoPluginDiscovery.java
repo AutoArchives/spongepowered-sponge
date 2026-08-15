@@ -78,8 +78,8 @@ public class NeoPluginDiscovery extends PluginDiscovery {
     public void registerMixinContainers() {
         final FMLMixinService mixinService = (FMLMixinService) MixinService.getService();
         for (final PluginDiscovery.Candidate candidate : this.candidates()) {
-            if (candidate.pluginFound() && candidate.resource() instanceof JarContentsPluginResource jarResource) {
-                mixinService.addMixinContainer(new PluginResourceContainerHandle(jarResource));
+            if (candidate.pluginFound()) {
+                mixinService.addMixinContainer(new PluginResourceContainerHandle(candidate.metadata().getFirst().id(), candidate.resource()));
             }
         }
     }
