@@ -243,8 +243,8 @@ minecraft {
 
     runs {
         configureEach {
-//             jvmArgs("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
-            jvmArgs("-Dmixin.debug=true", "-Dmixin.debug.export=true", "-Dmixin.dumpTargetOnFailure=true")
+            // jvmArgs("-Dsponge.bootstrap.debug=true") // Uncomment to debug bootstrap classpath
+            // jvmArgs("-Dmixin.debug=true", "-Dmixin.debug.export=true", "-Dmixin.dumpTargetOnFailure=true")
             mainClass.set("org.spongepowered.bootstrap.forge.ForgeBootstrap")
 
             args(mixinConfigs.flatMap { sequenceOf("--mixin.config", it) })
