@@ -42,6 +42,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Mixin(DistanceManager.class)
@@ -103,10 +104,10 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
     }
 
     @Override
-    public Collection<Ticket> bridge$tickets(final org.spongepowered.api.world.server.TicketType ticketType) {
+    public Collection<Ticket> bridge$tickets(final Predicate<org.spongepowered.api.world.server.TicketType> typePredicate) {
         return ((TicketStorageAccessor) this.ticketStorage).accessor$tickets().values()
             .stream().flatMap(Collection::stream)
-            .map(Ticket.class::cast).filter(ticket -> ticket.type() == ticketType)
+            .map(Ticket.class::cast).filter(ticket -> typePredicate.test(ticket.type()))
             .collect(Collectors.toList());
     }
 }
