@@ -93,6 +93,13 @@ public final class SecureJarPluginResource implements JVMPluginResource {
         }
     }
 
+    /**
+     * Whether this resource declares plugins: a library in the game layer does not.
+     */
+    public boolean hasCandidates() {
+        return this.candidates != null && !this.candidates.isEmpty();
+    }
+
     public void init() {
         if (this.pluginJarMetadata != null) {
             this.pluginJarMetadata.init(this.candidates.isEmpty() ? null : this.candidates.get(0).metadata());

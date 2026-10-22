@@ -48,6 +48,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -115,6 +116,9 @@ public final class VanillaTransformationService implements ITransformationServic
         final ILaunchPluginService mixin = env.findLaunchPlugin(MixinLaunchPlugin.NAME).orElse(null);
 
         final List<SecureJar> gameResources = new ArrayList<>();
+        final Set<String> parentModules = new HashSet<>();
+        final Set<String> claimedPackages = new HashSet<>();
+        VanillaTransformationService.parentLayers(layerManager, parentModules, claimedPackages);
 
         for (final Set<? extends PluginResource> resources : this.pluginPlatform.getResources().values()) {
             for (final PluginResource resource : resources) {
@@ -123,7 +127,22 @@ public final class VanillaTransformationService implements ITransformationServic
                     secureJarResource.init();
 
                     if (ResourceType.of(resource) == ResourceType.PLUGIN) {
-                        gameResources.add(secureJarResource.jar());
+                        final SecureJar jar = secureJarResource.jar();
+                        // A dev workspace hands its whole classpath over as libraries, Minecraft's and Sponge's own among
+                        // them under whatever module name each file name gives, so a library is dropped once its packages
+                        // are already in a layer, or its name in a parent one (a natives jar has no packages): the game's
+                        // own resources come first, and keep theirs
+                        if (!secureJarResource.hasCandidates()) {
+                            final Optional<String> claimed = parentModules.contains(jar.name())
+                                ? Optional.of("module " + jar.name())
+                                : jar.getPackages().stream().filter(claimedPackages::contains).map(p -> "package " + p).findFirst();
+                            if (claimed.isPresent()) {
+                                this.pluginPlatform.logger().debug("Skipping library {}: {} is already loaded", resource.path(), claimed.get());
+                                continue;
+                            }
+                        }
+                        claimedPackages.addAll(jar.getPackages());
+                        gameResources.add(jar);
                     }
                 }
 
@@ -188,6 +207,18 @@ public final class VanillaTransformationService implements ITransformationServic
             return secureJarResource.jar().getRootPath();
         }
         return resource.path();
+    }
+
+    private static void parentLayers(final IModuleLayerManager layerManager, final Set<String> modules, final Set<String> packages) {
+        for (final IModuleLayerManager.Layer layer : IModuleLayerManager.Layer.values()) {
+            if (layer == IModuleLayerManager.Layer.GAME) {
+                continue;
+            }
+            layerManager.getLayer(layer).ifPresent(l -> l.modules().forEach(m -> {
+                modules.add(m.getName());
+                packages.addAll(m.getPackages());
+            }));
+        }
     }
 
     private static boolean isSponge(final PluginResource resource) {

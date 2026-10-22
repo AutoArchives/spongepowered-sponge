@@ -45,9 +45,12 @@ import org.spongepowered.vanilla.applaunch.plugin.resource.SecureJarPluginResour
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +89,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
         this.locatorServices = new HashMap<>();
         this.languageServices = new HashMap<>();
-        this.locatorResources = new HashMap<>();
+        this.locatorResources = new LinkedHashMap<>();
         this.pluginCandidates = new IdentityHashMap<>();
 
         final Path additionalPluginsDirectory = Path.of(this.tokens.replace(this.config.additionalPluginsDirectory()));
@@ -221,7 +224,11 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     }
 
     public void locatePluginResources() {
-        for (final Map.Entry<String, PluginResourceLocatorService<?>> locatorEntry : this.locatorServices.entrySet()) {
+        // The game's own resources first: of two modules with one name the first found is kept, so a plugin's copy of
+        // a library the game ships (a dev workspace hands over its whole classpath) never replaces the game's
+        final List<Map.Entry<String, PluginResourceLocatorService<?>>> locators = new ArrayList<>(this.locatorServices.entrySet());
+        locators.sort(Comparator.comparing(entry -> !entry.getKey().equals("sponge_resources")));
+        for (final Map.Entry<String, PluginResourceLocatorService<?>> locatorEntry : locators) {
             final PluginResourceLocatorService<?> locatorService = locatorEntry.getValue();
             final Set<? extends PluginResource> resources = locatorService.locatePluginResources(this.environment);
             if (!resources.isEmpty()) {
